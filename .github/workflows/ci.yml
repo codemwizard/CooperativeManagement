@@ -1,0 +1,124 @@
+name: Symphony V4 CI
+
+on:
+  push:
+    branches: [main, master, 'phase/*']
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  lint-and-typecheck:
+    name: Lint and typecheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+      - run: npm ci
+      - run: npm run typecheck --if-present
+      - run: npm run verify:arch --if-present
+
+  unit-tests:
+    name: Unit tests (domain)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+      - run: npm ci
+      - run: npm run test:unit --if-present
+        working-directory: packages/domain
+
+  db-integration:
+    name: DB integration tests
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:18-alpine
+        env:
+          POSTGRES_DB: symphony_test
+          POSTGRES_USER: symphony
+          POSTGRES_PASSWORD: symphony_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+    env:
+      DATABASE_URL: postgresql://symphony:symphony_test@localhost:5432/symphony_test
+      DATABASE_SCHEMA: symphony
+      DATA_MODE: test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+      - run: npm ci
+        working-directory: packages/db
+      - run: npm run migrate --if-present
+        working-directory: packages/db
+      - run: npm run test:db --if-present
+        working-directory: packages/db
+
+  legacy-verify:
+    name: Legacy regression suite
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+      - run: npm ci
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+      - run: npm run verify:all
+
+  bdd:
+    name: BDD (Cucumber)
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:18-alpine
+        env:
+          POSTGRES_DB: symphony_test
+          POSTGRES_USER: symphony
+          POSTGRES_PASSWORD: symphony_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+    env:
+      DATABASE_URL: postgresql://symphony:symphony_test@localhost:5432/symphony_test
+      DATA_MODE: test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+      - run: npm ci
+      - run: npm run test:bdd --if-present
+
+  trace-gate:
+    name: Traceability gate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+      - run: npm ci
+      - run: npm run verify:trace --if-present
+

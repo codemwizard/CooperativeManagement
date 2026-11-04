@@ -1,0 +1,99 @@
+{
+  "roles": [
+    "secretary",
+    "treasurer",
+    "chairman",
+    "member",
+    "field_agent",
+    "pfi_analyst",
+    "pfi_credit",
+    "ta",
+    "verifier"
+  ],
+  "actions": {
+    "create_organization": [
+      "secretary",
+      "chairman"
+    ],
+    "create_project": [
+      "secretary",
+      "chairman"
+    ],
+    "edit_member_list": [
+      "secretary"
+    ],
+    "upload_minutes": [
+      "secretary"
+    ],
+    "signoff_minutes": [
+      "chairman"
+    ],
+    "add_evidence": [
+      "secretary",
+      "treasurer",
+      "chairman"
+    ],
+    "record_payment": [
+      "treasurer",
+      "member"
+    ],
+    "confirm_payment": [
+      "treasurer"
+    ],
+    "mark_verified": [
+      "field_agent"
+    ],
+    "restructure_request": [
+      "secretary",
+      "chairman"
+    ],
+    "switch_destination": [
+      "secretary",
+      "treasurer",
+      "chairman"
+    ],
+    "present_to_destination": [
+      "chairman"
+    ],
+    "raise_finding": [
+      "pfi_analyst",
+      "pfi_credit"
+    ],
+    "request_evidence": [
+      "pfi_analyst",
+      "pfi_credit"
+    ],
+    "record_outcome": [
+      "pfi_credit"
+    ],
+    "view_pipeline": [
+      "ta"
+    ],
+    "verify_claim": [
+      "verifier"
+    ]
+  },
+  "constraints": [
+    {
+      "code": "SELF_VERIFICATION",
+      "rule": "mark_verified is blocked when actor.user_id equals evidence.supplied_by."
+    },
+    {
+      "code": "SELF_CONFIRMATION",
+      "rule": "confirm_payment is blocked when actor.user_id equals payment.recorded_by."
+    },
+    {
+      "code": "ROLE_NOT_PERMITTED",
+      "rule": "Any action by a role not listed for that action is blocked."
+    },
+    {
+      "code": "SIGNOFF_REQUIRED",
+      "rule": "mark_verified on governance evidence requires a prior signoff_minutes event."
+    },
+    {
+      "code": "READ_ONLY_ROLE",
+      "rule": "pfi_analyst, pfi_credit, ta and verifier cannot modify SME evidence."
+    }
+  ],
+  "user_id_convention": "c{N}.{role} for cooperative officers (e.g. c1.secretary); fa.banda and fa.mulenga for field agents; pfi.credit1; ta.officer1; vvb.reviewer1"
+}

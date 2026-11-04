@@ -1,0 +1,8 @@
+{
+  "name": "Symphony Domain Transition Pack",
+  "version": "0.1.0",
+  "status": "design_baseline_not_production_migration",
+  "database_path": "PostgreSQL first; Supabase-compatible v0 later",
+  "scenario_count": 20,
+  "test_command": "python -m unittest discover -s contracts -v"
+}

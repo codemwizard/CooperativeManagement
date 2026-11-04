@@ -1,0 +1,35 @@
+Spreadsheet runtime warmup failed during python startup
+Traceback (most recent call last):
+  File "/tmp/tmp.QlpUkOUI9D/artifact_tool_v2-2.8.66/artifact_tool/patches/warm_spreadsheet_runtime_on_startup.py", line 26, in warm_spreadsheet_runtime_on_startup
+  File "/tmp/tmp.QlpUkOUI9D/artifact_tool_v2-2.8.66/artifact_tool/spreadsheet_warmup.py", line 785, in warm_spreadsheet_runtime
+  File "/tmp/tmp.QlpUkOUI9D/artifact_tool_v2-2.8.66/artifact_tool/spreadsheet_warmup.py", line 718, in _warm_feature_flows
+  File "/tmp/tmp.QlpUkOUI9D/artifact_tool_v2-2.8.66/artifact_tool/spreadsheet_warmup.py", line 509, in _warm_drawing_and_image_flows
+  File "/tmp/tmp.QlpUkOUI9D/artifact_tool_v2-2.8.66/artifact_tool/generated/interface/models.py", line 32861, in bring_to_front
+  File "/tmp/tmp.QlpUkOUI9D/artifact_tool_v2-2.8.66/artifact_tool/rpc/remote.py", line 764, in __call__
+  File "/tmp/tmp.QlpUkOUI9D/artifact_tool_v2-2.8.66/artifact_tool/rpc/client.py", line 175, in call
+artifact_tool.rpc.client.RemoteError: Element ordering requires an owning element collection.
+test_SC001_self_enroller_cannot_handover_without_authority (test_domain_contracts.DomainContracts.test_SC001_self_enroller_cannot_handover_without_authority) ... ok
+test_SC002_appointment_requires_source (test_domain_contracts.DomainContracts.test_SC002_appointment_requires_source) ... ok
+test_SC003_certificate_officers_not_current_appointments (test_domain_contracts.DomainContracts.test_SC003_certificate_officers_not_current_appointments) ... ok
+test_SC004_replacement_preserves_history (test_domain_contracts.DomainContracts.test_SC004_replacement_preserves_history) ... ok
+test_SC005_overlapping_exclusive_appointments_rejected (test_domain_contracts.DomainContracts.test_SC005_overlapping_exclusive_appointments_rejected) ... ok
+test_SC006_bylaw_effectiveness_requires_proof (test_domain_contracts.DomainContracts.test_SC006_bylaw_effectiveness_requires_proof) ... ok
+test_SC007_minutes_correction_creates_version (test_domain_contracts.DomainContracts.test_SC007_minutes_correction_creates_version) ... ok
+test_SC008_resolution_requires_approved_minutes (test_domain_contracts.DomainContracts.test_SC008_resolution_requires_approved_minutes) ... ok
+test_SC009_new_evidence_has_no_inherited_verification (test_domain_contracts.DomainContracts.test_SC009_new_evidence_has_no_inherited_verification) ... ok
+test_SC010_supplier_cannot_verify_own_evidence (test_domain_contracts.DomainContracts.test_SC010_supplier_cannot_verify_own_evidence) ... ok
+test_SC011_finding_is_exact_version (test_domain_contracts.DomainContracts.test_SC011_finding_is_exact_version) ... ok
+test_SC012_admission_is_not_verification (test_domain_contracts.DomainContracts.test_SC012_admission_is_not_verification) ... ok
+test_SC013_open_dispute_blocks_unqualified_reliance (test_domain_contracts.DomainContracts.test_SC013_open_dispute_blocks_unqualified_reliance) ... ok
+test_SC014_validation_run_is_snapshot (test_domain_contracts.DomainContracts.test_SC014_validation_run_is_snapshot) ... ok
+test_SC015_cross_tenant_reference_rejected (test_domain_contracts.DomainContracts.test_SC015_cross_tenant_reference_rejected) ... ok
+test_SC016_idempotent_replay_does_not_duplicate_event (test_domain_contracts.DomainContracts.test_SC016_idempotent_replay_does_not_duplicate_event) ... ok
+test_SC017_stale_expected_version_rejected (test_domain_contracts.DomainContracts.test_SC017_stale_expected_version_rejected) ... ok
+test_SC018_event_and_outbox_emitted_together (test_domain_contracts.DomainContracts.test_SC018_event_and_outbox_emitted_together) ... ok
+test_SC019_read_only_institutional_role_cannot_mutate (test_domain_contracts.DomainContracts.test_SC019_read_only_institutional_role_cannot_mutate) ... ok
+test_SC020_unknown_vacancy_does_not_claim_compliance (test_domain_contracts.DomainContracts.test_SC020_unknown_vacancy_does_not_claim_compliance) ... ok
+
+----------------------------------------------------------------------
+Ran 20 tests in 0.002s
+
+OK

@@ -1,0 +1,57 @@
+{
+    "name":  "symphony-prototype",
+    "private":  true,
+    "version":  "1.0.0",
+    "type":  "module",
+    "workspaces":  [
+                       "packages/*",
+                       "apps/*"
+                   ],
+    "scripts":  {
+                    "dev":  "vite",
+                    "build":  "tsc --noEmit \u0026\u0026 vite build",
+                    "preview":  "vite preview",
+                    "test":  "vitest run",
+                    "test:watch":  "vitest",
+                    "test:ui":  "node tools/run_e2e.mjs",
+                    "test:e2e":  "node tools/run_e2e.mjs",
+                    "verify:oracle":  "node tools/run_python_tool.js tools/reference_oracle.py",
+                    "verify:help":  "node tools/run_python_tool.js tools/validate_help.py",
+                    "verify:bundle":  "python tools/verify_bundle.py",
+                    "verify:all":  "npm run verify:oracle \u0026\u0026 npm run verify:help \u0026\u0026 npm run verify:bundle \u0026\u0026 npm run test \u0026\u0026 npm run test:e2e",
+                    "verify:arch":  "npx depcruise packages/domain/src packages/contracts/src packages/db/src packages/testkit/src apps/api/src --config .dependency-cruiser.cjs",
+                    "verify:trace":  "tsx tools/verify-trace.ts",
+                    "verify:v4":  "npm run verify:arch \u0026\u0026 npm run test:unit \u0026\u0026 npm run test:bdd \u0026\u0026 npm run verify:trace \u0026\u0026 npm run verify:all",
+                    "test:unit":  "cd packages/domain \u0026\u0026 npx vitest run --reporter=verbose",
+                    "test:db":  "cd packages/db \u0026\u0026 npx vitest run --reporter=verbose",
+                    "test:bdd":  "npx cucumber-js --config cucumber.cjs --profile default",
+                    "test:a11y":  "npx playwright test tests/workspace/a11y.spec.ts",
+                    "db:migrate":  "cd packages/db \u0026\u0026 npm run migrate",
+                    "db:seed:legal":  "cd packages/db \u0026\u0026 tsx src/seeds/legal-sources.ts",
+                    "db:seed:capabilities":  "cd packages/db \u0026\u0026 tsx src/seeds/capability-registry.ts"
+                },
+    "dependencies":  {
+                         "lucide-react":  "^0.460.0",
+                         "react":  "^18.3.1",
+                         "react-dom":  "^18.3.1"
+                     },
+    "devDependencies":  {
+                            "@axe-core/playwright":  "^4.14.0",
+                            "@cucumber/cucumber":  "^13.3.0",
+                            "@cucumber/pretty-formatter":  "^4.1.0",
+                            "@playwright/test":  "^1.48.0",
+                            "@types/node":  "^20.14.0",
+                            "@types/react":  "^18.3.3",
+                            "@types/react-dom":  "^18.3.0",
+                            "@vitejs/plugin-react":  "^4.3.1",
+                            "axe-core":  "^4.14.0",
+                            "dependency-cruiser":  "^18.7.2",
+                            "typescript":  "^5.5.3",
+                            "vite":  "^5.4.2",
+                            "vitest":  "^2.1.1"
+                        },
+    "engines":  {
+                    "node":  "\u003e=25 \u003c27",
+                    "npm":  "\u003e=11.6.2"
+                }
+}

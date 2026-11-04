@@ -1,0 +1,26 @@
+{
+  "composite_score": 74,
+  "grade": "B",
+  "confidence": "Medium",
+  "pillars": {
+    "environmental": {
+      "score": 65,
+      "evaluable": true,
+      "applicable_count": 1,
+      "total_count": 1
+    },
+    "social": {
+      "score": 65,
+      "evaluable": true,
+      "applicable_count": 1,
+      "total_count": 1
+    },
+    "governance": {
+      "score": 83,
+      "evaluable": true,
+      "applicable_count": 2,
+      "total_count": 2
+    }
+  },
+  "exceptions": []
+}

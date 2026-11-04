@@ -1,0 +1,39 @@
+services:
+  db:
+    image: postgres:17-alpine
+    container_name: symphony_db
+    environment:
+      POSTGRES_USER: symphony
+      POSTGRES_PASSWORD: symphony_dev
+      POSTGRES_DB: symphony
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./migrations:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U symphony -d symphony"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  db-test:
+    image: postgres:17-alpine
+    container_name: symphony_db_test
+    environment:
+      POSTGRES_USER: symphony
+      POSTGRES_PASSWORD: symphony_dev
+      POSTGRES_DB: symphony_test
+    ports:
+      - "5433:5432"
+    tmpfs:
+      - /var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U symphony -d symphony_test"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+volumes:
+  pgdata:
+

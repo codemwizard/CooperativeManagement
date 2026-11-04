@@ -1,0 +1,20 @@
+{
+  "name": "@symphony/testkit",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Builders, fake clock/ids, in-memory repositories, step helpers",
+  "main": "./src/index.ts",
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run --reporter=verbose"
+  },
+  "dependencies": {
+    "@symphony/domain": "*"
+  },
+  "devDependencies": {
+    "typescript": "^5.5.3",
+    "vitest": "^2.1.1"
+  }
+}
+

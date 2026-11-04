@@ -1,0 +1,70 @@
+{
+  "kit_version": "1.0",
+  "note": "All names, figures and products are fictional and illustrative.",
+  "demo_date": "2026-10-06",
+  "evidence_levels": [
+    "none",
+    "asserted",
+    "supported",
+    "verified"
+  ],
+  "evidence_overlays": [
+    "disputed",
+    "stale"
+  ],
+  "requirement_states": [
+    "not_applicable",
+    "unresolved",
+    "satisfied",
+    "assessment_time",
+    "exception"
+  ],
+  "assessment_states": [
+    "in_progress",
+    "ready",
+    "presented",
+    "under_assessment"
+  ],
+  "outcome_states": [
+    "pending",
+    "more_evidence_requested",
+    "approved",
+    "declined",
+    "deferred"
+  ],
+  "monitoring_states": [
+    "current",
+    "due",
+    "overdue",
+    "exception"
+  ],
+  "monitoring_due_window_days": 14,
+  "boundary_labels": {
+    "beachhead": "Beachhead",
+    "extended": "Same state, extended",
+    "extended_illustrative": "Same state, extended: illustrative. Not built."
+  },
+  "display_rules": {
+    "lender_names_on_screen": [
+      "Lender A",
+      "Lender B"
+    ],
+    "programme_name_on_screen": "NABII Programme Pipeline",
+    "facilitator_may_be_named": "NABII",
+    "footer_requirements_screen": "Illustrative products."
+  },
+  "mandatory_limitations": {
+    "registration_verified": "Verified in the field. Registry not independently queried.",
+    "generic_verified": "Sighted by field agent. Issuing body not contacted.",
+    "generic_supported": "Supplied by the cooperative. Not independently checked."
+  },
+  "invariants": [
+    "I1 No self-verification: the user who supplied evidence can never mark it Verified.",
+    "I2 Supersede, never overwrite: every change appends to evidence history.",
+    "I3 Every state shows its basis (evidence, who, when, limitation).",
+    "I4 Readiness is computed from state plus a destination's requirements, never typed in.",
+    "I5 Symphony does not decide outcomes. Outcomes belong to the lender. Findings belong to the verifier.",
+    "I6 No Arrangement object exists before a financing relationship; none is built in this prototype.",
+    "I7 Every screen carries a boundary label."
+  ]
+}

@@ -1,0 +1,25 @@
+{
+    "name":  "@symphony/db",
+    "version":  "0.1.0",
+    "private":  true,
+    "type":  "module",
+    "description":  "SQL migrations, seeds, Kysely repository adapters",
+    "main":  "./src/index.ts",
+    "scripts":  {
+                    "typecheck":  "tsc --noEmit",
+                    "test:db":  "vitest run --reporter=verbose",
+                    "migrate":  "tsx src/migrate.ts",
+                    "seed":  "tsx src/seed.ts"
+                },
+    "dependencies":  {
+                         "kysely":  "^0.27.4",
+                         "pg":  "^8.13.0"
+                     },
+    "devDependencies":  {
+                            "@types/pg":  "^8.11.10",
+                            "ts-node":  "^10.9.2",
+                            "tsx":  "^4.23.15",
+                            "typescript":  "^5.5.3",
+                            "vitest":  "^2.1.1"
+                        }
+}

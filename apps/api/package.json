@@ -1,0 +1,26 @@
+{
+  "name": "@symphony/api",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Fastify API: auth, command endpoint, projections, outbox worker",
+  "main": "./src/index.ts",
+  "scripts": {
+    "dev": "node --loader ts-node/esm src/server.ts",
+    "typecheck": "tsc --noEmit",
+    "test:api": "vitest run --reporter=verbose"
+  },
+  "dependencies": {
+    "@symphony/domain": "*",
+    "@symphony/db": "*",
+    "@symphony/contracts": "*",
+    "fastify": "^5.1.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.0",
+    "typescript": "^5.5.3",
+    "vitest": "^2.1.1"
+  }
+}
+

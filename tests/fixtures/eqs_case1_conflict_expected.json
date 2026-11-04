@@ -1,0 +1,34 @@
+{
+  "composite_score": 56,
+  "grade": "C",
+  "confidence": "Low",
+  "pillars": {
+    "environmental": {
+      "score": 65,
+      "evaluable": true,
+      "applicable_count": 1,
+      "total_count": 1
+    },
+    "social": {
+      "score": 65,
+      "evaluable": true,
+      "applicable_count": 1,
+      "total_count": 1
+    },
+    "governance": {
+      "score": 48,
+      "evaluable": true,
+      "applicable_count": 2,
+      "total_count": 2
+    }
+  },
+  "exceptions": [
+    {
+      "code": "CONFLICT_G1",
+      "pillar": "governance",
+      "severity": "critical",
+      "message": "Indicator [G1]: unresolved verification finding conflict blocks promotion.",
+      "actionable_remediation": "Record attributable conflict resolution with disposition and rationale."
+    }
+  ]
+}

@@ -1,0 +1,303 @@
+{
+  "version": "1.0",
+  "note": "Ask these after the demo, in conversation. Do not take notes during the demo. Fill in session_notes_template.json within 15 minutes of finishing. Automatic capture covers what they did; these questions cover what they think.",
+  "hypotheses": {
+    "H1": "Lenders will treat a field-verified readiness record as assessable and save effort",
+    "H2": "A third party can be paid a contingent fee on disbursement without conflict with affordability or licensing",
+    "H3": "The facilitator will treat readiness as a pipeline output and route cohorts to it",
+    "H4": "The record carries forward into decisioning and monitoring (the infrastructure claim)",
+    "H5": "There is a named buyer, owner and path to a pilot"
+  },
+  "commitment_ladder": [
+    {
+      "level": 0,
+      "label": "No further interest"
+    },
+    {
+      "level": 1,
+      "label": "Polite interest, no next step"
+    },
+    {
+      "level": 2,
+      "label": "Agrees to a follow-up conversation"
+    },
+    {
+      "level": 3,
+      "label": "Names who else must see it"
+    },
+    {
+      "level": 4,
+      "label": "Agrees to discuss a pilot, with a named owner"
+    },
+    {
+      "level": 5,
+      "label": "Commits to a dated pilot step (data, access or approval)"
+    }
+  ],
+  "asking_guidance": [
+    "Ask open questions first. Do not offer options unless the question lists them.",
+    "Do not pitch, defend or explain a screen while asking.",
+    "Ask the baseline question (B1 or N1) before any question that mentions a Symphony feature.",
+    "Record quotes under 20 words, attributed to a role, never a name.",
+    "Ask C5 last. Do not suggest a level.",
+    "If asked about price, listen and record the response. Do not offer a number unless you have decided to.",
+    "Tell attendees at the start that their interactions with the demo are recorded on this device only, with no names."
+  ],
+  "suggested_order": {
+    "bank": [
+      "B1",
+      "B2",
+      "B3",
+      "B4",
+      "B5",
+      "B6",
+      "B7",
+      "B8",
+      "B9",
+      "B10",
+      "C3",
+      "C1",
+      "C2",
+      "C4",
+      "C5"
+    ],
+    "nabii": [
+      "N1",
+      "N2",
+      "N3",
+      "N4",
+      "N5",
+      "N6",
+      "N7",
+      "N8",
+      "C3",
+      "C1",
+      "C2",
+      "C4",
+      "C5"
+    ]
+  },
+  "questions": [
+    {
+      "id": "C1",
+      "audience": "both",
+      "question": "What is the first thing you would change about what you just saw?",
+      "answer_type": "free_text",
+      "tests": "H5",
+      "listen_for": "Specific change requests (signals real consideration) vs generic praise"
+    },
+    {
+      "id": "C2",
+      "audience": "both",
+      "question": "What would stop you using this?",
+      "answer_type": "free_text",
+      "tests": "H5",
+      "listen_for": "Regulatory, process, trust or cost blockers. Note whether any is removable"
+    },
+    {
+      "id": "C3",
+      "audience": "both",
+      "question": "Which screen was most useful to you, and which was least useful?",
+      "answer_type": "screen_pick",
+      "tests": "H4",
+      "listen_for": "Compare to automatic dwell data (stated vs revealed interest)",
+      "options": [
+        "Organization identity and registration",
+        "Governance records",
+        "Member register",
+        "Evidence provenance and limitations",
+        "Readiness basis",
+        "Facility monitoring",
+        "Portfolio view",
+        "Pipeline and cohort view",
+        "Lender assessment workspace",
+        "Request restructuring",
+        "Destination switch"
+      ]
+    },
+    {
+      "id": "C4",
+      "audience": "both",
+      "question": "Who else would need to see this before anything could happen?",
+      "answer_type": "free_text",
+      "tests": "H5",
+      "listen_for": "Roles, not names. Count the number of distinct functions named"
+    },
+    {
+      "id": "C5",
+      "audience": "both",
+      "question": "Where on this ladder would you place the next step you are willing to take?",
+      "answer_type": "commitment_ladder",
+      "tests": "H5",
+      "listen_for": "Record the level they choose and what they say to justify it. Do not suggest a level",
+      "follow_up": "What would have to be true to move one level up?"
+    },
+    {
+      "id": "B1",
+      "audience": "bank",
+      "question": "Walk me through what your team does today with a cooperative application like this, from first contact to credit committee. Where does the time go?",
+      "answer_type": "free_text_plus_number",
+      "tests": "H1",
+      "listen_for": "Hours or days per stage; who does each; where rework happens. This is your baseline, so do not reveal any claim about their process first",
+      "follow_up": "How many such applications does your team handle per quarter?"
+    },
+    {
+      "id": "B2",
+      "audience": "bank",
+      "question": "Looking at the case you were shown, which parts would your team accept as presented, which would they re-verify, and which would they redo?",
+      "answer_type": "section_matrix",
+      "tests": "H1",
+      "listen_for": "Anything they would 'redo' is a requirement or evidence gap. Anything 'accept' is the value",
+      "options": [
+        "Organization identity and registration",
+        "Governance records",
+        "Member register",
+        "Evidence provenance and limitations",
+        "Readiness basis",
+        "Facility monitoring",
+        "Portfolio view"
+      ]
+    },
+    {
+      "id": "B3",
+      "audience": "bank",
+      "question": "What would your team need to see before relying on evidence verified by a field agent rather than by your own staff?",
+      "answer_type": "free_text",
+      "tests": "H1",
+      "listen_for": "Independence, training, liability, sampling, audit rights. Note any request for a warranty or indemnity"
+    },
+    {
+      "id": "B4",
+      "audience": "bank",
+      "question": "If a case arrives in this form, what happens to it inside your organisation? Which functions touch it: credit, risk, compliance, legal?",
+      "answer_type": "free_text",
+      "tests": "H5",
+      "listen_for": "Approval chain. Note whether a policy change is needed"
+    },
+    {
+      "id": "B5",
+      "audience": "bank",
+      "question": "How would you want to receive cases like this: through a portal, by email, or into your own systems?",
+      "answer_type": "single_choice",
+      "tests": "H5",
+      "listen_for": "Integration burden. Note any security or data-residency requirement",
+      "options": [
+        "Own portal or login",
+        "Email or file",
+        "Integrated into our systems",
+        "Not sure"
+      ]
+    },
+    {
+      "id": "B6",
+      "audience": "bank",
+      "question": "Which of the monitoring screens would your team actually use: use of proceeds, covenants, portfolio? Which would replace something you do now?",
+      "answer_type": "multi_choice",
+      "tests": "H4",
+      "listen_for": "Replacement of an existing process is stronger than 'nice to have'",
+      "options": [
+        "Use of proceeds",
+        "Covenant tracking",
+        "Portfolio view",
+        "Baseline vs current",
+        "None of them"
+      ]
+    },
+    {
+      "id": "B7",
+      "audience": "bank",
+      "question": "Have you ever paid, or shared a fee with, a party that prepared or referred a borrower? How did that work and what rules applied?",
+      "answer_type": "free_text",
+      "tests": "H2",
+      "listen_for": "Existing precedent, any regulatory limit, who decided. Do not name a fee level yet"
+    },
+    {
+      "id": "B8",
+      "audience": "bank",
+      "question": "If a third party were paid when a loan is disbursed, what concerns would you have about incentives, borrower cost or regulation?",
+      "answer_type": "free_text",
+      "tests": "H2",
+      "listen_for": "Conflict-of-interest, affordability, licensing, disclosure to borrower"
+    },
+    {
+      "id": "B9",
+      "audience": "bank",
+      "question": "Was anything you were shown something we should not claim, or that could create risk for you?",
+      "answer_type": "free_text",
+      "tests": "H1",
+      "listen_for": "Red flags and wording to change. Treat as high-value"
+    },
+    {
+      "id": "B10",
+      "audience": "bank",
+      "question": "What would a pilot need to look like for you to say yes, and who would own it on your side?",
+      "answer_type": "free_text",
+      "tests": "H5",
+      "listen_for": "Scope, size, duration, data access, named owner. Distinguish 'could' from 'would'"
+    },
+    {
+      "id": "N1",
+      "audience": "nabii",
+      "question": "How do you define and measure readiness for a cohort today? What does a cohort need to show to count as pipeline progress?",
+      "answer_type": "free_text",
+      "tests": "H3",
+      "listen_for": "Their definition and metrics. Compare to the prototype's readiness state"
+    },
+    {
+      "id": "N2",
+      "audience": "nabii",
+      "question": "Does the readiness record match what you would want a lender to receive? What is missing, and what is extra?",
+      "answer_type": "free_text",
+      "tests": "H3",
+      "listen_for": "Gaps and redundancies in requirements"
+    },
+    {
+      "id": "N3",
+      "audience": "nabii",
+      "question": "How does technical assistance funding reach enterprises today, and where would a route paid on loan disbursement fit or conflict?",
+      "answer_type": "free_text",
+      "tests": "H2",
+      "listen_for": "Overlap with funded TA, willingness to refer, any policy against success-based fees"
+    },
+    {
+      "id": "N4",
+      "audience": "nabii",
+      "question": "What would you need before encouraging lenders to treat records like these as assessable?",
+      "answer_type": "free_text",
+      "tests": "H1",
+      "listen_for": "Endorsement path, lender engagement, standards"
+    },
+    {
+      "id": "N5",
+      "audience": "nabii",
+      "question": "What cohort-level information would you want, how often, and who would you report it to?",
+      "answer_type": "free_text",
+      "tests": "H3",
+      "listen_for": "Reporting cadence and audience. Note donor-facing needs"
+    },
+    {
+      "id": "N6",
+      "audience": "nabii",
+      "question": "Who else would want the environmental baseline captured at readiness, and for what purpose?",
+      "answer_type": "free_text",
+      "tests": "H4",
+      "listen_for": "Named stakeholders or programmes. Distinguish interest from funding"
+    },
+    {
+      "id": "N7",
+      "audience": "nabii",
+      "question": "How are cooperatives selected for programmes today, and would a readiness record change selection?",
+      "answer_type": "free_text",
+      "tests": "H3",
+      "listen_for": "Selection criteria. Relevance to choosing the strongest candidates first"
+    },
+    {
+      "id": "N8",
+      "audience": "nabii",
+      "question": "What would a first cohort pilot require from your side: approvals, timing, constraints?",
+      "answer_type": "free_text",
+      "tests": "H5",
+      "listen_for": "Concrete steps and dates"
+    }
+  ]
+}
