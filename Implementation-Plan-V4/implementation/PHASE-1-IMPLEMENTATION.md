@@ -357,7 +357,7 @@
 
 ### Tasks
 
-- [ ] **1.7.1** Write failing tests in `packages/domain/src/privacy/__tests__/pii-vault.test.ts`:
+- [x] **1.7.1** Write failing tests in `packages/domain/src/privacy/__tests__/pii-vault.test.ts`:
   - `encrypt_thenDecrypt_returnsSamePlaintext` — AES-256-GCM round-trip
   - `differentPersonKeys_producesDifferentCiphertext` — same plaintext, different key refs → different ciphertexts
   - `blindIndex_matchesSamePlaintext` — HMAC of "John" matches HMAC of "John"; HMAC of "John" does not match "JOHN" (normalise before HMAC)
@@ -369,7 +369,7 @@
   Run: `npx vitest run packages/domain/src/privacy/__tests__/pii-vault.test.ts`  
   _Expected output: 7 FAILED (red)._
 
-- [ ] **1.7.2** Implement `packages/domain/src/privacy/key-provider.ts` interface + `LocalDevKeyProvider`:
+- [x] **1.7.2** Implement `packages/domain/src/privacy/key-provider.ts` interface + `LocalDevKeyProvider`:
   - Generates per-person data keys; wraps them with a local root key (from env, never hardcoded)
   - `encrypt(plaintext, keyRef)` → AES-256-GCM ciphertext + IV + auth tag
   - `decrypt(ciphertext, keyRef)` → plaintext
@@ -384,7 +384,7 @@
   Run: `npx vitest run packages/domain/src/privacy/__tests__/pii-vault.test.ts`  
   _Expected output: 7 PASSED._
 
-- [ ] **1.7.3** Create `packages/domain/src/privacy/consent-service.ts` implementing:
+- [x] **1.7.3** Create `packages/domain/src/privacy/consent-service.ts` implementing:
   - `RecordConsent` command — records `consent_records` row with `lawful_basis` (from O-19: `legal_obligation` for statutory register fields; `consent` for other PII)
   - `WithdrawConsent` command — sets `withdrawn_at`; triggers retention-policy evaluation
   - Public register fields (name, address, occupation, date registered) use `lawful_basis = 'legal_obligation'` and are never covered by `WithdrawConsent` alone
@@ -397,7 +397,7 @@
   Run: `npx vitest run packages/domain/src/privacy/__tests__/consent.test.ts`  
   _Expected output: 3 PASSED._
 
-- [ ] **1.7.4** Create `packages/api/src/serialisers/masking-serialiser.ts` that strips or masks fields based on the viewer's role:
+- [x] **1.7.4** Create `packages/api/src/serialisers/masking-serialiser.ts` that strips or masks fields based on the viewer's role:
   - `union_ta`, `institution` roles → all `person_identifier` fields replaced with `[MASKED]`; member PII removed
   - Cooperative officials → see their own records; other members masked per `PRV-003`
   - Public inspection → statutory fields only: name, address, occupation, date registered (O-19)
@@ -411,14 +411,14 @@
   Run: `npx vitest run packages/api/src/__tests__/masking-serialiser.test.ts`  
   _Expected output: 4 PASSED._
 
-- [ ] **1.7.5** Write `packages/domain/src/privacy/__tests__/retention.test.ts`:
+- [x] **1.7.5** Write `packages/domain/src/privacy/__tests__/retention.test.ts`:
   - `memberDataRetention_twoYearFloor` — retention policy for membership data enforces 2-year floor post-cessation (O-23 / Act ss.34, 37(6))
   - `cryptoShred_keepsTransactionFacts` — after shred, transaction rows remain under pseudonymous id; personal fields return `KEY_DELETED`
   
   Run: `npx vitest run packages/domain/src/privacy/__tests__/retention.test.ts`  
   _Expected output: 2 PASSED._
 
-- [ ] **1.7.6** Remove `@wip` from PRV-003, PRV-004, PRV-005, PRV-006, PRV-007 in `features/02_identity_privacy_and_access.feature`.  
+- [x] **1.7.6** Remove `@wip` from PRV-003, PRV-004, PRV-005, PRV-006, PRV-007 in `features/02_identity_privacy_and_access.feature`.  
   
   Run: `npm run test:bdd -- --tags "@PRV-003 or @PRV-004 or @PRV-005 or @PRV-006 or @PRV-007"`  
   _Expected output: 5 scenarios PASSED._

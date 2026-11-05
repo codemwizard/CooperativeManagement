@@ -23,7 +23,7 @@ Feature: Identity, privacy and access
     And the retention policy for "personal_membership_data" starts
     And the member's identifiers are no longer shown to officers without a lawful purpose
 
-  @REQ-PRV-002 @REQ-ID-005 @BDD-PRV-003 @hard @wip
+  @REQ-PRV-002 @REQ-ID-005 @BDD-PRV-003 @hard
   Scenario: Identifiers are encrypted and duplicates are found by blind index
     Given a member with NRC "TS0001/01/1" matching the synthetic pattern
     Then the stored identifier is encrypted
@@ -32,13 +32,13 @@ Feature: Identity, privacy and access
     Then a duplicate review is opened
     And the two records are not merged automatically
 
-  @REQ-ID-005 @BDD-PRV-004 @wip
+  @REQ-ID-005 @BDD-PRV-004
   Scenario: Members without an NRC use fallback identifiers
     When a Secretary adds an adult member without an NRC with identifier type "community_attested"
     Then the member is recorded with identifier type "community_attested"
     And duplicate review uses the blind indexes that exist for that person
 
-  @REQ-PRV-003 @BDD-PRV-005 @hard @wip
+  @REQ-PRV-003 @BDD-PRV-005 @hard
   Scenario Outline: Role-based masking of member identifiers
     When a "<role>" requests the member list
     Then NRC values are "<nrc_view>"
@@ -51,14 +51,14 @@ Feature: Identity, privacy and access
       | pfi_analyst             | absent                 |
       | member_of_other_coop    | absent                 |
 
-  @REQ-PRV-004 @BDD-PRV-006 @hard @wip
+  @REQ-PRV-004 @BDD-PRV-006 @hard
   Scenario: Events and logs carry no personal data
     When members are added, edited and verified
     Then no domain event payload contains an NRC-shaped value
     And no application log line contains an NRC-shaped value
     And events reference persons by pseudonymous id only
 
-  @REQ-PRV-005 @REQ-PRV-008 @BDD-PRV-007 @hard @wip
+  @REQ-PRV-005 @REQ-PRV-008 @BDD-PRV-007 @hard
   Scenario: Retention crypto-shreds personal data but keeps pseudonymised transaction facts
     Given a former member whose retention period has ended
     And a recorded contribution transaction for that member

@@ -9,7 +9,10 @@
     ".": "./src/index.ts",
     "./identity/auth-service": "./src/identity/auth-service.ts",
     "./authz/policy-engine": "./src/authz/policy-engine.ts",
-    "./authz/capacity-service": "./src/authz/capacity-service.ts"
+    "./authz/capacity-service": "./src/authz/capacity-service.ts",
+    "./privacy/key-provider": "./src/privacy/key-provider.ts",
+    "./privacy/consent-service": "./src/privacy/consent-service.ts",
+    "./privacy/retention-policy": "./src/privacy/retention-policy.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",

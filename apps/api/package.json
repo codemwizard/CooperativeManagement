@@ -5,6 +5,10 @@
   "type": "module",
   "description": "Fastify API: auth, command endpoint, projections, outbox worker",
   "main": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./serialisers/masking-serialiser": "./src/serialisers/masking-serialiser.ts"
+  },
   "scripts": {
     "dev": "node --loader ts-node/esm src/server.ts",
     "typecheck": "tsc --noEmit",
