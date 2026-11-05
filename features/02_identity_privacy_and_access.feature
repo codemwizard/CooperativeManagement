@@ -74,7 +74,7 @@ Feature: Identity, privacy and access
     And they cannot edit any entry
     And the inspection is logged without personal data of other members
 
-  @REQ-PRV-007 @REQ-PRV-009 @BDD-PRV-009 @hard @wip
+  @REQ-PRV-007 @REQ-PRV-009 @BDD-PRV-009 @hard
   Scenario Outline: Test mode accepts only the synthetic identifier pattern
     Given data mode "test"
     When a Secretary adds a member with NRC "<nrc>"
@@ -108,13 +108,13 @@ Feature: Identity, privacy and access
     Then the last digit is masked in the default display
     And no rule, finding or ranking uses that digit
 
-  @REQ-PRV-007 @BDD-PRV-010 @hard @wip
+  @REQ-PRV-007 @BDD-PRV-010 @hard
   Scenario: Real mode refuses to start outside an approved residency region
     Given data mode "real" and residency region "not-approved"
     When the application starts
     Then startup fails with reason "RESIDENCY_REGION_NOT_APPROVED"
 
-  @REQ-PRV-007 @BDD-PRV-011 @hard @wip
+  @REQ-PRV-007 @BDD-PRV-011 @hard
   Scenario: Purge-to-seed removes tenant data and restores the seed set
     Given a test database with enrolled cooperatives, evidence and events
     When the purge-to-seed job runs

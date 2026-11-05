@@ -383,15 +383,21 @@ When(
 );
 
 Then('the result is {string}', function (this: SymphonyWorld, expectedResult: string) {
-  const result = w(this)['_outlineResult'] as CapacityResult | undefined;
+  const result = w(this)['_outlineResult'] as (CapacityResult | { ok: boolean; code?: string; detail?: string }) | undefined;
   assert.ok(result !== undefined, 'Expected an outline result to be recorded');
 
-  if (expectedResult === 'allowed') {
-    assert.ok(result.ok, `Expected grant to be allowed but got: ${!result.ok ? result.detail : 'ok'}`);
+  if (expectedResult === 'allowed' || expectedResult === 'recorded') {
+    assert.ok(result.ok, `Expected to be ${expectedResult} but got: ${!result.ok ? (result as { detail?: string }).detail ?? 'failed' : 'ok'}`);
   } else if (expectedResult === 'rejected') {
-    assert.ok(!result.ok, 'Expected grant to be rejected but it succeeded');
+    assert.ok(!result.ok, 'Expected to be rejected but it succeeded');
+  } else if (expectedResult.startsWith('rejected ')) {
+    // e.g. "rejected NON_SYNTHETIC_IDENTIFIER_IN_TEST_MODE"
+    assert.ok(!result.ok, 'Expected to be rejected but it succeeded');
+    const expectedCode = expectedResult.slice('rejected '.length);
+    const actualCode = (result as { code?: string }).code;
+    assert.strictEqual(actualCode, expectedCode, `Expected rejection code "${expectedCode}", got "${String(actualCode)}"`);
   } else {
-    throw new Error(`Unknown expected result "${expectedResult}" — use "allowed" or "rejected"`);
+    throw new Error(`Unknown expected result "${expectedResult}" — use "allowed", "recorded", "rejected", or "rejected <CODE>"`);
   }
 });
 

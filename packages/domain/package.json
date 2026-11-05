@@ -12,7 +12,8 @@
     "./authz/capacity-service": "./src/authz/capacity-service.ts",
     "./privacy/key-provider": "./src/privacy/key-provider.ts",
     "./privacy/consent-service": "./src/privacy/consent-service.ts",
-    "./privacy/retention-policy": "./src/privacy/retention-policy.ts"
+    "./privacy/retention-policy": "./src/privacy/retention-policy.ts",
+    "./privacy/data-mode-guard": "./src/privacy/data-mode-guard.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",

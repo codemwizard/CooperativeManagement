@@ -435,7 +435,7 @@
 
 ### Tasks
 
-- [ ] **1.8.1** Write failing tests in `packages/domain/src/privacy/__tests__/test-data-mode.test.ts`:
+- [x] **1.8.1** Write failing tests in `packages/domain/src/privacy/__tests__/test-data-mode.test.ts`:
   - `testMode_rejectsRealNRC` — `DATA_MODE=test`; submit `123456/78/1`; expect `INVALID_TEST_IDENTIFIER`
   - `testMode_acceptsSyntheticNRC` — `DATA_MODE=test`; submit `TS0001/01/1`; expect accepted
   - `testMode_rejectsRealCoopRegNumber` — a real 11-digit number starting with a non-test prefix is rejected in test mode
@@ -446,7 +446,7 @@
   Run: `npx vitest run packages/domain/src/privacy/__tests__/test-data-mode.test.ts`  
   _Expected output: 6 FAILED (red)._
 
-- [ ] **1.8.2** Implement `packages/domain/src/privacy/data-mode-guard.ts`:
+- [x] **1.8.2** Implement `packages/domain/src/privacy/data-mode-guard.ts`:
   - `validateIdentifier(identifier, type, mode)` — in test mode, checks synthetic pattern; in real mode, NRC check is advisory only (PRV-009)
   - `enforceResidency(mode, region)` — in real mode, throws if region not in approved list
   
@@ -455,7 +455,7 @@
   Run: `npx vitest run packages/domain/src/privacy/__tests__/test-data-mode.test.ts`  
   _Expected output: 6 PASSED._
 
-- [ ] **1.8.3** Remove `@wip` from PRV-009, PRV-010, PRV-011.  
+- [x] **1.8.3** Remove `@wip` from PRV-009, PRV-010, PRV-011.  
   
   Run: `npm run test:bdd -- --tags "@PRV-009 or @PRV-010 or @PRV-011"`  
   _Expected output: 3 scenarios PASSED._
