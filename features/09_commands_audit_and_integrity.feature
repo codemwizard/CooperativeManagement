@@ -72,7 +72,7 @@ Feature: Commands, audit trail and integrity
     Then the field is ignored or the command is rejected
     And standing is recomputed from events only
 
-  @REQ-AUD-001 @BDD-AUD-010 @hard @INV-018 @wip
+  @REQ-AUD-001 @BDD-AUD-010 @hard @INV-018
   Scenario: Events are append-only
     When an update or delete is attempted on a domain event
     Then the database rejects it
@@ -109,7 +109,7 @@ Feature: Commands, audit trail and integrity
     Then the event shows occurred_at two days ago and recorded_at now
     And ordering of events within the aggregate follows the aggregate version
 
-  @REQ-AUD-001 @BDD-AUD-016 @wip
+  @REQ-AUD-001 @BDD-AUD-016
   Scenario: Validation runs are immutable
     Given a validation run recorded against rule version 3
     When the rule is updated to version 4

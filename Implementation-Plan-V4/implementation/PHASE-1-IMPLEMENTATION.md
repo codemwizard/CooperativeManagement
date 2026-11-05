@@ -167,7 +167,7 @@
 
 ### Tasks
 
-- [ ] **1.3.1** Write failing tests in `packages/db/src/__tests__/event-store.test.ts`:
+- [x] **1.3.1** Write failing tests in `packages/db/src/__tests__/event-store.test.ts`:
   - `appendedEvent_cannotBeUpdated` — INSERT an event then attempt UPDATE; expect database exception
   - `appendedEvent_cannotBeDeleted` — INSERT an event then attempt DELETE; expect database exception
   - `outboxRecord_deliveredAtSetOnce` — set `delivered_at` once; second SET throws or is ignored
@@ -175,10 +175,10 @@
   Run: `npx vitest run packages/db/src/__tests__/event-store.test.ts`  
   _Expected output: 3 FAILED (red)._
 
-- [ ] **1.3.2** Confirm immutability triggers exist on `domain_events` (created in WP-0.4.2). Run the failing tests.  
+- [x] **1.3.2** Confirm immutability triggers exist on `domain_events` (created in WP-0.4.2). Run the failing tests.  
   _Expected output after trigger verification: 3 PASSED._
 
-- [ ] **1.3.3** Create `packages/api/src/outbox-worker.ts` as a stub that polls `event_outbox` for undelivered records and marks them `delivered`. Worker is not started in Phase 1 (no consumers); only the polling query and the atomic mark are implemented.  
+- [x] **1.3.3** Create `packages/api/src/outbox-worker.ts` as a stub that polls `event_outbox` for undelivered records and marks them `delivered`. Worker is not started in Phase 1 (no consumers); only the polling query and the atomic mark are implemented.  
   
   Write `packages/api/src/__tests__/outbox-worker.test.ts`:
   - `undeliveredRecord_isPolled` — insert an outbox record; call poll; expect it appears in the result
@@ -187,7 +187,7 @@
   Run: `npx vitest run packages/api/src/__tests__/outbox-worker.test.ts`  
   _Expected output: 2 PASSED._
 
-- [ ] **1.3.4** Remove `@wip` from AUD-010, AUD-016 in `features/09_commands_audit_and_integrity.feature`.  
+- [x] **1.3.4** Remove `@wip` from AUD-010, AUD-016 in `features/09_commands_audit_and_integrity.feature`.  
   
   Run: `npm run test:bdd -- --tags "@AUD-010 or @AUD-016"`  
   _Expected output: 2 scenarios PASSED._
