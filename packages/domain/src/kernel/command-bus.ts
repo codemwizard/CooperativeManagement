@@ -74,7 +74,7 @@ export class CommandBus<TAggregate extends AggregateRoot> {
     if (options?.actorTenantId !== undefined && options.actorTenantId !== envelope.tenantId) {
       return {
         ok: false,
-        code: 'TENANT_MISMATCH',
+        code: 'NOT_AUTHORISED_FOR_ORGANISATION',
         detail: `Actor tenant ${options.actorTenantId} does not match command tenant ${envelope.tenantId}`,
       };
     }

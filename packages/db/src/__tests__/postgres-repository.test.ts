@@ -73,8 +73,12 @@ let db: Kysely<SymphonyDatabase>;
 let tenantId: string;
 
 beforeEach(async () => {
-  db = createDb(DATABASE_URL);
+  // Single-connection pool ensures set_config is visible across all test statements
+  db = createDb(DATABASE_URL, { max: 1 });
   tenantId = randomUUID();
+
+  // Set the RLS tenant context for this connection (non-LOCAL persists across stmts)
+  await sql`SELECT set_config('app.current_tenant_id', ${sql.lit(tenantId)}, false)`.execute(db);
 
   // Insert a fresh tenant for this test
   await db
@@ -84,8 +88,10 @@ beforeEach(async () => {
 });
 
 afterEach(async () => {
-  // Clean up test data using raw pg to disable the immutability trigger.
-  // The trigger exists to prevent production mutations; test teardown bypasses it.
+  // Re-assert RLS context in case the pool gave a different connection
+  await sql`SELECT set_config('app.current_tenant_id', ${sql.lit(tenantId)}, false)`.execute(db);
+
+  // Clean up test data — disable immutability trigger so we can DELETE domain_events
   await sql`
     ALTER TABLE symphony.domain_events DISABLE TRIGGER domain_events_immutability
   `.execute(db);

@@ -15,6 +15,9 @@
  * Tenant isolation (AUD-004 / AUD-005):
  *   Every load() includes WHERE tenant_id = tenantId.
  *   The save() inserts tenant_id on the state row, event rows, and outbox rows.
+ *   Additionally, SET LOCAL app.current_tenant_id = $tenantId is issued at the
+ *   start of every transaction to satisfy the defence-in-depth RLS policy on
+ *   domain_events and command_receipts (migration 0008).
  */
 
 import type { Kysely, Transaction } from 'kysely';
@@ -39,6 +42,9 @@ export class PostgresRepository<TAggregate extends AggregateRoot>
   // ─── load ──────────────────────────────────────────────────────────────────
 
   async load(id: string, tenantId: string): Promise<TAggregate | null> {
+    // Set RLS context — load may be called outside a transaction
+    await sql`SELECT set_config('app.current_tenant_id', ${sql.lit(tenantId)}, false)`.execute(this.db);
+
     const row = await this.db
       .selectFrom('symphony.aggregate_states')
       .selectAll()
@@ -59,6 +65,9 @@ export class PostgresRepository<TAggregate extends AggregateRoot>
     outboxMessages: readonly OutboxMessage[],
   ): Promise<void> {
     await this.db.transaction().execute(async (trx) => {
+      // Set RLS tenant context for the duration of this transaction (LOCAL = tx-scoped)
+      await sql`SET LOCAL app.current_tenant_id = ${sql.lit(aggregate.tenantId)}`.execute(trx);
+
       await this.upsertAggregateState(trx, aggregate, expectedVersion);
 
       if (events.length > 0) {

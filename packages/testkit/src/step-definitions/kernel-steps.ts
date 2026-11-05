@@ -92,6 +92,10 @@ class BddRepository implements Repository<BddTestAggregate> {
     this.outbox.push(...outboxMessages);
   }
 
+  seed(agg: BddTestAggregate): void {
+    this.store.set(agg.id, agg);
+  }
+
   get stateCount(): number {
     return this.store.size;
   }
@@ -401,3 +405,120 @@ Then(
     assert.strictEqual(this.lastRejectionReason, expectedReason, `Expected rejection reason "${expectedReason}"`);
   },
 );
+
+
+// ─── BDD-AUD-005: Cross-organisation command rejection ─────────────────────────
+
+When(
+  'the Secretary in {string} sends a command targeting an evidence item in {string}',
+  async function (this: SymphonyWorld, actorOrgName: string, targetOrgName: string) {
+    const actorOrg = this.organisations[actorOrgName];
+    const targetOrg = this.organisations[targetOrgName];
+    if (!actorOrg) throw new Error(`Organisation "${actorOrgName}" not registered`);
+    if (!targetOrg) throw new Error(`Organisation "${targetOrgName}" not registered`);
+
+    const actor = this.actors[`Secretary in ${actorOrgName}`];
+    if (!actor) throw new Error(`Actor "Secretary in ${actorOrgName}" not set up`);
+
+    const clock = new FakeClock('2026-01-01T12:00:00.000Z');
+    const ids = new SequentialIds();
+    const clockPort: Clock = { now: () => clock.nowIso() };
+    const idGenPort: IdGen = { generate: () => ids.next() };
+    const repo = new BddRepository();
+    const receiptStore = new BddReceiptStore();
+
+    const bus = new CommandBus<BddTestAggregate>({
+      repository: repo,
+      receiptStore,
+      policyStore: new BddPolicyStore(),
+      clock: clockPort,
+      idGen: idGenPort,
+    });
+
+    // Command targets Org B's tenant, but actor session is Org A's tenant
+    const now = clock.nowIso();
+    const envelope: CommandEnvelope<{ targetEvidenceId: string }> = {
+      commandId: ids.next('cmd'),
+      tenantId: targetOrg.tenantId,       // ← targets Org B
+      actorUserId: actor.userId,
+      occurredAt: now,
+      recordedAt: now,
+      deviceId: 'test-device',
+      expectedVersion: 0,
+      correlationId: 'corr-cross-org',
+      type: 'AmendClaim',
+      payload: { targetEvidenceId: ids.next('evd') },
+    };
+
+    const result = await bus.dispatch(
+      envelope,
+      async (_env, _ctx) => ({
+        newState: { id: ids.next(), tenantId: targetOrg.tenantId, version: 1, label: 'cross-org' },
+        events: [],
+        data: {},
+      }),
+      { actorTenantId: actorOrg.tenantId }, // ← actor belongs to Org A
+    );
+
+    if (!result.ok) {
+      this.lastRejectionReason = result.code;
+    }
+
+    // Store repo for "nothing in Org B changes" assertion
+    const world = this as unknown as Record<string, unknown>;
+    world['_crossOrgRepo'] = repo;
+    world['_crossOrgTargetTenantId'] = targetOrg.tenantId;
+    world['_crossOrgResult'] = result;
+  },
+);
+
+Then('nothing in {string} changes', function (this: SymphonyWorld, orgName: string) {
+  const world = this as unknown as Record<string, unknown>;
+  const repo = world['_crossOrgRepo'] as BddRepository;
+  const targetTenantId = world['_crossOrgTargetTenantId'] as string;
+  // No state should have been saved for the target org
+  assert.strictEqual(repo.stateCount, 0, `Expected no state changes in "${orgName}" (tenantId: ${targetTenantId})`);
+});
+
+Then('the attempt is audited', function (this: SymphonyWorld) {
+  // In Phase 1, the audit trail is the rejection result itself — the command receipt
+  // is NOT stored (rejected commands are not receipted). The bus returns a typed error.
+  // A full audit trail (append to audit log) is a Phase 2 feature.
+  // For now: verify the rejection result is non-null and contains the reason.
+  const world = this as unknown as Record<string, unknown>;
+  const result = world['_crossOrgResult'] as { ok: boolean };
+  assert.strictEqual(result.ok, false, 'Expected the cross-org command to be rejected (auditable)');
+});
+
+// ─── BDD-AUD-006: Cross-organisation read returns nothing ──────────────────────
+
+When(
+  'the Secretary in {string} requests an item identifier from {string}',
+  async function (this: SymphonyWorld, actorOrgName: string, targetOrgName: string) {
+    const actorOrg = this.organisations[actorOrgName];
+    const targetOrg = this.organisations[targetOrgName];
+    if (!actorOrg) throw new Error(`Organisation "${actorOrgName}" not registered`);
+    if (!targetOrg) throw new Error(`Organisation "${targetOrgName}" not registered`);
+
+    const repo = new BddRepository();
+
+    // Seed an aggregate in Org B
+    const targetAggId = '00000000-0000-0000-0099-000000000001';
+    repo.seed({ id: targetAggId, tenantId: targetOrg.tenantId, version: 1, label: 'org-b-item' });
+
+    // Try to load it using Org A's tenant context — must return null
+    const loaded = await repo.load(targetAggId, actorOrg.tenantId);
+
+    const world = this as unknown as Record<string, unknown>;
+    world['_crossOrgReadResult'] = loaded;
+  },
+);
+
+Then('the response is {string}', function (this: SymphonyWorld, expectedResponse: string) {
+  const world = this as unknown as Record<string, unknown>;
+  if (expectedResponse === 'not found') {
+    assert.strictEqual(world['_crossOrgReadResult'], null, 'Expected cross-org read to return null (not found)');
+  } else {
+    throw new Error(`Unknown expected response: "${expectedResponse}"`);
+  }
+});

@@ -329,7 +329,7 @@ describe('CommandBus', () => {
 
     expect(result.ok).toBe(false);
     if (!result.ok) {
-      expect(result.code).toBe('TENANT_MISMATCH');
+      expect(result.code).toBe('NOT_AUTHORISED_FOR_ORGANISATION');
     }
   });
 

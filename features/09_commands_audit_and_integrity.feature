@@ -35,14 +35,14 @@ Feature: Commands, audit trail and integrity
     And the second is rejected with reason "VERSION_CONFLICT"
     And the rejected input is stored for reconciliation
 
-  @REQ-AUD-004 @BDD-AUD-005 @hard @SC-015 @wip
+  @REQ-AUD-004 @BDD-AUD-005 @hard @SC-015
   Scenario: A command cannot touch another organisation
     When the Secretary in "Org A" sends a command targeting an evidence item in "Org B"
     Then it is rejected with reason "NOT_AUTHORISED_FOR_ORGANISATION"
     And nothing in "Org B" changes
     And the attempt is audited
 
-  @REQ-AUD-004 @BDD-AUD-006 @hard @wip
+  @REQ-AUD-004 @BDD-AUD-006 @hard
   Scenario: Cross-organisation reads return nothing
     When the Secretary in "Org A" requests an item identifier from "Org B"
     Then the response is "not found"

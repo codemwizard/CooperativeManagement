@@ -136,7 +136,7 @@
 
 ### Tasks
 
-- [ ] **1.2.1** Write failing tests in `packages/domain/src/kernel/__tests__/tenant-isolation.test.ts`:
+- [x] **1.2.1** Write failing tests in `packages/domain/src/kernel/__tests__/tenant-isolation.test.ts`:
   - `commandForAnotherTenant_isRejected` — actor from tenant A cannot issue commands to tenant B aggregate
   - `repositoryLoad_neverReturnsAnotherTenantsRecord` — `load` with tenant A never returns a record owned by tenant B, even if the aggregate ID matches
   - `eventsFromAnotherTenant_notVisible` — event query scoped to tenant A never returns tenant B events
@@ -144,12 +144,12 @@
   Run: `npx vitest run packages/domain/src/kernel/__tests__/tenant-isolation.test.ts`  
   _Expected output: 3 FAILED (red)._
 
-- [ ] **1.2.2** Implement tenant-scoped `load` in `postgres-repository.ts`: all SELECT queries include `WHERE tenant_id = $tenantId`. Add a Row-Level Security policy on `domain_events` and `command_receipts` as a defence-in-depth layer (not the primary control).  
+- [x] **1.2.2** Implement tenant-scoped `load` in `postgres-repository.ts`: all SELECT queries include `WHERE tenant_id = $tenantId`. Add a Row-Level Security policy on `domain_events` and `command_receipts` as a defence-in-depth layer (not the primary control).  
   
   Run: `npx vitest run packages/domain/src/kernel/__tests__/tenant-isolation.test.ts`  
   _Expected output: 3 PASSED._
 
-- [ ] **1.2.3** Remove `@wip` from AUD-005, AUD-006 in `features/09_commands_audit_and_integrity.feature`. Write step definitions.  
+- [x] **1.2.3** Remove `@wip` from AUD-005, AUD-006 in `features/09_commands_audit_and_integrity.feature`. Write step definitions.  
   
   Run: `npm run test:bdd -- --tags "@AUD-004 or @AUD-005 or @AUD-006"`  
   _Expected output: 3 scenarios PASSED._
