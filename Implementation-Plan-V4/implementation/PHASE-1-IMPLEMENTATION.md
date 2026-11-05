@@ -234,7 +234,7 @@
 
 ### Tasks
 
-- [ ] **1.5.1** Write failing tests in `packages/domain/src/identity/__tests__/auth.test.ts`:
+- [x] **1.5.1** Write failing tests in `packages/domain/src/identity/__tests__/auth.test.ts`:
   - `temporaryCredential_isHashedArgon2id` — credential stored as Argon2id hash; plaintext never retrievable
   - `temporaryCredential_singleUse` — second login with same temp credential is rejected with `CREDENTIAL_ALREADY_USED`
   - `temporaryCredential_isExpiredAfterDefault72h` — presenting a credential 73 hours after issue returns `CREDENTIAL_EXPIRED`
@@ -245,7 +245,7 @@
   Run: `npx vitest run packages/domain/src/identity/__tests__/auth.test.ts`  
   _Expected output: 6 FAILED (red)._
 
-- [ ] **1.5.2** Implement `packages/domain/src/identity/auth-service.ts`:
+- [x] **1.5.2** Implement `packages/domain/src/identity/auth-service.ts`:
   - Use `argon2id` via the `argon2` npm package for credential hashing
   - `issueTemporaryCredential(userId, ttlHours)` — hash + expiry; never store plaintext
   - `verifyCredential(userId, plaintext)` — check hash + expiry + used flag
@@ -261,7 +261,7 @@
   Run: `npx vitest run packages/domain/src/identity/__tests__/auth.test.ts`  
   _Expected output: 6 PASSED._
 
-- [ ] **1.5.3** Create `packages/api/src/routes/auth.ts` with Fastify routes:
+- [x] **1.5.3** Create `packages/api/src/routes/auth.ts` with Fastify routes:
   - `POST /auth/login` — Zod-validated body `{ userId, credential, deviceId }`. Returns `{ sessionToken, forcedChangeRequired }`. No credential in response body.
   - `POST /auth/change-password` — Zod-validated body `{ userId, currentCredential, newPassword }`. Requires auth.
   
@@ -274,7 +274,7 @@
   Run: `npx vitest run packages/api/src/__tests__/auth-routes.test.ts`  
   _Expected output: 4 PASSED._
 
-- [ ] **1.5.4** Remove `@wip` from ENR-003, ENR-004 and PRV-001, PRV-002 in features 01 and 02.  
+- [x] **1.5.4** Remove `@wip` from ENR-003, ENR-004 and PRV-001, PRV-002 in features 01 and 02.  
   
   Run: `npm run test:bdd -- --tags "@ENR-003 or @ENR-004 or @PRV-001 or @PRV-002"`  
   _Expected output: scenarios PASSED._

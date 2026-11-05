@@ -181,3 +181,4 @@ describe('Event store immutability (INV-018)', () => {
     expect(row2.delivered_at).toEqual(firstDelivery);
   });
 });
+

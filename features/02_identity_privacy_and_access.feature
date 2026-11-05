@@ -1,4 +1,4 @@
-﻿@phase1 @area-PRV
+@phase1 @area-PRV
 Feature: Identity, privacy and access
   Personal data is encrypted, masked by role and tied to consent. Union/TA and institutions
   see capability gaps and aggregates, never member PII. The platform runs on test data only
@@ -7,7 +7,7 @@ Feature: Identity, privacy and access
   Background:
     Given an active cooperative "Nsenga Honey Growers" with synthetic members
 
-  @REQ-PRV-001 @BDD-PRV-001 @hard @wip
+  @REQ-PRV-001 @BDD-PRV-001 @hard
   Scenario: Consent is required before personal data is entered
     When a Secretary tries to add member "M. Phiri" without recorded consent for purpose "cooperative_record_keeping"
     Then the command is rejected with reason "CONSENT_REQUIRED"
@@ -15,7 +15,7 @@ Feature: Identity, privacy and access
     And the Secretary adds the member
     Then the member is recorded
 
-  @REQ-PRV-001 @BDD-PRV-002 @hard @wip
+  @REQ-PRV-001 @BDD-PRV-002 @hard
   Scenario: Withdrawal of consent flags the record and starts the retention clock
     Given member "M. Phiri" with consent for "cooperative_record_keeping"
     When the member withdraws consent

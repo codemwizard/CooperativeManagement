@@ -5,6 +5,7 @@ module.exports = {
     import: [
       'packages/testkit/src/step-definitions/world.ts',
       'packages/testkit/src/step-definitions/kernel-steps.ts',
+      'packages/testkit/src/step-definitions/auth-steps.ts',
     ],
     format: ['progress'],
     tags: 'not @wip',

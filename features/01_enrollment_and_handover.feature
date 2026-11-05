@@ -1,4 +1,4 @@
-﻿@phase2 @area-ENR
+@phase2 @area-ENR
 Feature: Cooperative enrolment and handover
   A cooperative is registered on Symphony by a placeholder initiator (self-enroller) or by a platform
   enroller acting as the cooperative's proxy. Authority passes to institutionally recognised officers.
@@ -26,7 +26,7 @@ Feature: Cooperative enrolment and handover
     When the self-enroller tries to "ApproveMinutes"
     Then the command is rejected with reason "NOT_PERMITTED_FOR_INITIATOR"
 
-  @REQ-ENR-006 @REQ-ENR-010 @BDD-ENR-003 @hard @wip
+  @REQ-ENR-006 @REQ-ENR-010 @BDD-ENR-003 @hard
   Scenario: The self-enroller may create only Chairperson, Vice-Chairperson or Secretary accounts
     Given a self-enroller has created a workspace
     When the self-enroller creates an account with role "secretary" and a temporary password
@@ -34,7 +34,7 @@ Feature: Cooperative enrolment and handover
     When the self-enroller creates an account with role "treasurer" and a temporary password
     Then the command is rejected with reason "ROLE_NOT_ALLOWED_FOR_INITIATOR"
 
-  @REQ-ENR-010 @BDD-ENR-004 @hard @wip
+  @REQ-ENR-010 @BDD-ENR-004 @hard
   Scenario: Temporary credentials are single use, expire and force a change
     Given a Secretary account with a temporary password created 73 hours ago
     When the Secretary logs in with the temporary password

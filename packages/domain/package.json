@@ -5,6 +5,10 @@
   "type": "module",
   "description": "Pure domain logic — no I/O, no React, no pg (ADR-006)",
   "main": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./identity/auth-service": "./src/identity/auth-service.ts"
+  },
   "scripts": {
     "typecheck": "tsc --noEmit",
     "test:unit": "vitest run --reporter=verbose"
@@ -13,6 +17,8 @@
     "@symphony/testkit": "*",
     "typescript": "^5.5.3",
     "vitest": "^2.1.1"
+  },
+  "dependencies": {
+    "argon2": "^0.45.2"
   }
 }
-

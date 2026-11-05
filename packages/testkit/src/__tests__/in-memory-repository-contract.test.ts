@@ -12,3 +12,4 @@ import { runRepositoryContract } from '../contract-suite/repository-contract.js'
 describe('InMemoryRepository', () => {
   runRepositoryContract(() => new InMemoryRepository());
 });
+
