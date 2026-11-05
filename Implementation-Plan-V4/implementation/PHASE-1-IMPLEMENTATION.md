@@ -292,7 +292,7 @@
 
 ### Tasks
 
-- [ ] **1.6.1** Write failing tests in `packages/domain/src/authz/__tests__/policy.test.ts`:
+- [x] **1.6.1** Write failing tests in `packages/domain/src/authz/__tests__/policy.test.ts`:
   - `grantCapacity_IFV_allowedByChairperson` — Chairperson can grant `internal_verifier` capacity
   - `grantCapacity_IFV_deniedToSecretary` — Secretary cannot grant IFV capacity
   - `IFV_cannotVerifyOwnSuppliedVersion` — `decide('RecordFinding', version, ifvUser)` where ifvUser is the supplier → `deny`
@@ -304,7 +304,7 @@
   Run: `npx vitest run packages/domain/src/authz/__tests__/policy.test.ts`  
   _Expected output: 7 FAILED (red)._
 
-- [ ] **1.6.2** Implement `packages/domain/src/authz/policy-engine.ts` as a pure function:
+- [x] **1.6.2** Implement `packages/domain/src/authz/policy-engine.ts` as a pure function:
   ```typescript
   decide(
     action: string,
@@ -320,7 +320,7 @@
   Run: `npx vitest run packages/domain/src/authz/__tests__/policy.test.ts`  
   _Expected output: 7 PASSED._
 
-- [ ] **1.6.3** Write policy table tests `packages/domain/src/authz/__tests__/policy-table.test.ts` using `test.each` from JSON fixture `packages/testkit/src/fixtures/policy-table.json`. Fixture covers:
+- [x] **1.6.3** Write policy table tests `packages/domain/src/authz/__tests__/policy-table.test.ts` using `test.each` from JSON fixture `packages/testkit/src/fixtures/policy-table.json`. Fixture covers:
   - Every IFV conflict rule (supplier, collector, admitter — HARD, POLICY)
   - Every default role/capacity seeded in `03` §2.1
   - `union_ta` / `institution` read-only rules
@@ -329,14 +329,14 @@
   _Expected output: N PASSED (N = number of fixture rows)._  
   _Verifier check: fixture has ≥ 20 rows covering all role/capacity combinations listed in `03` §2.1._
 
-- [ ] **1.6.4** Create `packages/domain/src/authz/capacity-service.ts` implementing:
+- [x] **1.6.4** Create `packages/domain/src/authz/capacity-service.ts` implementing:
   - `GrantCapacity` command handler — validates granter authority, records `CapacityGranted` event
   - `RevokeCapacity` command handler — records `CapacityRevoked` event; revocation annotates past findings
   
   Run: `npx vitest run packages/domain/src/authz/__tests__/capacity-service.test.ts`  
   _Expected output: 4 PASSED (grant allowed, grant denied, revoke, revoke-annotates-finding)._
 
-- [ ] **1.6.5** Remove `@wip` from VER-001, VER-002, VER-003, VER-004, VER-015, AUD-008, AUD-009.  
+- [x] **1.6.5** Remove `@wip` from VER-001, VER-002, VER-003, VER-004, VER-015, AUD-008, AUD-009.  
   
   Run: `npm run test:bdd -- --tags "@VER-001 or @VER-002 or @VER-003 or @VER-004 or @VER-015 or @AUD-008 or @AUD-009"`  
   _Expected output: 7 scenarios PASSED._

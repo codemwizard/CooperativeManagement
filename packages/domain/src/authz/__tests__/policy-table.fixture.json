@@ -1,0 +1,38 @@
+[
+  { "note": "=== IFV Grant rules (IFV-2) ===", "_": true },
+  { "action": "GrantCapacity:internal_verifier", "actorPosition": "chairperson",     "actorCapacities": [],                   "platformRoles": [], "suppliedBy": null, "sameTenant": true,  "expected": "allow", "label": "Chairperson may grant IFV" },
+  { "action": "GrantCapacity:internal_verifier", "actorPosition": "vice_chairperson", "actorCapacities": [],                   "platformRoles": [], "suppliedBy": null, "sameTenant": true,  "expected": "allow", "label": "Vice-Chairperson may grant IFV" },
+  { "action": "GrantCapacity:internal_verifier", "actorPosition": "secretary",        "actorCapacities": [],                   "platformRoles": [], "suppliedBy": null, "sameTenant": true,  "expected": "deny",  "label": "Secretary may NOT grant IFV" },
+  { "action": "GrantCapacity:internal_verifier", "actorPosition": "treasurer",        "actorCapacities": [],                   "platformRoles": [], "suppliedBy": null, "sameTenant": true,  "expected": "deny",  "label": "Treasurer may NOT grant IFV" },
+  { "action": "GrantCapacity:internal_verifier", "actorPosition": null,               "actorCapacities": [],                   "platformRoles": ["platform_enroller"], "suppliedBy": null, "sameTenant": true, "expected": "allow", "label": "Platform enroller may grant IFV" },
+  { "action": "GrantCapacity:internal_verifier", "actorPosition": null,               "actorCapacities": ["internal_verifier"], "platformRoles": [], "suppliedBy": null, "sameTenant": true,  "expected": "deny",  "label": "IFV holder alone may NOT grant IFV" },
+
+  { "note": "=== IFV conflict rules (IFV-6, INV-011) ===", "_": true },
+  { "action": "RecordFinding", "actorPosition": null, "actorCapacities": ["internal_verifier"], "platformRoles": [], "suppliedBy": "SELF", "sameTenant": true,  "expected": "deny",  "label": "IFV cannot verify own supplied version (self-supply, HARD)" },
+  { "action": "RecordFinding", "actorPosition": null, "actorCapacities": ["internal_verifier"], "platformRoles": [], "suppliedBy": null,   "sameTenant": true,  "expected": "allow", "label": "IFV may verify version supplied by another" },
+  { "action": "RecordFinding", "actorPosition": null, "actorCapacities": ["internal_verifier"], "platformRoles": [], "suppliedBy": null,   "sameTenant": false, "expected": "deny",  "label": "IFV cannot act on another org's version (IFV-3)" },
+
+  { "note": "=== Expired / revoked capacity ===", "_": true },
+  { "action": "RecordFinding", "actorPosition": null, "actorCapacities": [],                   "platformRoles": [], "suppliedBy": null, "sameTenant": true,  "expected": "deny",  "label": "No IFV capacity → deny RecordFinding" },
+  { "action": "RecordFinding", "actorPosition": null, "actorCapacities": ["expired_internal_verifier"], "platformRoles": [], "suppliedBy": null, "sameTenant": true, "expected": "deny", "label": "Expired IFV capacity → deny" },
+
+  { "note": "=== Institutional read-only roles (INV-024) ===", "_": true },
+  { "action": "AddEvidence",       "actorPosition": null, "actorCapacities": [], "platformRoles": ["pfi_analyst"],       "suppliedBy": null, "sameTenant": true,  "expected": "deny",  "label": "pfi_analyst cannot AddEvidence" },
+  { "action": "AmendClaim",        "actorPosition": null, "actorCapacities": [], "platformRoles": ["pfi_analyst"],       "suppliedBy": null, "sameTenant": true,  "expected": "deny",  "label": "pfi_analyst cannot AmendClaim" },
+  { "action": "AdmitEvidence",     "actorPosition": null, "actorCapacities": [], "platformRoles": ["union_ta"],          "suppliedBy": null, "sameTenant": true,  "expected": "deny",  "label": "union_ta cannot AdmitEvidence" },
+  { "action": "ApproveMinutes",    "actorPosition": null, "actorCapacities": [], "platformRoles": ["fund_manager"],      "suppliedBy": null, "sameTenant": true,  "expected": "deny",  "label": "fund_manager cannot ApproveMinutes" },
+  { "action": "RecordTaCompletion","actorPosition": null, "actorCapacities": [], "platformRoles": ["ta"],                "suppliedBy": null, "sameTenant": true,  "expected": "deny",  "label": "ta cannot RecordTaCompletion (write)" },
+  { "action": "RecordFinding",     "actorPosition": null, "actorCapacities": [], "platformRoles": ["external_verifier"],"suppliedBy": null, "sameTenant": true,  "expected": "deny",  "label": "external_verifier cannot RecordFinding (no IFV capacity)" },
+  { "action": "GrantCapacity",     "actorPosition": null, "actorCapacities": [], "platformRoles": ["pfi_credit"],        "suppliedBy": null, "sameTenant": true,  "expected": "deny",  "label": "pfi_credit cannot GrantCapacity" },
+
+  { "note": "=== Officer actions ===", "_": true },
+  { "action": "ApproveMinutes", "actorPosition": "chairperson",     "actorCapacities": [], "platformRoles": [], "suppliedBy": null, "sameTenant": true,  "expected": "allow", "label": "Chairperson may ApproveMinutes" },
+  { "action": "ApproveMinutes", "actorPosition": "vice_chairperson","actorCapacities": [], "platformRoles": [], "suppliedBy": null, "sameTenant": true,  "expected": "allow", "label": "Vice-Chairperson may ApproveMinutes" },
+  { "action": "ApproveMinutes", "actorPosition": "secretary",       "actorCapacities": [], "platformRoles": [], "suppliedBy": null, "sameTenant": true,  "expected": "allow", "label": "Secretary may ApproveMinutes" },
+  { "action": "ApproveMinutes", "actorPosition": null,              "actorCapacities": [], "platformRoles": [], "suppliedBy": null, "sameTenant": true,  "expected": "deny",  "label": "Plain member cannot ApproveMinutes" },
+  { "action": "ApproveMinutes", "actorPosition": null,              "actorCapacities": [], "platformRoles": [], "suppliedBy": null, "sameTenant": true,  "expected": "allow", "label": "acting_officer delegation allows ApproveMinutes", "delegation": "acting_officer" },
+
+  { "note": "=== Cross-org boundary ===", "_": true },
+  { "action": "ApproveMinutes", "actorPosition": "chairperson", "actorCapacities": [], "platformRoles": [], "suppliedBy": null, "sameTenant": false, "expected": "deny",  "label": "Chairperson cannot act on another org's minutes" },
+  { "action": "AddEvidence",    "actorPosition": "secretary",   "actorCapacities": [], "platformRoles": [], "suppliedBy": null, "sameTenant": false, "expected": "deny",  "label": "Secretary cannot add evidence to another org" }
+]

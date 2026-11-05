@@ -7,7 +7,9 @@
   "main": "./src/index.ts",
   "exports": {
     ".": "./src/index.ts",
-    "./identity/auth-service": "./src/identity/auth-service.ts"
+    "./identity/auth-service": "./src/identity/auth-service.ts",
+    "./authz/policy-engine": "./src/authz/policy-engine.ts",
+    "./authz/capacity-service": "./src/authz/capacity-service.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",

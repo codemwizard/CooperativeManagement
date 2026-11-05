@@ -1,4 +1,4 @@
-﻿@phase2 @area-VER
+@phase2 @area-VER
 Feature: Internal Field Verifier and field agents
   The Internal Field Verifier (IFV) is a capacity bound to one organisation. It can be added to any
   user or held by a dedicated user. Its findings are cooperative-internal and are never presented
@@ -7,19 +7,19 @@ Feature: Internal Field Verifier and field agents
   Background:
     Given an active cooperative "Nsenga Honey Growers" with Chairperson "Zulu", Secretary "Chola", Treasurer "Banda" and member "Mwila"
 
-  @REQ-VER-001 @BDD-VER-001 @hard @wip
+  @REQ-VER-001 @BDD-VER-001 @hard
   Scenario: The IFV capacity can be added to an existing role
     When Zulu grants the "internal_verifier" capacity to Chola
     Then Chola is Secretary and an internal verifier
     And the grant is recorded with grantor, time and organisation
 
-  @REQ-VER-001 @BDD-VER-002 @hard @wip
+  @REQ-VER-001 @BDD-VER-002 @hard
   Scenario: The IFV can be a dedicated user with no other role
     When Zulu creates user "Ndhlovu" with only the "internal_verifier" capacity
     Then Ndhlovu can open the verification queue
     And Ndhlovu cannot approve minutes or admit evidence as an officer
 
-  @REQ-VER-001 @BDD-VER-003 @hard @wip
+  @REQ-VER-001 @BDD-VER-003 @hard
   Scenario Outline: Who may grant the IFV capacity
     When "<actor>" tries to grant the "internal_verifier" capacity to Mwila
     Then the result is "<result>"
@@ -32,7 +32,7 @@ Feature: Internal Field Verifier and field agents
       | Secretary                     | rejected |
       | member                        | rejected |
 
-  @REQ-VER-001 @BDD-VER-004 @hard @wip
+  @REQ-VER-001 @BDD-VER-004 @hard
   Scenario: A capacity for one organisation confers nothing elsewhere
     Given Ndhlovu is internal verifier for "Nsenga Honey Growers"
     When Ndhlovu tries to record a finding in "Chipata Fish Farmers"
@@ -108,7 +108,7 @@ Feature: Internal Field Verifier and field agents
     And each is annotated "verifier no longer active"
     And Ndhlovu cannot record new findings
 
-  @REQ-VER-001 @BDD-VER-015 @hard @INV-013 @wip
+  @REQ-VER-001 @BDD-VER-015 @hard @INV-013
   Scenario: Two IFVs disagreeing blocks promotion until a third resolves it
     Given IFV "Ndhlovu" records "conformant" and IFV "Kunda" records "not_conformant" on the same version
     Then the claim shows "Verification in conflict"

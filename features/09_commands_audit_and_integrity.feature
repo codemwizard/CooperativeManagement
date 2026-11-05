@@ -53,7 +53,7 @@ Feature: Commands, audit trail and integrity
     Then the domain event store contains no UI interaction events
     And the telemetry stream contains no personal data
 
-  @REQ-AUD-006 @BDD-AUD-008 @hard @SC-019 @wip
+  @REQ-AUD-006 @BDD-AUD-008 @hard @SC-019
   Scenario Outline: Read-only institutions cannot mutate cooperative source records
     Given a "<role>" with read-only scope on "Org A"
     When they send "<command>"
@@ -66,7 +66,7 @@ Feature: Commands, audit trail and integrity
       | fund_manager  | ApproveMinutes     |
       | ta            | RecordTaCompletion |
 
-  @REQ-AUD-006 @BDD-AUD-009 @hard @INV-021 @wip
+  @REQ-AUD-006 @BDD-AUD-009 @hard @INV-021
   Scenario: The client cannot set verified, authority or approval states
     When a client submits a payload containing "status": "approved_official"
     Then the field is ignored or the command is rejected
