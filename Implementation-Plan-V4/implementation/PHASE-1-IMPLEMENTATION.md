@@ -204,7 +204,7 @@
 
 ### Tasks
 
-- [ ] **1.4.1** Write the repository contract suite `packages/testkit/src/contract-suite/repository-contract.ts`. This is a parameterised test suite that accepts a `Repository` factory and runs the same tests against any implementation:
+- [x] **1.4.1** Write the repository contract suite `packages/testkit/src/contract-suite/repository-contract.ts`. This is a parameterised test suite that accepts a `Repository` factory and runs the same tests against any implementation:
   - `save_thenLoad_returnsSameData`
   - `save_withWrongVersion_throws`
   - `save_thenLoad_forDifferentTenant_returnsNull`
@@ -213,11 +213,11 @@
   
   _Verifier check: suite file compiles._
 
-- [ ] **1.4.2** Run the contract suite against the in-memory repository:  
+- [x] **1.4.2** Run the contract suite against the in-memory repository:  
   `npx vitest run packages/testkit/src/__tests__/in-memory-repository-contract.test.ts`  
   _Expected output: 5 PASSED._
 
-- [ ] **1.4.3** Run the contract suite against the PostgreSQL repository (Testcontainers):  
+- [x] **1.4.3** Run the contract suite against the PostgreSQL repository (Testcontainers):  
   `npx vitest run packages/db/src/__tests__/postgres-repository-contract.test.ts`  
   _Expected output: 5 PASSED._
 

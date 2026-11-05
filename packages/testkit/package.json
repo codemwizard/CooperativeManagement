@@ -5,6 +5,10 @@
   "type": "module",
   "description": "Builders, fake clock/ids, in-memory repositories, step helpers",
   "main": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./contract-suite/repository-contract": "./src/contract-suite/repository-contract.ts"
+  },
   "scripts": {
     "typecheck": "tsc --noEmit",
     "test": "vitest run --reporter=verbose"
