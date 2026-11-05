@@ -10,6 +10,7 @@
     "test:unit": "vitest run --reporter=verbose"
   },
   "devDependencies": {
+    "@symphony/testkit": "*",
     "typescript": "^5.5.3",
     "vitest": "^2.1.1"
   }

@@ -1,0 +1,403 @@
+/**
+ * @symphony/testkit — step-definitions/kernel-steps.ts
+ *
+ * Step definitions for WP-1.1 BDD scenarios (feature 09):
+ *   BDD-AUD-001 — State, event and outbox commit together or not at all
+ *   BDD-AUD-002 — Same command id + same payload returns original result (idempotent replay)
+ *   BDD-AUD-003 — Same command id + different payload is rejected
+ *
+ * Uses in-memory implementations only (no database connection needed).
+ * The CommandBus from @symphony/domain is exercised with fake infrastructure.
+ */
+
+import assert from 'node:assert/strict';
+import { Given, When, Then } from '@cucumber/cucumber';
+import type { SymphonyWorld } from './world.js';
+import {
+  CommandBus,
+  type CommandEnvelope,
+  type CommandResult,
+  type AggregateRoot,
+  type Clock,
+  type CommandReceipt,
+  type CommandReceiptStore,
+  type DomainEvent,
+  type IdGen,
+  type OutboxMessage,
+  type PolicyDecision,
+  type PolicyStore,
+  type Repository,
+  OptimisticConcurrencyError,
+} from '@symphony/domain';
+import { FakeClock, SequentialIds } from '../index.js';
+
+// ─── Minimal aggregate for kernel BDD tests ────────────────────────────────────
+
+interface BddTestAggregate extends AggregateRoot {
+  readonly label: string;
+}
+
+// ─── In-memory infrastructure stubs ───────────────────────────────────────────
+
+class BddReceiptStore implements CommandReceiptStore {
+  private readonly store = new Map<string, CommandReceipt>();
+
+  async get(commandId: string, tenantId: string): Promise<CommandReceipt | null> {
+    return this.store.get(`${tenantId}:${commandId}`) ?? null;
+  }
+
+  async save(receipt: CommandReceipt): Promise<void> {
+    this.store.set(`${receipt.tenantId}:${receipt.commandId}`, receipt);
+  }
+}
+
+class BddPolicyStore implements PolicyStore {
+  async decide(
+    _action: string,
+    _target: { readonly id: string; readonly type: string; readonly tenantId: string },
+    _actor: { readonly userId: string; readonly tenantId: string },
+  ): Promise<PolicyDecision> {
+    return { allow: true };
+  }
+}
+
+class BddRepository implements Repository<BddTestAggregate> {
+  private readonly store = new Map<string, BddTestAggregate>();
+  readonly events: DomainEvent[] = [];
+  readonly outbox: OutboxMessage[] = [];
+  failOnSave = false;
+
+  async load(id: string, tenantId: string): Promise<BddTestAggregate | null> {
+    const item = this.store.get(id);
+    if (!item || item.tenantId !== tenantId) return null;
+    return item;
+  }
+
+  async save(
+    aggregate: BddTestAggregate,
+    expectedVersion: number,
+    events: readonly DomainEvent[],
+    outboxMessages: readonly OutboxMessage[],
+  ): Promise<void> {
+    if (this.failOnSave) {
+      throw new Error('Simulated infrastructure failure');
+    }
+    const current = this.store.get(aggregate.id);
+    const currentVersion = current !== undefined ? current.version : 0;
+    if (currentVersion !== expectedVersion) {
+      throw new OptimisticConcurrencyError(aggregate.id, expectedVersion, currentVersion);
+    }
+    this.store.set(aggregate.id, aggregate);
+    this.events.push(...events);
+    this.outbox.push(...outboxMessages);
+  }
+
+  get stateCount(): number {
+    return this.store.size;
+  }
+}
+
+// ─── Helpers ───────────────────────────────────────────────────────────────────
+
+function makeOrgId(name: string): string {
+  const seed = Array.from(name).reduce((acc, c) => acc + c.charCodeAt(0), 0);
+  return `00000000-0000-0000-0000-${String(seed).padStart(12, '0')}`;
+}
+
+function makeUserId(role: string, orgName: string): string {
+  const seed = Array.from(role + orgName).reduce((acc, c) => acc + c.charCodeAt(0), 0) + 1000;
+  return `00000000-0000-0000-0001-${String(seed).padStart(12, '0')}`;
+}
+
+function makeEnvelope<TPayload>(opts: {
+  commandId: string;
+  tenantId: string;
+  userId: string;
+  type: string;
+  payload: TPayload;
+  clock: FakeClock;
+  expectedVersion?: number;
+}): CommandEnvelope<TPayload> {
+  const now = opts.clock.nowIso();
+  return {
+    commandId: opts.commandId,
+    tenantId: opts.tenantId,
+    actorUserId: opts.userId,
+    occurredAt: now,
+    recordedAt: now,
+    deviceId: 'test-device',
+    expectedVersion: opts.expectedVersion ?? 0,
+    correlationId: `corr-${opts.commandId}`,
+    type: opts.type,
+    payload: opts.payload,
+  };
+}
+
+function makeBus(repo: BddRepository, receiptStore: BddReceiptStore, clock: FakeClock, ids: SequentialIds): CommandBus<BddTestAggregate> {
+  const clockPort: Clock = { now: () => clock.nowIso() };
+  const idGenPort: IdGen = { generate: () => ids.next() };
+  return new CommandBus<BddTestAggregate>({
+    repository: repo,
+    receiptStore,
+    policyStore: new BddPolicyStore(),
+    clock: clockPort,
+    idGen: idGenPort,
+  });
+}
+
+// ─── Background steps ──────────────────────────────────────────────────────────
+
+Given(
+  'two organisations {string} and {string}',
+  function (this: SymphonyWorld, orgAName: string, orgBName: string) {
+    const orgAId = makeOrgId(orgAName);
+    const orgBId = makeOrgId(orgBName);
+    this.organisations[orgAName] = { id: orgAId, tenantId: orgAId };
+    this.organisations[orgBName] = { id: orgBId, tenantId: orgBId };
+  },
+);
+
+Given(
+  'an authenticated Secretary in {string}',
+  function (this: SymphonyWorld, orgName: string) {
+    const org = this.organisations[orgName];
+    if (org === undefined) throw new Error(`Organisation "${orgName}" not registered`);
+    const userId = makeUserId('Secretary', orgName);
+    const actor = { userId, tenantId: org.tenantId, role: 'Secretary' };
+    this.actors[`Secretary in ${orgName}`] = actor;
+    this.currentActor = actor;
+  },
+);
+
+// ─── BDD-AUD-001: Atomic commit ────────────────────────────────────────────────
+
+When(
+  'a command fails after the state change but before the outbox write',
+  async function (this: SymphonyWorld) {
+    if (this.currentActor === null) throw new Error('No current actor');
+
+    const { tenantId, userId } = this.currentActor;
+    const clock = new FakeClock('2026-01-01T12:00:00.000Z');
+    const ids = new SequentialIds();
+    const repo = new BddRepository();
+    const receiptStore = new BddReceiptStore();
+
+    // Force failure on every save attempt
+    repo.failOnSave = true;
+
+    const bus = makeBus(repo, receiptStore, clock, ids);
+
+    const aggId = ids.next('agg');
+    const evtId = ids.next('evt');
+    const envelope = makeEnvelope({
+      commandId: ids.next('cmd'),
+      tenantId,
+      userId,
+      type: 'AtomicTestCommand',
+      payload: { label: 'atomic' },
+      clock,
+    });
+
+    let threw = false;
+    try {
+      await bus.dispatch(
+        envelope,
+        async (_env, _ctx) => ({
+          newState: { id: aggId, tenantId, version: 1, label: 'atomic' },
+          events: [
+            {
+              id: evtId,
+              tenantId,
+              aggregateId: aggId,
+              aggregateType: 'BddTestAggregate',
+              eventType: 'AtomicTestEvent',
+              payload: {},
+              occurredAt: clock.nowIso(),
+              recordedAt: clock.nowIso(),
+              sequence: 1,
+            },
+          ],
+          outbox: [
+            {
+              id: ids.next('outbox'),
+              eventId: evtId,
+              status: 'pending' as const,
+              createdAt: clock.nowIso(),
+            },
+          ],
+          data: {},
+        }),
+      );
+    } catch {
+      threw = true;
+    }
+
+    const world = this as unknown as Record<string, unknown>;
+    world['_atomicThrew'] = threw;
+    world['_atomicRepo'] = repo;
+  },
+);
+
+Then('no state change persists', function (this: SymphonyWorld) {
+  const world = this as unknown as Record<string, unknown>;
+  assert.strictEqual(world['_atomicThrew'], true, 'Expected command to throw');
+  assert.strictEqual((world['_atomicRepo'] as BddRepository).stateCount, 0, 'Expected no state rows');
+});
+
+Then('no event persists', function (this: SymphonyWorld) {
+  const repo = (this as unknown as Record<string, unknown>)['_atomicRepo'] as BddRepository;
+  assert.strictEqual(repo.events.length, 0, 'Expected no events');
+});
+
+Then('no outbox row persists', function (this: SymphonyWorld) {
+  const repo = (this as unknown as Record<string, unknown>)['_atomicRepo'] as BddRepository;
+  assert.strictEqual(repo.outbox.length, 0, 'Expected no outbox rows');
+});
+
+// ─── BDD-AUD-002: Idempotent replay ───────────────────────────────────────────
+
+Given(
+  'a command with id {string} has been applied',
+  async function (this: SymphonyWorld, commandId: string) {
+    if (this.currentActor === null) throw new Error('No current actor');
+
+    const { tenantId, userId } = this.currentActor;
+    const clock = new FakeClock('2026-01-01T12:00:00.000Z');
+    const ids = new SequentialIds();
+    const repo = new BddRepository();
+    const receiptStore = new BddReceiptStore();
+    const bus = makeBus(repo, receiptStore, clock, ids);
+
+    const aggId = ids.next('agg');
+    const envelope = makeEnvelope({
+      commandId,
+      tenantId,
+      userId,
+      type: 'IdempotentTestCommand',
+      payload: { label: 'first-payload' },
+      clock,
+    });
+
+    let handlerCallCount = 0;
+    const result = await bus.dispatch(
+      envelope,
+      async (_env, _ctx) => {
+        handlerCallCount++;
+        return {
+          newState: { id: aggId, tenantId, version: 1, label: 'applied' },
+          events: [],
+          data: { applied: true, callNumber: handlerCallCount },
+        };
+      },
+    );
+
+    this.commandResults.set(commandId, result as CommandResult<unknown>);
+    this.lastCommandId = commandId;
+
+    const world = this as unknown as Record<string, unknown>;
+    world['_bus'] = bus;
+    world['_clock'] = clock;
+    world['_ids'] = ids;
+    world['_repo'] = repo;
+  },
+);
+
+When('the same command is submitted again', async function (this: SymphonyWorld) {
+  if (this.currentActor === null) throw new Error('No current actor');
+  if (this.lastCommandId === null) throw new Error('No previous command id');
+
+  const { tenantId, userId } = this.currentActor;
+  const commandId = this.lastCommandId;
+  const world = this as unknown as Record<string, unknown>;
+  const clock = world['_clock'] as FakeClock;
+  const ids = world['_ids'] as SequentialIds;
+  const bus = world['_bus'] as CommandBus<BddTestAggregate>;
+
+  const envelope = makeEnvelope({
+    commandId, // ← same id
+    tenantId,
+    userId,
+    type: 'IdempotentTestCommand',
+    payload: { label: 'first-payload' }, // ← same payload
+    clock,
+  });
+
+  let replayHandlerCalls = 0;
+  const result = await bus.dispatch(
+    envelope,
+    async (_env, _ctx) => {
+      replayHandlerCalls++;
+      return {
+        newState: { id: ids.next(), tenantId, version: 1, label: 'replay-should-not-reach' },
+        events: [],
+        data: { applied: false },
+      };
+    },
+  );
+
+  this.commandResults.set(`${commandId}-replay`, result as CommandResult<unknown>);
+  world['_replayHandlerCalls'] = replayHandlerCalls;
+});
+
+Then('the result equals the first result', function (this: SymphonyWorld) {
+  if (this.lastCommandId === null) throw new Error('No command id');
+  const first = this.commandResults.get(this.lastCommandId) as { ok: boolean; data?: unknown };
+  const replay = this.commandResults.get(`${this.lastCommandId}-replay`) as { ok: boolean; data?: unknown };
+  assert.ok(first, 'Expected first result to exist');
+  assert.ok(replay, 'Expected replay result to exist');
+  assert.strictEqual(first.ok, true, 'Expected first result to be ok');
+  assert.strictEqual(replay.ok, true, 'Expected replay result to be ok');
+  // Replay must return the same data as the original
+  assert.strictEqual(JSON.stringify(replay.data), JSON.stringify(first.data), 'Expected replay data to match original');
+});
+
+Then('no second event is written', function (this: SymphonyWorld) {
+  const world = this as unknown as Record<string, unknown>;
+  assert.strictEqual(world['_replayHandlerCalls'], 0, 'Handler must not be called on replay');
+});
+
+// ─── BDD-AUD-003: Idempotency key reused with different payload ────────────────
+
+When(
+  'a command with id {string} and a different payload is submitted',
+  async function (this: SymphonyWorld, commandId: string) {
+    if (this.currentActor === null) throw new Error('No current actor');
+
+    const { tenantId, userId } = this.currentActor;
+    const world = this as unknown as Record<string, unknown>;
+    const clock = world['_clock'] as FakeClock;
+    const ids = world['_ids'] as SequentialIds;
+    const bus = world['_bus'] as CommandBus<BddTestAggregate>;
+
+    const envelope = makeEnvelope({
+      commandId, // ← same id as the already-applied command
+      tenantId,
+      userId,
+      type: 'IdempotentTestCommand',
+      payload: { label: 'COMPLETELY DIFFERENT PAYLOAD' }, // ← different payload
+      clock,
+    });
+
+    const result = await bus.dispatch(
+      envelope,
+      async (_env, _ctx) => ({
+        newState: { id: ids.next(), tenantId, version: 1, label: 'should-not-reach' },
+        events: [],
+        data: {},
+      }),
+    );
+
+    this.commandResults.set(`${commandId}-different`, result as CommandResult<unknown>);
+
+    if (!(result as { ok: boolean }).ok) {
+      this.lastRejectionReason = (result as { ok: false; code: string }).code;
+    }
+  },
+);
+
+Then(
+  'it is rejected with reason {string}',
+  function (this: SymphonyWorld, expectedReason: string) {
+    assert.strictEqual(this.lastRejectionReason, expectedReason, `Expected rejection reason "${expectedReason}"`);
+  },
+);

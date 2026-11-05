@@ -1,4 +1,4 @@
-﻿@phase1 @area-AUD
+@phase1 @area-AUD
 Feature: Commands, audit trail and integrity
   Every write is a command that commits state, event and outbox atomically, is idempotent,
   detects stale writes, isolates tenants and never trusts the client for standing or authority.
@@ -7,21 +7,21 @@ Feature: Commands, audit trail and integrity
     Given two organisations "Org A" and "Org B"
     And an authenticated Secretary in "Org A"
 
-  @REQ-AUD-001 @BDD-AUD-001 @hard @SC-018 @wip
+  @REQ-AUD-001 @BDD-AUD-001 @hard @SC-018
   Scenario: State, event and outbox commit together or not at all
     When a command fails after the state change but before the outbox write
     Then no state change persists
     And no event persists
     And no outbox row persists
 
-  @REQ-AUD-002 @BDD-AUD-002 @hard @SC-016 @wip
+  @REQ-AUD-002 @BDD-AUD-002 @hard @SC-016
   Scenario: The same command id with the same payload returns the original result
     Given a command with id "c-1" has been applied
     When the same command is submitted again
     Then the result equals the first result
     And no second event is written
 
-  @REQ-AUD-002 @BDD-AUD-003 @hard @SC-016 @wip
+  @REQ-AUD-002 @BDD-AUD-003 @hard @SC-016
   Scenario: The same command id with a different payload is rejected
     Given a command with id "c-1" has been applied
     When a command with id "c-1" and a different payload is submitted

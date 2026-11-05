@@ -4,22 +4,43 @@
  * Shared Cucumber World object. Provides test-scoped state shared between
  * step definitions within a scenario.
  *
- * Phase 0: Empty stub — no step definitions implemented yet.
- * All scenarios are tagged @wip and will be skipped by the BDD runner
- * until step definitions are implemented in Phase 1+.
+ * Phase 1: Holds in-memory command results, event log, actor identities.
  */
 
 import { setWorldConstructor } from '@cucumber/cucumber';
+import type { CommandResult } from '@symphony/domain';
+
+export interface Actor {
+  userId: string;
+  tenantId: string;
+  role: string;
+}
 
 export class SymphonyWorld {
-  /**
-   * Phase 0 stub — will hold: db client, actor identities,
-   * command results, event log, fake clock, etc. in Phase 1.
-   */
+  /** Named organisations registered in this scenario */
+  organisations: Record<string, { id: string; tenantId: string }> = {};
+
+  /** Named actors */
+  actors: Record<string, Actor> = {};
+
+  /** Current actor for the scenario */
+  currentActor: Actor | null = null;
+
+  /** Results of commands submitted in this scenario */
+  commandResults: Map<string, CommandResult<unknown>> = new Map();
+
+  /** Count of domain events emitted (by aggregate id) */
+  eventCounts: Map<string, number> = new Map();
+
+  /** Last rejection reason */
+  lastRejectionReason: string | null = null;
+
+  /** Last command id submitted */
+  lastCommandId: string | null = null;
+
   constructor() {
-    // No-op in Phase 0 scaffold
+    // Initialised above via field declarations
   }
 }
 
 setWorldConstructor(SymphonyWorld);
-

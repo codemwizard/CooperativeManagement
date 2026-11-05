@@ -1,6 +1,6 @@
 # Phase 1 Implementation Plan — Kernel, Identity, Authorisation, Privacy, Shell
 
-**Status:** Not Started (starts after Phase 0 Gate passes)  
+**Status:** In Progress (started 5 November 2026)  
 **Version:** 1.0 — 4 November 2026  
 **Authority:** `Implementation-Plan-V4/06-phased-plan.md` WP-1.1–1.9; `AI-Secure-Coding-Policy.md`  
 **Gate:** Scenarios in features 09 and the privacy parts of 02 pass; roles and IFV capacity grantable and revocable with audit; no PII in any union/TA response; purge-to-seed works; `/components` accessible.
@@ -12,10 +12,10 @@
 
 ## Pre-conditions (must all be ✅ before starting WP-1.1)
 
-- [ ] Phase 0 Gate fully passed (see `PHASE-0-IMPLEMENTATION.md`)
-- [ ] `npm run verify:all` (legacy) passes at or above baseline
-- [ ] `npm run verify:arch` exits 0
-- [ ] `npm run db:migrate` exits 0
+- [x] Phase 0 Gate fully passed (see `PHASE-0-IMPLEMENTATION.md`)
+- [x] `npm run verify:all` (legacy) passes at or above baseline
+- [x] `npm run verify:arch` exits 0
+- [x] `npm run db:migrate` exits 0
 
 ---
 
@@ -30,7 +30,7 @@
 
 ### Step 1a — Write failing tests FIRST (before any implementation)
 
-- [ ] **1.1.1** Create `packages/domain/src/kernel/__tests__/command-bus.test.ts` with the following FAILING test cases (use `testkit`'s `FakeClock` and `SequentialIds`):
+- [x] **1.1.1** Create `packages/domain/src/kernel/__tests__/command-bus.test.ts` with the following FAILING test cases (use `testkit`'s `FakeClock` and `SequentialIds`):
 
   | Test name | Expected behaviour | Test method |
   |---|---|---|
@@ -45,7 +45,7 @@
   _Expected output: 6 FAILED (all red — no implementation yet)._  
   _Verifier check: all 6 tests fail with "not implemented" or type errors, not runtime panics._
 
-- [ ] **1.1.2** Create `packages/domain/src/kernel/command-envelope.ts` defining the `CommandEnvelope<TPayload>` type:
+- [x] **1.1.2** Create `packages/domain/src/kernel/command-envelope.ts` defining the `CommandEnvelope<TPayload>` type:
   ```typescript
   export interface CommandEnvelope<TPayload> {
     readonly commandId: string;       // idempotency key (client-generated UUID)
@@ -62,7 +62,7 @@
   ```
   No `any`. Verify: `npx tsc --build --noEmit` exits 0.
 
-- [ ] **1.1.3** Create `packages/domain/src/kernel/command-result.ts` defining:
+- [x] **1.1.3** Create `packages/domain/src/kernel/command-result.ts` defining:
   ```typescript
   export type CommandResult<T> =
     | { ok: true; aggregateVersion: number; eventIds: readonly string[]; data: T }
@@ -79,7 +79,7 @@
   ```
   No `any`.
 
-- [ ] **1.1.4** Create `packages/domain/src/kernel/ports.ts` defining interfaces (not implementations):
+- [x] **1.1.4** Create `packages/domain/src/kernel/ports.ts` defining interfaces (not implementations):
   - `Repository<T>` — `load(id, tenantId): Promise<T | null>`, `save(aggregate, expectedVersion, events, outboxMessages): Promise<void>`
   - `Clock` — `now(): string`
   - `IdGen` — `generate(): string`
@@ -88,7 +88,7 @@
   
   _Verifier check: `npx tsc --build --noEmit` on `domain` exits 0._
 
-- [ ] **1.1.5** Implement `packages/domain/src/kernel/command-bus.ts`:
+- [x] **1.1.5** Implement `packages/domain/src/kernel/command-bus.ts`:
   - Load `CommandReceipt` by `commandId`; if found, return stored result (`IDEMPOTENT_REPLAY`)
   - Verify `tenantId` matches; if not, return `TENANT_MISMATCH`
   - Load aggregate + version via `Repository`
@@ -100,13 +100,14 @@
   - Return `{ ok: true, aggregateVersion, eventIds }`
   
   Run: `npx vitest run packages/domain/src/kernel/__tests__/command-bus.test.ts`  
-  _Expected output: 4 of 6 PASSED (the 2 PostgreSQL tests remain red until L4 step)._
+  _Expected output: all 6 unit tests PASSED._  
+  _Verifier check: all 6 tests pass without errors._
 
-- [ ] **1.1.6** Create `packages/testkit/src/repositories/in-memory-repository.ts` implementing `Repository<T>` using a `Map`. Throws `OptimisticConcurrencyError` on version mismatch.  
+- [x] **1.1.6** Create `packages/testkit/src/repositories/in-memory-repository.ts` implementing `Repository<T>` using a `Map`. Throws `OptimisticConcurrencyError` on version mismatch.  
   Run: `npx vitest run packages/domain/src/kernel/__tests__/command-bus.test.ts`  
   _Expected output: all 6 that use in-memory repo are PASSED. The PostgreSQL concurrency test remains `@wip`._
 
-- [ ] **1.1.7** Create `packages/db/src/repositories/postgres-repository.ts` implementing `Repository<T>` using Kysely + PostgreSQL. The `save` method wraps state + event + outbox in a single Kysely transaction. Use Testcontainers for integration tests.  
+- [x] **1.1.7** Create `packages/db/src/repositories/postgres-repository.ts` implementing `Repository<T>` using Kysely + PostgreSQL. The `save` method wraps state + event + outbox in a single Kysely transaction. Use Testcontainers for integration tests.  
   
   Write `packages/db/src/__tests__/postgres-repository.test.ts` with:
   - `concurrentVersions_onlyOneCommits` — start two transactions simultaneously with the same `expectedVersion`; assert only one succeeds
@@ -116,7 +117,7 @@
   _Expected output: 2 PASSED._  
   _Verifier check: Testcontainers starts a PostgreSQL container; both tests pass._
 
-- [ ] **1.1.8** Enable BDD scenarios for WP-1.1. Remove `@wip` from AUD-001, AUD-002, AUD-003 in `features/09_commands_audit_and_integrity.feature`. Write step definitions in `packages/testkit/src/step-definitions/kernel-steps.ts`.  
+- [x] **1.1.8** Enable BDD scenarios for WP-1.1. Remove `@wip` from AUD-001, AUD-002, AUD-003 in `features/09_commands_audit_and_integrity.feature`. Write step definitions in `packages/testkit/src/step-definitions/kernel-steps.ts`.  
   
   Run: `npm run test:bdd -- --tags "@AUD-001 or @AUD-002 or @AUD-003"`  
   _Expected output: 3 scenarios PASSED._  
