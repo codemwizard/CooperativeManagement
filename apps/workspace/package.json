@@ -8,7 +8,9 @@
     "dev": "vite --port 5174",
     "build": "tsc --noEmit && vite build",
     "typecheck": "tsc --noEmit",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test:unit": "vitest run --reporter=verbose",
+    "test:a11y": "playwright test tests/workspace/a11y.spec.ts"
   },
   "dependencies": {
     "@symphony/contracts": "*",
@@ -23,8 +25,10 @@
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",
     "@vitejs/plugin-react": "^4.3.1",
+    "jsdom": "^25.0.0",
     "typescript": "^5.5.3",
-    "vite": "^5.4.2"
+    "vite": "^5.4.2",
+    "vitest": "^2.1.1"
   }
 }
 

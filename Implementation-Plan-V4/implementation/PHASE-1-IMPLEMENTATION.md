@@ -472,10 +472,10 @@
 
 ### Tasks
 
-- [ ] **1.9.1** Set up `apps/workspace` as a Vite + React + React Router app. Add `npm run dev:workspace` and `npm run build:workspace` scripts.  
+- [x] **1.9.1** Set up `apps/workspace` as a Vite + React + React Router app. Add `npm run dev:workspace` and `npm run build:workspace` scripts.  
   _Verifier check: `npm run dev:workspace` starts on port 5174 (or configured port); no compile errors._
 
-- [ ] **1.9.2** Create the workspace shell layout with:
+- [x] **1.9.2** Create the workspace shell layout with:
   - Left navigation by area: Identity, Enrolment and authority, By-laws and requirements, Governance, People and appointments, Meetings and resolutions, Committees, Audit and education, Evidence register, Findings and next actions
   - Organisation header bar with organisation name, enrolment status, and pipeline stage
   - Right-hand provenance drawer (skeleton — full implementation Phase 2)
@@ -483,17 +483,17 @@
   
   _Verifier check: `npm run dev:workspace` renders the shell; left navigation shows all areas._
 
-- [ ] **1.9.3** Create `apps/workspace/src/presenters/present-evidence.ts` and `apps/workspace/src/presenters/present-requirement.ts` as the ONLY place that maps internal status enums to display vocabulary. Add a test:
+- [x] **1.9.3** Create `apps/workspace/src/presenters/present-evidence.ts` and `apps/workspace/src/presenters/present-requirement.ts` as the ONLY place that maps internal status enums to display vocabulary. Add a test:
   - `presenterTest_noSnakeCaseInOutput` — assert no string containing `_` reaches the rendered HTML of a StatusChip
   - `presenterTest_noBannedWords` — assert "compliant", "certified" (without authority), bare "verified" do not appear
   
   Run: `npx vitest run apps/workspace/src/__tests__/presenter.test.ts`  
   _Expected output: 2 PASSED._
 
-- [ ] **1.9.4** Create the `DemoPanel` component, mounted ONLY when `VITE_DEMO=true`. Includes: persona switcher (dev only), reset button, demo date display.  
+- [x] **1.9.4** Create the `DemoPanel` component, mounted ONLY when `VITE_DEMO=true`. Includes: persona switcher (dev only), reset button, demo date display.  
   _Verifier check: in production build (`VITE_DEMO=false`), `DemoPanel` component is absent from the bundle (check with `npm run build:workspace` then `grep -r "DemoPanel" dist/`)._
 
-- [ ] **1.9.5** Create the `/login` route with form fields: email/userId, password. On submit, calls `POST /auth/login`. Redirects to `/workspace` on success; shows error on failure.  
+- [x] **1.9.5** Create the `/login` route with form fields: email/userId, password. On submit, calls `POST /auth/login`. Redirects to `/workspace` on success; shows error on failure.  
   
   Write Playwright test `tests/workspace/login.spec.ts`:
   - `validCredentials_redirectsToWorkspace`
@@ -503,12 +503,12 @@
   Run: `npx playwright test tests/workspace/login.spec.ts`  
   _Expected output: 3 PASSED._
 
-- [ ] **1.9.6** Create the capability registry display in the workspace. Each left-nav area that is not yet implemented shows a `CapabilityGap` chip with the module name and status `not_implemented`.  
+- [x] **1.9.6** Create the capability registry display in the workspace. Each left-nav area that is not yet implemented shows a `CapabilityGap` chip with the module name and status `not_implemented`.  
   
   Run a11y check: `npm run test:a11y`  
   _Expected output: 0 axe violations._
 
-- [ ] **1.9.7** Remove `@wip` from UXW-001, UXW-002, UXW-003, UXW-004, UXW-015 in `features/10_workspace_and_capabilities.feature`.  
+- [x] **1.9.7** Remove `@wip` from UXW-001, UXW-002, UXW-003, UXW-004, UXW-015 in `features/10_workspace_and_capabilities.feature`.  
   
   Run: `npm run test:bdd -- --tags "@UXW-001 or @UXW-002 or @UXW-003 or @UXW-004 or @UXW-015"`  
   _Expected output: 5 scenarios PASSED._

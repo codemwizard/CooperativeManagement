@@ -9,6 +9,7 @@ module.exports = {
       'packages/testkit/src/step-definitions/authz-steps.ts',
       'packages/testkit/src/step-definitions/privacy-steps.ts',
       'packages/testkit/src/step-definitions/data-mode-steps.ts',
+      'packages/testkit/src/step-definitions/workspace-steps.ts',
     ],
     format: ['progress'],
     tags: 'not @wip',

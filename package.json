@@ -28,7 +28,9 @@
         "test:a11y": "npx playwright test tests/workspace/a11y.spec.ts",
         "db:migrate": "cd packages/db && npm run migrate",
         "db:seed:legal": "cd packages/db && tsx src/seeds/legal-sources.ts",
-        "db:seed:capabilities": "cd packages/db && tsx src/seeds/capability-registry.ts"
+        "db:seed:capabilities": "cd packages/db && tsx src/seeds/capability-registry.ts",
+        "dev:workspace": "cd apps/workspace && npx vite --port 5174",
+        "build:workspace": "cd apps/workspace && npx tsc --noEmit && npx vite build"
     },
     "dependencies": {
         "lucide-react": "^0.460.0",
@@ -56,6 +58,8 @@
         "npm": ">=11.6.2"
     },
     "allowScripts": {
-        "argon2@0.45.2": true
+        "argon2@0.45.2": true,
+        "esbuild@0.21.5": true,
+        "esbuild@0.28.2": true
     }
 }

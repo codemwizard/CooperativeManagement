@@ -1,4 +1,4 @@
-﻿@phase1 @area-UXW
+@phase1 @area-UXW
 Feature: Workspace, status vocabulary and extension capabilities
   The workspace shows exactly what the model supports. It never shows a score on readiness surfaces,
   never leaks enum text, never claims more than the evidence shows, and always makes capability gaps visible.
@@ -6,7 +6,7 @@ Feature: Workspace, status vocabulary and extension capabilities
   Background:
     Given the workspace is running with seed data in test mode
 
-  @REQ-UXW-001 @BDD-UXW-001 @ui @wip
+  @REQ-UXW-001 @BDD-UXW-001 @ui
   Scenario Outline: Navigation is scoped to the persona and every screen has a URL
     When "<persona>" signs in
     Then the primary navigation shows "<items>"
@@ -20,19 +20,19 @@ Feature: Workspace, status vocabulary and extension capabilities
       | union ta           | Cohort, Capability gaps                                                                              |
       | self-enroller      | Certificate details, Create officer accounts, Hand over                                              |
 
-  @REQ-UXW-001 @BDD-UXW-002 @ui @wip
+  @REQ-UXW-001 @BDD-UXW-002 @ui
   Scenario: Route changes move focus and survive reload
     When the user opens "/coop/org-1/evidence" and presses Back and Forward
     Then focus moves to the page h1 each time
     And filters and sort order persist in the URL query
 
-  @REQ-UXW-002 @BDD-UXW-003 @ui @hard @wip
+  @REQ-UXW-002 @BDD-UXW-003 @ui @hard
   Scenario: No enum text reaches the user
     When every route is rendered with seed data
     Then no rendered text contains snake_case enum values
     And no rendered text contains the phrases "compliant", "approved" without authority or a bare "Verified"
 
-  @REQ-UXW-002 @BDD-UXW-004 @ui @hard @wip
+  @REQ-UXW-002 @BDD-UXW-004 @ui @hard
   Scenario: Verified chips carry scope, verifier, version and class
     When an item verified by the internal verifier is expanded
     Then the chip text includes the verifier, scope, version and "cooperative-internal"
@@ -114,7 +114,7 @@ Feature: Workspace, status vocabulary and extension capabilities
     Then at most four actions are shown with one primary
     And actions requiring someone else show the owner role and needed authority
 
-  @REQ-UXW-005 @BDD-UXW-015 @ui @wip
+  @REQ-UXW-005 @BDD-UXW-015 @ui
   Scenario: Audience-relative wording is shown to institutions
     When a lender opens a claim verified by the internal verifier
     Then the page shows "Cooperative-verified, not independent; your own due diligence applies"
