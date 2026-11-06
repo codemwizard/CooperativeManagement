@@ -88,37 +88,35 @@ beforeEach(async () => {
 });
 
 afterEach(async () => {
-  // Re-assert RLS context in case the pool gave a different connection
-  await sql`SELECT set_config('app.current_tenant_id', ${sql.lit(tenantId)}, false)`.execute(db);
+  // Keep trigger changes and cleanup atomic. PostgreSQL's table lock prevents
+  // concurrent test files from observing the trigger in its disabled state.
+  await db.transaction().execute(async (trx) => {
+    await sql`SELECT set_config('app.current_tenant_id', ${sql.lit(tenantId)}, false)`.execute(trx);
+    await sql`ALTER TABLE symphony.domain_events DISABLE TRIGGER domain_events_immutability`.execute(trx);
+    try {
+      await trx.deleteFrom('symphony.event_outbox')
+        .where('event_id', 'in',
+          trx.selectFrom('symphony.domain_events')
+            .select('id')
+            .where('tenant_id', '=', tenantId)
+        )
+        .execute();
 
-  // Clean up test data — disable immutability trigger so we can DELETE domain_events
-  await sql`
-    ALTER TABLE symphony.domain_events DISABLE TRIGGER domain_events_immutability
-  `.execute(db);
-
-  await db.deleteFrom('symphony.event_outbox')
-    .where('event_id', 'in',
-      db.selectFrom('symphony.domain_events')
-        .select('id')
+      await trx.deleteFrom('symphony.domain_events')
         .where('tenant_id', '=', tenantId)
-    )
-    .execute();
+        .execute();
+    } finally {
+      await sql`ALTER TABLE symphony.domain_events ENABLE TRIGGER domain_events_immutability`.execute(trx);
+    }
 
-  await db.deleteFrom('symphony.domain_events')
-    .where('tenant_id', '=', tenantId)
-    .execute();
+    await trx.deleteFrom('symphony.aggregate_states')
+      .where('tenant_id', '=', tenantId)
+      .execute();
 
-  await sql`
-    ALTER TABLE symphony.domain_events ENABLE TRIGGER domain_events_immutability
-  `.execute(db);
-
-  await db.deleteFrom('symphony.aggregate_states')
-    .where('tenant_id', '=', tenantId)
-    .execute();
-
-  await db.deleteFrom('symphony.tenants')
-    .where('id', '=', tenantId)
-    .execute();
+    await trx.deleteFrom('symphony.tenants')
+      .where('id', '=', tenantId)
+      .execute();
+  });
 
   await db.destroy();
 });

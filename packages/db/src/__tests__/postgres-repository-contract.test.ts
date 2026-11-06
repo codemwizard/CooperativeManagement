@@ -41,26 +41,29 @@ beforeAll(async () => {
 
 afterAll(async () => {
   if (seededTenantIds.length > 0) {
-    await sql`ALTER TABLE symphony.domain_events DISABLE TRIGGER domain_events_immutability`.execute(db);
+    await db.transaction().execute(async (trx) => {
+      await sql`ALTER TABLE symphony.domain_events DISABLE TRIGGER domain_events_immutability`.execute(trx);
+      try {
+        for (const tid of seededTenantIds) {
+          await sql`SELECT set_config('app.current_tenant_id', ${sql.lit(tid)}, false)`.execute(trx);
 
-    for (const tid of seededTenantIds) {
-      await sql`SELECT set_config('app.current_tenant_id', ${sql.lit(tid)}, false)`.execute(db);
+          await trx
+            .deleteFrom('symphony.event_outbox')
+            .where(
+              'event_id',
+              'in',
+              trx.selectFrom('symphony.domain_events').select('id').where('tenant_id', '=', tid),
+            )
+            .execute();
 
-      await db
-        .deleteFrom('symphony.event_outbox')
-        .where(
-          'event_id',
-          'in',
-          db.selectFrom('symphony.domain_events').select('id').where('tenant_id', '=', tid),
-        )
-        .execute();
-
-      await db.deleteFrom('symphony.domain_events').where('tenant_id', '=', tid).execute();
-      await db.deleteFrom('symphony.aggregate_states').where('tenant_id', '=', tid).execute();
-      await db.deleteFrom('symphony.tenants').where('id', '=', tid).execute();
-    }
-
-    await sql`ALTER TABLE symphony.domain_events ENABLE TRIGGER domain_events_immutability`.execute(db);
+          await trx.deleteFrom('symphony.domain_events').where('tenant_id', '=', tid).execute();
+          await trx.deleteFrom('symphony.aggregate_states').where('tenant_id', '=', tid).execute();
+          await trx.deleteFrom('symphony.tenants').where('id', '=', tid).execute();
+        }
+      } finally {
+        await sql`ALTER TABLE symphony.domain_events ENABLE TRIGGER domain_events_immutability`.execute(trx);
+      }
+    });
   }
 
   await db.destroy();
