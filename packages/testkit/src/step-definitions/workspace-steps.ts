@@ -15,7 +15,7 @@
 import { Given, When, Then } from '@cucumber/cucumber';
 import assert from 'node:assert/strict';
 import * as fs from 'node:fs';
-import * as path from 'node:path';
+import { workspacePath } from './workspace-path.js';
 
 // ---------------------------------------------------------------------------
 // Inlined presenter logic (copied from apps/workspace/src/presenters)
@@ -110,11 +110,6 @@ interface WorkspaceWorld {
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
-
-/** Resolve a path relative to the workspace app root */
-function workspacePath(...parts: string[]): string {
-  return path.join('c:\\Workspace\\GitHub\\Prototype\\apps\\workspace', ...parts);
-}
 
 function assertFileExists(relPath: string): void {
   const full = workspacePath(...relPath.split('/'));

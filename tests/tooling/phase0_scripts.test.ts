@@ -4,6 +4,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { afterEach, describe, expect, it } from 'vitest';
+import { workspacePath } from '../../packages/testkit/src/step-definitions/workspace-path.js';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const scripts = JSON.parse(readFileSync(path.join(root, 'package.json'), 'utf8')).scripts;
@@ -16,6 +17,21 @@ afterEach(() => {
 });
 
 describe('Phase 0 script contracts', () => {
+  it('resolves BDD workspace fixtures relative to the checkout on any operating system', () => {
+    const appRoot = path.join(root, 'apps', 'workspace');
+    expect(workspacePath()).toBe(appRoot);
+    for (const entry of [
+      'vite.config.ts',
+      'index.html',
+      'src/main.tsx',
+      'src/shell/AppShell.tsx',
+      'src/routes/LoginPage.tsx',
+      'src/shell/LeftNav.tsx',
+    ]) {
+      expect(existsSync(workspacePath(...entry.split('/'))), `${entry} should resolve inside the checkout`).toBe(true);
+    }
+  });
+
   it('defines each mandatory command and points it at its real operation', () => {
     const commandTargets = new Map([
       ['db:start', 'docker compose up --wait db -d'],
