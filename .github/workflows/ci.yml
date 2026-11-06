@@ -32,6 +32,7 @@ jobs:
         run: mkdir -p artifacts
       - name: Run the mandatory Phase 0 gate
         id: phase0
+        shell: bash
         run: npm run verify:phase0 2>&1 | tee artifacts/phase0-gate.raw.log
       - name: Write sanitized Phase 0 CI evidence
         if: always()
