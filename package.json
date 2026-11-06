@@ -16,7 +16,7 @@
     "verify:oracle": "node tools/run_python_tool.js tools/reference_oracle.py",
     "verify:help": "node tools/run_python_tool.js tools/validate_help.py",
     "verify:bundle": "node tools/run_python_tool.js tools/verify_bundle.py",
-    "verify:legacy-floor": "npm run verify:oracle && npm run verify:help && npm run verify:bundle && npm run test",
+    "verify:legacy-floor": "npm run build && npm run verify:oracle && npm run verify:help && npm run verify:bundle && npm run test",
     "verify:all": "npm run verify:legacy-floor && npm run test:e2e",
     "verify:arch": "npx depcruise packages/domain/src packages/contracts/src packages/db/src packages/testkit/src apps/api/src apps/workspace/src --config .dependency-cruiser.cjs",
     "verify:trace": "tsx tools/verify-trace.ts",

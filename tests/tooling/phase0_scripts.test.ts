@@ -7,7 +7,8 @@ import { afterEach, describe, expect, it } from 'vitest';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const scripts = JSON.parse(readFileSync(path.join(root, 'package.json'), 'utf8')).scripts;
-const tempDirectories = [];
+const compose = readFileSync(path.join(root, 'docker-compose.yml'), 'utf8');
+const tempDirectories: string[] = [];
 
 afterEach(() => {
   for (const directory of tempDirectories.splice(0)) rmSync(directory, { recursive: true, force: true });
@@ -32,6 +33,18 @@ describe('Phase 0 script contracts', () => {
     }
     expect(scripts['test:db:migrations']).toContain('tools/require_migration_test_db.mjs');
     expect(scripts['verify:legacy-floor']).toContain('npm run test');
+    expect(scripts['verify:all']).toContain('npm run test:e2e');
+  });
+
+  it('leaves schema changes to the ordered migration runner, not PostgreSQL init hooks', () => {
+    const dbService = compose.split(/^  db-test:/m, 1)[0];
+    expect(dbService).not.toMatch(/docker-entrypoint-initdb\.d/);
+    expect(scripts['db:migrate']).toContain('packages/db/src/migrate.ts');
+  });
+
+  it('builds a clean legacy bundle before validating or exercising it', () => {
+    expect(scripts['verify:legacy-floor']).toMatch(/^npm run build\s*&&/);
+    expect(scripts['verify:all']).toContain('npm run verify:legacy-floor');
     expect(scripts['verify:all']).toContain('npm run test:e2e');
   });
 
