@@ -2,7 +2,8 @@
 
 **Status:** Phase 0 scaffold exists; remediation gate remains open  
 **Date:** 6 November 2026 (Africa/Johannesburg)  
-**Remediation commit:** `e69a43c8a3b2821ca1b9cad3780ab0015d2461a7` (`main`, pushed to `origin`)
+**Original remediation commit:** `e69a43c8a3b2821ca1b9cad3780ab0015d2461a7` (`main`, pushed to `origin`)
+**Latest Phase 0 gate-fix revision:** `55b12a4` (`main`, pushed to `origin`; exact-revision CI result pending)
 **Independent verifier:** not yet performed
 
 ## Evidence scope
