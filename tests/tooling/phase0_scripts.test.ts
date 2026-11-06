@@ -42,6 +42,15 @@ describe('Phase 0 script contracts', () => {
     expect(scripts['db:migrate']).toContain('packages/db/src/migrate.ts');
   });
 
+  it('mounts persistent and ephemeral PostgreSQL 18 data at the image data root', () => {
+    const [dbService, dbTestAndVolumes] = compose.split(/^  db-test:/m);
+    const dbTestService = dbTestAndVolumes?.split(/^volumes:/m, 1)[0] ?? '';
+    expect(dbService).toContain('pgdata:/var/lib/postgresql');
+    expect(dbService).not.toContain('/var/lib/postgresql/data');
+    expect(dbTestService).toContain('- /var/lib/postgresql');
+    expect(dbTestService).not.toContain('/var/lib/postgresql/data');
+  });
+
   it('builds a clean legacy bundle before validating or exercising it', () => {
     expect(scripts['verify:legacy-floor']).toMatch(/^npm run build\s*&&/);
     expect(scripts['verify:all']).toContain('npm run verify:legacy-floor');
