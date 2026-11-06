@@ -13,9 +13,13 @@
 ## Pre-conditions (must all be ✅ before starting WP-1.1)
 
 - [x] Phase 0 Gate fully passed (see `PHASE-0-IMPLEMENTATION.md`)
-- [x] `npm run verify:all` (legacy) passes at or above baseline
+- [x] `npm run verify:legacy-floor` (Phase 0 legacy regression floor) passes at or above baseline
 - [x] `npm run verify:arch` exits 0
 - [x] `npm run db:migrate` exits 0
+
+### Phase 0 closeout carry-forward
+
+The Phase 0 aggregate passed on commit `c70d3f439907e5ff37aee3953704e29d899e0032` (CI run [42201289720](https://github.com/codemwizard/CooperativeManagement/actions/runs/42201289720)). The earlier full browser run had three connection-refused failures in `tests/workspace/login.spec.ts` at `/login`. These are Phase 1 WP-1.9 login acceptance failures and must be resolved before Gate 1.9 / the Phase 1 gate; they are excluded from Phase 0's `verify:legacy-floor` and do not block Phase 0 completion.
 
 ---
 

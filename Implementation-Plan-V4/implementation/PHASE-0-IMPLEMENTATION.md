@@ -1,6 +1,6 @@
 # Phase 0 Implementation Plan — Decide, Prepare, Baseline
 
-**Status:** ? COMPLETE — historical checkpoint recorded 4 November 2026; current remediation gate OPEN
+**Status:** COMPLETE — original checkpoint recorded 4 November 2026; Phase 0 remediation gate passed on 6 November 2026 (see current verification report)
 **Version:** 1.0 — 4 November 2026  
 **Authority:** `Implementation-Plan-V4/06-phased-plan.md` WP-0.1–0.9; `AI-Secure-Coding-Policy.md`  
 **Historical gate:** CI green on empty scaffold; baseline recorded; ADRs ratified; no feature code present. Current remediation closure is governed by [`PHASE-0-REMEDIATION-IMPLEMENTATION.md`](./PHASE-0-REMEDIATION-IMPLEMENTATION.md) and [`docs/PHASE0_VERIFICATION_REPORT.md`](../../docs/PHASE0_VERIFICATION_REPORT.md).
@@ -504,5 +504,5 @@ Before marking Phase 0 complete, verify ALL of the following:
 
 **Docker note:** Docker is not installed on this machine. `docker-compose.yml` has been created for CI and future use. Testcontainers is not used; all DB work uses local PostgreSQL 18 directly.
 
-**Historical evidence note (6 November 2026):** The completion boxes and results above are preserved as the 4 November checkpoint record. The original commit object, CI run URL, and original test artifacts were unavailable during remediation, so these results have not been independently reverified and are not evidence that the current working tree passes the fixed remediation gate. Current local verification is recorded separately in [`docs/PHASE0_VERIFICATION_REPORT.md`](../../docs/PHASE0_VERIFICATION_REPORT.md). Phase 0 remediation remains open until the exact remediation revision passes CI and the remaining closure requirements in the remediation plan are evidenced.
+**Historical evidence note (6 November 2026):** The completion boxes and results above are preserved as the 4 November checkpoint record. The original commit object, CI run URL, and original test artifacts were unavailable during remediation; this closeout does not retroactively verify that historical checkpoint. The current remediation gate passed from a clean checkout on commit `c70d3f439907e5ff37aee3953704e29d899e0032`, CI run [42201289720](https://github.com/codemwizard/CooperativeManagement/actions/runs/42201289720). Current evidence is recorded in [`docs/PHASE0_VERIFICATION_REPORT.md`](../../docs/PHASE0_VERIFICATION_REPORT.md). The three previously observed login E2E failures are Phase 1 WP-1.9 work and do not reopen Phase 0.
 

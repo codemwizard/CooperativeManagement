@@ -8,7 +8,7 @@
 ## Reading order and dependencies
 
 ```
-Phase 0 Gate must pass before Phase 1 starts.
+Phase 0 Gate passed on 6 November 2026 (CI run 42201289720); Phase 1 is In Progress.
 Phase 1 Gate must pass before Phase 2 starts.
 ```
 
@@ -17,7 +17,8 @@ Phase 1 Gate must pass before Phase 2 starts.
 | File | Phase | Gate summary |
 |---|---|---|
 | [`PHASE-0-IMPLEMENTATION.md`](./PHASE-0-IMPLEMENTATION.md) | 0 — Decide, prepare, baseline | CI green; baseline recorded; ADRs ratified; no feature code |
-| [`PHASE-0-REMEDIATION-IMPLEMENTATION.md`](./PHASE-0-REMEDIATION-IMPLEMENTATION.md) | Phase 0 remediation | Bounded P0-01–P0-05 foundation repair; fixed Phase 0 closure gate; Phase 1 work excluded |
+| [`PHASE-0-REMEDIATION-IMPLEMENTATION.md`](./PHASE-0-REMEDIATION-IMPLEMENTATION.md) | Phase 0 remediation — COMPLETE | Exact CI gate PASS on `c70d3f4`; Phase 1 login E2E carried forward |
+| [`../../docs/PHASE0_COMMAND_MAP.md`](../../docs/PHASE0_COMMAND_MAP.md) | Phase 0 operations | Commands, prerequisites, scope, and evidence |
 | [`PHASE-1-IMPLEMENTATION.md`](./PHASE-1-IMPLEMENTATION.md) | 1 — Kernel, identity, authorisation, privacy, shell | BDD features 09/02/05/10 enabled; PII protected; legacy still green |
 
 ## Founder rulings applied (O-18 to O-21)
