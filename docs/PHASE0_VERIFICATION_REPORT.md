@@ -2,13 +2,12 @@
 
 **Status:** Phase 0 scaffold exists; remediation gate remains open  
 **Date:** 6 November 2026 (Africa/Johannesburg)  
-**Base commit:** `dea3c1507f96237f76adb7d4ddeb5c7d32609cb3`  
-**Working tree:** remediation changes are uncommitted; this base SHA is not the remediation revision  
+**Remediation commit:** `e69a43c8a3b2821ca1b9cad3780ab0015d2461a7` (`main`, pushed to `origin`)
 **Independent verifier:** not yet performed
 
 ## Evidence scope
 
-This report records current local verification only. The exact remediation revision has not run in CI, and the current working tree has not been committed. Historical Phase 0 checkpoint counts and claims remain in [`BASELINE_2026-11.md`](BASELINE_2026-11.md); no original CI run URL, downloadable test artifact, or independently verifiable historical Git object was available during this remediation. This report does not retroactively verify that checkpoint.
+This report records current local verification and the first CI run for the exact remediation commit. Historical Phase 0 checkpoint counts and claims remain in [`BASELINE_2026-11.md`](BASELINE_2026-11.md); no original CI run URL, downloadable test artifact, or independently verifiable historical Git object was available during this remediation. This report does not retroactively verify that checkpoint.
 
 ## Toolchain and decisions
 
@@ -17,7 +16,7 @@ This report records current local verification only. The exact remediation revis
 | Node.js | 26.7.0 |
 | npm | 11.19.0 |
 | PostgreSQL | 18.0 (local disposable cluster); Compose and CI use PostgreSQL 18 |
-| CI runner | `ubuntu-latest`, configured but not executed in this run |
+| CI runner | `ubuntu-latest`; run [42174847546](https://github.com/codemwizard/CooperativeManagement/actions/runs/42174847546) for the remediation commit |
 
 Node/npm choices follow the user-selected installed runtime and the package compatibility range. PostgreSQL 18 follows ADR-005 and the architecture decision. Raw `pg` SQL migration execution under a session advisory lock is recorded in ADR-022; Kysely remains the repository/query adapter. The migration integration environment is a disposable local PostgreSQL 18 cluster; CI uses the isolated PostgreSQL 18 Compose service.
 
@@ -38,11 +37,12 @@ Node/npm choices follow the user-selected installed runtime and the package comp
 | Traceability | PASS | `npm run verify:trace` — 205 feature scenarios found, 174 tagged `@wip`, 26 hard non-`@wip` scenarios mapped to step definitions; all requirement tags resolve. |
 | Accessibility scenario | PASS | `npm run test:a11y` — 1 test passed and the command exited successfully. It uses the shared Vite/Playwright lifecycle wrapper to shut down the local server cleanly. |
 | Phase 0 aggregate | PASS (local) | `npm run verify:phase0` completed all component gates in sequence against a fresh disposable PostgreSQL 18.0 database. Toolchain was Node 26.7.0 / npm 11.19.0; the migration DB was `symphony_migrations_test` with `DATA_MODE=test`. The post-aggregate focused reruns are listed below. |
-| CI workflow and evidence writer | PASS (configuration) | Workflow YAML parses; the Phase 0, existing DB integration, and full legacy E2E jobs are present and use the pinned matrix. The evidence writer was exercised with a sentinel credential URL; it emitted sanitized JSON/log data without the sentinel. No workflow run has occurred. |
+| CI workflow and evidence writer | PARTIAL / CI FAILED | Workflow YAML parses; Phase 0, existing DB integration, and full legacy E2E jobs use the pinned matrix. The evidence writer was exercised with a sentinel credential URL and sanitized the output. CI run [42174847546](https://github.com/codemwizard/CooperativeManagement/actions/runs/42174847546) used this exact commit. The DB integration job passed. The Phase 0 job failed at “Verify the local PostgreSQL lifecycle commands” before `npm run verify:phase0` ran, so there is no exact-commit CI aggregate result. GitHub retained artifact `phase0-evidence-e69a43c8a3b2821ca1b9cad3780ab0015d2461a7` (567 bytes); its download requires authentication unavailable in this environment, so its contents are not claimed as inspected gate evidence. The full legacy E2E job also failed; that failure remains separately classified for Phase 1 ownership. |
 | Legacy verification floor | PASS | `npm run verify:legacy-floor` — oracle (10 cases × 3 destinations), help (91 entries, 23 tour steps, 8 visible texts), sanitized bundle check, and 10 files / 162 Vitest tests passed. |
 | Full legacy `verify:all` including E2E | FAIL | 32 of 35 browser tests passed. The three `tests/workspace/login.spec.ts` tests failed to connect to `http://127.0.0.1:5174/login` (`ERR_CONNECTION_REFUSED`). These Phase 1 login E2E checks are explicitly outside Phase 0 scope in the remediation plan; they remain visible here and are not relabelled as passed. |
-| Compose DB lifecycle | NOT RUN locally | Docker is unavailable on the local host. CI workflow executes `db:start` and `db:stop`, then starts/stops the isolated test service with health checks. |
-| CI aggregate and retained artifact | NOT RUN | Requires the remediation revision to run in GitHub Actions. The Phase 0 job is configured to retain sanitized per-run JSON evidence and gate logs for 90 days; existing DB and full legacy E2E coverage remains in separate jobs. |
+| Compose DB lifecycle | FAILED in CI | Job [127750837826](https://github.com/codemwizard/CooperativeManagement/actions/runs/42174847546/job/127750837826) failed at “Verify the local PostgreSQL lifecycle commands” (`npm run db:start && npm run db:stop`). Docker is unavailable locally. The precise Docker/Compose diagnostic is not accessible from the public job log endpoint in this environment, so the cause still needs confirmation from the run log before changing the lifecycle configuration. |
+| CI aggregate and retained artifact | NOT RUN / ARTIFACT RETAINED | The Phase 0 gate step did not execute because the preceding Compose lifecycle step failed. Artifact `phase0-evidence-e69a43c8a3b2821ca1b9cad3780ab0015d2461a7` is listed for the run, but its contents could not be downloaded for inspection in this environment. Once the lifecycle failure is understood and fixed, rerun the exact revised commit and record the successful aggregate result and inspectable artifact. |
+| CI legacy E2E job | FAILED | Job [127750838198](https://github.com/codemwizard/CooperativeManagement/actions/runs/42174847546/job/127750838198) failed while running `npm run verify:all`. This is reported independently of the Phase 0 gate; inspect its job output and retain the Phase 1 login E2E failures under Phase 1 ownership. |
 
 The `.env` file was checked locally without recording its values. Its entries were local development configuration; no live credential was identified in this inspection. The current Git index does not track `.env`; `.env.example` contains placeholders. This inspection cannot establish whether a prior external copy exists or prove a third party never received it. No claim of historical rotation or archive-wide delivery audit is made. No repository-local ZIP/export generator was found; the unrelated `UI-Designs.zip` is not an application source distribution. Automated checks cover tracked paths and ZIP member lists when a distributable ZIP is supplied.
 
@@ -52,10 +52,10 @@ After that aggregate, the existing standalone DB and full legacy E2E CI jobs wer
 
 ## Open closure items
 
-- Commit the remediation and run the exact revision through the CI aggregate; retain the workflow URL and artifact reference.
+- Diagnose the failed Compose lifecycle command from job [127750837826](https://github.com/codemwizard/CooperativeManagement/actions/runs/42174847546/job/127750837826), correct it, and push a revised commit.
+- Run the revised exact commit through the full Phase 0 CI aggregate; retain the successful workflow URL and artifact reference.
 - Confirm the aggregate `test:a11y` process exits successfully in CI.
-- Run Docker Compose lifecycle commands in CI (not available locally).
-- Keep the unrelated Phase 1 login E2E failures visible and resolve them within Phase 1 ownership.
+- Keep the independent full legacy E2E failure visible and resolve its Phase 1 login failures within Phase 1 ownership.
 - Obtain an independent review of the resulting revision and this evidence.
 
-**Phase 0 closure gate: OPEN.** The full local aggregate passes, but exact-revision CI, Compose lifecycle verification, retained CI run/artifact references, and independent review are still pending. Phase 1 remains In Progress.
+**Phase 0 closure gate: OPEN.** The full local aggregate passes, but the first exact-revision CI run failed before the aggregate started. Compose lifecycle verification, a successful CI aggregate, retained evidence artifact, and independent review remain pending. Phase 1 remains In Progress.
