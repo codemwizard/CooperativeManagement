@@ -23,8 +23,9 @@ methodology with IRIS+ aligned indicators) are included. All other engine invari
 ## Getting Started
 
 ### Prerequisites
-- Node.js 25.x
-- npm 11.6.2+
+- Node.js 26.7.0
+- npm 11.19.0
+- PostgreSQL 18
 - Python 3.10+ (for verification tools)
 
 ### 1. Install Dependencies

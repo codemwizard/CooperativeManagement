@@ -8,6 +8,7 @@
     "scripts":  {
                     "typecheck":  "tsc --noEmit",
                     "test:db":  "vitest run --reporter=verbose",
+                    "test:migrations":  "vitest run --reporter=verbose src/__tests__/migration-runner-config.test.ts src/__tests__/migration-executor.test.ts src/__tests__/migration-runner.integration.test.ts",
                     "migrate":  "tsx src/migrate.ts",
                     "seed":  "tsx src/seed.ts"
                 },

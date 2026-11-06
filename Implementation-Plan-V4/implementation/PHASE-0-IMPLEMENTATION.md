@@ -1,9 +1,9 @@
 # Phase 0 Implementation Plan — Decide, Prepare, Baseline
 
-**Status:** ? COMPLETE  
+**Status:** ? COMPLETE — historical checkpoint recorded 4 November 2026; current remediation gate OPEN
 **Version:** 1.0 — 4 November 2026  
 **Authority:** `Implementation-Plan-V4/06-phased-plan.md` WP-0.1–0.9; `AI-Secure-Coding-Policy.md`  
-**Gate:** CI green on empty scaffold; baseline recorded; ADRs ratified; no feature code present.
+**Historical gate:** CI green on empty scaffold; baseline recorded; ADRs ratified; no feature code present. Current remediation closure is governed by [`PHASE-0-REMEDIATION-IMPLEMENTATION.md`](./PHASE-0-REMEDIATION-IMPLEMENTATION.md) and [`docs/PHASE0_VERIFICATION_REPORT.md`](../../docs/PHASE0_VERIFICATION_REPORT.md).
 
 > **How to use this plan**
 > Check each task box `[x]` as the task is completed — not at the end. Every task that runs a test or command names it explicitly so an independent verifier can re-run the same check and confirm the same result. The gate at the bottom of each work package must be verified before moving to the next.
@@ -503,4 +503,6 @@ Before marking Phase 0 complete, verify ALL of the following:
 - 29 unit tests in `packages/testkit` all pass
 
 **Docker note:** Docker is not installed on this machine. `docker-compose.yml` has been created for CI and future use. Testcontainers is not used; all DB work uses local PostgreSQL 18 directly.
+
+**Historical evidence note (6 November 2026):** The completion boxes and results above are preserved as the 4 November checkpoint record. The original commit object, CI run URL, and original test artifacts were unavailable during remediation, so these results have not been independently reverified and are not evidence that the current working tree passes the fixed remediation gate. Current local verification is recorded separately in [`docs/PHASE0_VERIFICATION_REPORT.md`](../../docs/PHASE0_VERIFICATION_REPORT.md). Phase 0 remediation remains open until the exact remediation revision passes CI and the remaining closure requirements in the remediation plan are evidenced.
 

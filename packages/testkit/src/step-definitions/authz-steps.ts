@@ -168,7 +168,7 @@ Then('Chola is Secretary and an internal verifier', function (this: SymphonyWorl
   // IFV capacity was granted
   const ifvCaps = w(this)['_ifvCapacities'] as Record<string, string[]>;
   const cholaId = userId('Chola');
-  assert.ok(ifvCaps[cholaId]?.length > 0, 'Expected Chola to have an IFV capacity');
+  assert.ok((ifvCaps[cholaId]?.length ?? 0) > 0, 'Expected Chola to have an IFV capacity');
 });
 
 Then(
@@ -249,7 +249,7 @@ Then('Ndhlovu can open the verification queue', function (this: SymphonyWorld) {
   const ifvCaps = w(this)['_ifvCapacities'] as Record<string, string[]>;
   const ndhlovuId = userId('Ndhlovu');
   assert.ok(
-    ifvCaps[ndhlovuId]?.length > 0,
+    (ifvCaps[ndhlovuId]?.length ?? 0) > 0,
     'Expected Ndhlovu to have IFV capacity (required to open verification queue)',
   );
 });

@@ -55,11 +55,12 @@ describe('CapacityService', () => {
     if (!result.ok) return;
     expect(result.events).toHaveLength(1);
     expect(result.events[0]?.eventType).toBe('CapacityGranted');
-    const payload = result.events[0]?.payload as Record<string, unknown>;
-    expect(payload['grantorUserId']).toBe(CHAIR_ID);
-    expect(payload['granteeUserId']).toBe(IFV_USER_ID);
-    expect(payload['capacityType']).toBe('internal_verifier');
-    expect(payload['tenantId']).toBe(ORG_A);
+    expect(result.events[0]?.payload).toMatchObject({
+      grantorUserId: CHAIR_ID,
+      granteeUserId: IFV_USER_ID,
+      capacityType: 'internal_verifier',
+      tenantId: ORG_A,
+    });
   });
 
   it('grantCapacity_denied_toSecretary', async () => {

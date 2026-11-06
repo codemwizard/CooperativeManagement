@@ -11,7 +11,7 @@
 import { describe, it, expect } from 'vitest';
 import { decide } from '../policy-engine.js';
 import type { ActorContext, PolicyTarget, PolicyContext } from '../policy-engine.js';
-import policyTable from './policy-table.fixture.json' assert { type: 'json' };
+import policyTable from './policy-table.fixture.json' with { type: 'json' };
 
 // ─── Fixture row type ──────────────────────────────────────────────────────────
 
@@ -53,7 +53,7 @@ describe('PolicyEngine — policy table', () => {
       id: 'target-001',
       type: 'EvidenceVersion',
       tenantId: targetTenantId,
-      suppliedBy: row.suppliedBy === 'SELF' ? ACTOR_ID : undefined,
+      ...(row.suppliedBy === 'SELF' ? { suppliedBy: ACTOR_ID } : {}),
     };
 
     const actor: ActorContext = {

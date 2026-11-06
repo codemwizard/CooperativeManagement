@@ -33,7 +33,9 @@ function makeTarget(
   tenantId: string,
   suppliedBy?: string,
 ): PolicyTarget {
-  return { id, type, tenantId, suppliedBy };
+  return suppliedBy === undefined
+    ? { id, type, tenantId }
+    : { id, type, tenantId, suppliedBy };
 }
 
 function makeActor(overrides: Partial<ActorContext> = {}): ActorContext {

@@ -16,7 +16,7 @@ const server = await createServer({
 function runPlaywright() {
   const cli = fileURLToPath(new URL('../node_modules/@playwright/test/cli.js', import.meta.url));
   return new Promise((resolve) => {
-    const child = spawn(process.execPath, [cli, 'test'], {
+    const child = spawn(process.execPath, [cli, 'test', ...process.argv.slice(2)], {
       env: {
         ...process.env,
         SYMPHONY_E2E_EXTERNAL_SERVER: '1',

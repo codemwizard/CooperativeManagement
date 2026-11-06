@@ -211,6 +211,7 @@ This document records the architectural choices and resolutions made per `AGENT.
 | ADR-019 | **Platform enroller checks** are recorded as scoped `platform` checks on an exact evidence version. Proxy entry and platform check are two distinct acts. Same-person disclosure flag; optional `require_distinct_reviewer` policy (default off). | Accepted |
 | ADR-020 | **Union/TA scope** is a delegation chain: NABII/programme manager → union → assigned cohorts. Full capability gaps visible; no member PII or sensitive data. | Accepted |
 | ADR-021 | **Dossier export payload unchanged** for now; extended only with provenance fields in Phase 8. | Accepted |
+| ADR-022 | **SQL migration execution:** raw `pg` applies the repository's forward-only `.sql` files under a PostgreSQL advisory lock. Kysely remains the repository/query adapter. Applied migration files are immutable; unknown ledger entries fail and recorded files are not re-applied. | Accepted for Phase 0 remediation (6 November 2026) |
 
 ### Superseded legacy decisions (for new apps only)
 

@@ -153,12 +153,11 @@ describe('AuthService', () => {
     expect(payloadStr).not.toMatch(/"(password|credential|hash|plaintext)"/);
 
     // Required fields only
-    const payload = event.payload as Record<string, unknown>;
-    expect(payload).toHaveProperty('userId');
-    expect(payload).toHaveProperty('method');
-    expect(payload).toHaveProperty('result');
-    expect(payload).toHaveProperty('deviceId');
-    expect(payload).toHaveProperty('occurredAt');
+    expect(event.payload).toHaveProperty('userId');
+    expect(event.payload).toHaveProperty('method');
+    expect(event.payload).toHaveProperty('result');
+    expect(event.payload).toHaveProperty('deviceId');
+    expect(event.payload).toHaveProperty('occurredAt');
   });
 
   it('credential_neverAppearsInEventPayload', async () => {

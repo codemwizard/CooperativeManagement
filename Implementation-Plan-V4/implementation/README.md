@@ -17,6 +17,7 @@ Phase 1 Gate must pass before Phase 2 starts.
 | File | Phase | Gate summary |
 |---|---|---|
 | [`PHASE-0-IMPLEMENTATION.md`](./PHASE-0-IMPLEMENTATION.md) | 0 — Decide, prepare, baseline | CI green; baseline recorded; ADRs ratified; no feature code |
+| [`PHASE-0-REMEDIATION-IMPLEMENTATION.md`](./PHASE-0-REMEDIATION-IMPLEMENTATION.md) | Phase 0 remediation | Bounded P0-01–P0-05 foundation repair; fixed Phase 0 closure gate; Phase 1 work excluded |
 | [`PHASE-1-IMPLEMENTATION.md`](./PHASE-1-IMPLEMENTATION.md) | 1 — Kernel, identity, authorisation, privacy, shell | BDD features 09/02/05/10 enabled; PII protected; legacy still green |
 
 ## Founder rulings applied (O-18 to O-21)

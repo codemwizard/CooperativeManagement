@@ -65,9 +65,11 @@ describe('maskMemberRecord', () => {
     const masked = maskMemberRecord(secretary, 'secretary', 'person-secretary');
 
     // Own record — full access
-    expect(masked['name']).toBe(secretary['name']);
-    expect(masked['nrc']).toBe(secretary['nrc']);
-    expect(masked['email']).toBe(secretary['email']);
+    expect(masked).toMatchObject({
+      name: sampleMember.name,
+      nrc: sampleMember.nrc,
+      email: sampleMember.email,
+    });
   });
 
   it('publicInspection_showsOnlyStatutoryFields', () => {
