@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "project_owner_signed": true,
+  "project_decision_owner": "Project owner; approval assumed by explicit user direction 2026-11-07",
+  "phase0_candidate_passed": true,
+  "phase0_candidate_commit": "c25b616fa2e0f75b14327d87747880a227cbb8b2",
+  "phase0_candidate_worktree_dirty": true,
+  "phase0_candidate_result": "PASS on complete dirty working tree based on c25b616fa2e0f75b14327d87747880a227cbb8b2: npm run verify:phase0 completed successfully 2026-11-07 using Node 26.7.0, npm 11.19.0, PostgreSQL 18.0, DATA_MODE=test, and isolated symphony_phase1_test. Typecheck/build, architecture (115 modules/173 dependencies), 71 domain tests, 9 PostgreSQL migration tests, BDD (49 scenarios/224 steps), traceability, accessibility (1), and legacy floor (261 tests across 11 files, including 94 WP0 contract/tooling tests) passed. Test DB role symphony passed rolled-back CREATE SCHEMA/TABLE, ALTER TABLE, INSERT, UPDATE, DELETE privilege probe. This result is for the tested working tree, not a clean commit. Historical CI PASS remains c70d3f439907e5ff37aee3953704e29d899e0032 / run 42201289720.",
+  "all_contract_decisions_resolved": true,
+  "independent_reviewer_named": false,
+  "reviewer_name": null,
+  "reviewer_independent": false,
+  "reviewer_available": false,
+  "owner_action": "Owner signatures and legal validations for the supplied decision package are assumed granted by explicit user direction 2026-11-07. Database access and full dirty-working-tree Phase 0 gate are verified; rerun on the exact clean candidate commit before closure. A separate independent AI reviewer must inspect the final candidate and evidence before WP0.13 sign-off.",
+  "last_updated": "2026-11-07"
+}

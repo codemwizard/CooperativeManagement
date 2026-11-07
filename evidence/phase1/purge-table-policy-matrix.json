@@ -1,0 +1,345 @@
+{
+  "version": 1,
+  "source": "53-table root migration inventory plus PostgreSQL 18.0 pg_constraint foreign-key catalog from symphony_phase1_test",
+  "status": "WP0 proposed, reviewable table/row allowlist; no destructive statements executed",
+  "target": {
+    "database": "symphony_phase1_test",
+    "schema": "symphony",
+    "database_owner_role": "symphony",
+    "database_marker": "symphony-disposable-test:v1",
+    "dedicated_purge_role": "symphony_phase1_purger (proposed, not provisioned)",
+    "profile": "test",
+    "data_mode": "test",
+    "synthetic_only": true,
+    "marker_installed": false
+  },
+  "preflight_required": [
+    "RUNTIME_PROFILE=test",
+    "DATA_MODE=test",
+    "database name and schema exactly match approved target",
+    "database marker exactly identifies disposable test database",
+    "dedicated purge role is not production-capable and is not the app role",
+    "migration inventory has no unclassified/unknown table",
+    "audit ledger exists and is excluded from delete allowlist",
+    "all tables/row policies below are acknowledged"
+  ],
+  "delete_dependency_order": [
+    "acceptance_policies",
+    "aggregate_states",
+    "appointments",
+    "approval_policies",
+    "authentication_events",
+    "bylaw_provisions",
+    "bylaw_versions",
+    "bylaw_documents",
+    "capacity_grants",
+    "command_receipts",
+    "consent_records",
+    "delegations",
+    "duty_matrix_rows",
+    "enforcement_policies",
+    "enroller_assignments",
+    "enrolment_handovers",
+    "enrolment_sessions",
+    "event_outbox",
+    "domain_events",
+    "evidence_admissions",
+    "evidence_disputes",
+    "evidence_relationships",
+    "evidence_requirement_links",
+    "evidence_support_items",
+    "meeting_rules",
+    "membership_rules",
+    "observation_attestations",
+    "organization_enrollment",
+    "organization_identifiers",
+    "organization_requirements",
+    "person_identifiers",
+    "person_pii_vault",
+    "persons",
+    "platform_checks",
+    "precedence_policies",
+    "record_approvals",
+    "requirement_sources",
+    "requirement_definitions",
+    "resolution_class_rules",
+    "user_role_assignments",
+    "verification_findings",
+    "verification_assignments",
+    "evidence_versions",
+    "evidence_items",
+    "organizations",
+    "users",
+    "tenants"
+  ],
+  "delete_tables": [
+    {
+      "table": "acceptance_policies",
+      "disposition": "delete_test_tenant_rows_only",
+      "predicate": "organization_id IN captured_test_tenant_organization_ids"
+    },
+    {
+      "table": "aggregate_states",
+      "disposition": "delete_all_rows_in_marked_isolated_test_database",
+      "predicate": "TRUE only after DB marker/profile/role guard passes"
+    },
+    {
+      "table": "appointments",
+      "disposition": "delete_all_rows_in_marked_isolated_test_database",
+      "predicate": "TRUE only after DB marker/profile/role guard passes"
+    },
+    {
+      "table": "approval_policies",
+      "disposition": "delete_all_rows_in_marked_isolated_test_database",
+      "predicate": "TRUE only after DB marker/profile/role guard passes"
+    },
+    {
+      "table": "authentication_events",
+      "disposition": "delete_all_rows_in_marked_isolated_test_database",
+      "predicate": "TRUE only after DB marker/profile/role guard passes"
+    },
+    {
+      "table": "bylaw_provisions",
+      "disposition": "delete_all_rows_in_marked_isolated_test_database",
+      "predicate": "TRUE only after DB marker/profile/role guard passes"
+    },
+    {
+      "table": "bylaw_versions",
+      "disposition": "delete_all_rows_in_marked_isolated_test_database",
+      "predicate": "TRUE only after DB marker/profile/role guard passes"
+    },
+    {
+      "table": "bylaw_documents",
+      "disposition": "delete_all_rows_in_marked_isolated_test_database",
+      "predicate": "TRUE only after DB marker/profile/role guard passes"
+    },
+    {
+      "table": "capacity_grants",
+      "disposition": "delete_all_rows_in_marked_isolated_test_database",
+      "predicate": "TRUE only after DB marker/profile/role guard passes"
+    },
+    {
+      "table": "command_receipts",
+      "disposition": "delete_all_rows_in_marked_isolated_test_database",
+      "predicate": "TRUE only after DB marker/profile/role guard passes"
+    },
+    {
+      "table": "consent_records",
+      "disposition": "delete_all_rows_in_marked_isolated_test_database",
+      "predicate": "TRUE only after DB marker/profile/role guard passes"
+    },
+    {
+      "table": "delegations",
+      "disposition": "delete_all_rows_in_marked_isolated_test_database",
+      "predicate": "TRUE only after DB marker/profile/role guard passes"
+    },
+    {
+      "table": "duty_matrix_rows",
+      "disposition": "delete_test_tenant_rows_only",
+      "predicate": "organization_id IN captured_test_tenant_organization_ids"
+    },
+    {
+      "table": "enforcement_policies",
+      "disposition": "delete_test_tenant_rows_only",
+      "predicate": "organization_id IN captured_test_tenant_organization_ids"
+    },
+    {
+      "table": "enroller_assignments",
+      "disposition": "delete_all_rows_in_marked_isolated_test_database",
+      "predicate": "TRUE only after DB marker/profile/role guard passes"
+    },
+    {
+      "table": "enrolment_handovers",
+      "disposition": "delete_all_rows_in_marked_isolated_test_database",
+      "predicate": "TRUE only after DB marker/profile/role guard passes"
+    },
+    {
+      "table": "enrolment_sessions",
+      "disposition": "delete_all_rows_in_marked_isolated_test_database",
+      "predicate": "TRUE only after DB marker/profile/role guard passes"
+    },
+    {
+      "table": "event_outbox",
+      "disposition": "delete_all_rows_in_marked_isolated_test_database",
+      "predicate": "TRUE only after DB marker/profile/role guard passes"
+    },
+    {
+      "table": "domain_events",
+      "disposition": "delete_all_rows_in_marked_isolated_test_database",
+      "predicate": "TRUE only after DB marker/profile/role guard passes"
+    },
+    {
+      "table": "evidence_admissions",
+      "disposition": "delete_all_rows_in_marked_isolated_test_database",
+      "predicate": "TRUE only after DB marker/profile/role guard passes"
+    },
+    {
+      "table": "evidence_disputes",
+      "disposition": "delete_all_rows_in_marked_isolated_test_database",
+      "predicate": "TRUE only after DB marker/profile/role guard passes"
+    },
+    {
+      "table": "evidence_relationships",
+      "disposition": "delete_all_rows_in_marked_isolated_test_database",
+      "predicate": "TRUE only after DB marker/profile/role guard passes"
+    },
+    {
+      "table": "evidence_requirement_links",
+      "disposition": "delete_all_rows_in_marked_isolated_test_database",
+      "predicate": "TRUE only after DB marker/profile/role guard passes"
+    },
+    {
+      "table": "evidence_support_items",
+      "disposition": "delete_all_rows_in_marked_isolated_test_database",
+      "predicate": "TRUE only after DB marker/profile/role guard passes"
+    },
+    {
+      "table": "meeting_rules",
+      "disposition": "delete_test_tenant_rows_only",
+      "predicate": "organization_id IN captured_test_tenant_organization_ids"
+    },
+    {
+      "table": "membership_rules",
+      "disposition": "delete_test_tenant_rows_only",
+      "predicate": "organization_id IN captured_test_tenant_organization_ids"
+    },
+    {
+      "table": "observation_attestations",
+      "disposition": "delete_all_rows_in_marked_isolated_test_database",
+      "predicate": "TRUE only after DB marker/profile/role guard passes"
+    },
+    {
+      "table": "organization_enrollment",
+      "disposition": "delete_all_rows_in_marked_isolated_test_database",
+      "predicate": "TRUE only after DB marker/profile/role guard passes"
+    },
+    {
+      "table": "organization_identifiers",
+      "disposition": "delete_all_rows_in_marked_isolated_test_database",
+      "predicate": "TRUE only after DB marker/profile/role guard passes"
+    },
+    {
+      "table": "organization_requirements",
+      "disposition": "delete_all_rows_in_marked_isolated_test_database",
+      "predicate": "TRUE only after DB marker/profile/role guard passes"
+    },
+    {
+      "table": "person_identifiers",
+      "disposition": "delete_all_rows_in_marked_isolated_test_database",
+      "predicate": "TRUE only after DB marker/profile/role guard passes"
+    },
+    {
+      "table": "person_pii_vault",
+      "disposition": "delete_all_rows_in_marked_isolated_test_database",
+      "predicate": "TRUE only after DB marker/profile/role guard passes"
+    },
+    {
+      "table": "persons",
+      "disposition": "delete_all_rows_in_marked_isolated_test_database",
+      "predicate": "TRUE only after DB marker/profile/role guard passes"
+    },
+    {
+      "table": "platform_checks",
+      "disposition": "delete_all_rows_in_marked_isolated_test_database",
+      "predicate": "TRUE only after DB marker/profile/role guard passes"
+    },
+    {
+      "table": "precedence_policies",
+      "disposition": "delete_test_tenant_rows_only",
+      "predicate": "organization_id IN captured_test_tenant_organization_ids"
+    },
+    {
+      "table": "record_approvals",
+      "disposition": "delete_all_rows_in_marked_isolated_test_database",
+      "predicate": "TRUE only after DB marker/profile/role guard passes"
+    },
+    {
+      "table": "requirement_sources",
+      "disposition": "delete_all_rows_in_marked_isolated_test_database",
+      "predicate": "TRUE only after DB marker/profile/role guard passes"
+    },
+    {
+      "table": "requirement_definitions",
+      "disposition": "delete_test_tenant_rows_only",
+      "predicate": "cooperative_id IN captured_test_tenant_organization_ids"
+    },
+    {
+      "table": "resolution_class_rules",
+      "disposition": "delete_test_tenant_rows_only",
+      "predicate": "organization_id IN captured_test_tenant_organization_ids"
+    },
+    {
+      "table": "user_role_assignments",
+      "disposition": "delete_all_rows_in_marked_isolated_test_database",
+      "predicate": "TRUE only after DB marker/profile/role guard passes"
+    },
+    {
+      "table": "verification_findings",
+      "disposition": "delete_all_rows_in_marked_isolated_test_database",
+      "predicate": "TRUE only after DB marker/profile/role guard passes"
+    },
+    {
+      "table": "verification_assignments",
+      "disposition": "delete_all_rows_in_marked_isolated_test_database",
+      "predicate": "TRUE only after DB marker/profile/role guard passes"
+    },
+    {
+      "table": "evidence_versions",
+      "disposition": "delete_all_rows_in_marked_isolated_test_database",
+      "predicate": "TRUE only after DB marker/profile/role guard passes"
+    },
+    {
+      "table": "evidence_items",
+      "disposition": "delete_all_rows_in_marked_isolated_test_database",
+      "predicate": "TRUE only after DB marker/profile/role guard passes"
+    },
+    {
+      "table": "organizations",
+      "disposition": "delete_all_rows_in_marked_isolated_test_database",
+      "predicate": "TRUE only after DB marker/profile/role guard passes"
+    },
+    {
+      "table": "users",
+      "disposition": "delete_all_rows_in_marked_isolated_test_database",
+      "predicate": "TRUE only after DB marker/profile/role guard passes"
+    },
+    {
+      "table": "tenants",
+      "disposition": "delete_all_rows_in_marked_isolated_test_database",
+      "predicate": "TRUE only after DB marker/profile/role guard passes"
+    }
+  ],
+  "preserve_tables": [
+    "capability_registry",
+    "identity_check_methods",
+    "legal_sources",
+    "platform_roles",
+    "position_combination_rules",
+    "retention_policies"
+  ],
+  "audit_ledger": {
+    "table": "purge_audit",
+    "status": "future WP4.2 control-plane table; never in delete allowlist; purge role cannot update/delete prior audit rows"
+  },
+  "execution_constraints": [
+    "Use individual DELETE statements in one transaction; no TRUNCATE, CASCADE, DROP SCHEMA, dynamic all-table discovery, or broad grant.",
+    "Capture IDs of organizations belonging to test tenants before deleting parent/tenant rows; use that frozen set for organization-scoped control-plane row predicates.",
+    "Require exact migration inventory match; any new table without an explicit preserve/delete row policy fails before SQL.",
+    "Write successful audit row in the same transaction as purge and deterministic reseed.",
+    "Refusal audit must not mutate the target before the target is independently verified.",
+    "This candidate list must be reviewed against current migration SQL and foreign-key graph before WP0.5 can pass."
+  ],
+  "purge_role_contract": {
+    "name": "symphony_phase1_purger",
+    "login": true,
+    "superuser": false,
+    "createdb": false,
+    "createrole": false,
+    "bypassrls": false,
+    "database_connect": "symphony_phase1_test only",
+    "ownership": "not owner of schema, tenant tables, or audit ledger",
+    "sql_grants": "DELETE only for explicit allowlist; narrowly scoped SELECT required to verify target/marker/organization IDs; INSERT only for deterministic seed and success audit",
+    "forbidden": "No DDL, no unrestricted DELETE, no UPDATE/DELETE on audit ledger, no production endpoint/credential, no app-role inheritance",
+    "status": "capability contract proposed; role not provisioned"
+  }
+}

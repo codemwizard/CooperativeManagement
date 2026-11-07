@@ -1,0 +1,36 @@
+{
+  "schema_version": 1,
+  "task_id": "WP0.12",
+  "status": {
+    "implementation": "complete",
+    "unit_test": "passed",
+    "integration_test": "not_applicable",
+    "bdd_ui_test": "not_applicable",
+    "gate_verified": "passed"
+  },
+  "commit": "working-tree",
+  "environment": {
+    "node": "26.7.0",
+    "npm": "11.19.0",
+    "postgres": "not-required",
+    "database_role": "not-required",
+    "data_mode": "test",
+    "key_provider": "unknown"
+  },
+  "commands": [
+    {
+      "command": "npm run test:phase1:contracts",
+      "result": "passed",
+      "artifact": "evidence/phase1/examples/wp0-12.example.json"
+    }
+  ],
+  "claims": {
+    "behavior_proved": "Evidence records follow the shared version 1 schema and reject unsafe paths or secret-shaped fields.",
+    "path_proved": "Node tooling validator and Vitest contract tests.",
+    "configuration_proved": "No database or key provider was used.",
+    "coverage_limitations": ["This example does not claim any Phase 1 product behavior."]
+  },
+  "limitations": [],
+  "unresolved_decisions": [],
+  "reviewer": "pending"
+}

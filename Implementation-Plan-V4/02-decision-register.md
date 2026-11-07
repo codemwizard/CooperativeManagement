@@ -2,6 +2,8 @@
 
 Sections: §1 ADRs · §2 how your answers were applied · §3 plain-language answers to the questions you asked me to explain · §4 conflicts needing your ruling · §5 open items.
 
+**Phase 1 technical closure queue:** Decisions D-01–D-12 and the ordered WP0/Phase 1 closure actions are tracked in [`implementation/PHASE-1-CLOSURE-DECISIONS-AND-ACTIONS.md`](implementation/PHASE-1-CLOSURE-DECISIONS-AND-ACTIONS.md). That document is the actionable index for the Phase 1 contracts and evidence gates; this register remains the history of project ADRs, rulings, and O-items.
+
 Status key: **Accepted** = your decision, applied as stated · **Proposed** = my architectural decision, effective unless you veto · **Needs ruling** = see §4.
 
 ## 1. Architecture decision records
@@ -260,3 +262,24 @@ New validation status scale for every legal seed: `needs_legal_validation` → *
 | O-20 | **CLOSED (4 Nov 2026):** Full Act read (ss.1–60(3)(a), 74–85, Schedules I–II); all 35 seeds are `text_checked`. Cooperative registration number: **11 digits, numerals only** (Form 2, SI 26/1999). | Seeds updated; `organisation_identifiers` pattern `^\d{11}$` |
 | O-21 | **CLOSED (4 Nov 2026):** Minor members: default **off** (`allow_minor_members = false`). Legal reviewer to advise on guardian consent and applicable lawful basis. | `ID-008` finalised; `membership_rules` seed set |
 | O-22 | **OPEN:** Missing Act pages 244–247 (ss.60(3)(b)–73): s.61 auditor liability, s.62 yearly returns, ss.63–67 amalgamation/transfer/division, ss.68–73 credit unions. Upload when available. | Tracked |
+
+## 7. Phase 1 WP0 owner rulings (7 November 2026)
+
+The project owner explicitly directed that all owner signatures and legal validations for the supplied Phase 1 closure decision package be **assumed granted**. This records that instruction as the approval basis; it is not represented as a cryptographic signature or an independent legal-source review. The detailed approved dispositions and evidence requirements are in [`implementation/PHASE-1-CLOSURE-DECISIONS-AND-ACTIONS.md`](implementation/PHASE-1-CLOSURE-DECISIONS-AND-ACTIONS.md), with contract text under `docs/phase1/`.
+
+| Decision | Owner disposition | Remaining proof (does not require reopening the approval) |
+|---|---|---|
+| D-01 command envelope and receipt | Approved: JCS/HMAC semantic envelope; client `occurred_at`, device and request correlation are excluded metadata; no pre-acceptance ID reservation; actor/tenant-bound replay and atomic state/event/outbox/receipt. | Executable canonicalization, race, audit failure, rollback, uncertainty and redaction vectors; operational key/receipt retention records. |
+| D-02 reconciliation | Approved: generic field encryption, no blind index, current permission for original actor, authorized audited tenant officer takeover, configurable expiry, separate active/replica/backup lifecycle. | Authority mapping, access/lifecycle vectors and actual configured backup/replica facts. |
+| D-03 tenant isolation | Approved: strict ENABLE+FORCE RLS for tenant tables; restricted runtime role; separate migration identity; transaction-local context and explicit predicates. | Complete table/grant/policy review and actual-role PostgreSQL proof. |
+| D-04 authority races | Approved: actor/tenant authority aggregate version; shared lock for protected commands, exclusive lock for authority mutations, deterministic order. | Complete dependency/change-path inventory and both PostgreSQL linearization orders. |
+| D-05 purge | Approved: marked disposable test DB only; dedicated role; allowlist; no CASCADE; protected catalogue/audit; atomic reset/seed/audit and fail-closed guards. | Concrete role/target/table inventory and refusal/rollback/repeatability tests. |
+| D-06 demo | Approved: configured synthetic actor(s)/tenant, narrow server-side allowlist, no ordinary admin/general tenant/purge authority. | Concrete deployment identifiers and API positive/negative proof before provisioning. |
+| D-07 privacy | Owner/legal approval assumed; minimum traceable persistence, lawful-basis distinction, audience boundaries; unsupported legal meanings remain configurable assumptions. | Complete field/entity/transition/audience/basis/retention/BDD map. Approval does not substitute for source provenance or behavior proof. |
+| D-08 temporary credential | Approved: 72 hours from server issue time, single use, forced change, no runtime override. | Injected-clock boundary tests and secret-redaction evidence. |
+| D-09 BDD scope | Approved: no deleting scenarios to make the runner pass; later-phase exclusions need explicit mapping/rationale/approval. | Resolve all 17 manifest misses from requirements; pass strict frozen set. |
+| D-10 sessions | Approved: opaque server-side sessions; HttpOnly/Secure/SameSite=Lax; synchronizer CSRF + Origin; rotation/revocation rules; 30m idle, 12h absolute; progressive rate delay, generic failure, no permanent lockout. | API/browser/boundary tests. Password complexity rule still needs a source before WP5 completion. |
+| D-11 runtime | Approved: `test`, `demo`, `real-data-staging`, `production`; single `RUNTIME_PROFILE` selector, matched `APP_ENV`/`DATA_MODE`, fail closed. | Actual startup-composition tests for valid and contradictory profiles. |
+| D-12 review model | Approved: independent AI review permitted under separate-context/source/artifact/rerun conditions; owner remains final closure authority. | Amend plan and obtain a separate reviewer; implementer cannot self-review. |
+
+**Effect on status:** these rulings resolve owner approval questions in the supplied D-01–D-12 package. They do not close WP0 or Phase 1. Required tests, DB/runtime evidence, current-candidate Phase 0 PASS, separate independent review and the WP0.13 evidence gate remain mandatory. O-22 remains open because missing Act pages are a source-material issue outside the supplied approval package.

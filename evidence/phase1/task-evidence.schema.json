@@ -1,0 +1,83 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://symphony.example/contracts/phase1/task-evidence-v1.schema.json",
+  "title": "Symphony Phase 1 task evidence",
+  "description": "Sanitized, repository-relative evidence for implementation and the verification levels in scope for that task. Levels deferred to later work packages are explicitly not_applicable and recorded as follow-ups.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "task_id", "status", "commit", "environment", "commands", "claims", "limitations", "unresolved_decisions", "reviewer"],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "task_id": { "type": "string", "pattern": "^WP[0-9]+(?:\\.[0-9]+)?$" },
+    "status": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["implementation", "unit_test", "integration_test", "bdd_ui_test", "gate_verified"],
+      "properties": {
+        "implementation": { "enum": ["complete", "partial", "pending", "blocked", "not_started"] },
+        "unit_test": { "$ref": "#/$defs/verification" },
+        "integration_test": { "$ref": "#/$defs/verification" },
+        "bdd_ui_test": { "$ref": "#/$defs/verification" },
+        "gate_verified": { "$ref": "#/$defs/verification" }
+      }
+    },
+    "commit": { "type": "string", "pattern": "^(?:[0-9a-f]{40}|working-tree)$" },
+    "environment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["node", "npm", "postgres", "database_role", "data_mode", "key_provider"],
+      "properties": {
+        "node": { "type": "string" },
+        "npm": { "type": "string" },
+        "postgres": { "type": "string" },
+        "database_role": { "type": "string", "maxLength": 120 },
+        "data_mode": { "enum": ["test", "real", "unknown"] },
+        "key_provider": { "enum": ["local-test", "local-development", "approved-non-test", "unknown"] }
+      }
+    },
+    "commands": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["command", "result", "artifact"],
+        "properties": {
+          "command": { "type": "string", "minLength": 1, "maxLength": 240 },
+          "result": { "enum": ["passed", "failed", "blocked", "not_run"] },
+          "artifact": { "type": "string", "pattern": "^(?:[A-Za-z0-9_.-]+/)*[A-Za-z0-9_.-]+$" }
+        }
+      }
+    },
+    "claims": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["behavior_proved", "path_proved", "configuration_proved", "coverage_limitations"],
+      "properties": {
+        "behavior_proved": { "type": "string", "minLength": 1 },
+        "path_proved": { "type": "string", "minLength": 1 },
+        "configuration_proved": { "type": "string", "minLength": 1 },
+        "coverage_limitations": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "limitations": { "type": "array", "items": { "type": "string" } },
+    "unresolved_decisions": { "type": "array", "items": { "type": "string" } },
+    "reviewer": { "type": "string", "minLength": 1 },
+    "deferred_followups": {
+      "description": "Verification or behavior intentionally owned by a downstream task because the product path is not part of this task's scope.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["task_id", "scope", "acceptance_evidence"],
+        "properties": {
+          "task_id": { "type": "string", "pattern": "^WP[0-9]+(?:\\.[0-9]+)?$" },
+          "scope": { "type": "string", "minLength": 1 },
+          "acceptance_evidence": { "type": "string", "minLength": 1 }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "verification": { "enum": ["passed", "failed", "pending", "blocked", "not_applicable"] }
+  }
+}

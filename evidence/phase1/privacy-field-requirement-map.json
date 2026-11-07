@@ -1,0 +1,310 @@
+{
+  "version": 1,
+  "authority": "03-specification-delta.md §§8,13; PRV/ID/UNI requirements and exact BDD tags in Implementation-Plan-V4/features/02_identity_privacy_and_access.feature; owner/legal approval assumed by explicit user direction 2026-11-07.",
+  "rule": "Only fields explicitly required by an accepted scenario may be persisted. Candidate fields are not implementation authorization by themselves. A row marked no_current_entity is a WP3.3 design input; do not silently add a table or field.",
+  "mappings": [
+    {
+      "bdd_ids": [
+        "BDD-PRV-001"
+      ],
+      "behavior": "Require recorded consent for cooperative_record_keeping before personal data entry.",
+      "current_entity_fields": [
+        "consent_records.person_id",
+        "consent_records.purpose",
+        "consent_records.lawful_basis",
+        "consent_records.granted_at",
+        "consent_records.evidence_ref"
+      ],
+      "command_or_transition": [
+        "record consent evidence",
+        "reject member personal-data command without required consent"
+      ],
+      "audience": [
+        "authorized Secretary/enroller",
+        "member concerned"
+      ],
+      "lawful_basis": "Consent only for consent-dependent fields; do not treat as universal basis.",
+      "retention": "Per-category retention_policies policy; no value inferred by this mapping.",
+      "status": "existing candidate schema; API/DB behavior belongs to WP3.3",
+      "requirements": [
+        "REQ-PRV-001"
+      ]
+    },
+    {
+      "bdd_ids": [
+        "BDD-PRV-002"
+      ],
+      "behavior": "Record withdrawal and begin configured retention evaluation; stop identifier display absent another lawful purpose.",
+      "current_entity_fields": [
+        "consent_records.withdrawn_at",
+        "consent_records.purpose",
+        "person_identifiers.identifier_encrypted",
+        "person_pii_vault.encrypted_value",
+        "person_pii_vault.key_ref"
+      ],
+      "command_or_transition": [
+        "consent withdrawal timestamp",
+        "retention evaluation trigger/state"
+      ],
+      "audience": [
+        "authorized privacy/records officer",
+        "affected member"
+      ],
+      "lawful_basis": "Withdrawal ends the specified consent basis only; independently sourced legal obligation is evaluated separately.",
+      "retention": "Policy-controlled per data category, including recorded legal/retention conflict review.",
+      "status": "candidate state exists; transition/job behavior belongs to WP3.3/WP3.4",
+      "requirements": [
+        "REQ-PRV-001"
+      ]
+    },
+    {
+      "bdd_ids": [
+        "BDD-PRV-003",
+        "BDD-PRV-004"
+      ],
+      "behavior": "Store identifiers encrypted, use only keyed blind indexes for duplicate review, preserve reissued identifier linkage, and never auto-merge people.",
+      "current_entity_fields": [
+        "person_identifiers.person_id",
+        "identifier_type",
+        "identifier_encrypted",
+        "blind_index",
+        "is_primary",
+        "previous_identifier_id"
+      ],
+      "command_or_transition": [
+        "identifier add/replace/link",
+        "duplicate-review outcome; no merge command"
+      ],
+      "audience": [
+        "authorized identity officer for masked/reveal-on-need view",
+        "duplicate-review service"
+      ],
+      "lawful_basis": "Field-specific basis from the source-backed purpose; do not derive from the blind index.",
+      "retention": "Identifier category policy; active/replica/backup behavior must be separately evidenced.",
+      "status": "existing schema candidate; ciphertext/provider and duplicate-review proof belongs to WP3.2",
+      "requirements": [
+        "REQ-ID-005",
+        "REQ-PRV-002"
+      ]
+    },
+    {
+      "bdd_ids": [
+        "BDD-PRV-005"
+      ],
+      "behavior": "Mask member identifiers for authorized officers and omit them entirely for union/TA, PFI, and unrelated-cooperative audiences.",
+      "current_entity_fields": [
+        "person_identifiers.identifier_type",
+        "person_identifiers.identifier_encrypted",
+        "person_identifiers.person_id"
+      ],
+      "command_or_transition": [
+        "audience-specific read projection; no write"
+      ],
+      "audience": [
+        "Secretary/internal verifier: masked; union/TA/PFI/other cooperative: absent"
+      ],
+      "lawful_basis": "Read authorization is not created by the existence of stored ciphertext.",
+      "retention": "Underlying identifier category policy.",
+      "status": "projection/access contract; WP3.3 API response canaries and WP6.3 rendered views",
+      "requirements": [
+        "REQ-PRV-003"
+      ]
+    },
+    {
+      "bdd_ids": [
+        "BDD-PRV-006"
+      ],
+      "behavior": "Events and logs carry no raw PII/NRC-shaped values and reference people only by pseudonymous ID.",
+      "current_entity_fields": [
+        "persons.pseudonym_id",
+        "domain_events.payload (pseudonymous reference only)"
+      ],
+      "command_or_transition": [
+        "event serialization and application log redaction"
+      ],
+      "audience": [
+        "event consumers and operational log readers receive no member PII"
+      ],
+      "lawful_basis": "Not applicable to event/log payload; do not serialize personal fields.",
+      "retention": "Event retention per audit policy; logs per operational policy, both without raw PII.",
+      "status": "serialization/logging boundary owned by WP3.1",
+      "requirements": [
+        "REQ-PRV-004"
+      ]
+    },
+    {
+      "bdd_ids": [
+        "BDD-PRV-007"
+      ],
+      "behavior": "After configured retention, personal fields become undecryptable while pseudonymous transaction facts remain and conflict review is visible.",
+      "current_entity_fields": [
+        "retention_policies.data_category",
+        "hold_duration_months",
+        "retention_conflict_review_required",
+        "person_pii_vault.key_ref",
+        "persons.pseudonym_id"
+      ],
+      "command_or_transition": [
+        "retention expiry evaluation",
+        "active payload removal/crypto-inaccessibility",
+        "retention conflict review flag"
+      ],
+      "audience": [
+        "authorized privacy officer; transaction readers see pseudonymous identity only"
+      ],
+      "lawful_basis": "No legal outcome is inferred; preserve source-scoped needs_legal_validation on unresolved exceptions.",
+      "retention": "Per-category policy; numeric durations and exception outcomes must come from approved source/policy, not test fixture.",
+      "status": "policy/evidence map; provider lifecycle belongs to WP3.4; current local provider is not durable shred proof",
+      "requirements": [
+        "REQ-PRV-005",
+        "REQ-PRV-008"
+      ]
+    },
+    {
+      "bdd_ids": [
+        "BDD-PRV-008",
+        "BDD-PRV-018",
+        "BDD-PRV-019"
+      ],
+      "behavior": "Read-only inspection shows only applicable register/by-law data and records a privacy-safe inspection observation.",
+      "current_entity_fields": [
+        "bylaw_documents / bylaw_versions / bylaw_provisions for by-law inspection; no member-inspection session entity exists in current migrations"
+      ],
+      "command_or_transition": [
+        "read-only inspection session; no source mutation"
+      ],
+      "audience": [
+        "public inspector or member sees only the applicable statutory register fields; by-law reader sees by-law version/status only"
+      ],
+      "lawful_basis": "Feature cites public statutory inspection and member inspection; owner/legal approval is assumed, and only scenario-scoped fields are permitted.",
+      "retention": "Inspection audit retention is policy-controlled; log inspector and receipt reference only where the scenario requires, no other members' PII.",
+      "status": "member inspection session/policy needs WP3.3 mapping; visible route and assertions belong to WP6.3",
+      "requirements": [
+        "REQ-PRV-006"
+      ]
+    },
+    {
+      "bdd_ids": [
+        "BDD-PRV-009"
+      ],
+      "behavior": "In test profile, accept only the documented synthetic NRC pattern; reject non-synthetic patterns.",
+      "current_entity_fields": [
+        "person_identifiers.identifier_type",
+        "identifier_encrypted",
+        "blind_index"
+      ],
+      "command_or_transition": [
+        "test-profile identifier validation before persistence"
+      ],
+      "audience": [
+        "server validation; generic reason to caller"
+      ],
+      "lawful_basis": "Synthetic-only control, not a claim about real-data identity validity.",
+      "retention": "Test fixture lifecycle; no real identity data is permitted.",
+      "status": "domain/API validation belongs to WP3.1; do not treat client validation as enforcement",
+      "requirements": [
+        "REQ-PRV-007",
+        "REQ-PRV-009"
+      ]
+    },
+    {
+      "bdd_ids": [
+        "BDD-PRV-010"
+      ],
+      "behavior": "Real-data startup refuses an unapproved residency region before readiness.",
+      "current_entity_fields": [
+        "No personal-data row is created by this guard; residency is deployment configuration and readiness evidence."
+      ],
+      "command_or_transition": [
+        "startup composition guard"
+      ],
+      "audience": [
+        "operators receive classified refusal without secrets"
+      ],
+      "lawful_basis": "Approved-region source/configuration must be recorded; no region value invented here.",
+      "retention": "Not applicable to startup configuration.",
+      "status": "WP3.5 startup composition",
+      "requirements": [
+        "REQ-PRV-007"
+      ]
+    },
+    {
+      "bdd_ids": [
+        "BDD-PRV-011"
+      ],
+      "behavior": "Purge tenant data and restore deterministic seeds while preserving catalogues and a durable successful audit.",
+      "current_entity_fields": [
+        "purge allowlist is defined from complete migration inventory; successful purge audit ledger is outside allowlist"
+      ],
+      "command_or_transition": [
+        "guarded purge-to-seed transaction"
+      ],
+      "audience": [
+        "dedicated test operator; no ordinary app role"
+      ],
+      "lawful_basis": "Synthetic disposable test data only.",
+      "retention": "Test database reset; successful audit remains durable according to operational policy.",
+      "status": "WP4.1/WP4.2; WP0.5 specifies target/role/table contract",
+      "requirements": [
+        "REQ-PRV-007",
+        "REQ-PRV-009"
+      ]
+    },
+    {
+      "bdd_ids": [
+        "BDD-PRV-015",
+        "BDD-PRV-016"
+      ],
+      "behavior": "Keep statutory register fields under the stated legal_obligation basis distinct from consent-dependent identifier fields; public inspection exposes only scenario-listed fields and a privacy-safe session audit.",
+      "current_entity_fields": [
+        "No member register entity currently exists in root migrations; scenario names name, address, occupation, shares, date_registered, and inspection session inspector_name, fee_receipt_reference, occurred_at, fields_shown."
+      ],
+      "command_or_transition": [
+        "register entry under legal obligation",
+        "fee receipt reference recorded; Symphony does not process payment",
+        "public inspection session open/read"
+      ],
+      "audience": [
+        "public sees name/address/occupation/date_registered only; no identifier/contact/share amount/sensitive fields"
+      ],
+      "lawful_basis": "Feature explicitly distinguishes statutory s.28 fields as legal_obligation from identifier consent; payment is external and only receipt reference is stored.",
+      "retention": "Member-register and inspection-audit category policies; no numeric value inferred by this map.",
+      "status": "candidate fields are exactly those required by scenario, not approved schema; WP3.3 must map source/command/retention before persistence and WP6.3 exercises rendered route",
+      "requirements": [
+        "REQ-PRV-006",
+        "REQ-PRV-010"
+      ]
+    },
+    {
+      "bdd_ids": [
+        "BDD-PRV-020"
+      ],
+      "behavior": "Another member's individual account records require that member's written consent evidence or general-meeting resolution; own society books remain inspectable by authorized officers/members/delegates.",
+      "current_entity_fields": [
+        "No individual-account inspection entity exists in current migrations; existing consent_records.evidence_ref is only a candidate evidence reference, not proof of written consent semantics."
+      ],
+      "command_or_transition": [
+        "record scoped written-consent evidence or general-meeting resolution reference",
+        "authorize only that member's account rows",
+        "audit officer/member books inspection"
+      ],
+      "audience": [
+        "requesting person sees only authorized target member's account"
+      ],
+      "lawful_basis": "Scenario cites Act s.59(2); owner/legal validation is assumed for the supplied baseline only.",
+      "retention": "Account/inspection evidence category policy; preserve source-specific holds/conflicts.",
+      "status": "no current entity or API; WP3.3 must not infer a generalized consent portal and WP6.3 owns route behavior",
+      "requirements": [
+        "REQ-PRV-011"
+      ]
+    }
+  ],
+  "global_exclusions": [
+    "No generalized consent portal",
+    "No broad lawful-basis history engine",
+    "No unscoped personal-data API",
+    "No invented numeric retention period",
+    "No production-grade crypto-shred claim from the local provider",
+    "No persistence for a candidate field without a mapped Phase 1 acceptance behavior"
+  ]
+}

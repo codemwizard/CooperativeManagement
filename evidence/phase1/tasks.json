@@ -1,0 +1,647 @@
+[
+  {
+    "schema_version": 1,
+    "task_id": "WP0.1",
+    "status": {
+      "implementation": "complete",
+      "unit_test": "passed",
+      "integration_test": "not_applicable",
+      "bdd_ui_test": "not_applicable",
+      "gate_verified": "passed"
+    },
+    "commit": "working-tree",
+    "environment": {
+      "node": "26.7.0",
+      "npm": "11.19.0",
+      "postgres": "not-run",
+      "database_role": "not-run",
+      "data_mode": "test",
+      "key_provider": "unknown"
+    },
+    "commands": [
+      {
+        "command": "node node_modules/vitest/vitest.mjs run tests/tooling/phase1_contracts.test.ts (94 tests passed)",
+        "result": "passed",
+        "artifact": "evidence/phase1/command-contract-vectors.json"
+      }
+    ],
+    "claims": {
+      "behavior_proved": "Executable pure contract vectors pass for JCS/HMAC, transport metadata exclusion, semantic-field sensitivity, command_id lookup-only behavior, defaults/unknown-field rejection, schema/canonicalizer version lookup, retained historical HMAC key, all denied/accepted receipt cases, terminal stale conflict, receipt visibility, response-loss/uncertain-commit resolution, and safe-result canaries.",
+      "path_proved": "Pure command-contract oracle and Vitest vectors; no PostgreSQL contention or production API path claimed.",
+      "configuration_proved": "No database or key provider used.",
+      "coverage_limitations": [
+        "Later product-path tests are recorded in deferred_followups and remain mandatory for their owning Phase 1 tasks."
+      ]
+    },
+    "limitations": [
+      "No WP1 implementation authorized."
+    ],
+    "unresolved_decisions": [],
+    "reviewer": "pending",
+    "deferred_followups": [
+      {
+        "scope": "Implement transactional receipt/state/event/outbox atomicity and contention behavior.",
+        "task_id": "WP1.2",
+        "acceptance_evidence": "PostgreSQL independent-connection tests prove rollback, reservation visibility, both contention outcomes and bounded same-ID retries."
+      },
+      {
+        "scope": "Expose classified safe command results through API composition.",
+        "task_id": "WP1.6",
+        "acceptance_evidence": "API tests prove non-disclosure and no raw request/payload/PII in receipt or response."
+      }
+    ]
+  },
+  {
+    "schema_version": 1,
+    "task_id": "WP0.2",
+    "status": {
+      "implementation": "complete",
+      "unit_test": "passed",
+      "integration_test": "not_applicable",
+      "bdd_ui_test": "not_applicable",
+      "gate_verified": "passed"
+    },
+    "commit": "working-tree",
+    "environment": {
+      "node": "26.7.0",
+      "npm": "11.19.0",
+      "postgres": "not-run",
+      "database_role": "not-run",
+      "data_mode": "test",
+      "key_provider": "unknown"
+    },
+    "commands": [
+      {
+        "command": "node node_modules/vitest/vitest.mjs run tests/tooling/phase1_contracts.test.ts (94 tests passed)",
+        "result": "passed",
+        "artifact": "evidence/phase1/reconciliation-contract-vectors.json"
+      }
+    ],
+    "claims": {
+      "behavior_proved": "Model vectors pass for current membership/permission, original actor, officer takeover/audit, unrelated/cross-tenant actors, expiry/tombstone boundary, and fresh correction ID.",
+      "path_proved": "Pure access/lifecycle model only; no DB, API, encryption or scheduled deletion executed.",
+      "configuration_proved": "No database or key provider used.",
+      "coverage_limitations": [
+        "Later product-path tests are recorded in deferred_followups and remain mandatory for their owning Phase 1 tasks."
+      ]
+    },
+    "limitations": [
+      "No inbox schema or product implementation authorized."
+    ],
+    "unresolved_decisions": [],
+    "reviewer": "pending",
+    "deferred_followups": [
+      {
+        "scope": "Implement inbox persistence, encrypted payload, audited access and active-store lifecycle.",
+        "task_id": "WP1.4",
+        "acceptance_evidence": "PostgreSQL/API tests prove tenant/actor restrictions, takeover audit, encryption, expiry and tombstone."
+      },
+      {
+        "scope": "Record actual selected deployment provider, replica, backup, snapshot and restore lifecycle facts before real-data deployment.",
+        "task_id": "WP3.4",
+        "acceptance_evidence": "Operational evidence states measured deletion propagation and backup expiry/restore behavior without overstating crypto-erasure."
+      }
+    ]
+  },
+  {
+    "schema_version": 1,
+    "task_id": "WP0.3",
+    "status": {
+      "implementation": "complete",
+      "unit_test": "passed",
+      "integration_test": "not_applicable",
+      "bdd_ui_test": "not_applicable",
+      "gate_verified": "passed"
+    },
+    "commit": "working-tree",
+    "environment": {
+      "node": "26.7.0",
+      "npm": "11.19.0",
+      "postgres": "not-run",
+      "database_role": "not-run",
+      "data_mode": "test",
+      "key_provider": "unknown"
+    },
+    "commands": [
+      {
+        "command": "node node_modules/vitest/vitest.mjs run tests/tooling/phase1_contracts.test.ts (94 tests passed)",
+        "result": "passed",
+        "artifact": "evidence/phase1/tenant-table-policy-matrix.json"
+      }
+    ],
+    "claims": {
+      "behavior_proved": "All 53 migrated tables have an explicit tenant/global/control-plane grant and policy disposition; validator confirms current RLS matches migrations and proposed controls do not grant unrestricted DELETE.",
+      "path_proved": "Migration inventory and contract matrix only; no dedicated runtime role or new RLS migration claimed.",
+      "configuration_proved": "No application role was provisioned.",
+      "coverage_limitations": [
+        "Later product-path tests are recorded in deferred_followups and remain mandatory for their owning Phase 1 tasks."
+      ]
+    },
+    "limitations": [
+      "Inventory is not an accepted RLS grant design."
+    ],
+    "unresolved_decisions": [],
+    "reviewer": "pending",
+    "deferred_followups": [
+      {
+        "scope": "Provision least-privilege runtime identity and enforce RLS/predicates.",
+        "task_id": "WP1.5",
+        "acceptance_evidence": "PostgreSQL tests under non-owner/no-BYPASSRLS role cover unset/wrong tenant, every policy, catalogue writes and pool reuse."
+      }
+    ]
+  },
+  {
+    "schema_version": 1,
+    "task_id": "WP0.4",
+    "status": {
+      "implementation": "complete",
+      "unit_test": "passed",
+      "integration_test": "not_applicable",
+      "bdd_ui_test": "not_applicable",
+      "gate_verified": "passed"
+    },
+    "commit": "working-tree",
+    "environment": {
+      "node": "26.7.0",
+      "npm": "11.19.0",
+      "postgres": "not-run",
+      "database_role": "not-run",
+      "data_mode": "test",
+      "key_provider": "unknown"
+    },
+    "commands": [
+      {
+        "command": "node node_modules/vitest/vitest.mjs run tests/tooling/phase1_contracts.test.ts (94 tests passed)",
+        "result": "passed",
+        "artifact": "evidence/phase1/authority-dependency-inventory.json"
+      }
+    ],
+    "claims": {
+      "behavior_proved": "Eight mutable authority dependency classes include source tables, change paths, serialization target, both serial-order cases and downstream proof owner; pure model tests exercise both linearization orders for each dependency.",
+      "path_proved": "Dependency inventory and deterministic pure model; no DB locks or race behavior claimed.",
+      "configuration_proved": "No database transaction exercised.",
+      "coverage_limitations": [
+        "Later product-path tests are recorded in deferred_followups and remain mandatory for their owning Phase 1 tasks."
+      ]
+    },
+    "limitations": [
+      "Authorization product code is assigned to WP2; WP0 acceptance is the complete authority dependency and serialization contract plus model evidence."
+    ],
+    "unresolved_decisions": [],
+    "reviewer": "pending",
+    "deferred_followups": [
+      {
+        "scope": "Serialize authority changes with protected mutations.",
+        "task_id": "WP2.4",
+        "acceptance_evidence": "PostgreSQL barrier tests prove both serial orders for every inventoried change path."
+      }
+    ]
+  },
+  {
+    "schema_version": 1,
+    "task_id": "WP0.5",
+    "status": {
+      "implementation": "complete",
+      "unit_test": "passed",
+      "integration_test": "not_applicable",
+      "bdd_ui_test": "not_applicable",
+      "gate_verified": "passed"
+    },
+    "commit": "working-tree",
+    "environment": {
+      "node": "26.7.0",
+      "npm": "11.19.0",
+      "postgres": "not-run",
+      "database_role": "not-run",
+      "data_mode": "test",
+      "key_provider": "unknown"
+    },
+    "commands": [
+      {
+        "command": "node node_modules/vitest/vitest.mjs run tests/tooling/phase1_contracts.test.ts (94 tests passed)",
+        "result": "passed",
+        "artifact": "evidence/phase1/purge-table-policy-matrix.json"
+      }
+    ],
+    "claims": {
+      "behavior_proved": "Every one of 53 tables has explicit delete/preserve treatment and child-first delete order from the PostgreSQL FK catalog; target, marker and purge-role capability contract are exact; all failure guards deny before destructive SQL in pure vectors.",
+      "path_proved": "Read-only PostgreSQL schema/FK catalog plus pure preflight tests; no marker written, role provisioned, or destructive statement issued.",
+      "configuration_proved": "No purge credentials inspected.",
+      "coverage_limitations": [
+        "Later product-path tests are recorded in deferred_followups and remain mandatory for their owning Phase 1 tasks."
+      ]
+    },
+    "limitations": [
+      "Purge product code is assigned to WP4; WP0 acceptance is the exact target/role/table contract and preflight refusal evidence."
+    ],
+    "unresolved_decisions": [],
+    "reviewer": "pending",
+    "deferred_followups": [
+      {
+        "scope": "Install marker and provision dedicated purge role in disposable test environment.",
+        "task_id": "WP4.1",
+        "acceptance_evidence": "Zero-delete-SQL tests prove every guard under actual restricted credentials."
+      },
+      {
+        "scope": "Run allowlisted purge/reset/seed transaction.",
+        "task_id": "WP4.2",
+        "acceptance_evidence": "PostgreSQL tests prove atomic rollback, audit, preserved catalogues and repeatability."
+      }
+    ]
+  },
+  {
+    "schema_version": 1,
+    "task_id": "WP0.6",
+    "status": {
+      "implementation": "complete",
+      "unit_test": "passed",
+      "integration_test": "not_applicable",
+      "bdd_ui_test": "not_applicable",
+      "gate_verified": "passed"
+    },
+    "commit": "working-tree",
+    "environment": {
+      "node": "26.7.0",
+      "npm": "11.19.0",
+      "postgres": "not-run",
+      "database_role": "not-run",
+      "data_mode": "test",
+      "key_provider": "unknown"
+    },
+    "commands": [
+      {
+        "command": "node node_modules/vitest/vitest.mjs run tests/tooling/phase1_contracts.test.ts (94 tests passed)",
+        "result": "passed",
+        "artifact": "evidence/phase1/DEMO_AUTHORIZATION_CONTRACT.md"
+      }
+    ],
+    "claims": {
+      "behavior_proved": "Pure policy vectors allow only configured synthetic demo actor/tenant and demo.reset; wrong profile, actor, tenant, non-synthetic data, forged claim as authority, and purge operation deny non-disclosing.",
+      "path_proved": "Pure authorization policy model; no live endpoint or tenant mutation claimed.",
+      "configuration_proved": "No demo actor or tenant approved.",
+      "coverage_limitations": [
+        "Later product-path tests are recorded in deferred_followups and remain mandatory for their owning Phase 1 tasks."
+      ]
+    },
+    "limitations": [
+      "Demo API/workspace implementation is assigned to WP6; WP0 acceptance is the server-policy contract and decision vectors."
+    ],
+    "unresolved_decisions": [],
+    "reviewer": "pending",
+    "deferred_followups": [
+      {
+        "scope": "Implement server-side demo reset guard and provision explicit synthetic actor/tenant config.",
+        "task_id": "WP6.2",
+        "acceptance_evidence": "API tests prove the authorized tenant-only mutation and all denial cases have no row changes."
+      }
+    ]
+  },
+  {
+    "schema_version": 1,
+    "task_id": "WP0.7",
+    "status": {
+      "implementation": "complete",
+      "unit_test": "passed",
+      "integration_test": "not_applicable",
+      "bdd_ui_test": "not_applicable",
+      "gate_verified": "passed"
+    },
+    "commit": "working-tree",
+    "environment": {
+      "node": "26.7.0",
+      "npm": "11.19.0",
+      "postgres": "not-run",
+      "database_role": "not-run",
+      "data_mode": "test",
+      "key_provider": "unknown"
+    },
+    "commands": [
+      {
+        "command": "node node_modules/vitest/vitest.mjs run tests/tooling/phase1_contracts.test.ts (94 tests passed)",
+        "result": "passed",
+        "artifact": "evidence/phase1/privacy-field-requirement-map.json"
+      }
+    ],
+    "claims": {
+      "behavior_proved": "Every frozen privacy BDD ID maps to normative requirement, current/candidate fields or explicit absent entity, command/transition, audience, lawful-basis distinction, retention policy and status.",
+      "path_proved": "Source/BDD traceability and current migration inventory only; no unmapped persistence migration authorized.",
+      "configuration_proved": "Owner and legal approvals are assumed granted by explicit user direction dated 2026-11-07; source-scoped legal assumptions remain documented and are not presented as broader legal conclusions.",
+      "coverage_limitations": [
+        "Later product-path tests are recorded in deferred_followups and remain mandatory for their owning Phase 1 tasks."
+      ]
+    },
+    "limitations": [
+      "The mapping is a draft and does not approve a migration."
+    ],
+    "unresolved_decisions": [],
+    "reviewer": "pending",
+    "deferred_followups": [
+      {
+        "scope": "Implement only the minimum persistence justified by the accepted field trace.",
+        "task_id": "WP3.3",
+        "acceptance_evidence": "Requirement-to-entity/command/transition/API tests prove mapped behavior and no unmapped storage."
+      }
+    ]
+  },
+  {
+    "schema_version": 1,
+    "task_id": "WP0.8",
+    "status": {
+      "implementation": "complete",
+      "unit_test": "passed",
+      "integration_test": "not_applicable",
+      "bdd_ui_test": "not_applicable",
+      "gate_verified": "passed"
+    },
+    "commit": "working-tree",
+    "environment": {
+      "node": "26.7.0",
+      "npm": "11.19.0",
+      "postgres": "not-run",
+      "database_role": "not-run",
+      "data_mode": "test",
+      "key_provider": "unknown"
+    },
+    "commands": [
+      {
+        "command": "node node_modules/vitest/vitest.mjs run --root packages/domain src/identity/__tests__/auth.test.ts (red, exact 72-hour equality failure before fix)",
+        "result": "failed",
+        "artifact": "evidence/phase1/wp0.8-boundary-tdd.md"
+      },
+      {
+        "command": "node node_modules/vitest/vitest.mjs run --root packages/domain src/identity/__tests__/auth.test.ts (green, 7 passed)",
+        "result": "passed",
+        "artifact": "evidence/phase1/wp0.8-boundary-tdd.md"
+      },
+      {
+        "command": "npm run verify:phase0 (full gate on dirty candidate; PostgreSQL 18.0 / symphony_phase1_test)",
+        "result": "passed",
+        "artifact": "evidence/phase1/phase0-candidate-verification.md"
+      },
+      {
+        "command": "node node_modules/vitest/vitest.mjs run tests/tooling/phase1_contracts.test.ts (94 tests)",
+        "result": "passed",
+        "artifact": "tests/tooling/phase1_contracts.test.ts"
+      }
+    ],
+    "claims": {
+      "behavior_proved": "72-hour temporary credential expiry is valid one millisecond before and rejected exactly at/after expiry using an injected clock; TDD red reproduced strict-boundary defect and green passed after >= fix.",
+      "path_proved": "Domain AuthService unit path plus full Phase 0 gate; API/session persistence remains WP5.",
+      "configuration_proved": "No runtime override is used; test supplies a deterministic clock and the approved 72-hour TTL.",
+      "coverage_limitations": [
+        "Later product-path tests are recorded in deferred_followups and remain mandatory for their owning Phase 1 tasks."
+      ]
+    },
+    "limitations": [
+      "Password complexity and concrete rate-limit algorithm remain sourced WP5 completion inputs, not WP0.8 blockers."
+    ],
+    "unresolved_decisions": [],
+    "reviewer": "pending",
+    "deferred_followups": [
+      {
+        "scope": "Integrate source-backed temporary credential policy into API/session composition.",
+        "task_id": "WP5.1",
+        "acceptance_evidence": "API tests prove single use, forced change, exact expiry and no secret leakage."
+      }
+    ]
+  },
+  {
+    "schema_version": 1,
+    "task_id": "WP0.9",
+    "status": {
+      "implementation": "complete",
+      "unit_test": "passed",
+      "integration_test": "not_applicable",
+      "bdd_ui_test": "not_applicable",
+      "gate_verified": "passed"
+    },
+    "commit": "working-tree",
+    "environment": {
+      "node": "26.7.0",
+      "npm": "11.19.0",
+      "postgres": "not-run",
+      "database_role": "not-run",
+      "data_mode": "test",
+      "key_provider": "unknown"
+    },
+    "commands": [
+      {
+        "command": "node node_modules/vitest/vitest.mjs run tests/tooling/phase1_contracts.test.ts (94 tests passed)",
+        "result": "passed",
+        "artifact": "evidence/phase1/bdd-work-package-map.json"
+      }
+    ],
+    "claims": {
+      "behavior_proved": "All 42 frozen manifest IDs map exactly once to source requirement tags, owner tasks and required observable product paths; structural test rejects missing IDs, unknown owners or unspecified path.",
+      "path_proved": "Manifest/source/gate contract only; 17 current strict-run misses remain deferred acceptance, not product behavior claimed.",
+      "configuration_proved": "Gate includes verify:phase0 and explicit Phase 1 suites; Phase 1 login config requires local test-scoped PostgreSQL.",
+      "coverage_limitations": [
+        "Later product-path tests are recorded in deferred_followups and remain mandatory for their owning Phase 1 tasks."
+      ]
+    },
+    "limitations": [
+      "No Phase 1 BDD/API/browser suite is green yet."
+    ],
+    "unresolved_decisions": [],
+    "reviewer": "pending",
+    "deferred_followups": [
+      {
+        "scope": "Execute all frozen acceptance scenarios after owning WP1-WP6 paths exist.",
+        "task_id": "WP7.2",
+        "acceptance_evidence": "Strict final gate reports all 42 IDs passed with no @wip, skip, filter, missing scenario or zero discovery."
+      }
+    ]
+  },
+  {
+    "schema_version": 1,
+    "task_id": "WP0.10",
+    "status": {
+      "implementation": "complete",
+      "unit_test": "passed",
+      "integration_test": "not_applicable",
+      "bdd_ui_test": "not_applicable",
+      "gate_verified": "passed"
+    },
+    "commit": "working-tree",
+    "environment": {
+      "node": "26.7.0",
+      "npm": "11.19.0",
+      "postgres": "not-run",
+      "database_role": "not-run",
+      "data_mode": "test",
+      "key_provider": "unknown"
+    },
+    "commands": [
+      {
+        "command": "node node_modules/vitest/vitest.mjs run tests/tooling/phase1_contracts.test.ts (94 tests passed)",
+        "result": "passed",
+        "artifact": "evidence/phase1/authentication-session-policy-matrix.json"
+      }
+    ],
+    "claims": {
+      "behavior_proved": "Contract vectors prove exact forced-change route allowlist, CSRF+Origin requirement, 30-minute idle/12-hour absolute expiry boundaries and 72-hour temporary credential equality-expired rule.",
+      "path_proved": "Pure session policy model; no session store/API/browser behavior claimed. Numeric progressive-delay and password rules remain explicit pre-WP5 sourced inputs.",
+      "configuration_proved": "No session transport values invented.",
+      "coverage_limitations": [
+        "Later product-path tests are recorded in deferred_followups and remain mandatory for their owning Phase 1 tasks."
+      ]
+    },
+    "limitations": [
+      "Password complexity has no source value in the supplied decision package; WP5 must obtain a source before its completion. This does not block WP0 policy acceptance."
+    ],
+    "unresolved_decisions": [],
+    "reviewer": "pending",
+    "deferred_followups": [
+      {
+        "scope": "Implement the ratified auth/session route and policy contract.",
+        "task_id": "WP5.1",
+        "acceptance_evidence": "API boundary, rotation, revocation, CSRF/Origin, rate-limit and forced-change tests pass."
+      },
+      {
+        "scope": "Exercise user-visible login/change/logout flow.",
+        "task_id": "WP5.4",
+        "acceptance_evidence": "Real browser-to-API tests verify cookie flags and route restrictions without interception."
+      }
+    ]
+  },
+  {
+    "schema_version": 1,
+    "task_id": "WP0.11",
+    "status": {
+      "implementation": "complete",
+      "unit_test": "passed",
+      "integration_test": "not_applicable",
+      "bdd_ui_test": "not_applicable",
+      "gate_verified": "passed"
+    },
+    "commit": "working-tree",
+    "environment": {
+      "node": "26.7.0",
+      "npm": "11.19.0",
+      "postgres": "not-run",
+      "database_role": "not-run",
+      "data_mode": "test",
+      "key_provider": "unknown"
+    },
+    "commands": [
+      {
+        "command": "node node_modules/vitest/vitest.mjs run tests/tooling/phase1_contracts.test.ts (94 tests passed)",
+        "result": "passed",
+        "artifact": "evidence/phase1/runtime-mode-matrix.json"
+      }
+    ],
+    "claims": {
+      "behavior_proved": "Matrix tests cover all four profiles and reject mismatched APP_ENV/DATA_MODE, unapproved key/residency, missing least-privilege/disposable DB, synthetic-data violation, unconfigured demo scope and non-dedicated purge role.",
+      "path_proved": "Pure config-composition contract only; full app startup/readiness and mutating DB boundary remain downstream.",
+      "configuration_proved": "No real-data or production profile started.",
+      "coverage_limitations": [
+        "Later product-path tests are recorded in deferred_followups and remain mandatory for their owning Phase 1 tasks."
+      ]
+    },
+    "limitations": [
+      "Full application startup composition is assigned downstream; WP0 acceptance is the approved profile matrix and configuration decision vectors."
+    ],
+    "unresolved_decisions": [],
+    "reviewer": "pending",
+    "deferred_followups": [
+      {
+        "scope": "Apply one authoritative runtime profile in application composition.",
+        "task_id": "WP1.6",
+        "acceptance_evidence": "Startup tests prove valid profiles compose and invalid profiles fail before listen/mutating DB access."
+      },
+      {
+        "scope": "Enforce profile and role guard in CI.",
+        "task_id": "WP7.1",
+        "acceptance_evidence": "CI fixtures prove forbidden settings fail mandatory gate."
+      }
+    ]
+  },
+  {
+    "schema_version": 1,
+    "task_id": "WP0.12",
+    "status": {
+      "implementation": "complete",
+      "unit_test": "passed",
+      "integration_test": "not_applicable",
+      "bdd_ui_test": "not_applicable",
+      "gate_verified": "passed"
+    },
+    "commit": "working-tree",
+    "environment": {
+      "node": "26.7.0",
+      "npm": "11.19.0",
+      "postgres": "not-run",
+      "database_role": "not-run",
+      "data_mode": "test",
+      "key_provider": "unknown"
+    },
+    "commands": [
+      {
+        "command": "node node_modules/vitest/vitest.mjs run tests/tooling/phase1_contracts.test.ts (47 tests)",
+        "result": "passed",
+        "artifact": "evidence/phase1/tasks.json"
+      }
+    ],
+    "claims": {
+      "behavior_proved": "Versioned evidence schema, unsafe field/path rejection, dependency graph and gate contracts are exercised by tooling tests.",
+      "path_proved": "Ajv 2020-12 validator and focused Vitest suite.",
+      "configuration_proved": "No database or key provider required.",
+      "coverage_limitations": [
+        "Tooling contract success does not constitute WP0 closure or product behavior."
+      ]
+    },
+    "limitations": [],
+    "unresolved_decisions": [],
+    "reviewer": "pending"
+  },
+  {
+    "schema_version": 1,
+    "task_id": "WP0.13",
+    "status": {
+      "implementation": "partial",
+      "unit_test": "passed",
+      "integration_test": "passed",
+      "bdd_ui_test": "not_applicable",
+      "gate_verified": "pending"
+    },
+    "commit": "working-tree",
+    "environment": {
+      "node": "26.7.0",
+      "npm": "11.19.0",
+      "postgres": "18.0",
+      "database_role": "symphony (test database owner)",
+      "data_mode": "test",
+      "key_provider": "unknown"
+    },
+    "commands": [
+      {
+        "command": "npm run verify:phase0 using symphony_phase1_test; full dirty working tree based on c25b616fa2e0f75b14327d87747880a227cbb8b2",
+        "result": "passed",
+        "artifact": "evidence/phase1/phase0-candidate-verification.md"
+      },
+      {
+        "command": "node tools/phase1-contracts.js",
+        "result": "passed",
+        "artifact": "evidence/phase1/tasks.json"
+      }
+    ],
+    "claims": {
+      "behavior_proved": "WP0.1-WP0.12 evidence records validate as complete; all 94 WP0 tooling contract tests pass and the evidence/dependency/BDD/RLS/purge/runtime matrices validate. WP0.13 has four exact remaining closure gates: clean exact-commit Phase 0 evidence, reviewer identity, reviewer independence, and reviewer availability. Product-path tests for unimplemented Phase 1 features are assigned to their downstream work packages and are not WP0 blockers.",
+      "path_proved": "Full Phase 0 package/DB/BDD/browser/legacy gate plus WP0 contract graph/evidence validator; candidate base commit and dirty-tree limitation are recorded in the verification artifact.",
+      "configuration_proved": "DATA_MODE=test; MIGRATION_TEST_DATABASE_URL targets symphony_phase1_test; database role symphony owns that isolated database. No production data target used.",
+      "coverage_limitations": [
+        "Full Phase 0 result is currently for the dirty working tree; rerun on exact clean candidate commit.",
+        "Independent reviewer is not identified; final sign-off requires a separate reviewer who did not implement or produce primary evidence.",
+        "Downstream product path tests remain explicitly deferred to their owning WP1-WP7 tasks and mandatory Phase 1 gate."
+      ]
+    },
+    "limitations": [
+      "Do not start WP1 until the clean-candidate evidence and WP0.13 independent-review gate are satisfied."
+    ],
+    "unresolved_decisions": [
+      "Clean exact candidate commit must be recorded, then npm run verify:phase0 must pass against that exact commit.",
+      "Independent reviewer must be named, with independence and availability confirmed; reviewer must complete and record final review on the exact candidate."
+    ],
+    "reviewer": "pending"
+  }
+]

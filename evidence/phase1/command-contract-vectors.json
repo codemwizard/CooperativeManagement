@@ -1,0 +1,242 @@
+{
+  "version": 1,
+  "contract": "phase1-command-transaction-v2",
+  "key_version": "wp0-fixture-v1",
+  "fixture_key": "wp0-contract-test-key-v1",
+  "semantic_command": {
+    "tenant_id": "tenant-01",
+    "actor_id": "actor-01",
+    "command_id": "command-01",
+    "command_type": "membership.update",
+    "command_schema_version": 1,
+    "expected_aggregate_version": 7,
+    "payload": {
+      "name": "A cooperative",
+      "active": true
+    },
+    "occurred_at": "2030-01-01T00:00:00Z",
+    "device_id": "device-01",
+    "request_id": "request-01",
+    "trace_id": "trace-01",
+    "correlation_id": "correlation-01"
+  },
+  "expected_canonical_semantic_json": "{\"actor_id\":\"actor-01\",\"command_schema_version\":1,\"command_type\":\"membership.update\",\"expected_aggregate_version\":7,\"payload\":{\"active\":true,\"name\":\"A cooperative\"},\"tenant_id\":\"tenant-01\"}",
+  "expected_hmac_sha256": "e0c4a76ac4635a61968674d91793825452fa0efa1a163b72beaadd6ff0bb3f8e",
+  "historical_key_version": "wp0-fixture-v0",
+  "historical_fixture_key": "old-fixture-key-v0",
+  "expected_historical_hmac_sha256": "11177c1577e76e051a9914100c88b166205a00bf86d54d956f613b3900a5bcbb",
+  "metadata_fields": [
+    "occurred_at",
+    "device_id",
+    "request_id",
+    "trace_id",
+    "correlation_id"
+  ],
+  "races": [
+    {
+      "id": "same-actor-same-envelope",
+      "attempts": [
+        {
+          "actor_id": "actor-01",
+          "tenant_id": "tenant-01",
+          "payload": {
+            "name": "A cooperative",
+            "active": true
+          },
+          "authorized": true,
+          "command_id": "command-01"
+        },
+        {
+          "actor_id": "actor-01",
+          "tenant_id": "tenant-01",
+          "payload": {
+            "name": "A cooperative",
+            "active": true
+          },
+          "authorized": true,
+          "command_id": "command-01"
+        }
+      ],
+      "expected": [
+        "committed",
+        "replayed"
+      ]
+    },
+    {
+      "id": "same-actor-changed-payload",
+      "attempts": [
+        {
+          "actor_id": "actor-01",
+          "tenant_id": "tenant-01",
+          "payload": {
+            "name": "A cooperative",
+            "active": true
+          },
+          "authorized": true,
+          "command_id": "command-01"
+        },
+        {
+          "actor_id": "actor-01",
+          "tenant_id": "tenant-01",
+          "payload": {
+            "name": "Changed",
+            "active": true
+          },
+          "authorized": true,
+          "command_id": "command-01"
+        }
+      ],
+      "expected": [
+        "committed",
+        "key_reuse_rejected"
+      ]
+    },
+    {
+      "id": "different-actor-same-id",
+      "attempts": [
+        {
+          "actor_id": "actor-01",
+          "tenant_id": "tenant-01",
+          "payload": {
+            "name": "A cooperative",
+            "active": true
+          },
+          "authorized": true,
+          "command_id": "command-01"
+        },
+        {
+          "actor_id": "actor-02",
+          "tenant_id": "tenant-01",
+          "payload": {
+            "name": "A cooperative",
+            "active": true
+          },
+          "authorized": true,
+          "command_id": "command-01"
+        }
+      ],
+      "expected": [
+        "committed",
+        "non_disclosing_denial"
+      ]
+    },
+    {
+      "id": "denied-then-authorized",
+      "attempts": [
+        {
+          "actor_id": "actor-01",
+          "tenant_id": "tenant-01",
+          "payload": {
+            "name": "A cooperative",
+            "active": true
+          },
+          "authorized": false,
+          "command_id": "command-01"
+        },
+        {
+          "actor_id": "actor-01",
+          "tenant_id": "tenant-01",
+          "payload": {
+            "name": "A cooperative",
+            "active": true
+          },
+          "authorized": true,
+          "command_id": "command-01"
+        }
+      ],
+      "expected": [
+        "denied_no_receipt",
+        "committed"
+      ]
+    },
+    {
+      "id": "denial-audit-failure-then-retry",
+      "attempts": [
+        {
+          "actor_id": "actor-01",
+          "tenant_id": "tenant-01",
+          "payload": {
+            "name": "A cooperative",
+            "active": true
+          },
+          "authorized": false,
+          "audit_failure": true,
+          "command_id": "command-01"
+        },
+        {
+          "actor_id": "actor-01",
+          "tenant_id": "tenant-01",
+          "payload": {
+            "name": "A cooperative",
+            "active": true
+          },
+          "authorized": true,
+          "command_id": "command-01"
+        }
+      ],
+      "expected": [
+        "audit_failure_no_receipt",
+        "committed"
+      ]
+    },
+    {
+      "id": "authorized-races-denial",
+      "attempts": [
+        {
+          "actor_id": "actor-01",
+          "tenant_id": "tenant-01",
+          "payload": {
+            "name": "A cooperative",
+            "active": true
+          },
+          "authorized": true,
+          "command_id": "command-01"
+        },
+        {
+          "actor_id": "actor-02",
+          "tenant_id": "tenant-01",
+          "payload": {
+            "name": "A cooperative",
+            "active": true
+          },
+          "authorized": false,
+          "command_id": "command-01"
+        }
+      ],
+      "expected": [
+        "committed",
+        "denied_no_receipt"
+      ]
+    },
+    {
+      "id": "failure-before-commit-does-not-bind",
+      "attempts": [
+        {
+          "actor_id": "actor-01",
+          "tenant_id": "tenant-01",
+          "payload": {
+            "name": "A cooperative",
+            "active": true
+          },
+          "authorized": true,
+          "fail_before_commit": true,
+          "command_id": "command-01"
+        },
+        {
+          "actor_id": "actor-01",
+          "tenant_id": "tenant-01",
+          "payload": {
+            "name": "A cooperative",
+            "active": true
+          },
+          "authorized": true,
+          "command_id": "command-01"
+        }
+      ],
+      "expected": [
+        "failed_no_receipt",
+        "committed"
+      ]
+    }
+  ]
+}

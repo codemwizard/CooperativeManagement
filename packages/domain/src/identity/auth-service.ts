@@ -149,7 +149,7 @@ export class AuthService {
     }
 
     // 2. Expired
-    if (now > new Date(stored.expiresAt)) {
+    if (now.getTime() >= new Date(stored.expiresAt).getTime()) {
       return { ok: false, code: 'TEMPORARY_CREDENTIAL_EXPIRED' };
     }
 

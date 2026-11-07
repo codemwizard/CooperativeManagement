@@ -33,6 +33,7 @@ class TestClock {
   advance(hours: number): void {
     this._now = new Date(this._now.getTime() + hours * 3_600_000);
   }
+  set(value: Date): void { this._now = new Date(value); }
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -109,6 +110,25 @@ describe('AuthService', () => {
     );
     expect(result.ok).toBe(false);
     expect((result as AuthError).code).toBe('TEMPORARY_CREDENTIAL_EXPIRED');
+  });
+
+  it('temporaryCredential_expiresAtExact72HourBoundary', async () => {
+    const first = await svc.issueTemporaryCredential(USER_ID, DEFAULT_TTL_HOURS);
+    const expiry = new Date(first.expiresAt);
+
+    clock.set(new Date(expiry.getTime() - 1));
+    const justBefore = await svc.verifyCredential(USER_ID, first.plaintext, first, DEVICE_ID);
+    expect(justBefore.ok).toBe(true);
+
+    const atBoundary = await svc.issueTemporaryCredential(USER_ID, DEFAULT_TTL_HOURS);
+    const atBoundaryExpiry = new Date(atBoundary.expiresAt);
+    clock.set(atBoundaryExpiry);
+    const exactlyAt = await svc.verifyCredential(USER_ID, atBoundary.plaintext, atBoundary, DEVICE_ID);
+    expect(exactlyAt).toEqual({ ok: false, code: 'TEMPORARY_CREDENTIAL_EXPIRED' });
+
+    clock.set(new Date(atBoundaryExpiry.getTime() + 1));
+    const justAfter = await svc.verifyCredential(USER_ID, atBoundary.plaintext, atBoundary, DEVICE_ID);
+    expect(justAfter).toEqual({ ok: false, code: 'TEMPORARY_CREDENTIAL_EXPIRED' });
   });
 
   it('firstLogin_requiresPasswordChange', async () => {

@@ -1,0 +1,13 @@
+# Phase 1 purge-to-seed operation contract
+
+**Contract:** `phase1-purge-operation-v1`  
+**Status:** Disposable-test-only purge contract owner-approved (approval assumed at user direction, 2026-11-07); exact role/target/table evidence and PostgreSQL proof remain pending.
+**Authority:** ADR-016; PRV-007; Phase 1 plan WP0.5; `features/02_identity_privacy_and_access.feature` BDD-PRV-011.
+
+The successful purge audit ledger is outside the purge allowlist, protected by database privileges, and written atomically with the purge transaction. The dedicated purge role cannot update/delete that ledger. Refused/attempted operations use a separate control-plane/security audit channel and are never represented as successful. A failure to record required refusal evidence must not permit purge.
+
+The exact WP0 target and reviewable table/row policy are recorded in `evidence/phase1/purge-table-policy-matrix.json`: target database/schema `symphony_phase1_test.symphony`, required database comment marker `symphony-disposable-test:v1`, and proposed role `symphony_phase1_purger`. The marker and role are not installed/provisioned, so this database is not yet eligible for purge. The matrix classifies every current migration table; organization-specific control-plane rows are filtered by organization IDs captured before deletion, while global defaults/catalogues and the future `purge_audit` ledger are preserved.
+
+Before issuing the first destructive SQL statement, validate all of: explicit synthetic test mode; dedicated DB identity and exact marker; dedicated purge role; expected database/schema/connection target; credential cannot connect to production; explicit table/row allowlist matches current migration/FK inventory; audit ledger excluded; no unknown tenant/global/control-plane table; role is not owner, superuser, CREATEDB, CREATEROLE, BYPASSRLS, app role, or DDL-capable. Missing or mismatched input fails closed before any DELETE. Do not use an app role or a credential that can connect to production. Purge only through individual allowlisted DELETE statements in one transaction; no TRUNCATE, CASCADE, DROP SCHEMA or dynamic all-table discovery. Preserve catalogue data and restore deterministic seeds.
+
+WP0 pure preflight vectors cover each target/profile/marker/role/privilege/allowlist/audit/unknown-table/CASCADE guard and prove refusal before destructive SQL. No destructive SQL was executed. WP4.1/WP4.2 must provision the dedicated role/marker, verify actual credentials, prove every refusal issues zero DELETEs, and test successful purge, rollback, repeatability, durable audit and catalogue preservation against a disposable PostgreSQL target.

@@ -1,0 +1,110 @@
+{
+  "version": 1,
+  "authority_contract": "phase1-authorization-capacity-v1",
+  "scope": "Every mutable fact used by an in-scope Phase 1 allow decision; this is a contract inventory, not a claim that PostgreSQL serialization has been implemented.",
+  "serialization": {
+    "aggregate_key": "(tenant_id, actor_id)",
+    "protected_command": "Acquire a shared lock on the actor/tenant authority aggregate, read current dependency values, authorize, and commit protected mutation while holding that lock.",
+    "authority_change": "Acquire an exclusive lock on the same actor/tenant authority aggregate before changing a dependency; record the new aggregate version in the same transaction.",
+    "lock_order": ["tenant_id", "actor_id", "dependency_type", "dependency_id"],
+    "retry": "Bounded serialization/deadlock retry reuses the same logical command ID.",
+    "proof_owner": "WP2.4 PostgreSQL barrier tests; WP0 defines the complete dependency set and expected serial outcomes."
+  },
+  "dependencies": [
+    {
+      "id": "tenant-membership",
+      "fact": "Actor is an active identity with membership in the command tenant.",
+      "source_tables": ["users", "tenants", "user_role_assignments"],
+      "mutable": true,
+      "mutation_paths": ["membership create/suspend/revoke", "tenant assignment grant/revoke"],
+      "scope": "tenant",
+      "serialization_target": "affected actor/tenant authority aggregate",
+      "required_race_cases": ["protected-command-first-then-membership-revoke", "membership-revoke-first-then-protected-command"],
+      "proof_owner": "WP2.4"
+    },
+    {
+      "id": "platform-role-assignment",
+      "fact": "Actor has an explicit role assignment granting the canonical action.",
+      "source_tables": ["platform_roles", "user_role_assignments"],
+      "mutable": true,
+      "mutation_paths": ["role assignment grant/revoke", "role definition change"],
+      "scope": "tenant assignment plus global role catalogue",
+      "serialization_target": "actor/tenant aggregate for assignment changes; role definitions are frozen during Phase 1 and any future change must version the global policy catalogue and invalidate affected aggregate versions",
+      "required_race_cases": ["protected-command-first-then-role-revoke", "role-revoke-first-then-protected-command", "role-definition-version-change-invalidates-authorization"],
+      "proof_owner": "WP2.4"
+    },
+    {
+      "id": "appointment-and-source-status",
+      "fact": "Any office/appointment required by the action is current, in scope, and supported by the accepted source status.",
+      "source_tables": ["appointments", "organizations"],
+      "mutable": true,
+      "mutation_paths": ["appointment create/elect/appoint/end/revoke", "source evidence status correction"],
+      "scope": "tenant via organization",
+      "serialization_target": "affected actor/tenant authority aggregate",
+      "required_race_cases": ["protected-command-first-then-appointment-end", "appointment-end-first-then-protected-command", "historical-appointment-remains-immutable"],
+      "proof_owner": "WP2.4"
+    },
+    {
+      "id": "capacity-grant-and-revocation",
+      "fact": "Actor holds the required active capacity for the target organization and command.",
+      "source_tables": ["capacity_grants", "organizations"],
+      "mutable": true,
+      "mutation_paths": ["capacity grant", "capacity revoke", "capacity scope correction"],
+      "scope": "tenant via organization",
+      "serialization_target": "affected actor/tenant authority aggregate",
+      "required_race_cases": ["protected-command-first-then-capacity-revoke", "capacity-revoke-first-then-protected-command"],
+      "proof_owner": "WP2.4"
+    },
+    {
+      "id": "delegation-chain-and-revocation",
+      "fact": "Every delegation link in the actor-to-scope chain is active, unexpired, and in the target cohort/organization.",
+      "source_tables": ["delegations", "organizations", "enroller_assignments"],
+      "mutable": true,
+      "mutation_paths": ["delegation grant", "delegation revoke", "delegation scope change", "expiry boundary"],
+      "scope": "tenant/organization and configured cohort scope",
+      "serialization_target": "affected delegate actor/tenant authority aggregate; each parent/delegator change also advances affected delegate aggregates before commit",
+      "required_race_cases": ["protected-command-first-then-parent-delegation-revoke", "parent-revoke-first-then-protected-command", "expiry-at-boundary-denies"],
+      "proof_owner": "WP2.4"
+    },
+    {
+      "id": "organization-and-cohort-scope",
+      "fact": "The target organization/cohort belongs to the authorized tenant and is within the actor's assigned scope.",
+      "source_tables": ["organizations", "enrolment_sessions", "enroller_assignments", "delegations"],
+      "mutable": true,
+      "mutation_paths": ["organization tenant/scope reassignment", "cohort assignment grant/revoke", "delegation scope change"],
+      "scope": "tenant with explicit parent relations",
+      "serialization_target": "affected actor/tenant authority aggregate; organization reparenting is a privileged serialized operation",
+      "required_race_cases": ["protected-command-first-then-scope-revoke", "scope-revoke-first-then-protected-command", "cross-tenant-reparent-refused"],
+      "proof_owner": "WP2.4"
+    },
+    {
+      "id": "identity-conflict-and-ineligibility-facts",
+      "fact": "Person identity/conflict attributes relevant to a protected action are current and not superseded by a contradictory accepted fact.",
+      "source_tables": ["persons", "person_identifiers", "person_pii_vault", "consent_records"],
+      "mutable": true,
+      "mutation_paths": ["identity correction/link", "identifier revoke/replace", "conflict status change", "consent withdrawal where it changes permitted processing"],
+      "scope": "tenant via person and parent aggregate",
+      "serialization_target": "affected person/tenant authority aggregate; no person data may be added to an authority token or event",
+      "required_race_cases": ["protected-command-first-then-conflict-change", "conflict-change-first-then-protected-command", "consent-revoked-before-dependent-processing-denies"],
+      "proof_owner": "WP2.4"
+    },
+    {
+      "id": "policy-and-configuration-version",
+      "fact": "Action rules, scope policy, approval requirements, and relevant configuration are the version evaluated by the command.",
+      "source_tables": ["membership_rules", "acceptance_policies", "enforcement_policies", "approval_policies", "retention_policies", "precedence_policies", "duty_matrix_rows"],
+      "mutable": true,
+      "mutation_paths": ["policy/configuration version change", "policy effective-time update"],
+      "scope": "tenant-specific and global policy catalogue",
+      "serialization_target": "tenant/actor aggregate version for tenant policy; global policy catalogue version is frozen in Phase 1 or included in every affected decision snapshot and invalidates authorization when changed",
+      "required_race_cases": ["protected-command-first-then-policy-change", "policy-change-first-then-protected-command", "command-retains-evaluated-policy-version"],
+      "proof_owner": "WP2.4"
+    }
+  ],
+  "required_invariants": [
+    "Every allow rule references one or more dependency IDs above; no dependency is silently treated as immutable.",
+    "Every mutation path that can change an allow decision participates in the same serialization protocol or is explicitly frozen/versioned.",
+    "A command linearized before revocation may commit before it; a command linearized after revocation commit is denied.",
+    "No protected mutation commits using an unlocked stale dependency snapshot.",
+    "History rows are append-only; current revocation changes future authority and never rewrites historical findings."
+  ]
+}

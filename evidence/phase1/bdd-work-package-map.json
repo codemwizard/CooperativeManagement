@@ -1,0 +1,615 @@
+{
+  "version": 1,
+  "source": "evidence/phase1/bdd-scenarios.json plus canonical Implementation-Plan-V4/features/*.feature tags",
+  "rule": "Frozen IDs remain mandatory; this map assigns the correct product path and owner without claiming the unimplemented behavior is a WP0 failure.",
+  "scenarios": [
+    {
+      "id": "BDD-ENR-004",
+      "feature": "features/01_enrollment_and_handover.feature",
+      "requirements": [
+        "REQ-ENR-010"
+      ],
+      "scenario": "Temporary credentials are single use, expire and force a change",
+      "owner_tasks": [
+        "WP5.1",
+        "WP5.4"
+      ],
+      "required_path": "PostgreSQL-backed API plus browser-to-API; no auth-route interception",
+      "assertion_rule": "Execute this exact tagged scenario with observable assertions on the specified product path; no mock, @wip, skip, tag removal, zero-step pass, or in-memory substitute.",
+      "phase0_status": "mapped_and_deferred_to_owner_task"
+    },
+    {
+      "id": "BDD-PRV-001",
+      "feature": "features/02_identity_privacy_and_access.feature",
+      "requirements": [
+        "REQ-PRV-001"
+      ],
+      "scenario": "Consent is required before personal data is entered",
+      "owner_tasks": [
+        "WP3.3"
+      ],
+      "required_path": "privacy persistence API plus PostgreSQL; demonstrate consent/retention state transitions",
+      "assertion_rule": "Execute this exact tagged scenario with observable assertions on the specified product path; no mock, @wip, skip, tag removal, zero-step pass, or in-memory substitute.",
+      "phase0_status": "mapped_and_deferred_to_owner_task"
+    },
+    {
+      "id": "BDD-PRV-002",
+      "feature": "features/02_identity_privacy_and_access.feature",
+      "requirements": [
+        "REQ-PRV-001"
+      ],
+      "scenario": "Withdrawal of consent flags the record and starts the retention clock",
+      "owner_tasks": [
+        "WP3.3"
+      ],
+      "required_path": "privacy persistence API plus PostgreSQL; demonstrate consent/retention state transitions",
+      "assertion_rule": "Execute this exact tagged scenario with observable assertions on the specified product path; no mock, @wip, skip, tag removal, zero-step pass, or in-memory substitute.",
+      "phase0_status": "mapped_and_deferred_to_owner_task"
+    },
+    {
+      "id": "BDD-PRV-003",
+      "feature": "features/02_identity_privacy_and_access.feature",
+      "requirements": [
+        "REQ-PRV-002",
+        "REQ-ID-005"
+      ],
+      "scenario": "Identifiers are encrypted and duplicates are found by blind index",
+      "owner_tasks": [
+        "WP3.2"
+      ],
+      "required_path": "identifier crypto domain/API plus PostgreSQL storage and duplicate-review assertions",
+      "assertion_rule": "Execute this exact tagged scenario with observable assertions on the specified product path; no mock, @wip, skip, tag removal, zero-step pass, or in-memory substitute.",
+      "phase0_status": "mapped_and_deferred_to_owner_task"
+    },
+    {
+      "id": "BDD-PRV-004",
+      "feature": "features/02_identity_privacy_and_access.feature",
+      "requirements": [
+        "REQ-ID-005"
+      ],
+      "scenario": "Members without an NRC use fallback identifiers",
+      "owner_tasks": [
+        "WP3.2"
+      ],
+      "required_path": "identifier crypto domain/API plus PostgreSQL storage and duplicate-review assertions",
+      "assertion_rule": "Execute this exact tagged scenario with observable assertions on the specified product path; no mock, @wip, skip, tag removal, zero-step pass, or in-memory substitute.",
+      "phase0_status": "mapped_and_deferred_to_owner_task"
+    },
+    {
+      "id": "BDD-PRV-005",
+      "feature": "features/02_identity_privacy_and_access.feature",
+      "requirements": [
+        "REQ-PRV-003"
+      ],
+      "scenario": "Role-based masking of member identifiers",
+      "owner_tasks": [
+        "WP3.3",
+        "WP6.3"
+      ],
+      "required_path": "API response audience canaries plus rendered audience views",
+      "assertion_rule": "Execute this exact tagged scenario with observable assertions on the specified product path; no mock, @wip, skip, tag removal, zero-step pass, or in-memory substitute.",
+      "phase0_status": "mapped_and_deferred_to_owner_task"
+    },
+    {
+      "id": "BDD-PRV-006",
+      "feature": "features/02_identity_privacy_and_access.feature",
+      "requirements": [
+        "REQ-PRV-004"
+      ],
+      "scenario": "Events and logs carry no personal data",
+      "owner_tasks": [
+        "WP3.1"
+      ],
+      "required_path": "real event/log serialization path with NRC-shaped canaries",
+      "assertion_rule": "Execute this exact tagged scenario with observable assertions on the specified product path; no mock, @wip, skip, tag removal, zero-step pass, or in-memory substitute.",
+      "phase0_status": "mapped_and_deferred_to_owner_task"
+    },
+    {
+      "id": "BDD-PRV-007",
+      "feature": "features/02_identity_privacy_and_access.feature",
+      "requirements": [
+        "REQ-PRV-005",
+        "REQ-PRV-008"
+      ],
+      "scenario": "Retention crypto-shreds personal data but keeps pseudonymised transaction facts",
+      "owner_tasks": [
+        "WP3.4",
+        "WP3.3"
+      ],
+      "required_path": "retention/key-provider lifecycle integration with persistent pseudonymous transaction fact",
+      "assertion_rule": "Execute this exact tagged scenario with observable assertions on the specified product path; no mock, @wip, skip, tag removal, zero-step pass, or in-memory substitute.",
+      "phase0_status": "mapped_and_deferred_to_owner_task"
+    },
+    {
+      "id": "BDD-PRV-008",
+      "feature": "features/02_identity_privacy_and_access.feature",
+      "requirements": [
+        "REQ-PRV-006"
+      ],
+      "scenario": "A member may inspect the register read-only",
+      "owner_tasks": [
+        "WP6.1"
+      ],
+      "required_path": "browser-to-API route with observable assertions",
+      "assertion_rule": "Execute this exact tagged scenario with observable assertions on the specified product path; no mock, @wip, skip, tag removal, zero-step pass, or in-memory substitute.",
+      "phase0_status": "mapped_and_deferred_to_owner_task"
+    },
+    {
+      "id": "BDD-PRV-009",
+      "feature": "features/02_identity_privacy_and_access.feature",
+      "requirements": [
+        "REQ-PRV-007",
+        "REQ-PRV-009"
+      ],
+      "scenario": "Test mode accepts only the synthetic identifier pattern",
+      "owner_tasks": [
+        "WP3.1"
+      ],
+      "required_path": "test-profile domain/API validation of synthetic identifier patterns",
+      "assertion_rule": "Execute this exact tagged scenario with observable assertions on the specified product path; no mock, @wip, skip, tag removal, zero-step pass, or in-memory substitute.",
+      "phase0_status": "mapped_and_deferred_to_owner_task"
+    },
+    {
+      "id": "BDD-PRV-010",
+      "feature": "features/02_identity_privacy_and_access.feature",
+      "requirements": [
+        "REQ-PRV-007"
+      ],
+      "scenario": "Real mode refuses to start outside an approved residency region",
+      "owner_tasks": [
+        "WP3.5"
+      ],
+      "required_path": "actual application startup composition rejects unapproved residency before readiness",
+      "assertion_rule": "Execute this exact tagged scenario with observable assertions on the specified product path; no mock, @wip, skip, tag removal, zero-step pass, or in-memory substitute.",
+      "phase0_status": "mapped_and_deferred_to_owner_task"
+    },
+    {
+      "id": "BDD-PRV-011",
+      "feature": "features/02_identity_privacy_and_access.feature",
+      "requirements": [
+        "REQ-PRV-007"
+      ],
+      "scenario": "Purge-to-seed removes tenant data and restores the seed set",
+      "owner_tasks": [
+        "WP4.1",
+        "WP4.2"
+      ],
+      "required_path": "disposable PostgreSQL purge command, allowlist, deterministic reseed and durable audit",
+      "assertion_rule": "Execute this exact tagged scenario with observable assertions on the specified product path; no mock, @wip, skip, tag removal, zero-step pass, or in-memory substitute.",
+      "phase0_status": "mapped_and_deferred_to_owner_task"
+    },
+    {
+      "id": "BDD-PRV-015",
+      "feature": "features/02_identity_privacy_and_access.feature",
+      "requirements": [
+        "REQ-PRV-010"
+      ],
+      "scenario": "Statutory register fields rest on legal obligation, not consent",
+      "owner_tasks": [
+        "WP3.3",
+        "WP6.3"
+      ],
+      "required_path": "API/data-minimization contract plus browser inspection route and privacy-safe audit",
+      "assertion_rule": "Execute this exact tagged scenario with observable assertions on the specified product path; no mock, @wip, skip, tag removal, zero-step pass, or in-memory substitute.",
+      "phase0_status": "mapped_and_deferred_to_owner_task"
+    },
+    {
+      "id": "BDD-PRV-016",
+      "feature": "features/02_identity_privacy_and_access.feature",
+      "requirements": [
+        "REQ-PRV-010",
+        "REQ-PRV-006"
+      ],
+      "scenario": "Public inspection on payment of the prescribed fee shows only statutory fields (Act s.21, s.28)",
+      "owner_tasks": [
+        "WP3.3",
+        "WP6.3"
+      ],
+      "required_path": "API/data-minimization contract plus browser inspection route and privacy-safe audit",
+      "assertion_rule": "Execute this exact tagged scenario with observable assertions on the specified product path; no mock, @wip, skip, tag removal, zero-step pass, or in-memory substitute.",
+      "phase0_status": "mapped_and_deferred_to_owner_task"
+    },
+    {
+      "id": "BDD-PRV-018",
+      "feature": "features/02_identity_privacy_and_access.feature",
+      "requirements": [
+        "REQ-PRV-006"
+      ],
+      "scenario": "A member inspects free of charge and sees the same statutory fields",
+      "owner_tasks": [
+        "WP3.3",
+        "WP6.3"
+      ],
+      "required_path": "API/data-minimization contract plus browser inspection route and privacy-safe audit",
+      "assertion_rule": "Execute this exact tagged scenario with observable assertions on the specified product path; no mock, @wip, skip, tag removal, zero-step pass, or in-memory substitute.",
+      "phase0_status": "mapped_and_deferred_to_owner_task"
+    },
+    {
+      "id": "BDD-PRV-019",
+      "feature": "features/02_identity_privacy_and_access.feature",
+      "requirements": [
+        "REQ-PRV-006"
+      ],
+      "scenario": "Inspection of by-laws and regulations needs no personal data",
+      "owner_tasks": [
+        "WP3.3",
+        "WP6.3"
+      ],
+      "required_path": "API/data-minimization contract plus browser inspection route and privacy-safe audit",
+      "assertion_rule": "Execute this exact tagged scenario with observable assertions on the specified product path; no mock, @wip, skip, tag removal, zero-step pass, or in-memory substitute.",
+      "phase0_status": "mapped_and_deferred_to_owner_task"
+    },
+    {
+      "id": "BDD-PRV-020",
+      "feature": "features/02_identity_privacy_and_access.feature",
+      "requirements": [
+        "REQ-PRV-011"
+      ],
+      "scenario": "An individual member's accounts need that member's written consent (Act s.59(2))",
+      "owner_tasks": [
+        "WP3.3",
+        "WP6.3"
+      ],
+      "required_path": "API/data-minimization contract plus browser inspection route and privacy-safe audit",
+      "assertion_rule": "Execute this exact tagged scenario with observable assertions on the specified product path; no mock, @wip, skip, tag removal, zero-step pass, or in-memory substitute.",
+      "phase0_status": "mapped_and_deferred_to_owner_task"
+    },
+    {
+      "id": "BDD-UNI-001",
+      "feature": "features/02_identity_privacy_and_access.feature",
+      "requirements": [
+        "REQ-UNI-001",
+        "REQ-UNI-002"
+      ],
+      "scenario": "Union TA sees assigned cohorts and capability gaps but no member PII",
+      "owner_tasks": [
+        "WP2.2",
+        "WP2.3"
+      ],
+      "required_path": "trusted delegated-scope API composition with full response canaries",
+      "assertion_rule": "Execute this exact tagged scenario with observable assertions on the specified product path; no mock, @wip, skip, tag removal, zero-step pass, or in-memory substitute.",
+      "phase0_status": "mapped_and_deferred_to_owner_task"
+    },
+    {
+      "id": "BDD-UNI-002",
+      "feature": "features/02_identity_privacy_and_access.feature",
+      "requirements": [
+        "REQ-UNI-001"
+      ],
+      "scenario": "Delegation is a chain and can be revoked",
+      "owner_tasks": [
+        "WP2.3",
+        "WP2.4"
+      ],
+      "required_path": "persisted delegation grant/revoke with both authorization serial orders and immutable audit",
+      "assertion_rule": "Execute this exact tagged scenario with observable assertions on the specified product path; no mock, @wip, skip, tag removal, zero-step pass, or in-memory substitute.",
+      "phase0_status": "mapped_and_deferred_to_owner_task"
+    },
+    {
+      "id": "BDD-AUD-001",
+      "feature": "features/09_commands_audit_and_integrity.feature",
+      "requirements": [
+        "REQ-AUD-001"
+      ],
+      "scenario": "State, event and outbox commit together or not at all",
+      "owner_tasks": [
+        "WP1.2"
+      ],
+      "required_path": "PostgreSQL transaction adapter with state/event/outbox/receipt rollback assertions",
+      "assertion_rule": "Execute this exact tagged scenario with observable assertions on the specified product path; no mock, @wip, skip, tag removal, zero-step pass, or in-memory substitute.",
+      "phase0_status": "mapped_and_deferred_to_owner_task"
+    },
+    {
+      "id": "BDD-AUD-002",
+      "feature": "features/09_commands_audit_and_integrity.feature",
+      "requirements": [
+        "REQ-AUD-002"
+      ],
+      "scenario": "The same command id with the same payload returns the original result",
+      "owner_tasks": [
+        "WP1.3"
+      ],
+      "required_path": "PostgreSQL receipt contention/replay API with actor and semantic-envelope binding",
+      "assertion_rule": "Execute this exact tagged scenario with observable assertions on the specified product path; no mock, @wip, skip, tag removal, zero-step pass, or in-memory substitute.",
+      "phase0_status": "mapped_and_deferred_to_owner_task"
+    },
+    {
+      "id": "BDD-AUD-003",
+      "feature": "features/09_commands_audit_and_integrity.feature",
+      "requirements": [
+        "REQ-AUD-002"
+      ],
+      "scenario": "The same command id with a different payload is rejected",
+      "owner_tasks": [
+        "WP1.3"
+      ],
+      "required_path": "PostgreSQL receipt contention/replay API with actor and semantic-envelope binding",
+      "assertion_rule": "Execute this exact tagged scenario with observable assertions on the specified product path; no mock, @wip, skip, tag removal, zero-step pass, or in-memory substitute.",
+      "phase0_status": "mapped_and_deferred_to_owner_task"
+    },
+    {
+      "id": "BDD-AUD-004",
+      "feature": "features/09_commands_audit_and_integrity.feature",
+      "requirements": [
+        "REQ-AUD-003"
+      ],
+      "scenario": "A stale expected version is rejected and both inputs are preserved",
+      "owner_tasks": [
+        "WP1.4"
+      ],
+      "required_path": "encrypted reconciliation persistence plus access/retention checks under application role",
+      "assertion_rule": "Execute this exact tagged scenario with observable assertions on the specified product path; no mock, @wip, skip, tag removal, zero-step pass, or in-memory substitute.",
+      "phase0_status": "mapped_and_deferred_to_owner_task"
+    },
+    {
+      "id": "BDD-AUD-005",
+      "feature": "features/09_commands_audit_and_integrity.feature",
+      "requirements": [
+        "REQ-AUD-004"
+      ],
+      "scenario": "A command cannot touch another organisation",
+      "owner_tasks": [
+        "WP1.5"
+      ],
+      "required_path": "PostgreSQL least-privilege role, RLS and explicit tenant-filter tests",
+      "assertion_rule": "Execute this exact tagged scenario with observable assertions on the specified product path; no mock, @wip, skip, tag removal, zero-step pass, or in-memory substitute.",
+      "phase0_status": "mapped_and_deferred_to_owner_task"
+    },
+    {
+      "id": "BDD-AUD-006",
+      "feature": "features/09_commands_audit_and_integrity.feature",
+      "requirements": [
+        "REQ-AUD-004"
+      ],
+      "scenario": "Cross-organisation reads return nothing",
+      "owner_tasks": [
+        "WP1.5"
+      ],
+      "required_path": "PostgreSQL least-privilege role, RLS and explicit tenant-filter tests",
+      "assertion_rule": "Execute this exact tagged scenario with observable assertions on the specified product path; no mock, @wip, skip, tag removal, zero-step pass, or in-memory substitute.",
+      "phase0_status": "mapped_and_deferred_to_owner_task"
+    },
+    {
+      "id": "BDD-AUD-007",
+      "feature": "features/09_commands_audit_and_integrity.feature",
+      "requirements": [
+        "REQ-AUD-005"
+      ],
+      "scenario": "UI telemetry is not the business audit log",
+      "owner_tasks": [
+        "WP1.1",
+        "WP6.1"
+      ],
+      "required_path": "business audit/event sink and separate UI telemetry path",
+      "assertion_rule": "Execute this exact tagged scenario with observable assertions on the specified product path; no mock, @wip, skip, tag removal, zero-step pass, or in-memory substitute.",
+      "phase0_status": "mapped_and_deferred_to_owner_task"
+    },
+    {
+      "id": "BDD-AUD-008",
+      "feature": "features/09_commands_audit_and_integrity.feature",
+      "requirements": [
+        "REQ-AUD-006"
+      ],
+      "scenario": "Read-only institutions cannot mutate cooperative source records",
+      "owner_tasks": [
+        "WP2.1",
+        "WP2.2"
+      ],
+      "required_path": "default-deny policy/domain plus trusted API composition and forged-claim tests",
+      "assertion_rule": "Execute this exact tagged scenario with observable assertions on the specified product path; no mock, @wip, skip, tag removal, zero-step pass, or in-memory substitute.",
+      "phase0_status": "mapped_and_deferred_to_owner_task"
+    },
+    {
+      "id": "BDD-AUD-009",
+      "feature": "features/09_commands_audit_and_integrity.feature",
+      "requirements": [
+        "REQ-AUD-006"
+      ],
+      "scenario": "The client cannot set verified, authority or approval states",
+      "owner_tasks": [
+        "WP2.1",
+        "WP2.2"
+      ],
+      "required_path": "default-deny policy/domain plus trusted API composition and forged-claim tests",
+      "assertion_rule": "Execute this exact tagged scenario with observable assertions on the specified product path; no mock, @wip, skip, tag removal, zero-step pass, or in-memory substitute.",
+      "phase0_status": "mapped_and_deferred_to_owner_task"
+    },
+    {
+      "id": "BDD-AUD-010",
+      "feature": "features/09_commands_audit_and_integrity.feature",
+      "requirements": [
+        "REQ-AUD-001"
+      ],
+      "scenario": "Events are append-only",
+      "owner_tasks": [
+        "WP1.5"
+      ],
+      "required_path": "PostgreSQL append-only privilege/trigger boundary against runtime role",
+      "assertion_rule": "Execute this exact tagged scenario with observable assertions on the specified product path; no mock, @wip, skip, tag removal, zero-step pass, or in-memory substitute.",
+      "phase0_status": "mapped_and_deferred_to_owner_task"
+    },
+    {
+      "id": "BDD-AUD-014",
+      "feature": "features/09_commands_audit_and_integrity.feature",
+      "requirements": [
+        "REQ-AUD-002"
+      ],
+      "scenario": "Authorisation is enforced on the server for every command",
+      "owner_tasks": [
+        "WP2.1",
+        "WP2.2"
+      ],
+      "required_path": "default-deny policy/domain plus trusted API composition and forged-claim tests",
+      "assertion_rule": "Execute this exact tagged scenario with observable assertions on the specified product path; no mock, @wip, skip, tag removal, zero-step pass, or in-memory substitute.",
+      "phase0_status": "mapped_and_deferred_to_owner_task"
+    },
+    {
+      "id": "BDD-AUD-015",
+      "feature": "features/09_commands_audit_and_integrity.feature",
+      "requirements": [
+        "REQ-ENR-008"
+      ],
+      "scenario": "Events keep occurred_at separate from recorded_at",
+      "owner_tasks": [
+        "WP1.1"
+      ],
+      "required_path": "versioned command envelope and server acceptance timestamp path",
+      "assertion_rule": "Execute this exact tagged scenario with observable assertions on the specified product path; no mock, @wip, skip, tag removal, zero-step pass, or in-memory substitute.",
+      "phase0_status": "mapped_and_deferred_to_owner_task"
+    },
+    {
+      "id": "BDD-AUD-016",
+      "feature": "features/09_commands_audit_and_integrity.feature",
+      "requirements": [
+        "REQ-AUD-001"
+      ],
+      "scenario": "Validation runs are immutable",
+      "owner_tasks": [
+        "WP1.6"
+      ],
+      "required_path": "command execution and immutable rule-version snapshot integration path",
+      "assertion_rule": "Execute this exact tagged scenario with observable assertions on the specified product path; no mock, @wip, skip, tag removal, zero-step pass, or in-memory substitute.",
+      "phase0_status": "mapped_and_deferred_to_owner_task"
+    },
+    {
+      "id": "BDD-UXW-001",
+      "feature": "features/10_workspace_and_capabilities.feature",
+      "requirements": [
+        "REQ-UXW-001"
+      ],
+      "scenario": "Navigation is scoped to the persona and every screen has a URL",
+      "owner_tasks": [
+        "WP6.1"
+      ],
+      "required_path": "browser-to-API route with observable assertions",
+      "assertion_rule": "Execute this exact tagged scenario with observable assertions on the specified product path; no mock, @wip, skip, tag removal, zero-step pass, or in-memory substitute.",
+      "phase0_status": "mapped_and_deferred_to_owner_task"
+    },
+    {
+      "id": "BDD-UXW-002",
+      "feature": "features/10_workspace_and_capabilities.feature",
+      "requirements": [
+        "REQ-UXW-001"
+      ],
+      "scenario": "Route changes move focus and survive reload",
+      "owner_tasks": [
+        "WP6.1"
+      ],
+      "required_path": "browser-to-API route with observable assertions",
+      "assertion_rule": "Execute this exact tagged scenario with observable assertions on the specified product path; no mock, @wip, skip, tag removal, zero-step pass, or in-memory substitute.",
+      "phase0_status": "mapped_and_deferred_to_owner_task"
+    },
+    {
+      "id": "BDD-UXW-003",
+      "feature": "features/10_workspace_and_capabilities.feature",
+      "requirements": [
+        "REQ-UXW-002"
+      ],
+      "scenario": "No enum text reaches the user",
+      "owner_tasks": [
+        "WP6.1"
+      ],
+      "required_path": "browser-to-API route with observable assertions",
+      "assertion_rule": "Execute this exact tagged scenario with observable assertions on the specified product path; no mock, @wip, skip, tag removal, zero-step pass, or in-memory substitute.",
+      "phase0_status": "mapped_and_deferred_to_owner_task"
+    },
+    {
+      "id": "BDD-UXW-004",
+      "feature": "features/10_workspace_and_capabilities.feature",
+      "requirements": [
+        "REQ-UXW-002"
+      ],
+      "scenario": "Verified chips carry scope, verifier, version and class",
+      "owner_tasks": [
+        "WP6.1"
+      ],
+      "required_path": "browser-to-API route with observable assertions",
+      "assertion_rule": "Execute this exact tagged scenario with observable assertions on the specified product path; no mock, @wip, skip, tag removal, zero-step pass, or in-memory substitute.",
+      "phase0_status": "mapped_and_deferred_to_owner_task"
+    },
+    {
+      "id": "BDD-UXW-005",
+      "feature": "features/10_workspace_and_capabilities.feature",
+      "requirements": [
+        "REQ-UXW-005"
+      ],
+      "scenario": "The status strip uses shape, colour and text together",
+      "owner_tasks": [
+        "WP6.1"
+      ],
+      "required_path": "browser-to-API route with observable assertions",
+      "assertion_rule": "Execute this exact tagged scenario with observable assertions on the specified product path; no mock, @wip, skip, tag removal, zero-step pass, or in-memory substitute.",
+      "phase0_status": "mapped_and_deferred_to_owner_task"
+    },
+    {
+      "id": "BDD-UXW-009",
+      "feature": "features/10_workspace_and_capabilities.feature",
+      "requirements": [
+        "REQ-UXW-003"
+      ],
+      "scenario": "Blocked actions explain themselves in text and are announced",
+      "owner_tasks": [
+        "WP6.1"
+      ],
+      "required_path": "browser-to-API route with observable assertions",
+      "assertion_rule": "Execute this exact tagged scenario with observable assertions on the specified product path; no mock, @wip, skip, tag removal, zero-step pass, or in-memory substitute.",
+      "phase0_status": "mapped_and_deferred_to_owner_task"
+    },
+    {
+      "id": "BDD-UXW-010",
+      "feature": "features/10_workspace_and_capabilities.feature",
+      "requirements": [
+        "REQ-UXW-004"
+      ],
+      "scenario": "Demo tooling is separate from product screens",
+      "owner_tasks": [
+        "WP6.2"
+      ],
+      "required_path": "served demo workspace with synthetic tenant, confirmation and non-demo exclusion",
+      "assertion_rule": "Execute this exact tagged scenario with observable assertions on the specified product path; no mock, @wip, skip, tag removal, zero-step pass, or in-memory substitute.",
+      "phase0_status": "mapped_and_deferred_to_owner_task"
+    },
+    {
+      "id": "BDD-UXW-011",
+      "feature": "features/10_workspace_and_capabilities.feature",
+      "requirements": [
+        "REQ-UXW-004"
+      ],
+      "scenario": "Seed values are never presented as real",
+      "owner_tasks": [
+        "WP6.2"
+      ],
+      "required_path": "served demo workspace with synthetic tenant, confirmation and non-demo exclusion",
+      "assertion_rule": "Execute this exact tagged scenario with observable assertions on the specified product path; no mock, @wip, skip, tag removal, zero-step pass, or in-memory substitute.",
+      "phase0_status": "mapped_and_deferred_to_owner_task"
+    },
+    {
+      "id": "BDD-UXW-013",
+      "feature": "features/10_workspace_and_capabilities.feature",
+      "requirements": [
+        "REQ-UXW-005"
+      ],
+      "scenario": "The provenance drawer is accessible and complete",
+      "owner_tasks": [
+        "WP6.1"
+      ],
+      "required_path": "browser-to-API route with observable assertions",
+      "assertion_rule": "Execute this exact tagged scenario with observable assertions on the specified product path; no mock, @wip, skip, tag removal, zero-step pass, or in-memory substitute.",
+      "phase0_status": "mapped_and_deferred_to_owner_task"
+    },
+    {
+      "id": "BDD-UXW-015",
+      "feature": "features/10_workspace_and_capabilities.feature",
+      "requirements": [
+        "REQ-UXW-005"
+      ],
+      "scenario": "Audience-relative wording is shown to institutions",
+      "owner_tasks": [
+        "WP6.3"
+      ],
+      "required_path": "rendered institutional presenter copy and scope disclaimer assertions",
+      "assertion_rule": "Execute this exact tagged scenario with observable assertions on the specified product path; no mock, @wip, skip, tag removal, zero-step pass, or in-memory substitute.",
+      "phase0_status": "mapped_and_deferred_to_owner_task"
+    }
+  ]
+}
