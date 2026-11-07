@@ -11,7 +11,7 @@
   "commit": "working-tree",
   "environment": {
     "node": "26.7.0",
-    "npm": "11.19.0",
+    "npm": "12.2.0",
     "postgres": "not-required",
     "database_role": "not-required",
     "data_mode": "test",
@@ -28,7 +28,9 @@
     "behavior_proved": "Evidence records follow the shared version 1 schema and reject unsafe paths or secret-shaped fields.",
     "path_proved": "Node tooling validator and Vitest contract tests.",
     "configuration_proved": "No database or key provider was used.",
-    "coverage_limitations": ["This example does not claim any Phase 1 product behavior."]
+    "coverage_limitations": [
+      "This example does not claim any Phase 1 product behavior."
+    ]
   },
   "limitations": [],
   "unresolved_decisions": [],

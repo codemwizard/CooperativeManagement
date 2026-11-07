@@ -283,3 +283,7 @@ The project owner explicitly directed that all owner signatures and legal valida
 | D-12 review model | Approved: independent AI review permitted under separate-context/source/artifact/rerun conditions; owner remains final closure authority. | Amend plan and obtain a separate reviewer; implementer cannot self-review. |
 
 **Effect on status:** these rulings resolve owner approval questions in the supplied D-01–D-12 package. They do not close WP0 or Phase 1. Required tests, DB/runtime evidence, current-candidate Phase 0 PASS, separate independent review and the WP0.13 evidence gate remain mandatory. O-22 remains open because missing Act pages are a source-material issue outside the supplied approval package.
+
+### 6.4 Active toolchain pin (owner direction, 7 November 2026)
+
+The active repository toolchain is Node.js `26.7.0` and npm `12.2.0`. This direction supersedes npm `11.19.0` as the active expected version in repository metadata, the toolchain validator, CI setup, and current development documentation. Retained Phase 0/CI evidence that actually ran under npm `11.19.0` remains historical and must not be rewritten. Run `npm run verify:phase0` with Node `26.7.0` and npm `12.2.0` and retain a new result before using it as the current WP0.13 Phase 0 candidate pass.

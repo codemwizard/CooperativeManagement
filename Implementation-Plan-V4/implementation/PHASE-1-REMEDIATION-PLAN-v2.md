@@ -220,7 +220,7 @@ status:
 commit: "<sha>"
 environment:
   node: "26.7.0"
-  npm: "11.19.0"
+  npm: "12.2.0"
   postgres: "18.6"
   database_role: "phase1_app_test; non-owner; non-superuser; no BYPASSRLS"
   data_mode: "test"
@@ -505,7 +505,7 @@ WP6.1 and WP6.3 contract tests can start in WP0. WP6.3 uses its own deterministi
 
 ### WP7 — Complete toolchain/typecheck/CI command and failure-propagation gate
 
-**Finding:** P1-09, supporting P1-01–08/10/11. **Authority:** Phase 0 pins Node 26.7.0, npm 11.19.0, PostgreSQL 18.6; ADR-005 and Phase 0 report.  
+**Finding:** P1-09, supporting P1-01–08/10/11. **Authority:** Node 26.7.0 and npm 12.2.0 are the active owner-directed toolchain pins; historical Phase 0 artifacts record npm 11.19.0. PostgreSQL 18.6 is the CI service version; ADR-005 and retained CI evidence.
 **Likely paths:** root `package.json`, workspace scripts/manifests, solution TS configs, `.github/workflows/ci.yml`, Playwright/Cucumber config, migration/seed tools, CI evidence collector.
 
 #### Atomic task breakdown
@@ -517,7 +517,7 @@ WP6.1 and WP6.3 contract tests can start in WP0. WP6.3 uses its own deterministi
 
 WP7 begins in WP0 and is expanded at each integration boundary; it is not deferred until product work is complete.
 
-1. Keep exact runtime pins consistent with `.nvmrc`, package engines, npm lockfile/packageManager, Docker Compose, CI matrix, and docs. Current Phase 0 report records Node 26.7.0/npm 11.19.0/PostgreSQL 18.6; any change requires an ADR and a fresh baseline.
+1. Keep exact runtime pins consistent with `.nvmrc`, package engines, npm lockfile/packageManager, Docker Compose, CI matrix, and docs. Active pins are Node 26.7.0/npm 12.2.0; historical Phase 0 reports record npm 11.19.0 and remain unchanged. The owner directed the new active npm pin on 2026-11-07; the Phase 0 gate must be rerun under the active pins before WP0.13 closure.
 2. Add a TypeScript solution config referencing every new workspace (`packages/domain`, contracts, DB, testkit, API, workspace) and keep legacy TypeScript project separately explicit. Use project references/build order; no `skipLibCheck`/exclude workaround to hide errors unless the existing architectural standard explicitly permits it and the reason is documented.
 3. Add explicit scripts for API tests, workspace build/typecheck, command tests, full DB integration, BDD, UI/Playwright, a11y, trace, architecture, privacy/purge nonfunctional tests, and legacy floor. Reconcile `test:ui` with existing legacy runner: use a distinct `test:workspace` or similarly unambiguous name; do not silently replace legacy E2E coverage.
 4. Create root `verify:phase1` with a fixed, documented order. It must include `verify:phase0` or the equivalent Phase 0 floor, plus all Phase 1 suites, migrations on clean PostgreSQL 18, API/auth, workspace build/typecheck, BDD/trace, a11y and no-mock login browser tests. It must never include Phase 2 feature claims.
@@ -530,7 +530,7 @@ WP7 begins in WP0 and is expanded at each integration boundary; it is not deferr
 
 ### WP8 — Independent Phase 1 closure review
 
-WP0.13 identifies the separate independent reviewer and records availability/independence before implementation is complete. The owner has amended the review model to permit a separate AI review session/model that did not implement the work or produce primary evidence. The reviewer receives the exact candidate commit, contracts, commands and retained artifacts; independently inspects source/evidence; reruns selected critical checks where possible; and reports findings, limitations and unverified claims. The implementing agent cannot review its own work. If reviewer availability changes, the project owner records a replacement and confirms independence before requesting closure; reviewer availability is tracked as a project dependency.
+WP0.13 identifies the separate independent reviewer and records availability/independence before implementation is complete. The owner has amended the review model to permit a separate AI review session/model that did not implement the work or produce primary evidence. Independence is process-based: the reviewer must not have authored implementation changes, tests, primary evidence, or the implementation agent's acceptance conclusions. A clean context by itself is insufficient if the reviewer participated in that work. Record the reviewer model/provider and separate session identifier, exact candidate commit, review scope, and a declaration that the reviewer had no role in implementation or primary-evidence production. Provide repository access so the reviewer can inspect source and evidence; repository access does not compromise independence. Give the reviewer the requirements, candidate commit, and verification commands, but request an independent assessment rather than a target verdict. The reviewer inspects source and raw retained results, reruns selected critical checks where possible, and reports findings, limitations, and unverified claims in their own words. The owner records the review artifact and disposition. If reviewer availability changes, record a replacement and repeat the independence check. This is independent AI review, not legal, regulatory, or external-auditor assurance.
 
 If a qualifying independent reviewer is not available, implementation work and automated gates may be recorded as passed, but formal Phase 1 closure remains **pending independent review** and Phase 2 remains frozen. Do not substitute self-review or the implementation report for independent review. AI review does not constitute legal or regulatory approval.
 

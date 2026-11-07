@@ -24,9 +24,11 @@ methodology with IRIS+ aligned indicators) are included. All other engine invari
 
 ### Prerequisites
 - Node.js 26.7.0
-- npm 11.19.0
+- npm 12.2.0 (pinned project toolchain)
 - PostgreSQL 18
 - Python 3.10+ (for verification tools)
+
+The active project toolchain pins Node.js 26.7.0 and npm 12.2.0 in `toolchain.json`, `package.json`, `.nvmrc`, and CI. Historical Phase 0 artifacts retain the versions actually used for those runs; the current gate validates against the active pins above.
 
 ### 1. Install Dependencies
 

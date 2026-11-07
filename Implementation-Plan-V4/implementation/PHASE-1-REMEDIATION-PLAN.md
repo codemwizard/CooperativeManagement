@@ -246,10 +246,10 @@ Run static/type/architecture checks and focused tests continuously; do not wait 
 
 ### WP7 — Complete toolchain/typecheck/CI command and failure-propagation gate
 
-**Finding:** P1-09, supporting P1-01–08/10/11. **Authority:** Phase 0 pins Node 26.7.0, npm 11.19.0, PostgreSQL 18.6; ADR-005 and Phase 0 report.  
+**Finding:** P1-09, supporting P1-01–08/10/11. **Authority:** Node 26.7.0 and npm 12.2.0 are the active owner-directed toolchain pins; historical Phase 0 artifacts record npm 11.19.0. PostgreSQL 18.6 is the CI service version; ADR-005 and retained CI evidence.
 **Likely paths:** root `package.json`, workspace scripts/manifests, solution TS configs, `.github/workflows/ci.yml`, Playwright/Cucumber config, migration/seed tools, CI evidence collector.
 
-1. Keep exact runtime pins consistent with `.nvmrc`, package engines, npm lockfile/packageManager, Docker Compose, CI matrix, and docs. Current Phase 0 report records Node 26.7.0/npm 11.19.0/PostgreSQL 18.6; any change requires an ADR and a fresh baseline.
+1. Keep exact runtime pins consistent with `.nvmrc`, package engines, npm lockfile/packageManager, Docker Compose, CI matrix, and docs. Active pins are Node 26.7.0/npm 12.2.0; historical Phase 0 reports record npm 11.19.0 and remain unchanged. The owner directed the new active npm pin on 2026-11-07; the Phase 0 gate must be rerun under the active pins before WP0.13 closure.
 2. Add a TypeScript solution config referencing every new workspace (`packages/domain`, contracts, DB, testkit, API, workspace) and keep legacy TypeScript project separately explicit. Use project references/build order; no `skipLibCheck`/exclude workaround to hide errors unless the existing architectural standard explicitly permits it and the reason is documented.
 3. Add explicit scripts for API tests, workspace build/typecheck, command tests, full DB integration, BDD, UI/Playwright, a11y, trace, architecture, privacy/purge nonfunctional tests, and legacy floor. Reconcile `test:ui` with existing legacy runner: use a distinct `test:workspace` or similarly unambiguous name; do not silently replace legacy E2E coverage.
 4. Create root `verify:phase1` with a fixed, documented order. It must include `verify:phase0` or the equivalent Phase 0 floor, plus all Phase 1 suites, migrations on clean PostgreSQL 18, API/auth, workspace build/typecheck, BDD/trace, a11y and no-mock login browser tests. It must never include Phase 2 feature claims.

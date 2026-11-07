@@ -20,7 +20,7 @@ jobs:
           node-version: '26.7.0'
           cache: npm
       - name: Pin npm version
-        run: npm install --global npm@11.19.0
+        run: npm install --global npm@12.2.0
       - run: npm ci
       - name: Verify the local PostgreSQL lifecycle commands
         run: npm run db:start && npm run db:stop
@@ -81,7 +81,7 @@ jobs:
           node-version: '26.7.0'
           cache: npm
       - name: Pin npm version
-        run: npm install --global npm@11.19.0
+        run: npm install --global npm@12.2.0
       - run: npm ci
       - run: npm run db:migrate:test
       - run: npm run test:db --workspace @symphony/db
@@ -96,7 +96,7 @@ jobs:
           node-version: '26.7.0'
           cache: npm
       - name: Pin npm version
-        run: npm install --global npm@11.19.0
+        run: npm install --global npm@12.2.0
       - run: npm ci
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium

@@ -607,7 +607,7 @@
     "commit": "working-tree",
     "environment": {
       "node": "26.7.0",
-      "npm": "11.19.0",
+      "npm": "12.2.0",
       "postgres": "18.0",
       "database_role": "symphony (test database owner)",
       "data_mode": "test",
@@ -615,7 +615,7 @@
     },
     "commands": [
       {
-        "command": "npm run verify:phase0 using symphony_phase1_test; full dirty working tree based on c25b616fa2e0f75b14327d87747880a227cbb8b2",
+        "command": "npm run verify:phase0 using Node 26.7.0/npm 12.2.0 and symphony_phase1_test; full dirty working tree based on c25b616fa2e0f75b14327d87747880a227cbb8b2",
         "result": "passed",
         "artifact": "evidence/phase1/phase0-candidate-verification.md"
       },
@@ -626,11 +626,11 @@
       }
     ],
     "claims": {
-      "behavior_proved": "WP0.1-WP0.12 evidence records validate as complete; all 94 WP0 tooling contract tests pass and the evidence/dependency/BDD/RLS/purge/runtime matrices validate. WP0.13 has four exact remaining closure gates: clean exact-commit Phase 0 evidence, reviewer identity, reviewer independence, and reviewer availability. Product-path tests for unimplemented Phase 1 features are assigned to their downstream work packages and are not WP0 blockers.",
-      "path_proved": "Full Phase 0 package/DB/BDD/browser/legacy gate plus WP0 contract graph/evidence validator; candidate base commit and dirty-tree limitation are recorded in the verification artifact.",
+      "behavior_proved": "WP0.1-WP0.12 evidence records validate as complete; all 94 WP0 tooling contract tests pass and the evidence/dependency/BDD/RLS/purge/runtime matrices validate. The full Phase 0 gate now passes on the dirty candidate under active Node 26.7.0/npm 12.2.0 pins. WP0.13 still requires a clean exact commit and reviewer identity, independence, availability, and completed review. Product-path tests for unimplemented Phase 1 features remain assigned to downstream work packages and are not WP0 blockers.",
+      "path_proved": "Full Phase 0 gate against isolated symphony_phase1_test and WP0 contract graph/evidence validator; exact active runtime, base commit, and dirty-tree limitation are recorded in the current verification artifact.",
       "configuration_proved": "DATA_MODE=test; MIGRATION_TEST_DATABASE_URL targets symphony_phase1_test; database role symphony owns that isolated database. No production data target used.",
       "coverage_limitations": [
-        "Full Phase 0 result is currently for the dirty working tree; rerun on exact clean candidate commit.",
+        "Current active-pin Phase 0 pass covers the dirty working tree; rerun on the exact clean candidate commit.",
         "Independent reviewer is not identified; final sign-off requires a separate reviewer who did not implement or produce primary evidence.",
         "Downstream product path tests remain explicitly deferred to their owning WP1-WP7 tasks and mandatory Phase 1 gate."
       ]
@@ -639,7 +639,7 @@
       "Do not start WP1 until the clean-candidate evidence and WP0.13 independent-review gate are satisfied."
     ],
     "unresolved_decisions": [
-      "Clean exact candidate commit must be recorded, then npm run verify:phase0 must pass against that exact commit.",
+      "Clean exact candidate commit must be recorded and npm run verify:phase0 rerun on that exact commit.",
       "Independent reviewer must be named, with independence and availability confirmed; reviewer must complete and record final review on the exact candidate."
     ],
     "reviewer": "pending"

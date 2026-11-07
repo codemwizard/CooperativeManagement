@@ -14,7 +14,8 @@ export function validateToolchain({
   if (nvmrc.trim() !== expected.node) failures.push('.nvmrc');
   if (packageJson.packageManager !== `npm@${expected.npm}`) failures.push('package.json packageManager');
   if (packageJson.engines?.node !== `>=${expected.node} <27`) failures.push('package.json Node engine');
-  if (packageJson.engines?.npm !== `>=${expected.npm}`) failures.push('package.json npm engine');
+  const npmNextMajor = Number(expected.npm.split('.')[0]) + 1;
+  if (packageJson.engines?.npm !== `>=${expected.npm} <${npmNextMajor}`) failures.push('package.json npm engine');
   if (rootLock?.engines?.node !== packageJson.engines.node) failures.push('package-lock.json Node engine');
   if (rootLock?.engines?.npm !== packageJson.engines.npm) failures.push('package-lock.json npm engine');
   if (!readme.includes(`Node.js ${expected.node}`)) failures.push('README Node version');

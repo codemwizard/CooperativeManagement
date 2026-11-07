@@ -2,10 +2,10 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { validateToolchain } from '../../tools/toolchain-contract.mjs';
 
-const expected = { node: '26.7.0', npm: '11.19.0', postgresqlMajor: 18 };
+const expected = { node: '26.7.0', npm: '12.2.0', postgresqlMajor: 18 };
 const packageJson = {
-  packageManager: 'npm@11.19.0',
-  engines: { node: '>=26.7.0 <27', npm: '>=11.19.0' },
+  packageManager: 'npm@12.2.0',
+  engines: { node: '>=26.7.0 <27', npm: '>=12.2.0 <13' },
 };
 const lockfile = { packages: { '': { engines: packageJson.engines } } };
 const validSources = {
@@ -13,11 +13,11 @@ const validSources = {
   packageJson,
   lockfile,
   nvmrc: '26.7.0\n',
-  readme: 'Node.js 26.7.0, npm 11.19.0, PostgreSQL 18',
-  workflow: "node-version: '26.7.0'; npm@11.19.0; image: postgres:18-alpine",
+  readme: 'Node.js 26.7.0, npm 12.2.0, PostgreSQL 18',
+  workflow: "node-version: '26.7.0'; npm@12.2.0; image: postgres:18-alpine",
   compose: 'image: postgres:18-alpine',
   actualNode: '26.7.0',
-  actualNpm: '11.19.0',
+  actualNpm: '12.2.0',
 };
 
 test('accepts a fully aligned local and CI matrix', () => {
