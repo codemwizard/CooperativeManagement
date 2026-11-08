@@ -39,15 +39,14 @@
       "ordinary_runtime_role": "symphony_app",
       "permitted_sql_operations": [
         "SELECT",
-        "INSERT",
-        "UPDATE"
+        "INSERT"
       ],
       "delete_grant": false,
       "required_rls": "ENABLE+FORCE",
       "current_rls_enabled_and_forced": true,
       "explicit_tenant_predicate": true,
       "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
-      "access_policy": "Tenant context is transaction-local, derived only from authenticated server context; every query also includes an explicit tenant predicate.",
+      "access_policy": "Complete receipt rows are inserted once and immutable after commit. Tenant context is transaction-local, derived only from authenticated server context; every query also includes an explicit tenant predicate.",
       "status": "WP0 proposed contract; no production/application grant or new policy migration claimed"
     },
     {
@@ -58,15 +57,14 @@
       "ordinary_runtime_role": "symphony_app",
       "permitted_sql_operations": [
         "SELECT",
-        "INSERT",
-        "UPDATE"
+        "INSERT"
       ],
       "delete_grant": false,
       "required_rls": "ENABLE+FORCE",
       "current_rls_enabled_and_forced": true,
       "explicit_tenant_predicate": true,
       "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
-      "access_policy": "Tenant context is transaction-local, derived only from authenticated server context; every query also includes an explicit tenant predicate.",
+      "access_policy": "Append-only event rows are inserted and never updated or deleted. Tenant context is transaction-local, derived only from authenticated server context; every query also includes an explicit tenant predicate.",
       "status": "WP0 proposed contract; no production/application grant or new policy migration claimed"
     },
     {

@@ -287,3 +287,12 @@ The project owner explicitly directed that all owner signatures and legal valida
 ### 6.4 Active toolchain pin (owner direction, 7 November 2026)
 
 The active repository toolchain is Node.js `26.7.0` and npm `12.2.0`. This direction supersedes npm `11.19.0` as the active expected version in repository metadata, the toolchain validator, CI setup, and current development documentation. Retained Phase 0/CI evidence that actually ran under npm `11.19.0` remains historical and must not be rewritten. Run `npm run verify:phase0` with Node `26.7.0` and npm `12.2.0` and retain a new result before using it as the current WP0.13 Phase 0 candidate pass.
+
+### 6.5 WP0 Baseline Closure and Phase 1 Authorization (owner decision, 7 November 2026)
+
+**Disposition:** APPROVED and CLOSED.
+- **Independent AI Review:** Conducted by Gemini 3.8 Flash (High) in independent session `1fcbac00-0538-45bf-9355-7d7403ea4820`; independent review report accepted.
+- **Phase 0 Baseline Verification:** Successfully executed and passed 100% (all 12 checks, exit code 0) on clean candidate commit `f1fa5f9413747c0ac3cbd73413179101d33f653e` with Node 26.7.0, npm 12.2.0, PostgreSQL 18.0, and isolated test database `symphony_phase1_test`.
+- **WP0 Contract Baseline:** Structurally valid, 43 acyclic task dependency nodes, 94 contract oracle vectors passed, 53 migrated tables classified, runtime mode matrix verified.
+- **Owner Closure Permission:** Explicitly granted by project owner on 2026-11-07. WP0 is closed; WP1 implementation (beginning with WP1.1) is authorized to proceed.
+

@@ -1,10 +1,10 @@
 # Phase 1 contract baseline (WP0)
 
-**Baseline version:** `phase1-baseline-v2-owner-approved-assumed`  
-**Status:** Owner approval assumed by explicit user direction on 2026-11-07; WP0 remains open pending evidence and review. WP1 remains blocked.  
-**Project decision owner:** User/project owner; signature assumed granted by explicit direction, not cryptographically signed in this file.  
-**Independent Phase 1 closure reviewer:** Independent AI review is permitted by owner direction; a separate reviewer must still inspect the exact candidate and evidence.  
-**Signed:** Owner approval assumed by explicit user direction; not represented as a verified electronic signature.
+**Baseline version:** `phase1-baseline-v2-owner-approved-closed`  
+**Status:** WP0 closed; owner approval granted on 2026-11-07; Independent Review complete; WP1 authorized to begin.  
+**Project decision owner:** User/project owner; closure permission explicitly granted on 2026-11-07.  
+**Independent Phase 1 closure reviewer:** Gemini 3.8 Flash (High), session `1fcbac00-0538-45bf-9355-7d7403ea4820`; independent review complete and accepted.  
+**Signed:** Owner closure permission granted 2026-11-07; baseline ratified.
 
 ## Source baseline and limits
 
@@ -15,8 +15,8 @@ ADR-005 (TypeScript/PostgreSQL 18/Fastify/Zod/Kysely + SQL) and ADR-006 (pure do
 ## Phase 0 exact evidence and current candidate check
 
 - Historical Phase 0 PASS is commit `c70d3f439907e5ff37aee3953704e29d899e0032`, GitHub Actions run `42201289720`, documented in `docs/PHASE0_VERIFICATION_REPORT.md` and `docs/PHASE0_COMMAND_MAP.md`.
-- On 2026-11-07, the implementer verified the existing `symphony_phase1_test` PostgreSQL 18.0 database. The `symphony` owner role lacks `CREATEDB` (it cannot provision another database or create roles under that privilege), but can create/alter schema objects and insert/update/delete rows inside the owned test database. A transaction-only schema/table/ALTER/DML privilege probe was rolled back. The Phase 0 migration suite then passed (3 files / 9 tests), followed by the full `npm run verify:phase0` gate on the dirty working tree based on `c25b616fa2e0f75b14327d87747880a227cbb8b2`; evidence is `evidence/phase1/phase0-candidate-verification.md`.
-- The full dirty-tree gate passed on 2026-11-07 with the active Node 26.7.0/npm 12.2.0 pins, PostgreSQL 18.0, 71 domain tests, 9 migration tests, 49 BDD scenarios / 224 steps, 1 a11y test, and 261 legacy Vitest tests. The earlier dirty-tree pass under npm 11.19.0 remains historical and is retained separately. The candidate is still uncommitted/dirty; rerun the full gate on the exact clean candidate commit before WP0.13 closure. Preserve user-owned `CI-Results/` contents unchanged.
+- On 2026-11-07, the implementer and project owner verified the existing `symphony_phase1_test` PostgreSQL 18.0 database. The `symphony` owner role lacks `CREATEDB` (it cannot provision another database or create roles under that privilege), but can create/alter schema objects and insert/update/delete rows inside the owned test database. A transaction-only schema/table/ALTER/DML privilege probe was rolled back. The Phase 0 migration suite passed (3 files / 9 tests), followed by the full `npm run verify:phase0` gate on the clean candidate commit `f1fa5f9413747c0ac3cbd73413179101d33f653e`; evidence is `evidence/phase1/phase0-candidate-verification.md`.
+- The full clean-tree gate passed on 2026-11-07 with the active Node 26.7.0/npm 12.2.0 pins, PostgreSQL 18.0, 71 domain tests, 9 migration tests, 49 BDD scenarios / 224 steps, 1 a11y test, and 261 legacy Vitest tests. Independent review was completed by Gemini 3.8 Flash (High) in session `1fcbac00-0538-45bf-9355-7d7403ea4820`, confirming all 12 checks passed. Preserve user-owned `CI-Results/` contents unchanged.
 
 ## Approved decisions versus remaining evidence
 
@@ -70,8 +70,8 @@ The user explicitly directed that all owner signatures and legal validations be 
 
 ## Scope and dependency evidence
 
-`evidence/phase1/task-dependencies.yml` captures the plan's WP0–WP8 graph and an explicit basis for every edge. Structural validation checks known tasks, cycles, missing/weak edge reasons and mandatory WP0 nodes. A target task cannot execute until every transitive predecessor has a passing common evidence record. WP0.13 requires passing WP0.1–WP0.12 records and cannot be substituted by this draft. WP3.3 fields/transitions remain conditional under the privacy mapping; unmapped items are deferred. No WP1 code is authorized by this artifact.
+`evidence/phase1/task-dependencies.yml` captures the plan's WP0–WP8 graph and an explicit basis for every edge. Structural validation checks known tasks, cycles, missing/weak edge reasons and mandatory WP0 nodes. A target task cannot execute until every transitive predecessor has a passing common evidence record. WP0.13 requires passing WP0.1–WP0.12 records and cannot be substituted by this draft. WP3.3 fields/transitions remain conditional under the privacy mapping; unmapped items are deferred. WP0 is closed and WP1 implementation is authorized; each WP1 task remains gated by its listed passing predecessors and the executable acceptance criteria in the Phase 1 remediation plan §5.
 
 ## WP0 sign-off
 
-WP0 is not complete. Owner signatures and legal validations are assumed granted by explicit user direction. Required before WP1: finish the complete DB role/table/authority inventories and executable vectors; pass the full Phase 0 gate on the exact candidate with isolated PostgreSQL 18; pass and record WP0.1–WP0.12 evidence; execute the frozen BDD manifest without filtered scenarios; run structural/gate validators; complete independent review under the amended AI-permitted model; and record owner closure acceptance. The current implementation agent cannot independently review its own work.
+WP0 is complete and closed. Owner closure permission was explicitly granted on 2026-11-07. All conditions from the Independent Review Report (session `1fcbac00-0538-45bf-9355-7d7403ea4820`) have been met: complete DB role/table/authority inventories and executable contract vectors pass; the full Phase 0 gate passed on clean commit `f1fa5f9413747c0ac3cbd73413179101d33f653e` with isolated PostgreSQL 18; WP0.1–WP0.12 common evidence records validate clean; frozen BDD manifest mapping is established; and structural/gate validators confirm zero blockers. Implementation of WP1 (starting with WP1.1) is authorized.

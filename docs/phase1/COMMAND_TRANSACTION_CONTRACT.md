@@ -1,7 +1,7 @@
 # Phase 1 command transaction contract
 
 **Contract:** `phase1-command-transaction-v1`  
-**Status:** Owner-approved contract baseline (approval assumed at user direction, 2026-11-07); pure model vectors partially pass; DB/API runtime proof remains pending before WP1.
+**Status:** Owner-approved WP0 contract; WP0 is closed and WP1 is authorized. Pure model vectors are contract evidence only; PostgreSQL/API runtime proof is assigned to WP1.1–WP1.3/WP1.6 as specified in the Phase 1 remediation plan. This status does not imply implementation or runtime proof has passed.
 **Authority:** Phase 1 remediation plan v2, §2 (command, receipt, canonical payload, rotation, transaction uncertainty, rejection); `03-specification-delta.md` §9; `features/09_commands_audit_and_integrity.feature` AUD-001–004, 010, 014–016; ADR-014.
 
 ## Logical command identity
@@ -29,7 +29,7 @@ Changing any immutable field for an existing key is key reuse and is rejected wi
 
 ## Receipt and transaction visibility
 
-Receipt reservation, business state, domain events, outbox rows and final safe result are one PostgreSQL transaction. A reservation is not a replayable terminal receipt until the transaction commits; no pending or partial result is visible. The database commit is authoritative if the response is lost. A retry uses the same logical ID and resolves the committed result or proceeds only if the prior owner rolled back. Ambiguous commits are resolved by querying/retrying under the same key. Deadlock/serialization retries are bounded and never mint a new command ID.
+The complete receipt, business state, domain events, outbox rows and any terminal reconciliation inbox row are one PostgreSQL transaction. WP1 inserts a complete receipt only after authorization and deterministic result evaluation, then performs the state/event/outbox/inbox writes before commit. The receipt uses the composite primary key `(tenant_id, command_id)` and is invisible until commit; no pending/placeholder receipt is permitted. A failure rolls back every write. The database commit is authoritative if the response is lost. Deadlock/serialization retries are bounded and never mint a new command ID. WP1 retry behavior is fixed at three total transaction attempts for SQLSTATE `40001` and `40P01` only; all attempts retain the same logical ID and semantic envelope. Unique receipt-key contention is resolved by reading/verifying the committed receipt, not generic retry. On uncertain COMMIT, query the same key on a fresh connection; only re-enter the transaction if the lookup proves no receipt exists and the database is healthy. If outcome cannot be established, return retryable service unavailable and require client retry with the same ID. See the plan §5 for exact retry schedule and required fault-injection proof.
 
 Replay requires a currently authenticated actor/session and matching tenant ownership. Only the original actor receives the committed safe result. Replay does not rerun the mutation and does not require current mutation authority; changed actor, tenant, schema or digest receives a non-disclosing denial. A deterministic accepted terminal evaluation, including a stale-version conflict, stores a safe terminal result atomically with its reconciliation inbox record, while aggregate/event/outbox state remains unchanged.
 
@@ -41,7 +41,7 @@ The **Project Owner** is accountable for ensuring version availability and appro
 
 ## Security-attempt and receipt race table
 
-The following outcomes are normative for the approved attempt-ID-only model. They require executable tests before WP1.
+The following outcomes are normative for the approved attempt-ID-only model. Their contract vectors are WP0 evidence; real PostgreSQL/API execution is required in the owning WP1 tasks and does not reopen WP0.
 
 | Situation | Required outcome |
 |---|---|
@@ -60,6 +60,6 @@ Use HMAC-SHA-256 with a distinct key from field encryption. Store only the key v
 
 Receipt retention duration, key custodian/operations owner, approved retirement authority and recovery path are operational configuration/evidence items still to be established. Do not invent a retention duration or claim rotation is operationally ready until recorded.
 
-## Contract-vector coverage before WP1
+## Contract vectors and downstream WP1 acceptance
 
-The current executable model vectors pin JCS ordering/number behavior, duplicate-key and invalid-Unicode rejection, semantic-field versus request-metadata classification, historical HMAC key lookup, and the seven sequential attempt/receipt outcomes in `evidence/phase1/command-contract-vectors.json`. They are a pure contract model, not a production canonicalizer, PostgreSQL race, transaction rollback, audit-channel or uncertain-commit test. Remaining required vectors include schema default materialization/unknown-field rejection, historical schema/canonicalizer lookup, actual audit failure, invisible reservation/rollback, post-commit response loss, ambiguous commit, concurrent owner contention, stale terminal receipt and redaction through the real DB/API path. No canonicalization implementation is authorized by this WP0 document.
+The executable model vectors in `evidence/phase1/command-contract-vectors.json` are a pure contract model, not a production canonicalizer, PostgreSQL race, transaction rollback, audit-channel or uncertain-commit test. WP1.1 proves versioned schema/default handling and historical schema/canonicalizer/key lookup; WP1.2–WP1.3 prove transaction visibility, rollback, post-commit response loss, ambiguous commit and contention; WP1.6 proves real API redaction. These are downstream implementation acceptance tests under the closed WP0 contract, not prerequisites that reopen WP0.

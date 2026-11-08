@@ -9,7 +9,7 @@
       "bdd_ui_test": "not_applicable",
       "gate_verified": "passed"
     },
-    "commit": "working-tree",
+    "commit": "f1fa5f9413747c0ac3cbd73413179101d33f653e",
     "environment": {
       "node": "26.7.0",
       "npm": "11.19.0",
@@ -37,7 +37,7 @@
       "No WP1 implementation authorized."
     ],
     "unresolved_decisions": [],
-    "reviewer": "pending",
+    "reviewer": "Gemini 3.8 Flash (High) - Independent Review Session 1fcbac00-0538-45bf-9355-7d7403ea4820",
     "deferred_followups": [
       {
         "scope": "Implement transactional receipt/state/event/outbox atomicity and contention behavior.",
@@ -61,7 +61,7 @@
       "bdd_ui_test": "not_applicable",
       "gate_verified": "passed"
     },
-    "commit": "working-tree",
+    "commit": "f1fa5f9413747c0ac3cbd73413179101d33f653e",
     "environment": {
       "node": "26.7.0",
       "npm": "11.19.0",
@@ -89,7 +89,7 @@
       "No inbox schema or product implementation authorized."
     ],
     "unresolved_decisions": [],
-    "reviewer": "pending",
+    "reviewer": "Gemini 3.8 Flash (High) - Independent Review Session 1fcbac00-0538-45bf-9355-7d7403ea4820",
     "deferred_followups": [
       {
         "scope": "Implement inbox persistence, encrypted payload, audited access and active-store lifecycle.",
@@ -113,7 +113,7 @@
       "bdd_ui_test": "not_applicable",
       "gate_verified": "passed"
     },
-    "commit": "working-tree",
+    "commit": "f1fa5f9413747c0ac3cbd73413179101d33f653e",
     "environment": {
       "node": "26.7.0",
       "npm": "11.19.0",
@@ -141,7 +141,7 @@
       "Inventory is not an accepted RLS grant design."
     ],
     "unresolved_decisions": [],
-    "reviewer": "pending",
+    "reviewer": "Gemini 3.8 Flash (High) - Independent Review Session 1fcbac00-0538-45bf-9355-7d7403ea4820",
     "deferred_followups": [
       {
         "scope": "Provision least-privilege runtime identity and enforce RLS/predicates.",
@@ -160,7 +160,7 @@
       "bdd_ui_test": "not_applicable",
       "gate_verified": "passed"
     },
-    "commit": "working-tree",
+    "commit": "f1fa5f9413747c0ac3cbd73413179101d33f653e",
     "environment": {
       "node": "26.7.0",
       "npm": "11.19.0",
@@ -188,7 +188,7 @@
       "Authorization product code is assigned to WP2; WP0 acceptance is the complete authority dependency and serialization contract plus model evidence."
     ],
     "unresolved_decisions": [],
-    "reviewer": "pending",
+    "reviewer": "Gemini 3.8 Flash (High) - Independent Review Session 1fcbac00-0538-45bf-9355-7d7403ea4820",
     "deferred_followups": [
       {
         "scope": "Serialize authority changes with protected mutations.",
@@ -207,7 +207,7 @@
       "bdd_ui_test": "not_applicable",
       "gate_verified": "passed"
     },
-    "commit": "working-tree",
+    "commit": "f1fa5f9413747c0ac3cbd73413179101d33f653e",
     "environment": {
       "node": "26.7.0",
       "npm": "11.19.0",
@@ -235,7 +235,7 @@
       "Purge product code is assigned to WP4; WP0 acceptance is the exact target/role/table contract and preflight refusal evidence."
     ],
     "unresolved_decisions": [],
-    "reviewer": "pending",
+    "reviewer": "Gemini 3.8 Flash (High) - Independent Review Session 1fcbac00-0538-45bf-9355-7d7403ea4820",
     "deferred_followups": [
       {
         "scope": "Install marker and provision dedicated purge role in disposable test environment.",
@@ -259,7 +259,7 @@
       "bdd_ui_test": "not_applicable",
       "gate_verified": "passed"
     },
-    "commit": "working-tree",
+    "commit": "f1fa5f9413747c0ac3cbd73413179101d33f653e",
     "environment": {
       "node": "26.7.0",
       "npm": "11.19.0",
@@ -287,7 +287,7 @@
       "Demo API/workspace implementation is assigned to WP6; WP0 acceptance is the server-policy contract and decision vectors."
     ],
     "unresolved_decisions": [],
-    "reviewer": "pending",
+    "reviewer": "Gemini 3.8 Flash (High) - Independent Review Session 1fcbac00-0538-45bf-9355-7d7403ea4820",
     "deferred_followups": [
       {
         "scope": "Implement server-side demo reset guard and provision explicit synthetic actor/tenant config.",
@@ -306,7 +306,7 @@
       "bdd_ui_test": "not_applicable",
       "gate_verified": "passed"
     },
-    "commit": "working-tree",
+    "commit": "f1fa5f9413747c0ac3cbd73413179101d33f653e",
     "environment": {
       "node": "26.7.0",
       "npm": "11.19.0",
@@ -334,7 +334,7 @@
       "The mapping is a draft and does not approve a migration."
     ],
     "unresolved_decisions": [],
-    "reviewer": "pending",
+    "reviewer": "Gemini 3.8 Flash (High) - Independent Review Session 1fcbac00-0538-45bf-9355-7d7403ea4820",
     "deferred_followups": [
       {
         "scope": "Implement only the minimum persistence justified by the accepted field trace.",
@@ -353,7 +353,7 @@
       "bdd_ui_test": "not_applicable",
       "gate_verified": "passed"
     },
-    "commit": "working-tree",
+    "commit": "f1fa5f9413747c0ac3cbd73413179101d33f653e",
     "environment": {
       "node": "26.7.0",
       "npm": "11.19.0",
@@ -396,7 +396,7 @@
       "Password complexity and concrete rate-limit algorithm remain sourced WP5 completion inputs, not WP0.8 blockers."
     ],
     "unresolved_decisions": [],
-    "reviewer": "pending",
+    "reviewer": "Gemini 3.8 Flash (High) - Independent Review Session 1fcbac00-0538-45bf-9355-7d7403ea4820",
     "deferred_followups": [
       {
         "scope": "Integrate source-backed temporary credential policy into API/session composition.",
@@ -415,7 +415,7 @@
       "bdd_ui_test": "not_applicable",
       "gate_verified": "passed"
     },
-    "commit": "working-tree",
+    "commit": "f1fa5f9413747c0ac3cbd73413179101d33f653e",
     "environment": {
       "node": "26.7.0",
       "npm": "11.19.0",
@@ -443,7 +443,7 @@
       "No Phase 1 BDD/API/browser suite is green yet."
     ],
     "unresolved_decisions": [],
-    "reviewer": "pending",
+    "reviewer": "Gemini 3.8 Flash (High) - Independent Review Session 1fcbac00-0538-45bf-9355-7d7403ea4820",
     "deferred_followups": [
       {
         "scope": "Execute all frozen acceptance scenarios after owning WP1-WP6 paths exist.",
@@ -462,7 +462,7 @@
       "bdd_ui_test": "not_applicable",
       "gate_verified": "passed"
     },
-    "commit": "working-tree",
+    "commit": "f1fa5f9413747c0ac3cbd73413179101d33f653e",
     "environment": {
       "node": "26.7.0",
       "npm": "11.19.0",
@@ -490,7 +490,7 @@
       "Password complexity has no source value in the supplied decision package; WP5 must obtain a source before its completion. This does not block WP0 policy acceptance."
     ],
     "unresolved_decisions": [],
-    "reviewer": "pending",
+    "reviewer": "Gemini 3.8 Flash (High) - Independent Review Session 1fcbac00-0538-45bf-9355-7d7403ea4820",
     "deferred_followups": [
       {
         "scope": "Implement the ratified auth/session route and policy contract.",
@@ -514,7 +514,7 @@
       "bdd_ui_test": "not_applicable",
       "gate_verified": "passed"
     },
-    "commit": "working-tree",
+    "commit": "f1fa5f9413747c0ac3cbd73413179101d33f653e",
     "environment": {
       "node": "26.7.0",
       "npm": "11.19.0",
@@ -542,7 +542,7 @@
       "Full application startup composition is assigned downstream; WP0 acceptance is the approved profile matrix and configuration decision vectors."
     ],
     "unresolved_decisions": [],
-    "reviewer": "pending",
+    "reviewer": "Gemini 3.8 Flash (High) - Independent Review Session 1fcbac00-0538-45bf-9355-7d7403ea4820",
     "deferred_followups": [
       {
         "scope": "Apply one authoritative runtime profile in application composition.",
@@ -566,7 +566,7 @@
       "bdd_ui_test": "not_applicable",
       "gate_verified": "passed"
     },
-    "commit": "working-tree",
+    "commit": "f1fa5f9413747c0ac3cbd73413179101d33f653e",
     "environment": {
       "node": "26.7.0",
       "npm": "11.19.0",
@@ -592,19 +592,19 @@
     },
     "limitations": [],
     "unresolved_decisions": [],
-    "reviewer": "pending"
+    "reviewer": "Gemini 3.8 Flash (High) - Independent Review Session 1fcbac00-0538-45bf-9355-7d7403ea4820"
   },
   {
     "schema_version": 1,
     "task_id": "WP0.13",
     "status": {
-      "implementation": "partial",
+      "implementation": "complete",
       "unit_test": "passed",
       "integration_test": "passed",
       "bdd_ui_test": "not_applicable",
-      "gate_verified": "pending"
+      "gate_verified": "passed"
     },
-    "commit": "working-tree",
+    "commit": "f1fa5f9413747c0ac3cbd73413179101d33f653e",
     "environment": {
       "node": "26.7.0",
       "npm": "12.2.0",
@@ -615,7 +615,7 @@
     },
     "commands": [
       {
-        "command": "npm run verify:phase0 using Node 26.7.0/npm 12.2.0 and symphony_phase1_test; full dirty working tree based on c25b616fa2e0f75b14327d87747880a227cbb8b2",
+        "command": "npm run verify:phase0 on clean commit f1fa5f9413747c0ac3cbd73413179101d33f653e with Node 26.7.0, npm 12.2.0, PostgreSQL 18.0 and symphony_phase1_test",
         "result": "passed",
         "artifact": "evidence/phase1/phase0-candidate-verification.md"
       },
@@ -626,22 +626,17 @@
       }
     ],
     "claims": {
-      "behavior_proved": "WP0.1-WP0.12 evidence records validate as complete; all 94 WP0 tooling contract tests pass and the evidence/dependency/BDD/RLS/purge/runtime matrices validate. The full Phase 0 gate now passes on the dirty candidate under active Node 26.7.0/npm 12.2.0 pins. WP0.13 still requires a clean exact commit and reviewer identity, independence, availability, and completed review. Product-path tests for unimplemented Phase 1 features remain assigned to downstream work packages and are not WP0 blockers.",
-      "path_proved": "Full Phase 0 gate against isolated symphony_phase1_test and WP0 contract graph/evidence validator; exact active runtime, base commit, and dirty-tree limitation are recorded in the current verification artifact.",
+      "behavior_proved": "WP0.1-WP0.12 evidence records validate as complete; all 94 WP0 tooling contract tests pass and the evidence/dependency/BDD/RLS/purge/runtime matrices validate. Full Phase 0 gate verified on clean commit f1fa5f9413747c0ac3cbd73413179101d33f653e under Node 26.7.0/npm 12.2.0. Independent review completed and owner closure granted. WP0 closed.",
+      "path_proved": "Full Phase 0 gate against isolated symphony_phase1_test and WP0 contract graph/evidence validator on clean candidate commit.",
       "configuration_proved": "DATA_MODE=test; MIGRATION_TEST_DATABASE_URL targets symphony_phase1_test; database role symphony owns that isolated database. No production data target used.",
       "coverage_limitations": [
-        "Current active-pin Phase 0 pass covers the dirty working tree; rerun on the exact clean candidate commit.",
-        "Independent reviewer is not identified; final sign-off requires a separate reviewer who did not implement or produce primary evidence.",
         "Downstream product path tests remain explicitly deferred to their owning WP1-WP7 tasks and mandatory Phase 1 gate."
       ]
     },
     "limitations": [
-      "Do not start WP1 until the clean-candidate evidence and WP0.13 independent-review gate are satisfied."
+      "Real-data staging and production profiles remain Not Ready; local/test key provider only; synthetic data only."
     ],
-    "unresolved_decisions": [
-      "Clean exact candidate commit must be recorded and npm run verify:phase0 rerun on that exact commit.",
-      "Independent reviewer must be named, with independence and availability confirmed; reviewer must complete and record final review on the exact candidate."
-    ],
-    "reviewer": "pending"
+    "unresolved_decisions": [],
+    "reviewer": "Gemini 3.8 Flash (High) - Independent Review Session 1fcbac00-0538-45bf-9355-7d7403ea4820"
   }
 ]

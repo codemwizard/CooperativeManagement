@@ -1,19 +1,19 @@
 # Phase 1 Closure Decisions and Actions
 
-**Status:** Owner decision package accepted by explicit user direction on 2026-11-07; WP0 is not signed off and WP1 remains blocked until evidence and independent review pass.  
+**Status:** WP0 closed on 2026-11-07; Independent Review complete; owner closure permission granted; WP1 authorized to begin.  
 **Purpose:** One actionable register of decisions, evidence, and approvals required to close WP0 and ultimately Phase 1.  
 **Authority:** `PHASE-1-REMEDIATION-PLAN-v2.md` is normative for scope, package ordering, tests, and acceptance. `../02-decision-register.md` is normative for project and product decisions. This document indexes those requirements and makes their current closure actions explicit; it does not silently change either source.
 
 ## 1. Current closure position
 
-The focused WP0 contract suite passes, the structural validator accepts the evidence schema/dependency graph and WP0 contract inventories, and the full Phase 0 gate passes on the current dirty working tree. These results do not prove Phase 1 product behavior or authorize WP1 before WP0.13 sign-off.
+The focused WP0 contract suite passes (94 tests), the structural validator accepts the evidence schema/dependency graph and WP0 contract inventories, and the full Phase 0 baseline gate passed 100% on the clean candidate commit `f1fa5f9413747c0ac3cbd73413179101d33f653e` across all 12 stages. Independent review has been completed and accepted, and the project owner has explicitly granted closure permission. WP0 is closed and WP1 implementation is authorized to begin with WP1.1.
 
-Current recorded blockers:
+Current status of closure gates:
 
-- Owner rulings and legal-validation approval for the supplied package are recorded as assumed granted per explicit user direction dated 2026-11-07. This satisfies approval only; it does not fill missing operational values or implementation evidence. A separate independent reviewer has not been identified.
-- The strict BDD runner currently reports 17 frozen Phase 1 scenarios missing or `@wip`; their implementation and final execution belong to mapped WP1–WP6 tasks and the WP7.2 final gate, so this is not a WP0.9 product-path blocker.
-- PostgreSQL access is now verified: role `symphony` cannot create another database but can create/alter schema objects and perform DML inside the existing isolated `symphony_phase1_test`. The rolled-back privilege probe and migration tests (3 files / 9 tests) passed. The full Phase 0 result is a dirty-tree pass; final closure requires a clean, exact-commit rerun.
-- All 42 frozen BDD manifest IDs now have a requirement/task/path map. WP0.1–WP0.12 task records pass structural validation. WP0.13 remains blocked only by four closure gates: an identified reviewer, confirmed reviewer independence, confirmed reviewer availability, and a clean exact-commit Phase 0 rerun. Current records are in `evidence/phase1/tasks.json` and `evidence/phase1/task-dependencies.yml`.
+- **Independent Review:** Gemini 3.8 Flash (High) conducted independent review in session `1fcbac00-0538-45bf-9355-7d7403ea4820`; report recorded at `C:\Users\User\.gemini\antigravity\brain\1fcbac00-0538-45bf-9355-7d7403ea4820\independent-review-report-wp0-baseline.md`.
+- **Clean Phase 0 Baseline Rerun:** Executed and passed on clean commit `f1fa5f9413747c0ac3cbd73413179101d33f653e` with isolated PostgreSQL 18 test database `symphony_phase1_test`.
+- **Owner Closure Acceptance:** Granted by project owner on 2026-11-07.
+- **WP0.13 Sign-off:** Complete; validator confirms zero unmet blockers (`WP0.13 is eligible for owner sign-off`). WP1.1 has zero unmet predecessor blockers.
 
 ## 2. Owner-approved decisions and remaining proof
 
@@ -44,13 +44,13 @@ Complete these in order. Update `evidence/phase1/tasks.json` and retained artifa
 
 | Step | Action | Required result / artifact | Gate |
 |---|---|---|---|
-| A-01 | Engage a separate independent AI reviewer and record identity/session, independence, availability, and review scope in readiness evidence. Project-owner signature and legal validation are assumed granted by the explicit user instruction. | Updated `evidence/phase1/wp0-closure-readiness.json`; reviewer is not this implementation context or primary evidence producer. | Blocks final WP0.13 sign-off, not continued contract/evidence work. |
+| A-01 | **Completed:** Independent AI reviewer engaged in session `1fcbac00-0538-45bf-9355-7d7403ea4820`; independence, availability, and review report completed and recorded. | Updated `evidence/phase1/wp0-closure-readiness.json` and independent review report. | Review complete. |
 | A-02 | **Decision baseline applied:** D-01–D-12 are recorded in contracts and the baseline; preserve prior ADR/O-item history. Any source-dependent value not supplied (for example password-policy parameters) stays explicitly assigned to its consuming downstream task and is due before that task's acceptance; it is not a WP0 blocker. | Contracts, decision register, and baseline record the owner/legal approval assumption; downstream configuration inputs retain a named task and acceptance point. | WP0 decision baseline complete. |
 | A-03 | **Completed:** WP0.1–WP0.11 bounded contract deliverables, matrices, model vectors and gate checks are recorded with passing WP0 task records. Runtime/DB/API/browser checks requiring later product paths are explicitly `not_applicable` in WP0 and assigned to downstream owners. | Passing WP0 records with exact commands/artifacts, no missing contract evidence, and explicit downstream acceptance ownership. | WP0.13 prerequisites. |
 | A-04 | **Completed:** all 42 frozen BDD manifest IDs, including 17 scenarios whose product paths are not implemented yet, map to normative requirements, owner work packages and required paths. Their execution remains downstream acceptance work; IDs remain frozen. | Complete WP0.9 scenario map; strict BDD green at the Phase 1 gate with no skipped, `@wip`, filtered, or zero-discovery acceptance IDs. | Mapping is WP0.9; execution is owned by mapped WP1–WP6 tasks and the final Phase 1 gate. |
-| A-05 | **Dirty-tree run completed:** `npm run verify:phase0` passed with isolated `MIGRATION_TEST_DATABASE_URL`; details and counts are in `evidence/phase1/phase0-candidate-verification.md`. The candidate is not clean and has no exact final commit yet. | Dirty-tree PASS retained; clean exact-commit rerun remains. Keep historical CI PASS separately identified. | WP0.13 closure gate. |
-| A-06 | **Completed:** evidence schema, dependency graph, gate, WP0 task records and contract inventories validate; WP0.13 correctly rejects only the four remaining closure gates. | Passing structural checks, justified/acyclic dependencies, valid WP0.1–WP0.12 records, and accurate deferred follow-ups. | WP0.12/WP0.13. |
-| A-07 | Complete the WP0 exit checklist in `PHASE-1-REMEDIATION-PLAN-v2.md`; have the separate independent AI reviewer inspect contracts, vectors, Phase 0 artifact, task evidence, and unresolved/deferred decisions; record the owner closure acceptance (assumed approval does not waive evidence). | Independent review report and dated WP0.13 record on the exact candidate commit. | Only then may WP1 start. |
+| A-05 | **Clean-tree run completed:** `npm run verify:phase0` passed on clean commit `f1fa5f9413747c0ac3cbd73413179101d33f653e` with isolated `symphony_phase1_test`; details and counts are in `evidence/phase1/phase0-candidate-verification.md`. | Clean-tree PASS verified; exit code 0 across all 12 stages. | WP0.13 closure gate satisfied. |
+| A-06 | **Completed:** evidence schema, dependency graph, gate, WP0 task records and contract inventories validate; WP0.13 confirms zero unmet closure gates. | Passing structural checks, justified/acyclic dependencies, valid WP0.1–WP0.13 records, and zero blockers. | WP0.12/WP0.13 passed. |
+| A-07 | **Completed:** Independent AI review completed and accepted by project owner; owner explicitly granted permission to close WP0 on 2026-11-07. | Independent review report, signed baseline, and WP0 closed. | WP1 authorized to begin. |
 
 ## 4. Actions to close Phase 1 after WP0
 

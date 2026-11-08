@@ -369,8 +369,11 @@ describe('WP0.13 dependency gate', () => {
     const graph = readJson('evidence/phase1/task-dependencies.yml');
     const records = Object.fromEntries((readJson('evidence/phase1/tasks.json') as Array<Record<string, any>>).map((record) => [record.task_id, record]));
     const readiness = readJson('evidence/phase1/wp0-closure-readiness.json');
-    expect(validateDependencyGraph(graph, records, 'WP0.13', readiness)).toContain('WP0.13 Phase 0 candidate must be a clean exact commit');
-    expect(validateDependencyGraph(graph, records, 'WP1.1')).toContain('WP0.13 has no passing completion record');
+    expect(validateDependencyGraph(graph, records, 'WP0.13', readiness)).toEqual([]);
+    expect(validateDependencyGraph(graph, records, 'WP1.1')).toEqual([]);
+    expect(validateDependencyGraph(graph, records, 'WP0.13', { ...readiness, phase0_candidate_worktree_dirty: true })).toContain('WP0.13 Phase 0 candidate must be a clean exact commit');
+    const incomplete = { ...records, 'WP0.13': { ...records['WP0.13'], status: { ...records['WP0.13'].status, gate_verified: 'pending' } } };
+    expect(validateDependencyGraph(graph, incomplete, 'WP1.1')).toContain('WP0.13 has no passing completion record');
   });
 
   it('rejects a cycle, an unknown predecessor, and a predecessor without a reason', () => {
