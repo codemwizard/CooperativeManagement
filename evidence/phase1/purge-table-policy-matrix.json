@@ -317,6 +317,13 @@
     "position_combination_rules",
     "retention_policies"
   ],
+  "planned_preserve_tables": [
+    {
+      "table": "security_attempts",
+      "disposition": "preserve_append_only_security_history_outside_purge_allowlist",
+      "reason": "Authenticated command-denial observations are security audit records; the purge role has no DELETE grant. This planned table is added by the Phase 1 security-attempt migration, not part of the current 53-table inventory."
+    }
+  ],
   "audit_ledger": {
     "table": "purge_audit",
     "status": "future WP4.2 control-plane table; never in delete allowlist; purge role cannot update/delete prior audit rows"

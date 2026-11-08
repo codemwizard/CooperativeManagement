@@ -15,6 +15,23 @@
     "Control-plane tables have no ordinary app-role grants; operation-specific grants require a named command, service identity, and audit behavior.",
     "Current migration state is evidence of existing behavior only; two tables currently have ENABLE+FORCE, so WP1.5 must implement and test the rest under real restricted credentials."
   ],
+  "planned_phase1_tables": [
+    {
+      "table": "security_attempts",
+      "classification": "tenant_scoped",
+      "scope_basis": "Authenticated command denial observation; tenant and actor are established by trusted server authentication context before insert.",
+      "scope_resolution": "row.tenant_id must equal transaction-local app.tenant_id; if tenant context is unavailable, do not write this table.",
+      "ordinary_runtime_role": "symphony_app",
+      "permitted_sql_operations": ["INSERT"],
+      "delete_grant": false,
+      "required_rls": "ENABLE+FORCE",
+      "current_rls_enabled_and_forced": false,
+      "explicit_tenant_predicate": true,
+      "tenant_context": "SET LOCAL app.tenant_id only from authenticated server context; insert policy binds tenant_id to that context.",
+      "access_policy": "Append-only authenticated command-denial observation only. No SELECT, UPDATE or DELETE for ordinary app role. Unauthenticated authentication attempts use WP5's separate security audit path. Audit failure cannot authorize a command or create a business receipt.",
+      "status": "Planned WP1 migration; must be added to the migration inventory and receive ENABLE+FORCE RLS and INSERT-only grant/policy before use."
+    }
+  ],
   "tables": [
     {
       "table": "tenants",

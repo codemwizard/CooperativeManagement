@@ -8,7 +8,7 @@
 ## Reading order and dependencies
 
 ```
-Phase 0 Gate passed on 6 November 2026 (CI run 42201289720); Phase 1 is In Progress.
+Historical Phase 0 CI gate passed on 6 November 2026 (run 42201289720); the clean candidate gate was rerun on 7 November 2026. Phase 1 is In Progress.
 Phase 1 Gate must pass before Phase 2 starts.
 ```
 
@@ -20,7 +20,7 @@ Phase 1 Gate must pass before Phase 2 starts.
 | [`PHASE-0-REMEDIATION-IMPLEMENTATION.md`](./PHASE-0-REMEDIATION-IMPLEMENTATION.md) | Phase 0 remediation — COMPLETE | Exact CI gate PASS on `c70d3f4`; Phase 1 login E2E carried forward |
 | [`../../docs/PHASE0_COMMAND_MAP.md`](../../docs/PHASE0_COMMAND_MAP.md) | Phase 0 operations | Commands, prerequisites, scope, and evidence |
 | [`PHASE-1-IMPLEMENTATION.md`](./PHASE-1-IMPLEMENTATION.md) | 1 — Kernel, identity, authorisation, privacy, shell | In Progress; historical WP checkboxes require re-evidence; Phase 1 gate remains open |
-| [`PHASE-1-REMEDIATION-PLAN-v2.md`](./PHASE-1-REMEDIATION-PLAN-v2.md) | Phase 1 remediation (v2.1 execution baseline with targeted review amendments) | WP0 contract baseline required before implementation; precise replay/concurrency, RLS, minimum-scope privacy, purge, session, evidence, dependency and independent-review readiness contracts |
+| [`PHASE-1-REMEDIATION-PLAN-v2.md`](./PHASE-1-REMEDIATION-PLAN-v2.md) | Phase 1 remediation (v2.1 execution baseline with 8 Nov targeted review amendment) | WP0 contract/design gate closed; WP1 authorized; downstream runtime proof remains required. Includes replay/concurrency, RLS, privacy, purge, session and reviewer-document index links. |
 | [`PHASE-1-REMEDIATION-PLAN.md`](./PHASE-1-REMEDIATION-PLAN.md) | Phase 1 remediation (superseded history) | Original reviewed plan; retained for change history |
 
 ## Founder rulings applied (O-18 to O-21)
@@ -42,4 +42,6 @@ Each task has a checkbox:
 **Check the box when the task is done**, not at the end of the phase. Each task names the exact test command to run. An independent verifier can re-run any named command to confirm the same result.
 
 Gate checks at the bottom of each phase document must ALL be ✅ before the next phase begins.
+
+For independent review, start at [`../../docs/phase1/INDEPENDENT_REVIEW_GUIDE.md`](../../docs/phase1/INDEPENDENT_REVIEW_GUIDE.md) and [`../../evidence/phase1/review-document-index.json`](../../evidence/phase1/review-document-index.json). The index resolves the current source/evidence set and identifies unavailable historical raw output explicitly.
 

@@ -335,9 +335,10 @@
       ],
       "scenario": "A stale expected version is rejected and both inputs are preserved",
       "owner_tasks": [
-        "WP1.4"
+        "WP1.4",
+        "WP1.7"
       ],
-      "required_path": "encrypted reconciliation persistence plus access/retention checks under application role",
+      "required_path": "encrypted reconciliation persistence under the application role (WP1.4), then current persisted-actor/officer authorization and access/retention checks (WP1.7)",
       "assertion_rule": "Execute this exact tagged scenario with observable assertions on the specified product path; no mock, @wip, skip, tag removal, zero-step pass, or in-memory substitute.",
       "phase0_status": "mapped_and_deferred_to_owner_task"
     },
@@ -453,7 +454,7 @@
       "owner_tasks": [
         "WP1.1"
       ],
-      "required_path": "versioned command envelope and server acceptance timestamp path",
+      "required_path": "versioned command envelope with client occurredAt attribution and server-generated transaction-start recorded_at semantics",
       "assertion_rule": "Execute this exact tagged scenario with observable assertions on the specified product path; no mock, @wip, skip, tag removal, zero-step pass, or in-memory substitute.",
       "phase0_status": "mapped_and_deferred_to_owner_task"
     },

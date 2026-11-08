@@ -70,3 +70,7 @@ Passing WP0 authorizes WP1; it does not close Phase 1. Continue the plan's order
 - Every deferred item must identify the owner, due point, impact, and the exact work it blocks. A deferral cannot waive a Phase 1 mandatory acceptance criterion.
 - Preserve `CI-Results/` artifacts and prior decision history. Add new evidence by reference; do not rewrite historical results as current results.
 
+# Historical record notice (2026-11-08)
+
+This register preserves the original WP0 closure decisions and their history. The current acceptance boundary is in [`../../docs/phase1/PHASE1_CONTRACT_BASELINE.md`](../../docs/phase1/PHASE1_CONTRACT_BASELINE.md): WP0 is closed as the contract/design gate, while downstream PostgreSQL/runtime proof remains mandatory Phase 1 acceptance and is not waived. That boundary supersedes this register only where its earlier wording treated downstream implementation proof as a WP0 blocker. The aggregate-only wording of its D-04 summary is also historical; the current global dependency and lock-order rule is recorded in `02-decision-register.md` §7.1, `docs/phase1/AUTHORIZATION_CAPACITY_CONTRACT.md` v2 and `evidence/phase1/authority-dependency-inventory.json`. Other technical corrections and reviewer navigation are in the v2.1 targeted amendment and [`../../docs/phase1/INDEPENDENT_REVIEW_GUIDE.md`](../../docs/phase1/INDEPENDENT_REVIEW_GUIDE.md). Preserve this historical record; use the current baseline and review-document index for execution/review.
+

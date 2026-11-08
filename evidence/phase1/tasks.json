@@ -92,9 +92,9 @@
     "reviewer": "Gemini 3.8 Flash (High) - Independent Review Session 1fcbac00-0538-45bf-9355-7d7403ea4820",
     "deferred_followups": [
       {
-        "scope": "Implement inbox persistence, encrypted payload, audited access and active-store lifecycle.",
+        "scope": "WP1.4 implements encrypted inbox persistence, tenant-scoped storage and active-store lifecycle; WP1.7 implements authorization using current persisted actor/officer authority.",
         "task_id": "WP1.4",
-        "acceptance_evidence": "PostgreSQL/API tests prove tenant/actor restrictions, takeover audit, encryption, expiry and tombstone."
+        "acceptance_evidence": "WP1.4 PostgreSQL tests prove encrypted persistence, tenant policy, expiry and tombstone. WP1.7 API/DB tests prove current membership/permission, authorized takeover audit, unrelated actor denial and cross-tenant non-disclosure using WP2.2 authority."
       },
       {
         "scope": "Record actual selected deployment provider, replica, backup, snapshot and restore lifecycle facts before real-data deployment.",

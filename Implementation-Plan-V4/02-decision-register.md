@@ -272,7 +272,7 @@ The project owner explicitly directed that all owner signatures and legal valida
 | D-01 command envelope and receipt | Approved: JCS/HMAC semantic envelope; client `occurred_at`, device and request correlation are excluded metadata; no pre-acceptance ID reservation; actor/tenant-bound replay and atomic state/event/outbox/receipt. | Executable canonicalization, race, audit failure, rollback, uncertainty and redaction vectors; operational key/receipt retention records. |
 | D-02 reconciliation | Approved: generic field encryption, no blind index, current permission for original actor, authorized audited tenant officer takeover, configurable expiry, separate active/replica/backup lifecycle. | Authority mapping, access/lifecycle vectors and actual configured backup/replica facts. |
 | D-03 tenant isolation | Approved: strict ENABLE+FORCE RLS for tenant tables; restricted runtime role; separate migration identity; transaction-local context and explicit predicates. | Complete table/grant/policy review and actual-role PostgreSQL proof. |
-| D-04 authority races | Approved: actor/tenant authority aggregate version; shared lock for protected commands, exclusive lock for authority mutations, deterministic order. | Complete dependency/change-path inventory and both PostgreSQL linearization orders. |
+| D-04 authority races | Amended 8 Nov: actor/tenant authority aggregate remains, but is not the only guard. Every dependency is scoped (actor-tenant, organization, person/shared-identity, global policy/configuration, immutable/versioned); mutable external scopes use their authoritative version/lock or explicit full-runtime freeze. One global lock order is required. | Complete dependency/change-path inventory and PostgreSQL barrier tests for both orders, each dependency class, and multi-scope operations. Earlier aggregate-only wording remains historical and is superseded by §7.1. |
 | D-05 purge | Approved: marked disposable test DB only; dedicated role; allowlist; no CASCADE; protected catalogue/audit; atomic reset/seed/audit and fail-closed guards. | Concrete role/target/table inventory and refusal/rollback/repeatability tests. |
 | D-06 demo | Approved: configured synthetic actor(s)/tenant, narrow server-side allowlist, no ordinary admin/general tenant/purge authority. | Concrete deployment identifiers and API positive/negative proof before provisioning. |
 | D-07 privacy | Owner/legal approval assumed; minimum traceable persistence, lawful-basis distinction, audience boundaries; unsupported legal meanings remain configurable assumptions. | Complete field/entity/transition/audience/basis/retention/BDD map. Approval does not substitute for source provenance or behavior proof. |
@@ -280,9 +280,21 @@ The project owner explicitly directed that all owner signatures and legal valida
 | D-09 BDD scope | Approved: no deleting scenarios to make the runner pass; later-phase exclusions need explicit mapping/rationale/approval. | Resolve all 17 manifest misses from requirements; pass strict frozen set. |
 | D-10 sessions | Approved: opaque server-side sessions; HttpOnly/Secure/SameSite=Lax; synchronizer CSRF + Origin; rotation/revocation rules; 30m idle, 12h absolute; progressive rate delay, generic failure, no permanent lockout. | API/browser/boundary tests. Password complexity rule still needs a source before WP5 completion. |
 | D-11 runtime | Approved: `test`, `demo`, `real-data-staging`, `production`; single `RUNTIME_PROFILE` selector, matched `APP_ENV`/`DATA_MODE`, fail closed. | Actual startup-composition tests for valid and contradictory profiles. |
-| D-12 review model | Approved: independent AI review permitted under separate-context/source/artifact/rerun conditions; owner remains final closure authority. | Amend plan and obtain a separate reviewer; implementer cannot self-review. |
+| D-12 review model | Approved: independent AI review permitted under separate-context/source/artifact/rerun conditions; owner remains final closure authority. | WP0 review report is recorded at `docs/Independent-Review-Report-Phase-1_Remediation-Plan_v2.md`. WP8 still requires a new candidate-specific independent review; implementer cannot self-review. |
 
-**Effect on status:** these rulings resolve owner approval questions in the supplied D-01–D-12 package. They do not close WP0 or Phase 1. Required tests, DB/runtime evidence, current-candidate Phase 0 PASS, separate independent review and the WP0.13 evidence gate remain mandatory. O-22 remains open because missing Act pages are a source-material issue outside the supplied approval package.
+### 7.1 Phase 1 v2.1 targeted review amendment (8 November 2026)
+
+The project owner requested adoption of the independent review's targeted corrections. This amendment supersedes only the conflicting technical detail in D-04 and the WP0 acceptance-boundary interpretation below. The 7 November D-04 disposition treated the actor/tenant authority aggregate as the serialization guard for mutable authorization facts; that wording is retained here as a historical record and is superseded by the scoped dependency model below.
+
+| Amendment | Current disposition | Normative location / remaining proof |
+|---|---|---|
+| D-04 authority dependency coverage | Retain the actor-tenant authority aggregate but do not treat it as the sole lock. Classify dependencies as actor-tenant, organization, person/shared-identity, global policy/configuration, or immutable/versioned snapshot. Mutable external scopes use authoritative row/version locks or a documented full-runtime freeze. One shared order: command aggregate, global policy, organization, person/shared identity, tenant, actor; canonical scope key/type/ID order within each scope. | `docs/phase1/AUTHORIZATION_CAPACITY_CONTRACT.md`; `evidence/phase1/authority-dependency-inventory.json`; WP2.4 PostgreSQL barrier proof for both serial orders and multi-scope mutations. |
+| WP0 closure boundary | WP0 is closed as the contract/design and common evidence-schema gate. Actual application-role RLS, PostgreSQL authority/purge races, and product-path BDD implementation are mandatory Phase 1 runtime acceptance, not WP0 blockers and not waived. | `docs/phase1/PHASE1_CONTRACT_BASELINE.md`; retain this register as historical. Status records distinguish contract/model from runtime implementation/proof. |
+| Independent review record | Review claims require the exact report, candidate SHA, task evidence index, validator result and raw verification results. The prior report and primary evidence are indexed; raw stdout from the historical validator run is not retained and must remain a stated limitation. | `docs/phase1/INDEPENDENT_REVIEW_GUIDE.md`; `evidence/phase1/review-document-index.json`; `docs/Independent-Review-Report-Phase-1_Remediation-Plan_v2.md`. |
+
+Other targeted corrections are recorded in the v2.1 plan, versioned Phase 1 contracts, task graph and `evidence/phase1/reviews/phase1-v2.1-review-disposition.md`. No new feature scope is added.
+
+**Effect on status:** these rulings resolved owner approval questions in the supplied D-01–D-12 package. WP0 was subsequently closed by the owner on 2026-11-07 as recorded in §6.5; downstream Phase 1 tests and DB/runtime evidence remain mandatory. O-22 remains open because missing Act pages are a source-material issue outside the supplied approval package.
 
 ### 6.4 Active toolchain pin (owner direction, 7 November 2026)
 
@@ -290,9 +302,11 @@ The active repository toolchain is Node.js `26.7.0` and npm `12.2.0`. This direc
 
 ### 6.5 WP0 Baseline Closure and Phase 1 Authorization (owner decision, 7 November 2026)
 
-**Disposition:** APPROVED and CLOSED.
-- **Independent AI Review:** Conducted by Gemini 3.8 Flash (High) in independent session `1fcbac00-0538-45bf-9355-7d7403ea4820`; independent review report accepted.
+**Disposition:** APPROVED and CLOSED (historical closure snapshot recorded 7 November 2026).
+- **Independent AI Review:** Conducted by Gemini 3.8 Flash (High) in independent session `1fcbac00-0538-45bf-9355-7d7403ea4820`; report retained at `docs/Independent-Review-Report-Phase-1_Remediation-Plan_v2.md` and identifies candidate `f1fa5f9413747c0ac3cbd73413179101d33f653e`. The review index links the report and primary evidence.
 - **Phase 0 Baseline Verification:** Successfully executed and passed 100% (all 12 checks, exit code 0) on clean candidate commit `f1fa5f9413747c0ac3cbd73413179101d33f653e` with Node 26.7.0, npm 12.2.0, PostgreSQL 18.0, and isolated test database `symphony_phase1_test`.
-- **WP0 Contract Baseline:** Structurally valid, 43 acyclic task dependency nodes, 94 contract oracle vectors passed, 53 migrated tables classified, runtime mode matrix verified.
+- **WP0 Contract Baseline:** Historical snapshot recorded 43 acyclic task dependency nodes, 94 contract oracle vectors passed, 53 then-migrated tables classified, runtime mode matrix verified. The current graph includes the later amendment tasks WP1.7 and WP3.6; the historical count must not be treated as the current graph count.
 - **Owner Closure Permission:** Explicitly granted by project owner on 2026-11-07. WP0 is closed; WP1 implementation (beginning with WP1.1) is authorized to proceed.
+
+The v2.1 baseline's closure-boundary statement supersedes the earlier register's interpretation only for runtime evidence intentionally assigned to WP1–WP7. This records the revised acceptance rule without rewriting the original closure record.
 
