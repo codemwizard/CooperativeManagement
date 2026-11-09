@@ -8,7 +8,7 @@
     "bdd_ui_test": "not_applicable",
     "gate_verified": "passed"
   },
-  "commit": "working-tree",
+  "commit": "98eb5571ca29ded9afbef191678c7bfdf92b023c",
   "environment": {
     "node": "v26.7.0",
     "npm": "12.2.0",
