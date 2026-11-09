@@ -1,0 +1,68 @@
+{
+  "schema_version": 1,
+  "task_id": "WP1.1",
+  "status": {
+    "implementation": "complete",
+    "unit_test": "passed",
+    "integration_test": "passed",
+    "bdd_ui_test": "not_applicable",
+    "gate_verified": "passed"
+  },
+  "commit": "working-tree",
+  "environment": {
+    "node": "v26.7.0",
+    "npm": "12.2.0",
+    "postgres": "18.0",
+    "database_role": "symphony",
+    "data_mode": "test",
+    "key_provider": "local-test"
+  },
+  "commands": [
+    {
+      "command": "Vitest: command-digest.test.ts and command-receipt-contract.test.ts",
+      "result": "passed",
+      "artifact": "evidence/phase1/wp1.1/domain-tests-npm12.2.log"
+    },
+    {
+      "command": "Historical npm run test:db:migrations result (earlier toolchain metadata is not current pinned-toolchain proof)",
+      "result": "passed",
+      "artifact": "evidence/phase1/wp1.1/migration-test.log"
+    },
+    {
+      "command": "npm run test:db:migrations (npm 12.2.0 closeout rerun)",
+      "result": "passed",
+      "artifact": "evidence/phase1/wp1.1/migration-test-npm12.2.log"
+    },
+    {
+      "command": "npm run typecheck:v4",
+      "result": "passed",
+      "artifact": "evidence/phase1/wp1.1/typecheck-v4-npm12.2.log"
+    },
+    {
+      "command": "npm run verify:arch",
+      "result": "passed",
+      "artifact": "evidence/phase1/wp1.1/verify-arch-npm12.2.log"
+    },
+    {
+      "command": "npm run verify:phase1:contracts",
+      "result": "passed",
+      "artifact": "evidence/phase1/wp1.1/phase1-contracts-npm12.2.log"
+    }
+  ],
+  "claims": {
+    "behavior_proved": "The command-result and receipt validators enforce the versioned result union, registered command-specific data schema, composite tenant/command identity fields, 32-byte semantic digest, approved canonicalization/result schema versions, and exclusion of raw payload/device/expected-version fields. There is no exported permissive singleton result validator; success schemas are created with command-specific data schemas. The semantic digest matches the approved WP0 HMAC vector, excludes lookup/transport metadata, uses the active key for new digests, requests the stored historical key for replay, rejects missing historical keys, and compares with Node timingSafeEqual. Migration 0009 transforms only an empty legacy receipt table and installs the constrained receipt schema.",
+    "path_proved": "Focused domain contract tests (12 pass), shared @symphony/contracts schemas, TypeScript build/workspace typecheck, architecture validation, Phase 1 contract gate, and the PostgreSQL 18 migration runner integration suite were executed under npm 12.2.0. The migration run against the isolated symphony_phase1_test database passed 3 files / 11 tests, including concurrent clean installation, no-op replay, failure rollback/retry, schema invariants/seeds, WP1.1 receipt constraints, and safe abort on a non-empty legacy receipt table. No command dispatch or API path was claimed.",
+    "configuration_proved": "Node v26.7.0, npm 12.2.0, PostgreSQL 18.0, role symphony, isolated database symphony_phase1_test, and DATA_MODE=test were verified for the migration gate. The test URL was derived from the locally configured Symphony DATABASE_URL by replacing only the database path; credentials were not printed or retained in evidence. Unit tests use deterministic test-only HMAC keys.",
+    "coverage_limitations": [
+      "No application-role RLS, security-attempt insert path, command dispatch, transaction atomicity, API composition, BDD product path, or production key provider was exercised; those are assigned to WP1.2 and later tasks, not WP1.1.",
+      "The migration integration run does not prove migration under the future restricted application role, which is owned by WP1.5.",
+      "No contemporaneous red-phase TDD transcript is retained; the current green tests prove the covered behavior but not the historical order in which tests and implementation were authored."
+    ]
+  },
+  "limitations": [
+    "No contemporaneous red-phase TDD transcript is retained. The focused tests are functional and the green results are preserved, but this record does not claim independent proof of test-first chronology.",
+    "Real-data staging and production operation remain unauthorized and Not Ready."
+  ],
+  "unresolved_decisions": [],
+  "reviewer": "Codex implementation and closeout review; independent Phase 1 review remains a WP8 gate"
+}

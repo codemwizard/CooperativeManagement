@@ -1,0 +1,91 @@
+{
+  "schema_version": 1,
+  "task_id": "WP1.2",
+  "status": {
+    "implementation": "not_started",
+    "unit_test": "pending",
+    "integration_test": "pending",
+    "bdd_ui_test": "not_applicable",
+    "gate_verified": "pending"
+  },
+  "commit": "working-tree",
+  "environment": {
+    "node": "v26.7.0",
+    "npm": "12.2.0",
+    "postgres": "18.0",
+    "database_role": "isolated migration/test credentials; application-role/RLS claims excluded",
+    "data_mode": "test",
+    "key_provider": "local-test"
+  },
+  "commands": [
+    {
+      "command": "npm run test:unit --workspace @symphony/domain -- src/kernel/__tests__/command-bus-transaction.test.ts",
+      "result": "not_run",
+      "artifact": "evidence/phase1/wp1.2/domain-transaction-tests.log"
+    },
+    {
+      "command": "npm run test:db --workspace @symphony/db -- src/__tests__/command-transaction.integration.test.ts",
+      "result": "not_run",
+      "artifact": "evidence/phase1/wp1.2/command-transaction-tests.log"
+    },
+    {
+      "command": "npm run test:db --workspace @symphony/db -- src/__tests__/security-attempt-audit.integration.test.ts",
+      "result": "not_run",
+      "artifact": "evidence/phase1/wp1.2/security-audit-tests.log"
+    },
+    {
+      "command": "npm run test:db:migrations with isolated MIGRATION_TEST_DATABASE_URL",
+      "result": "not_run",
+      "artifact": "evidence/phase1/wp1.2/migration-tests.log"
+    },
+    {
+      "command": "npm run typecheck:v4",
+      "result": "not_run",
+      "artifact": "evidence/phase1/wp1.2/typecheck-v4.log"
+    },
+    {
+      "command": "npm run verify:arch",
+      "result": "not_run",
+      "artifact": "evidence/phase1/wp1.2/verify-arch.log"
+    }
+  ],
+  "sub_gates": [
+    {
+      "gate_id": "WP1.2-A",
+      "status": "pending",
+      "commands": [
+        {
+          "command": "Accepted-command transaction atomicity, same-context policy/authority access, and rollback/retry integration tests",
+          "result": "not_run",
+          "artifact": "evidence/phase1/wp1.2/wp1.2-a-accepted-command-gate.log"
+        }
+      ]
+    },
+    {
+      "gate_id": "WP1.2-B",
+      "status": "pending",
+      "commands": [
+        {
+          "command": "Authenticated-denial security-attempt audit commit ordering, privacy, and audit-storage-failure tests",
+          "result": "not_run",
+          "artifact": "evidence/phase1/wp1.2/wp1.2-b-security-audit-gate.log"
+        }
+      ]
+    }
+  ],
+  "claims": {
+    "behavior_proved": "No WP1.2 behavior is claimed as implemented or proven. This is the pre-implementation evidence envelope; all listed commands and both sub-gates are pending.",
+    "path_proved": "None. Execute and retain each focused suite, migration run, typecheck, and architecture check listed above after implementation.",
+    "configuration_proved": "The required future test configuration is Node v26.7.0, npm 12.2.0, PostgreSQL 18.0, isolated test data, and local test keys. No database URL or credential is recorded.",
+    "coverage_limitations": [
+      "No WP1.2 implementation, runtime evidence, or independent review has been performed.",
+      "WP1.2-A accepted-command atomicity and WP1.2-B security-attempt auditing must both pass before the overall task can pass.",
+      "Application-role grants/RLS belong to WP1.5; terminal-conflict inbox behavior belongs to WP1.4; API composition belongs to WP1.6."
+    ]
+  },
+  "limitations": [
+    "This record is a planned task envelope only; not_run is not a passing result and planned artifact paths do not yet exist."
+  ],
+  "unresolved_decisions": [],
+  "reviewer": "Not reviewed; implementation has not started."
+}

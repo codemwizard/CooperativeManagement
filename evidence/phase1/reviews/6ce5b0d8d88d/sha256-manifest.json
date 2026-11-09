@@ -1,0 +1,719 @@
+{
+  "format": "phase1-review-sha256-manifest-v1",
+  "candidate_commit": "6ce5b0d8d88d2cd8ae057f9ebb93858c28eeb8c1",
+  "clean_worktree": true,
+  "review_index": "evidence/phase1/review-document-index.json",
+  "review_index_sha256": "2bcaabf433e758fa643af26cce17cfdedacc1e8ab8c906b52655c09a83dc356a",
+  "files": [
+    {
+      "path": "CI-Results/phase0-evidence-c70d3f439907e5ff37aee3953704e29d899e0032/phase0-ci-evidence.json",
+      "role": "Final preserved Phase 0 CI evidence JSON",
+      "bytes": 392,
+      "sha256": "6f80e8c2660bac8acbd8688f45ddd54d6a6c4c1d12c639ce3cd5ca711047fb9d"
+    },
+    {
+      "path": "Implementation-Plan-V4/01-current-state-and-readiness-gap.md",
+      "role": "Baseline state and prior readiness gap",
+      "bytes": 8272,
+      "sha256": "0a2062a61f1acf371639fee6966201e88bc3e3ba96d3500f754e30001207f741"
+    },
+    {
+      "path": "Implementation-Plan-V4/02-decision-register.md",
+      "role": "Decision authority and historical/current decisions",
+      "bytes": 46694,
+      "sha256": "0ee707e2125d38b4fcf1ad8799dd476aa028b2a82c0cdcf858fcd0e44dcbc5a1"
+    },
+    {
+      "path": "Implementation-Plan-V4/03-specification-delta.md",
+      "role": "Normative requirements and specification deltas",
+      "bytes": 41461,
+      "sha256": "13304bc68738691f3d1a1c9d502dac8549332f98a345ac59dfc2ecc5c1904c49"
+    },
+    {
+      "path": "Implementation-Plan-V4/03b-evidence-standing-model.md",
+      "role": "Evidence and standing model",
+      "bytes": 16823,
+      "sha256": "9ed65cf1ba08645d008e2a7c3ee09fc2c880dc36f88d5dc67d60d77ac92f6f06"
+    },
+    {
+      "path": "Implementation-Plan-V4/04-architecture.md",
+      "role": "Architecture constraints",
+      "bytes": 11562,
+      "sha256": "9ee23757681841c12568dc6f0f2c06ee8e20c1caf229724030244c1d49feec0a"
+    },
+    {
+      "path": "Implementation-Plan-V4/05-tdd-strategy.md",
+      "role": "TDD and test-quality requirements",
+      "bytes": 7022,
+      "sha256": "dc6426e7e5f15e071bccc7fcb58e0ba5f5fe3e4e0959135efbee8701f55ad930"
+    },
+    {
+      "path": "Implementation-Plan-V4/06-phased-plan.md",
+      "role": "Phase/work-package scope and order",
+      "bytes": 12972,
+      "sha256": "81f15e9a336749decfd4c3a5c814a1938d1fbbb60848892d700a0bdb5f3e977e"
+    },
+    {
+      "path": "Implementation-Plan-V4/07-extension-framework.md",
+      "role": "Extension constraints",
+      "bytes": 9081,
+      "sha256": "68fae3714f8b55c3c5285b120a038ef524849639ca7c3ecbd76455b8d268798a"
+    },
+    {
+      "path": "Implementation-Plan-V4/08-eqs-and-esg-index-preservation.md",
+      "role": "Index preservation constraints",
+      "bytes": 6718,
+      "sha256": "336a41641afe541d92b31faaa3d9095f82b07867c1ed968b315ff1c951a92a60"
+    },
+    {
+      "path": "Implementation-Plan-V4/09-ui-ux-implementation.md",
+      "role": "UI and UX requirements",
+      "bytes": 12474,
+      "sha256": "817b90bdc62ef61f68c04b716ec0608ee9923d820da7e48ebcd3192f5b349471"
+    },
+    {
+      "path": "Implementation-Plan-V4/AI-Secure-Coding-Policy.md",
+      "role": "Secure coding policy",
+      "bytes": 1333,
+      "sha256": "4fede724d70c453348702578d96ecb22381a33321bf172ac1d0dc8b3fc1aaabe"
+    },
+    {
+      "path": "Implementation-Plan-V4/README.md",
+      "role": "Plan set navigation and authority",
+      "bytes": 5300,
+      "sha256": "1cf776caf5a30f0cc4252b230fe39775c47a02004a61478fcf34bde015586072"
+    },
+    {
+      "path": "Implementation-Plan-V4/features/01_enrollment_and_handover.feature",
+      "role": "Canonical BDD source",
+      "bytes": 7333,
+      "sha256": "5f513d3a16fcb301c96d0fa40624fc2690a5440a764d131229fcbdebde7844cb"
+    },
+    {
+      "path": "Implementation-Plan-V4/features/02_identity_privacy_and_access.feature",
+      "role": "Canonical BDD source",
+      "bytes": 10945,
+      "sha256": "28b4a61033afe1db9b647456b0477fa1d26e42043f858b573cfbb5203a4ef60b"
+    },
+    {
+      "path": "Implementation-Plan-V4/features/03_evidence_standing.feature",
+      "role": "Canonical BDD source",
+      "bytes": 7964,
+      "sha256": "4c7d2c71cbad339d267e476da2229a5380598a6522d925b926424111dd473324"
+    },
+    {
+      "path": "Implementation-Plan-V4/features/04_duty_process_records.feature",
+      "role": "Canonical BDD source",
+      "bytes": 6123,
+      "sha256": "a8c5ea12e0c194bf2fe74fabdb277cdfeba14e6458dbc22be287ee677630e275"
+    },
+    {
+      "path": "Implementation-Plan-V4/features/05_internal_field_verifier.feature",
+      "role": "Canonical BDD source",
+      "bytes": 6781,
+      "sha256": "10b7c6580de5a329ca595fae69049f61b21c8a3a31b7dbce2746720266ec0a23"
+    },
+    {
+      "path": "Implementation-Plan-V4/features/06_bylaws_precedence_and_requirements.feature",
+      "role": "Canonical BDD source",
+      "bytes": 11928,
+      "sha256": "f53b3b6052f2b94e02666980603f599ed79c873fdc8ef31eba5a05f8722eec53"
+    },
+    {
+      "path": "Implementation-Plan-V4/features/07_governance_positions_and_appointments.feature",
+      "role": "Canonical BDD source",
+      "bytes": 12144,
+      "sha256": "32f1241b833db6b56ee42f8a01b50bdf914edd94981aec4beba86a754f296372"
+    },
+    {
+      "path": "Implementation-Plan-V4/features/08_meetings_and_resolutions.feature",
+      "role": "Canonical BDD source",
+      "bytes": 10389,
+      "sha256": "0c1fb4fd21de46a932122c140bd5bbe6e8dba9c5dc4a4d4aee487c69b9619e1a"
+    },
+    {
+      "path": "Implementation-Plan-V4/features/09_commands_audit_and_integrity.feature",
+      "role": "Canonical BDD source",
+      "bytes": 5126,
+      "sha256": "f3def372a775aaf64af820571553c6a86be22f1330ccef76ae12a3c030d299b1"
+    },
+    {
+      "path": "Implementation-Plan-V4/features/10_workspace_and_capabilities.feature",
+      "role": "Canonical BDD source",
+      "bytes": 8473,
+      "sha256": "f1c5abc3b4aa9900700109e1d91428fcdf8b7736d7914e74883e35a860a71d7a"
+    },
+    {
+      "path": "Implementation-Plan-V4/implementation/PHASE-0-IMPLEMENTATION.md",
+      "role": "Phase 0 implementation baseline and carry-forward context",
+      "bytes": 35355,
+      "sha256": "be140b416bcb2fabd610628c485bba56157de3d1544de055ef344d38733ba06b"
+    },
+    {
+      "path": "Implementation-Plan-V4/implementation/PHASE-0-REMEDIATION-IMPLEMENTATION.md",
+      "role": "Phase 0 remediation history and carry-forward context",
+      "bytes": 28042,
+      "sha256": "e98d94bfccb730e8e3cabff7498e5ed025bc2f72434a08c29b6b840d5950804e"
+    },
+    {
+      "path": "Implementation-Plan-V4/implementation/PHASE-1-CLOSURE-DECISIONS-AND-ACTIONS.md",
+      "role": "Historical decision/action register; superseded only where explicitly stated by current baseline",
+      "bytes": 15738,
+      "sha256": "0152c31cf9aa80f9e910891fe58499fb79194ec80eabbd011b5d8b01bb84a352"
+    },
+    {
+      "path": "Implementation-Plan-V4/implementation/PHASE-1-IMPLEMENTATION.md",
+      "role": "Historical Phase 1 implementation outline; reconcile against current v2.1 plan",
+      "bytes": 34174,
+      "sha256": "d82c8b62cd0aa5b36133a738cfdf00a64818e2d9b410e1b44594db8168b02b42"
+    },
+    {
+      "path": "Implementation-Plan-V4/implementation/PHASE-1-REMEDIATION-PLAN-v2.md",
+      "role": "Current Phase 1 execution baseline; v2.1 targeted amendment",
+      "bytes": 155822,
+      "sha256": "312be6539c263aa934e861a5b7a391c42666ab89d60847a631fdd3fcbfa8402a"
+    },
+    {
+      "path": "Implementation-Plan-V4/implementation/PHASE-1-REMEDIATION-PLAN.md",
+      "role": "Historical initial remediation plan; superseded by v2.1 targeted amendment",
+      "bytes": 51584,
+      "sha256": "a174c0718a4b11f81dd68c26600c2fd43dc6434a913a184865279388d3e3fe4e"
+    },
+    {
+      "path": "Implementation-Plan-V4/implementation/README.md",
+      "role": "Implementation plan directory navigation",
+      "bytes": 3143,
+      "sha256": "2ba7face5fcb385ed1dbb314975dd419f0a5806dda4300b989d9ba8000f73de7"
+    },
+    {
+      "path": "Implementation-Plan-V4/remediation/Prototype_V4_Phase0_Phase1_Review_and_Remediation_Plan.md",
+      "role": "Original Phase 0/Phase 1 findings and remediation source",
+      "bytes": 33383,
+      "sha256": "d4df168290f50bcc7a744b67b63578356190d9cb5f3ab8f132362e67fd56483d"
+    },
+    {
+      "path": "Implementation-Plan-V4/traceability-matrix.md",
+      "role": "Requirement-to-feature/work-package traceability",
+      "bytes": 7604,
+      "sha256": "c6b00bbb06dbab48e68575c9022439fcc4c349c958d180bee68e9f596b4c3c41"
+    },
+    {
+      "path": "cucumber.cjs",
+      "role": "BDD execution configuration and feature path",
+      "bytes": 786,
+      "sha256": "f8e9b9fd888672ebfbc21cc4caf57603ee0ac72f558cf23fcc1cfd6d1bdbe48a"
+    },
+    {
+      "path": "docs/Independent-Review-Report-Phase-1_Remediation-Plan_v2.md",
+      "role": "Prior independent WP0 closure review; candidate SHA f1fa5f9413747c0ac3cbd73413179101d33f653e",
+      "bytes": 16613,
+      "sha256": "9803901780f0eff172d1eb7774ea8b64e312c061867ce7c5bd6968457c5fd4a7"
+    },
+    {
+      "path": "docs/PHASE0_COMMAND_MAP.md",
+      "role": "Phase 0 mandatory command map",
+      "bytes": 4975,
+      "sha256": "a44a38b363a0ab6a8ea4b359ca22245160c328622f01b5937ed2da11385a74a4"
+    },
+    {
+      "path": "docs/PHASE0_VERIFICATION_REPORT.md",
+      "role": "Phase 0 CI/gate report",
+      "bytes": 9917,
+      "sha256": "d29e27d90f887e3c90749c660c20dd1b1560fd7d1fa69f8719d89dcaaea53ffd"
+    },
+    {
+      "path": "docs/phase1.zip",
+      "role": "Source document archive considered by the prior review; compare its snapshot with current indexed repository documents",
+      "bytes": 76211,
+      "sha256": "e659055eb4dc06c1e1df9ad760439f1acd7215d2994154ff19f9bd51858d0ca6"
+    },
+    {
+      "path": "docs/phase1/API_CONTRACT.md",
+      "role": "HTTP contract",
+      "bytes": 10955,
+      "sha256": "ee116268e382c89d5e1c531ada8f432d742d2328d0ff4834164ea5162816dcb5"
+    },
+    {
+      "path": "docs/phase1/AUTHENTICATION_CONTRACT.md",
+      "role": "Authentication/session contract",
+      "bytes": 6640,
+      "sha256": "1fef5fe688191476510d5b2bf44d340b5e067f7a9628c77b226960e09fe364ee"
+    },
+    {
+      "path": "docs/phase1/AUTHORIZATION_CAPACITY_CONTRACT.md",
+      "role": "Authority dependency and serialization contract",
+      "bytes": 3591,
+      "sha256": "7819b8d74a05215f64905986c0483ba6f5dcf148a478d587934c4baa49a974a6"
+    },
+    {
+      "path": "docs/phase1/COMMAND_TRANSACTION_CONTRACT.md",
+      "role": "Command identity, receipt, atomicity and audit contract",
+      "bytes": 11210,
+      "sha256": "c5fc1e976b22cabf09db96d49d69c37ebe64d24adcc088ff9dda491611e76947"
+    },
+    {
+      "path": "docs/phase1/DEMO_AUTHORIZATION_CONTRACT.md",
+      "role": "Demo authorization contract",
+      "bytes": 1718,
+      "sha256": "cfb1ab7dcd10318f8e0a662d102b30f5904e1bf039b9388c6b802bc47d85440c"
+    },
+    {
+      "path": "docs/phase1/INDEPENDENT_REVIEW_GUIDE.md",
+      "role": "Normative review navigation, independence and evidence protocol",
+      "bytes": 6351,
+      "sha256": "ef50650817a2a33450bb5317f830195bba7e5185674e5c76a38fdfe5d1bebc9d"
+    },
+    {
+      "path": "docs/phase1/PHASE1_CONTRACT_BASELINE.md",
+      "role": "WP0 closure boundary, decision baseline, sources and carry-forward",
+      "bytes": 15683,
+      "sha256": "0f37b6a894fa5eea5a46e87b1edb82d4f8d1d91636701cd90552c522ea801db7"
+    },
+    {
+      "path": "docs/phase1/PRIVACY_CONTROL_CONTRACT.md",
+      "role": "Privacy/control contract",
+      "bytes": 4057,
+      "sha256": "773287e072e3b1bae1d7bde6b31cad17c29f1a42007f997f52c7960a427f34af"
+    },
+    {
+      "path": "docs/phase1/PURGE_OPERATION_CONTRACT.md",
+      "role": "Purge and forced-RLS contract",
+      "bytes": 3422,
+      "sha256": "0a664b8ff0fd76f609dba85e94805b805ef6fb1a2d041cff758bc4081350aa8c"
+    },
+    {
+      "path": "docs/phase1/RECONCILIATION_CONTRACT.md",
+      "role": "Inbox persistence and authorization contract",
+      "bytes": 3425,
+      "sha256": "fb74416bc7fe0414aee49dad8dc846a581b2c98d6113eba88594b28df3972436"
+    },
+    {
+      "path": "docs/phase1/TENANT_ISOLATION_CONTRACT.md",
+      "role": "Tenant classification, grants and RLS contract",
+      "bytes": 4453,
+      "sha256": "3887af74a60bb47874006f983a327081be17cb81e0875df9f630f0cfb63b9609"
+    },
+    {
+      "path": "evidence/phase1/authentication-session-policy-matrix.json",
+      "role": "Session policy decision vectors",
+      "bytes": 2294,
+      "sha256": "e434b3a992e0be8e5e364799bc8f28a2f4ee42850ad0e380da15f74ab1892726"
+    },
+    {
+      "path": "evidence/phase1/authority-dependency-inventory.json",
+      "role": "Authority scopes, lock order and race test inventory",
+      "bytes": 9362,
+      "sha256": "1909a23cfc471ef1e3c1e1bc6948660125868da2420239ad8433eb91fbb69c17"
+    },
+    {
+      "path": "evidence/phase1/bdd-scenarios.json",
+      "role": "Frozen scenario inventory",
+      "bytes": 7598,
+      "sha256": "e9474ee78589cf1fd228a5d52eb1a178f4b6e29b5bcb0bd5581cc2a24f54b426"
+    },
+    {
+      "path": "evidence/phase1/bdd-work-package-map.json",
+      "role": "Scenario-to-task ownership map",
+      "bytes": 28301,
+      "sha256": "eb5323c66a41360d31d9a86d0bbee0993a4401c1d359844703933940d99bf6af"
+    },
+    {
+      "path": "evidence/phase1/command-contract-vectors.json",
+      "role": "Command contract vectors",
+      "bytes": 6357,
+      "sha256": "0d033e22d7220b523c36d69094cfbfb36cb8e6e08767331603d5035372a2ed1f"
+    },
+    {
+      "path": "evidence/phase1/database-capability-check.md",
+      "role": "Observed local PostgreSQL capabilities and limits",
+      "bytes": 1524,
+      "sha256": "e1aacf116c00768b9e2e292c63ef9158e86927cddec6fcd2d2e9c68236463126"
+    },
+    {
+      "path": "evidence/phase1/examples/wp0-12.example.json",
+      "role": "Common evidence record example",
+      "bytes": 1096,
+      "sha256": "052fd8e4777f8d07e4a2a43d32aa2e7c68045799a90f94353e1a4a5185096c6b"
+    },
+    {
+      "path": "evidence/phase1/phase0-candidate-verification.md",
+      "role": "Phase 0 exact candidate verification evidence",
+      "bytes": 2919,
+      "sha256": "adbbc48698eec98c97ca18f3fa8075d71bbc88cb9a381835ae1bb7f54ae97f07"
+    },
+    {
+      "path": "evidence/phase1/privacy-field-requirement-map.json",
+      "role": "Privacy requirement-to-field map",
+      "bytes": 13852,
+      "sha256": "ffb1533bd692c45575c43f14239b9fa2196e3b21396efacd6ffd58dc1aa3dcf9"
+    },
+    {
+      "path": "evidence/phase1/purge-table-policy-matrix.json",
+      "role": "Purge allowlist/row policy",
+      "bytes": 13995,
+      "sha256": "cfffdb148a2533f7ee4ed88b6cc19753aba8b67cc3443467373852bbeadff326"
+    },
+    {
+      "path": "evidence/phase1/reconciliation-contract-vectors.json",
+      "role": "Reconciliation contract vectors",
+      "bytes": 2691,
+      "sha256": "d58660535622b73a9863bb3a7602f45018eac6f57803fff9d27f42c51db812d2"
+    },
+    {
+      "path": "evidence/phase1/reviews/phase1-v2.1-review-disposition.md",
+      "role": "Disposition of supplied 2026-11-08 review findings",
+      "bytes": 6992,
+      "sha256": "3667461dca494e48a745a00d7c6baae0b4f365daff90b876bfe10b0378f6368e"
+    },
+    {
+      "path": "evidence/phase1/runtime-mode-matrix.json",
+      "role": "Runtime profile contract",
+      "bytes": 1987,
+      "sha256": "0292c61bad5afbe406d711f28e8dc982fb92e5e6c6e54c2d11747bea3d57043b"
+    },
+    {
+      "path": "evidence/phase1/task-dependencies.yml",
+      "role": "Normative task graph; JSON parsing is normative",
+      "bytes": 12644,
+      "sha256": "0b99f35d5d51c954c391a4e09f6ed23cf9e32e0d5d69b73eb00fa2b73a5f3e88"
+    },
+    {
+      "path": "evidence/phase1/task-evidence.schema.json",
+      "role": "Task record schema",
+      "bytes": 3853,
+      "sha256": "b4acf8c32bf06a5b5cea611238481da30d9d0f482e2c15ccce174346ef1d4ca1"
+    },
+    {
+      "path": "evidence/phase1/tasks.json",
+      "role": "Common task completion records and carry-forward evidence",
+      "bytes": 27999,
+      "sha256": "9f5a725ba93f8e47e93e6529c5d815d191fc4aac12cfdbda31b6eb837b6dd3c5"
+    },
+    {
+      "path": "evidence/phase1/tenant-table-inventory.json",
+      "role": "Migrated table classification source",
+      "bytes": 9979,
+      "sha256": "512d41497a00e6d39d10e0b94af8ce1621b6c7a1107673f9cfd94a27378b7404"
+    },
+    {
+      "path": "evidence/phase1/tenant-table-policy-matrix.json",
+      "role": "RLS/grant policy matrix",
+      "bytes": 54349,
+      "sha256": "0858205ec8d0c74d7ca0247f68d607cc0f27a70e6bc16c2fa9dbb93503bd0b26"
+    },
+    {
+      "path": "evidence/phase1/wp0-closure-readiness.json",
+      "role": "WP0 closure evidence summary",
+      "bytes": 1598,
+      "sha256": "f06d6b595fe5b96a14ef67df214aac22e77ff88eb234a96962b6f37d11957054"
+    },
+    {
+      "path": "evidence/phase1/wp0.1-command-id-digest-tdd.md",
+      "role": "WP0.1 contract TDD evidence",
+      "bytes": 2964,
+      "sha256": "cc28754187f08e6a5b4f23f6ea65450cf1e89dbdd2492c0612157655bcdb78a3"
+    },
+    {
+      "path": "evidence/phase1/wp0.8-boundary-tdd.md",
+      "role": "WP0.8 boundary TDD evidence",
+      "bytes": 1099,
+      "sha256": "e85ca982b63eee6c357749e0dfb6d56942eb92406c3834a220c69dbb68dbaca7"
+    },
+    {
+      "path": "features/01_enrollment_and_handover.feature",
+      "role": "Runnable BDD copy consumed by repository cucumber configuration; compare with canonical source",
+      "bytes": 7527,
+      "sha256": "54da473548bab2a44094217313c435e7dafc91018fb7269f3bf84f3a08ce2738"
+    },
+    {
+      "path": "features/02_identity_privacy_and_access.feature",
+      "role": "Runnable BDD copy consumed by repository cucumber configuration; compare with canonical source",
+      "bytes": 11232,
+      "sha256": "4b713d8e6ce84e38b887eb5989f0ed26b69c2b2e1e41e4abf85c8a8724fdb177"
+    },
+    {
+      "path": "features/03_evidence_standing.feature",
+      "role": "Runnable BDD copy consumed by repository cucumber configuration; compare with canonical source",
+      "bytes": 8202,
+      "sha256": "dab7225279ca5f6d0c6202e7a00e77f8341230b4d108b190a62678281b8b8165"
+    },
+    {
+      "path": "features/04_duty_process_records.feature",
+      "role": "Runnable BDD copy consumed by repository cucumber configuration; compare with canonical source",
+      "bytes": 6318,
+      "sha256": "6ded42bc07e7211188f34af007e7d1c15ca4c881acec4d0ad2d2f8f2413c5009"
+    },
+    {
+      "path": "features/05_internal_field_verifier.feature",
+      "role": "Runnable BDD copy consumed by repository cucumber configuration; compare with canonical source",
+      "bytes": 6983,
+      "sha256": "1d6109d925b8324f37b9b3b582bcee9675dd0dfcc0d6e42698144c3bf04084e8"
+    },
+    {
+      "path": "features/06_bylaws_precedence_and_requirements.feature",
+      "role": "Runnable BDD copy consumed by repository cucumber configuration; compare with canonical source",
+      "bytes": 12290,
+      "sha256": "a5d4c313eb05884ed025f9dea7cbae3003929c30aabecff5b5db86c7a2fd8d77"
+    },
+    {
+      "path": "features/07_governance_positions_and_appointments.feature",
+      "role": "Runnable BDD copy consumed by repository cucumber configuration; compare with canonical source",
+      "bytes": 12504,
+      "sha256": "b60d63c0910efe8ea251c7b665a8d8e4565fce0c6607a58f48d140f281699e6f"
+    },
+    {
+      "path": "features/08_meetings_and_resolutions.feature",
+      "role": "Runnable BDD copy consumed by repository cucumber configuration; compare with canonical source",
+      "bytes": 10704,
+      "sha256": "f465b9ec7bfa26da1726391ac76be36cf27683209408896d6e72848ab9c5abcf"
+    },
+    {
+      "path": "features/09_commands_audit_and_integrity.feature",
+      "role": "Runnable BDD copy consumed by repository cucumber configuration; compare with canonical source",
+      "bytes": 5278,
+      "sha256": "9b984e0ad752c2f289fd73a6055462223d768763367dd38efd729dae16144a16"
+    },
+    {
+      "path": "features/10_workspace_and_capabilities.feature",
+      "role": "Runnable BDD copy consumed by repository cucumber configuration; compare with canonical source",
+      "bytes": 8718,
+      "sha256": "bcef1ad41273051cad53a0b368bcebe237a6f129faace49c4c6f181655a319f7"
+    },
+    {
+      "path": "migrations/0001_kernel.sql",
+      "role": "Current historical database schema and receipt baseline",
+      "bytes": 5564,
+      "sha256": "fcbd29cd88044a498b3b72cde768a69e735dd7bcd0d394747b8550d54cd76c5f"
+    },
+    {
+      "path": "migrations/0002_identity.sql",
+      "role": "Current historical database schema",
+      "bytes": 12267,
+      "sha256": "35f8cf5b57321b3d43da5edcd00827bf20f0cde342a21f11e5412542421b5192"
+    },
+    {
+      "path": "migrations/0003_policy.sql",
+      "role": "Current historical database schema",
+      "bytes": 8887,
+      "sha256": "e9b25ebfd34fedccfd50c4068b34753adecbd7e8666bfb4c31b3cfab58be1124"
+    },
+    {
+      "path": "migrations/0004_enrolment.sql",
+      "role": "Current historical database schema",
+      "bytes": 5556,
+      "sha256": "e234c671b9747f77227372c14aa625e71829c3074c8f8d50aea2e56bd6286c82"
+    },
+    {
+      "path": "migrations/0005_evidence.sql",
+      "role": "Current historical database schema",
+      "bytes": 15176,
+      "sha256": "0c5e5265ed99646e279804bf1a4017e1baa6192c60d1c2fe44ef2a9c227907eb"
+    },
+    {
+      "path": "migrations/0006_legal.sql",
+      "role": "Current historical database schema",
+      "bytes": 11087,
+      "sha256": "0a214fc7e28e69606d9be1f519f786da5ac58135585c3af5cd97080dad1b045a"
+    },
+    {
+      "path": "migrations/0006b_governance_stub.sql",
+      "role": "Current historical database schema",
+      "bytes": 1871,
+      "sha256": "94f6ed6bae5e548c565998922a31b8b678671aaca632ec6944aa671876af3bbc"
+    },
+    {
+      "path": "migrations/0007_aggregate_states.sql",
+      "role": "Current historical database schema",
+      "bytes": 831,
+      "sha256": "94e4d83100aa41f1d24f55e094c68aeb3594980371cd913ea1a66ab058a5542a"
+    },
+    {
+      "path": "migrations/0008_rls_tenant_isolation.sql",
+      "role": "Current historical RLS setup and transition context",
+      "bytes": 2176,
+      "sha256": "de27da20e8061b86470f3806188717af9a3db1d77f868c610a43ccdd2828345f"
+    },
+    {
+      "path": "package.json",
+      "role": "Exact runnable verification command set and toolchain scripts",
+      "bytes": 5260,
+      "sha256": "ad3ded6619dd3ed0f01171710d485a0a17d0cb1a82b9704b6336149d95c05095"
+    },
+    {
+      "path": "tests/tooling/phase1_contracts.test.ts",
+      "role": "WP0 contract/dependency/BDD evidence validator tests",
+      "bytes": 38544,
+      "sha256": "999ebda04485ee933497e31f54982a01b9856304198940ca4c2c9a804815ba30"
+    },
+    {
+      "path": "tools/create_phase1_review_manifest.mjs",
+      "role": "Candidate-pinned review path hash generator",
+      "bytes": 3296,
+      "sha256": "7c868ab62eb26f15f8cca270d0714c86b2216a388a2e78f0d69f68914a40ab94"
+    },
+    {
+      "path": "tools/phase1-contracts.js",
+      "role": "WP0 contract/dependency/BDD evidence validator implementation",
+      "bytes": 32432,
+      "sha256": "f0569ec6fddd695938248cf31117496246f2f32a6c51799d0b3232756002ffa6"
+    },
+    {
+      "path": "tools/run_phase1_bdd.mjs",
+      "role": "BDD manifest execution and no-skip/no-empty runner",
+      "bytes": 2192,
+      "sha256": "63f91f4d274d0b25b562c726b87194112e562eede5c8802e581f6d55092926f5"
+    },
+    {
+      "path": "tools/verify-trace.ts",
+      "role": "Requirement/feature trace validator",
+      "bytes": 8335,
+      "sha256": "d8aa44faa7a1984f7aea2e48266033a2bc0f57a17abce5d9b31a65dc2711036d"
+    }
+  ],
+  "implementation_diff_files": [
+    {
+      "path": "Implementation-Plan-V4/02-decision-register.md",
+      "role": "Changed by the reviewed candidate commit; inspect diff and relevant surrounding code/tests.",
+      "bytes": 46694,
+      "sha256": "0ee707e2125d38b4fcf1ad8799dd476aa028b2a82c0cdcf858fcd0e44dcbc5a1"
+    },
+    {
+      "path": "Implementation-Plan-V4/implementation/PHASE-1-CLOSURE-DECISIONS-AND-ACTIONS.md",
+      "role": "Changed by the reviewed candidate commit; inspect diff and relevant surrounding code/tests.",
+      "bytes": 15738,
+      "sha256": "0152c31cf9aa80f9e910891fe58499fb79194ec80eabbd011b5d8b01bb84a352"
+    },
+    {
+      "path": "Implementation-Plan-V4/implementation/PHASE-1-REMEDIATION-PLAN-v2.md",
+      "role": "Changed by the reviewed candidate commit; inspect diff and relevant surrounding code/tests.",
+      "bytes": 155822,
+      "sha256": "312be6539c263aa934e861a5b7a391c42666ab89d60847a631fdd3fcbfa8402a"
+    },
+    {
+      "path": "Implementation-Plan-V4/implementation/README.md",
+      "role": "Changed by the reviewed candidate commit; inspect diff and relevant surrounding code/tests.",
+      "bytes": 3143,
+      "sha256": "2ba7face5fcb385ed1dbb314975dd419f0a5806dda4300b989d9ba8000f73de7"
+    },
+    {
+      "path": "docs/Independent-Review-Report-Phase-1_Remediation-Plan_v2.md",
+      "role": "Changed by the reviewed candidate commit; inspect diff and relevant surrounding code/tests.",
+      "bytes": 16613,
+      "sha256": "9803901780f0eff172d1eb7774ea8b64e312c061867ce7c5bd6968457c5fd4a7"
+    },
+    {
+      "path": "docs/phase1.zip",
+      "role": "Changed by the reviewed candidate commit; inspect diff and relevant surrounding code/tests.",
+      "bytes": 76211,
+      "sha256": "e659055eb4dc06c1e1df9ad760439f1acd7215d2994154ff19f9bd51858d0ca6"
+    },
+    {
+      "path": "docs/phase1/API_CONTRACT.md",
+      "role": "Changed by the reviewed candidate commit; inspect diff and relevant surrounding code/tests.",
+      "bytes": 10955,
+      "sha256": "ee116268e382c89d5e1c531ada8f432d742d2328d0ff4834164ea5162816dcb5"
+    },
+    {
+      "path": "docs/phase1/AUTHENTICATION_CONTRACT.md",
+      "role": "Changed by the reviewed candidate commit; inspect diff and relevant surrounding code/tests.",
+      "bytes": 6640,
+      "sha256": "1fef5fe688191476510d5b2bf44d340b5e067f7a9628c77b226960e09fe364ee"
+    },
+    {
+      "path": "docs/phase1/AUTHORIZATION_CAPACITY_CONTRACT.md",
+      "role": "Changed by the reviewed candidate commit; inspect diff and relevant surrounding code/tests.",
+      "bytes": 3591,
+      "sha256": "7819b8d74a05215f64905986c0483ba6f5dcf148a478d587934c4baa49a974a6"
+    },
+    {
+      "path": "docs/phase1/COMMAND_TRANSACTION_CONTRACT.md",
+      "role": "Changed by the reviewed candidate commit; inspect diff and relevant surrounding code/tests.",
+      "bytes": 11210,
+      "sha256": "c5fc1e976b22cabf09db96d49d69c37ebe64d24adcc088ff9dda491611e76947"
+    },
+    {
+      "path": "docs/phase1/INDEPENDENT_REVIEW_GUIDE.md",
+      "role": "Changed by the reviewed candidate commit; inspect diff and relevant surrounding code/tests.",
+      "bytes": 6351,
+      "sha256": "ef50650817a2a33450bb5317f830195bba7e5185674e5c76a38fdfe5d1bebc9d"
+    },
+    {
+      "path": "docs/phase1/PHASE1_CONTRACT_BASELINE.md",
+      "role": "Changed by the reviewed candidate commit; inspect diff and relevant surrounding code/tests.",
+      "bytes": 15683,
+      "sha256": "0f37b6a894fa5eea5a46e87b1edb82d4f8d1d91636701cd90552c522ea801db7"
+    },
+    {
+      "path": "docs/phase1/PURGE_OPERATION_CONTRACT.md",
+      "role": "Changed by the reviewed candidate commit; inspect diff and relevant surrounding code/tests.",
+      "bytes": 3422,
+      "sha256": "0a664b8ff0fd76f609dba85e94805b805ef6fb1a2d041cff758bc4081350aa8c"
+    },
+    {
+      "path": "docs/phase1/RECONCILIATION_CONTRACT.md",
+      "role": "Changed by the reviewed candidate commit; inspect diff and relevant surrounding code/tests.",
+      "bytes": 3425,
+      "sha256": "fb74416bc7fe0414aee49dad8dc846a581b2c98d6113eba88594b28df3972436"
+    },
+    {
+      "path": "docs/phase1/TENANT_ISOLATION_CONTRACT.md",
+      "role": "Changed by the reviewed candidate commit; inspect diff and relevant surrounding code/tests.",
+      "bytes": 4453,
+      "sha256": "3887af74a60bb47874006f983a327081be17cb81e0875df9f630f0cfb63b9609"
+    },
+    {
+      "path": "evidence/phase1/authority-dependency-inventory.json",
+      "role": "Changed by the reviewed candidate commit; inspect diff and relevant surrounding code/tests.",
+      "bytes": 9362,
+      "sha256": "1909a23cfc471ef1e3c1e1bc6948660125868da2420239ad8433eb91fbb69c17"
+    },
+    {
+      "path": "evidence/phase1/bdd-work-package-map.json",
+      "role": "Changed by the reviewed candidate commit; inspect diff and relevant surrounding code/tests.",
+      "bytes": 28301,
+      "sha256": "eb5323c66a41360d31d9a86d0bbee0993a4401c1d359844703933940d99bf6af"
+    },
+    {
+      "path": "evidence/phase1/purge-table-policy-matrix.json",
+      "role": "Changed by the reviewed candidate commit; inspect diff and relevant surrounding code/tests.",
+      "bytes": 13995,
+      "sha256": "cfffdb148a2533f7ee4ed88b6cc19753aba8b67cc3443467373852bbeadff326"
+    },
+    {
+      "path": "evidence/phase1/review-document-index.json",
+      "role": "Changed by the reviewed candidate commit; inspect diff and relevant surrounding code/tests.",
+      "bytes": 16619,
+      "sha256": "2bcaabf433e758fa643af26cce17cfdedacc1e8ab8c906b52655c09a83dc356a"
+    },
+    {
+      "path": "evidence/phase1/reviews/phase1-v2.1-review-disposition.md",
+      "role": "Changed by the reviewed candidate commit; inspect diff and relevant surrounding code/tests.",
+      "bytes": 6992,
+      "sha256": "3667461dca494e48a745a00d7c6baae0b4f365daff90b876bfe10b0378f6368e"
+    },
+    {
+      "path": "evidence/phase1/task-dependencies.yml",
+      "role": "Changed by the reviewed candidate commit; inspect diff and relevant surrounding code/tests.",
+      "bytes": 12644,
+      "sha256": "0b99f35d5d51c954c391a4e09f6ed23cf9e32e0d5d69b73eb00fa2b73a5f3e88"
+    },
+    {
+      "path": "evidence/phase1/tasks.json",
+      "role": "Changed by the reviewed candidate commit; inspect diff and relevant surrounding code/tests.",
+      "bytes": 27999,
+      "sha256": "9f5a725ba93f8e47e93e6529c5d815d191fc4aac12cfdbda31b6eb837b6dd3c5"
+    },
+    {
+      "path": "evidence/phase1/tenant-table-policy-matrix.json",
+      "role": "Changed by the reviewed candidate commit; inspect diff and relevant surrounding code/tests.",
+      "bytes": 54349,
+      "sha256": "0858205ec8d0c74d7ca0247f68d607cc0f27a70e6bc16c2fa9dbb93503bd0b26"
+    },
+    {
+      "path": "tools/create_phase1_review_manifest.mjs",
+      "role": "Changed by the reviewed candidate commit; inspect diff and relevant surrounding code/tests.",
+      "bytes": 3296,
+      "sha256": "7c868ab62eb26f15f8cca270d0714c86b2216a388a2e78f0d69f68914a40ab94"
+    }
+  ]
+}
