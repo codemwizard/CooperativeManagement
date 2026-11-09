@@ -9,3 +9,4 @@ export * from './kernel/command-envelope.js';
 export * from './kernel/command-result.js';
 export * from './kernel/ports.js';
 export * from './kernel/command-bus.js';
+export * from './kernel/command-digest.js';

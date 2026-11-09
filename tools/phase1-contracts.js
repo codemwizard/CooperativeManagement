@@ -458,9 +458,17 @@ function main() {
   const rlsProtected = tenantInventory.tables.filter((entry) => entry.rls_current).length;
   console.log(`Tenant inventory: ${tenantInventory.tables.length} migrated tables classified; ${rlsProtected} currently have ENABLE+FORCE RLS.`);
   const closureBlockers = validateDependencyGraph(graph, recordMap, 'WP0.13', readiness);
-  console.log(`WP0.13 is ${closureBlockers.length ? `BLOCKED (${closureBlockers.length} unmet prerequisites)` : 'eligible for owner sign-off'}.`);
+  const closureApproved = readiness.project_owner_signed
+    && readiness.phase0_candidate_passed
+    && readiness.all_contract_decisions_resolved
+    && readiness.independent_reviewer_named
+    && readiness.reviewer_independent
+    && readiness.reviewer_available;
+  console.log(`WP0.13 is ${closureBlockers.length
+    ? `BLOCKED (${closureBlockers.length} unmet prerequisites)`
+    : closureApproved ? 'CLOSED (owner approval and candidate pass recorded)' : 'eligible for owner sign-off'}.`);
   for (const blocker of closureBlockers) console.log(`WP0.13 unmet: ${blocker}`);
-  console.log(`Project owner: ${readiness.project_owner_signed ? 'signed' : 'pending'}; independent reviewer: ${readiness.independent_reviewer_named ? 'identified' : 'not identified'}; WP1 remains blocked until WP0.13 passes.`);
+  console.log(`Project owner: ${readiness.project_owner_signed ? 'signed' : 'pending'}; independent reviewer: ${readiness.independent_reviewer_named ? 'identified' : 'not identified'}; Phase 1 task authorization and sequencing are governed by the decision register and dependency graph.`);
   console.log('This validates the gate structure only; it does not claim WP0 acceptance or Phase 1 product behavior.');
 }
 

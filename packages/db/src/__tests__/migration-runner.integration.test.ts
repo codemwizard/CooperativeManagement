@@ -216,5 +216,93 @@ describe.skipIf(testDatabaseUrl === undefined || testDatabaseUrl === '')(
       );
       expect(membership.rows[0]?.value).toBe('false');
     });
+
+    it('installs the WP1.1 receipt schema constraints', async () => {
+      const receiptColumns = await pool.query<{ column_name: string; is_nullable: string; data_type: string }>(
+        `SELECT column_name, is_nullable, data_type
+         FROM information_schema.columns
+         WHERE table_schema = 'symphony' AND table_name = 'command_receipts'
+         ORDER BY ordinal_position`,
+      );
+      const receiptNames = receiptColumns.rows.map((row) => row.column_name);
+      expect(receiptNames).toEqual([
+        'command_id', 'tenant_id', 'actor_user_id', 'command_type', 'recorded_at',
+        'command_schema_version', 'canonicalization_version', 'digest_key_version',
+        'semantic_digest', 'result_classification', 'result_schema_version', 'safe_result',
+      ]);
+      expect(receiptNames).not.toContain('payload');
+      expect(receiptNames).not.toContain('device_id');
+      expect(receiptNames).not.toContain('expected_version');
+      expect(receiptNames).not.toContain('occurred_at');
+      expect(receiptColumns.rows.every((row) => row.is_nullable === 'NO')).toBe(true);
+
+      const receiptConstraints = await pool.query<{ definition: string }>(
+        `SELECT pg_get_constraintdef(oid) AS definition
+         FROM pg_constraint
+         WHERE conrelid = 'symphony.command_receipts'::regclass
+         ORDER BY conname`,
+      );
+      const definitions = receiptConstraints.rows.map((row) => row.definition).join('\n');
+      expect(definitions).toMatch(/PRIMARY KEY \(tenant_id, command_id\)/i);
+      expect(definitions).toMatch(/octet_length\(semantic_digest\) = 32/i);
+      expect(definitions).toMatch(/result_classification.*committed_success.*terminal_rejection/is);
+      expect(definitions).not.toMatch(/UNIQUE \(command_id\)/i);
+
+    });
+
+    it('aborts WP1.1 migration on a non-empty legacy receipt table without changing it', async () => {
+      const fixtureSchema = 'wp1_receipt_guard_fixture';
+      const sqlText = await fs.readFile(path.join(migrationDirectory, '0009_command_receipts_v2.sql'), 'utf8');
+      const fixtureSql = sqlText
+        .replaceAll('symphony.', '"wp1_receipt_guard_fixture".')
+        .replaceAll("'symphony.command_receipts'", "'wp1_receipt_guard_fixture.command_receipts'");
+      const client = await pool.connect();
+      try {
+        await client.query(`CREATE SCHEMA "${fixtureSchema}"`);
+        await client.query(`CREATE TABLE "${fixtureSchema}".tenants (id UUID PRIMARY KEY)`);
+        await client.query(`
+          CREATE TABLE "${fixtureSchema}".command_receipts (
+            command_id UUID PRIMARY KEY,
+            tenant_id UUID NOT NULL,
+            actor_user_id UUID NOT NULL,
+            type TEXT NOT NULL,
+            payload JSONB NOT NULL DEFAULT '{}',
+            occurred_at TIMESTAMPTZ NOT NULL,
+            recorded_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+            device_id TEXT,
+            expected_version INT,
+            result JSONB
+          )
+        `);
+        const commandId = '24a679a7-e2e0-4788-9f96-6c1874406792';
+        await client.query(
+          `INSERT INTO "${fixtureSchema}".command_receipts
+            (command_id, tenant_id, actor_user_id, type, occurred_at, payload)
+           VALUES ($1, $2, $3, 'membership.update', now(), '{"sentinel":true}')`,
+          [commandId, '4b92e2ac-b6b6-4ef8-981d-f92a9d1140ec', '69ec8dbd-8517-4cf7-ac59-3db4d6fc2065'],
+        );
+
+        await client.query('BEGIN');
+        await client.query(`SET LOCAL search_path TO "${fixtureSchema}", public`);
+        await expect(client.query(fixtureSql)).rejects.toThrow(/non-empty command_receipts/i);
+        await client.query('ROLLBACK');
+
+        const preserved = await client.query<{ command_id: string; payload: { sentinel: boolean } }>(
+          `SELECT command_id, payload FROM "${fixtureSchema}".command_receipts`,
+        );
+        expect(preserved.rows).toEqual([{ command_id: commandId, payload: { sentinel: true } }]);
+        const columns = await client.query<{ column_name: string }>(
+          `SELECT column_name FROM information_schema.columns
+           WHERE table_schema = $1 AND table_name = 'command_receipts' ORDER BY ordinal_position`,
+          [fixtureSchema],
+        );
+        expect(columns.rows.map((row) => row.column_name)).toContain('payload');
+        expect(columns.rows.map((row) => row.column_name)).not.toContain('safe_result');
+      } finally {
+        await client.query('ROLLBACK').catch(() => undefined);
+        await client.query(`DROP SCHEMA IF EXISTS "${fixtureSchema}" CASCADE`);
+        client.release();
+      }
+    });
   },
 );

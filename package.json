@@ -4,7 +4,10 @@
   "version": "1.0.0",
   "packageManager": "npm@12.2.0",
   "type": "module",
-  "workspaces": ["packages/*", "apps/*"],
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
   "scripts": {
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
@@ -64,8 +67,8 @@
     "@types/node": "^20.14.0",
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",
-    "ajv": "^8.20.0",
     "@vitejs/plugin-react": "^4.3.1",
+    "ajv": "^8.20.0",
     "axe-core": "^4.14.0",
     "cross-env": "^10.1.0",
     "dependency-cruiser": "^18.7.2",

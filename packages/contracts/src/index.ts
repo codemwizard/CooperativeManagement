@@ -4,6 +4,8 @@
 
 export const VERSION = '0.1.0';
 
+export * from './command-receipt.js';
+
 // Command envelope types (Phase 1 — WP-1.1)
 // export * from './command.js';
 

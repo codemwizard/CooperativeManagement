@@ -364,6 +364,37 @@ describe('WP0.12 evidence contract', () => {
   });
 });
 
+describe('WP1.2 evidence sub-gates', () => {
+  const passingWp1Record = () => {
+    const record = structuredClone(readJson('evidence/phase1/examples/wp0-12.example.json')) as Record<string, any>;
+    record.task_id = 'WP1.2';
+    record.status.gate_verified = 'passed';
+    record.sub_gates = ['WP1.2-A', 'WP1.2-B'].map((gate_id) => ({
+      gate_id,
+      status: 'passed',
+      commands: [{ command: 'npm run verify:arch', result: 'passed', artifact: 'evidence/phase1/wp1.2/subgate.log' }],
+    }));
+    return record;
+  };
+
+  it('requires both WP1.2-A and WP1.2-B before task gate can pass', () => {
+    const schema = readJson('evidence/phase1/task-evidence.schema.json');
+    expect(validateEvidence(passingWp1Record(), schema)).toEqual([]);
+
+    const incomplete = passingWp1Record();
+    incomplete.sub_gates = incomplete.sub_gates.filter((gate: Record<string, unknown>) => gate.gate_id !== 'WP1.2-B');
+    expect(validateEvidence(incomplete, schema).join(' ')).toMatch(/sub_gates/);
+  });
+
+  it('rejects an overall WP1.2 pass while either sub-gate or one of its commands is pending', () => {
+    const schema = readJson('evidence/phase1/task-evidence.schema.json');
+    const incomplete = passingWp1Record();
+    incomplete.sub_gates[1].status = 'pending';
+    incomplete.sub_gates[1].commands[0].result = 'not_run';
+    expect(validateEvidence(incomplete, schema).join(' ')).toMatch(/sub_gates/);
+  });
+});
+
 describe('WP0.13 dependency gate', () => {
   it('requires all WP0 tasks, known nodes, justified acyclic edges, and passing predecessors', () => {
     const graph = readJson('evidence/phase1/task-dependencies.yml');

@@ -20,7 +20,7 @@ Phase 1 Gate must pass before Phase 2 starts.
 | [`PHASE-0-REMEDIATION-IMPLEMENTATION.md`](./PHASE-0-REMEDIATION-IMPLEMENTATION.md) | Phase 0 remediation — COMPLETE | Exact CI gate PASS on `c70d3f4`; Phase 1 login E2E carried forward |
 | [`../../docs/PHASE0_COMMAND_MAP.md`](../../docs/PHASE0_COMMAND_MAP.md) | Phase 0 operations | Commands, prerequisites, scope, and evidence |
 | [`PHASE-1-IMPLEMENTATION.md`](./PHASE-1-IMPLEMENTATION.md) | 1 — Kernel, identity, authorisation, privacy, shell | In Progress; historical WP checkboxes require re-evidence; Phase 1 gate remains open |
-| [`PHASE-1-REMEDIATION-PLAN-v2.md`](./PHASE-1-REMEDIATION-PLAN-v2.md) | Phase 1 remediation (v2.1 execution baseline with 8 Nov targeted review amendment) | WP0 contract/design gate closed; WP1 authorized; downstream runtime proof remains required. Includes replay/concurrency, RLS, privacy, purge, session and reviewer-document index links. |
+| [`PHASE-1-REMEDIATION-PLAN-v2.md`](./PHASE-1-REMEDIATION-PLAN-v2.md) | Phase 1 remediation (v2.1.3 WP1.2 review amendments; based on the v2.1 execution baseline and 8 Nov targeted review) | WP0 contract/design gate closed; WP1.1 checks passed with npm 12.2.0 PostgreSQL proof; predecessor evidence must be commit-pinned before WP1.2 starts. WP1.2 explicitly consumes the WP1.1 receipt contract, makes command-bus writes atomic, excludes WP1.4 inbox acceptance, and defers app-role RLS/grants to WP1.5. Downstream runtime proof remains required. Includes replay/concurrency, privacy, purge, session and reviewer-document index links. |
 | [`PHASE-1-REMEDIATION-PLAN.md`](./PHASE-1-REMEDIATION-PLAN.md) | Phase 1 remediation (superseded history) | Original reviewed plan; retained for change history |
 
 ## Founder rulings applied (O-18 to O-21)
@@ -35,11 +35,9 @@ Phase 1 Gate must pass before Phase 2 starts.
 
 ## How task completion works
 
-Each task has a checkbox:
-- `[ ]` = not started
-- `[x]` = completed and verified
+Current remediation tasks close through a task record validated against `evidence/phase1/task-evidence.schema.json`, passing predecessor records in `evidence/phase1/task-dependencies.yml`, and retained command output/evidence artifacts. Each record binds behavior, exercised path, environment, commands, results, limitations and reviewer. A task cannot pass while a required sub-gate is pending; WP1.2 specifically requires both WP1.2-A and WP1.2-B. The current validator enforces the WP0 closure records and graph structure; task owners must preserve the exact command, exit code, test counts and artifact paths for downstream WP1+ acceptance.
 
-**Check the box when the task is done**, not at the end of the phase. Each task names the exact test command to run. An independent verifier can re-run any named command to confirm the same result.
+Checkboxes remain only in legacy Phase 0/Phase 1 implementation documents that still use them. In those documents, `[ ]` means not started and `[x]` means the legacy checklist item was marked done; a checkbox is not a current remediation completion record or evidence of a passing gate.
 
 Gate checks at the bottom of each phase document must ALL be ✅ before the next phase begins.
 

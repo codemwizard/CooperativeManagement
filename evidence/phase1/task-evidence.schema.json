@@ -48,6 +48,35 @@
         }
       }
     },
+    "sub_gates": {
+      "description": "Required separately reported WP1.2 acceptance sub-gates. Each must cite its exact commands and repository-relative output artifacts.",
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 2,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["gate_id", "status", "commands"],
+        "properties": {
+          "gate_id": { "enum": ["WP1.2-A", "WP1.2-B"] },
+          "status": { "enum": ["passed", "failed", "pending", "blocked"] },
+          "commands": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["command", "result", "artifact"],
+              "properties": {
+                "command": { "type": "string", "minLength": 1, "maxLength": 240 },
+                "result": { "enum": ["passed", "failed", "blocked", "not_run"] },
+                "artifact": { "type": "string", "pattern": "^(?:[A-Za-z0-9_.-]+/)*[A-Za-z0-9_.-]+$" }
+              }
+            }
+          }
+        }
+      }
+    },
     "claims": {
       "type": "object",
       "additionalProperties": false,
@@ -79,5 +108,33 @@
   },
   "$defs": {
     "verification": { "enum": ["passed", "failed", "pending", "blocked", "not_applicable"] }
-  }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "task_id": { "const": "WP1.2" } }, "required": ["task_id"] },
+      "then": {
+        "required": ["sub_gates"],
+        "properties": {
+          "sub_gates": {
+            "allOf": [
+              { "contains": { "properties": { "gate_id": { "const": "WP1.2-A" } }, "required": ["gate_id"] }, "minContains": 1, "maxContains": 1 },
+              { "contains": { "properties": { "gate_id": { "const": "WP1.2-B" } }, "required": ["gate_id"] }, "minContains": 1, "maxContains": 1 }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "task_id": { "const": "WP1.2" },
+          "status": { "properties": { "gate_verified": { "const": "passed" } }, "required": ["gate_verified"] }
+        },
+        "required": ["task_id", "status"]
+      },
+      "then": {
+        "properties": { "sub_gates": { "items": { "properties": { "status": { "const": "passed" }, "commands": { "items": { "properties": { "result": { "const": "passed" } } } } } } } }
+      }
+    }
+  ]
 }

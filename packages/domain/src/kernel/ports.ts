@@ -102,3 +102,9 @@ export interface KeyProvider {
   decrypt(ciphertext: Uint8Array, keyRef: string): Promise<Uint8Array>;
   hmac(value: Uint8Array, pepper: Uint8Array): Promise<Uint8Array>;
 }
+
+/** Digest keys are versioned independently from field-encryption keys. */
+export interface CommandDigestKeyProvider {
+  activeVersion(): string;
+  hmac(version: string, canonicalBytes: Uint8Array): Promise<Uint8Array>;
+}
