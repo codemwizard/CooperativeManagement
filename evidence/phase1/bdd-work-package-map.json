@@ -307,9 +307,10 @@
       ],
       "scenario": "The same command id with the same payload returns the original result",
       "owner_tasks": [
-        "WP1.3"
+        "WP1.3",
+        "WP1.6"
       ],
-      "required_path": "PostgreSQL receipt contention/replay API with actor and semantic-envelope binding",
+      "required_path": "WP1.3 proves PostgreSQL receipt contention/replay and actor/semantic-envelope binding; WP1.6 proves the same behavior through the composed HTTP API.",
       "assertion_rule": "Execute this exact tagged scenario with observable assertions on the specified product path; no mock, @wip, skip, tag removal, zero-step pass, or in-memory substitute.",
       "phase0_status": "mapped_and_deferred_to_owner_task"
     },
@@ -321,9 +322,10 @@
       ],
       "scenario": "The same command id with a different payload is rejected",
       "owner_tasks": [
-        "WP1.3"
+        "WP1.3",
+        "WP1.6"
       ],
-      "required_path": "PostgreSQL receipt contention/replay API with actor and semantic-envelope binding",
+      "required_path": "WP1.3 proves PostgreSQL receipt contention/replay and actor/semantic-envelope binding; WP1.6 proves the same behavior through the composed HTTP API.",
       "assertion_rule": "Execute this exact tagged scenario with observable assertions on the specified product path; no mock, @wip, skip, tag removal, zero-step pass, or in-memory substitute.",
       "phase0_status": "mapped_and_deferred_to_owner_task"
     },

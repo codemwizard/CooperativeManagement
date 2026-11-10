@@ -2,7 +2,7 @@ node_modules/
 dist/
 *.tsbuildinfo
 .vercel/
-*.log
+# *.log
 .DS_Store
 __pycache__/
 test-results/

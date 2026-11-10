@@ -46,9 +46,11 @@ class InMemoryReceiptStore implements CommandReceiptStore {
     return this.receipts.get(key) ?? null;
   }
 
-  async save(receipt: CommandReceipt): Promise<void> {
+  async save(receipt: CommandReceipt): Promise<boolean> {
     const key = `${receipt.tenant_id}:${receipt.command_id}`;
+    if (this.receipts.has(key)) return false;
     this.receipts.set(key, receipt);
+    return true;
   }
 }
 

@@ -29,6 +29,7 @@ import {
   OutboxMessage,
   PolicyStore,
   Repository,
+  RetryableCommandTransactionError,
   SecurityAttemptDenialCode,
   SecurityAttemptWriter,
   CommandDigestKeyProvider,
@@ -103,10 +104,18 @@ export class CommandBus<TAggregate extends AggregateRoot> {
     try {
       return await this.deps.transactionRunner.run(envelope.tenantId, async (transaction) => {
         return this.dispatchInTransaction(envelope, handler, options, transaction);
+      }, {
+        resolveUncertainCommit: async (transaction) => {
+          const receipt = await this.deps.receiptStore.get(envelope.commandId, envelope.tenantId, transaction);
+          return receipt === null ? null : this.replayReceipt<TData, TPayload>(receipt, envelope);
+        },
       });
     } catch (error: unknown) {
       if (error instanceof OptimisticConcurrencyError) {
         return { ok: false, code: 'STALE_VERSION', detail: error.message };
+      }
+      if (error instanceof RetryableCommandTransactionError) {
+        return { ok: false, code: 'COMMAND_TEMPORARILY_UNAVAILABLE', detail: 'Command temporarily unavailable' };
       }
       if (!(error instanceof AuthorizationDenied)) throw error;
       try {
@@ -225,7 +234,12 @@ export class CommandBus<TAggregate extends AggregateRoot> {
       recorded_at: this.deps.clock.now(),
     };
     createCommandReceiptSchema(this.deps.resultDataSchemas).parse(receipt);
-    await this.deps.receiptStore.save(receipt, transaction);
+    const saved = await this.deps.receiptStore.save(receipt, transaction);
+    if (!saved) {
+      const winner = await this.deps.receiptStore.get(envelope.commandId, envelope.tenantId, transaction);
+      if (winner === null) throw new RetryableCommandTransactionError();
+      return this.replayReceipt<TData, TPayload>(winner, envelope);
+    }
     await this.deps.repository.save(
       transition.newState,
       envelope.expectedVersion,

@@ -30,7 +30,7 @@ function setup(allow: boolean, auditFails = false) {
   let auditWasAfterRollback = false;
   const receiptStore: CommandReceiptStore = {
     get: async (_id, _tenant, context) => { if (context) contexts.push(context); return null; },
-    save: async (_receipt: CommandReceipt, context) => { if (context) contexts.push(context); },
+    save: async (_receipt: CommandReceipt, context) => { if (context) contexts.push(context); return true; },
   };
   const repository: Repository<Aggregate> = {
     load: async (_id, _tenant, context) => { if (context) contexts.push(context); return null; },

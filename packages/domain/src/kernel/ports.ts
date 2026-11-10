@@ -46,8 +46,25 @@ export interface CommandTransactionContext {
   readonly transactionId: symbol;
 }
 
+export interface CommandTransactionRecovery<T> {
+  /** Runs in a new transaction/connection after an uncertain commit. Null means no committed receipt exists. */
+  readonly resolveUncertainCommit: (context: CommandTransactionContext) => Promise<T | null>;
+}
+
 export interface CommandTransactionRunner {
-  run<T>(tenantId: string, work: (context: CommandTransactionContext) => Promise<T>): Promise<T>;
+  run<T>(
+    tenantId: string,
+    work: (context: CommandTransactionContext) => Promise<T>,
+    recovery?: CommandTransactionRecovery<T>,
+  ): Promise<T>;
+}
+
+/** Safe domain-level result for transient database failures or unresolved commits. */
+export class RetryableCommandTransactionError extends Error {
+  constructor() {
+    super('Command transaction outcome is temporarily unavailable');
+    this.name = 'RetryableCommandTransactionError';
+  }
 }
 
 export type SecurityAttemptDenialCode =
@@ -125,7 +142,8 @@ export interface PolicyStore {
 
 export interface CommandReceiptStore {
   get(commandId: string, tenantId: string, context?: CommandTransactionContext): Promise<CommandReceipt | null>;
-  save(receipt: CommandReceipt, context?: CommandTransactionContext): Promise<void>;
+  /** Returns false only when the tenant/command key already exists. */
+  save(receipt: CommandReceipt, context?: CommandTransactionContext): Promise<boolean>;
 }
 
 export interface KeyProvider {

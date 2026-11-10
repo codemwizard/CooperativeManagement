@@ -117,7 +117,7 @@
     {"id":"implementation_and_tests","path":"package.json","role":"Root toolchain pin and scripts; canonicalizer dependency is owned by the domain workspace"},
     {"id":"implementation_and_tests","path":"package-lock.json","role":"Resolved dependency versions and integrity data for canonicalization packages"},
     {"id":"evidence_and_results","path":"evidence/phase1/wp1.1/task-evidence.json","role":"WP1.1 closed task record; implementation, focused checks, PostgreSQL integration and task gate passed"},
-    {"id":"evidence_and_results","path":"evidence/phase1/wp1.2/task-evidence.json","role":"WP1.2 pre-implementation evidence envelope; commands not run and WP1.2-A/WP1.2-B pending"},
+    {"id":"evidence_and_results","path":"evidence/phase1/wp1.2/task-evidence.json","role":"WP1.2 completed task evidence; WP1.2-A and WP1.2-B passed against source commit 29317ff15dbb8010aa8768bb9ae451b54476875d using installed Node 26.7.0/npm 12.2.0 and PostgreSQL 18.0 (package build 18.0-2); no independent closure review claimed"},
     {"id":"evidence_and_results","path":"evidence/phase1/wp1.1/domain-tests.log","role":"Raw WP1.1 domain contract and digest test output"},
     {"id":"evidence_and_results","path":"evidence/phase1/wp1.1/migration-test.log","role":"Raw PostgreSQL migration test output for WP1.1"},
     {"id":"evidence_and_results","path":"evidence/phase1/wp1.1/typecheck-v4.log","role":"Raw repository typecheck output for WP1.1 candidate"},

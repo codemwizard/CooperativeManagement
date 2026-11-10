@@ -18,9 +18,10 @@ const databaseUrl = process.env['MIGRATION_TEST_DATABASE_URL'];
 describe.skipIf(!databaseUrl)('WP1.2-A PostgreSQL transaction boundary', () => {
   const pool = new pg.Pool({ connectionString: databaseUrl });
   const db = createDb(databaseUrl ?? '', { max: 1 });
+  const recoveryDb = createDb(databaseUrl ?? '', { max: 1 });
   const tenantId = randomUUID();
   const receiptStore = new PostgresCommandReceiptStore({ 'test.command': z.object({ value: z.string() }).strict() });
-  const runner = new PostgresCommandTransactionRunner(db);
+  const runner = new PostgresCommandTransactionRunner(db, { recoveryDb });
   const repository = new PostgresRepository<TestAggregate>(db, 'Wp12TestAggregate');
   const fixtureEventIds: string[] = [];
   const commandEventIds: string[] = [];
@@ -92,7 +93,7 @@ describe.skipIf(!databaseUrl)('WP1.2-A PostgreSQL transaction boundary', () => {
       await client.query('ROLLBACK');
       throw error;
     } finally { client.release(); }
-    await Promise.all([db.destroy(), pool.end()]);
+    await Promise.all([db.destroy(), recoveryDb.destroy(), pool.end()]);
   });
 
   it('runs the actual CommandBus persistence ports on one PostgreSQL transaction', async () => {

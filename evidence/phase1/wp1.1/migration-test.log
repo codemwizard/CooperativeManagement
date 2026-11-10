@@ -1,0 +1,29 @@
+
+> symphony-prototype@1.0.0 test:db:migrations
+> node tools/require_migration_test_db.mjs && npm run test:migrations --workspace @symphony/db
+
+Migration test database configured: symphony_phase1_test
+
+> @symphony/db@0.1.0 test:migrations
+> vitest run --reporter=verbose src/__tests__/migration-runner-config.test.ts src/__tests__/migration-executor.test.ts src/__tests__/migration-runner.integration.test.ts
+
+
+ RUN  v2.1.9 C:/Workspace/GitHub/Prototype/packages/db
+
+ ✓ src/__tests__/migration-executor.test.ts > executeSqlMigration > commits the SQL and migration ledger row in one transaction
+ ✓ src/__tests__/migration-executor.test.ts > executeSqlMigration > rolls back a failed migration and never records it as applied
+ ✓ src/__tests__/migration-runner-config.test.ts > migration runner configuration safety > accepts and safely quotes only the canonical schema
+ ✓ src/__tests__/migration-runner-config.test.ts > migration runner configuration safety > rejects schema "public" before opening a database connection 913ms
+ ✓ src/__tests__/migration-runner-config.test.ts > migration runner configuration safety > rejects schema "symphony; DROP SCHEMA public CASCADE" before opening a database connection 532ms
+ ✓ src/__tests__/migration-runner-config.test.ts > migration runner configuration safety > rejects schema "\"symphony\"" before opening a database connection 626ms
+ ✓ src/__tests__/migration-runner.integration.test.ts > PostgreSQL migration runner integration > serializes concurrent clean installs and makes replay a no-op 3941ms
+ ✓ src/__tests__/migration-runner.integration.test.ts > PostgreSQL migration runner integration > rolls back a failed PostgreSQL migration without a ledger row and safely retries it
+ ✓ src/__tests__/migration-runner.integration.test.ts > PostgreSQL migration runner integration > retains required schema invariants and applies the Phase 0 global seeds 1309ms
+ ✓ src/__tests__/migration-runner.integration.test.ts > PostgreSQL migration runner integration > installs the WP1.1 receipt schema constraints
+ ✓ src/__tests__/migration-runner.integration.test.ts > PostgreSQL migration runner integration > aborts WP1.1 migration on a non-empty legacy receipt table without changing it
+
+ Test Files  3 passed (3)
+      Tests  11 passed (11)
+   Start at  22:19:02
+   Duration  9.16s (transform 825ms, setup 0ms, collect 981ms, tests 8.69s, environment 4ms, prepare 3.43s)
+

@@ -48,8 +48,11 @@ class BddReceiptStore implements CommandReceiptStore {
     return this.store.get(`${tenantId}:${commandId}`) ?? null;
   }
 
-  async save(receipt: CommandReceipt): Promise<void> {
-    this.store.set(`${receipt.tenant_id}:${receipt.command_id}`, receipt);
+  async save(receipt: CommandReceipt): Promise<boolean> {
+    const key = `${receipt.tenant_id}:${receipt.command_id}`;
+    if (this.store.has(key)) return false;
+    this.store.set(key, receipt);
+    return true;
   }
 }
 

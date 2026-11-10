@@ -1,0 +1,293 @@
+
+> symphony-prototype@1.0.0 verify:phase0
+> npm run test:phase0-contract && npm run test:toolchain && npm run verify:toolchain && npm run verify:archive-hygiene && npm run typecheck:v4 && npm run verify:arch && npm run test:unit && npm run test:db:migrations && npm run test:bdd && npm run verify:trace && npm run test:a11y && npm run verify:legacy-floor
+
+
+> symphony-prototype@1.0.0 test:phase0-contract
+> npx vitest run tests/tooling/phase0_scripts.test.ts
+
+
+[1m[7m[36m RUN [39m[27m[22m [36mv2.1.9 [39m[90m/home/runner/work/CooperativeManagement/CooperativeManagement[39m
+
+ [32m✓[39m tests/tooling/phase0_scripts.test.ts [2m([22m[2m7 tests[22m[2m)[22m[90m 189[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m1 passed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[32m7 passed[39m[22m[90m (7)[39m
+[2m   Start at [22m 09:11:13
+[2m   Duration [22m 426ms[2m (transform 29ms, setup 0ms, collect 30ms, tests 189ms, environment 0ms, prepare 48ms)[22m
+
+
+> symphony-prototype@1.0.0 test:toolchain
+> node --test tests/tooling/verify_toolchain.test.mjs
+
+✔ accepts a fully aligned local and CI matrix (1.216462ms)
+✔ reports mismatched declarations and actual runtime versions (0.212225ms)
+ℹ tests 2
+ℹ suites 0
+ℹ pass 2
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 48.843392
+
+> symphony-prototype@1.0.0 verify:toolchain
+> node tools/verify_toolchain.mjs
+
+PASS: Node 26.7.0, npm 11.19.0, PostgreSQL 18.
+
+> symphony-prototype@1.0.0 verify:archive-hygiene
+> node tools/run_python_tool.js -m unittest tests/tooling/test_archive_hygiene.py && node tools/run_python_tool.js tools/verify_archive_hygiene.py
+
+.....
+----------------------------------------------------------------------
+Ran 5 tests in 0.002s
+
+OK
+PASS: Git index and .env.example contain no prohibited environment or private-key paths.
+
+> symphony-prototype@1.0.0 typecheck:v4
+> npx tsc --build --force packages/domain packages/contracts packages/db packages/testkit && npm run typecheck --workspace @symphony/domain && npm run typecheck --workspace @symphony/contracts && npm run typecheck --workspace @symphony/db && npm run typecheck --workspace @symphony/testkit && npm run typecheck --workspace @symphony/api && npm run typecheck --workspace @symphony/workspace
+
+
+> @symphony/domain@0.1.0 typecheck
+> tsc --noEmit
+
+
+> @symphony/contracts@0.1.0 typecheck
+> tsc --noEmit
+
+
+> @symphony/db@0.1.0 typecheck
+> tsc --noEmit
+
+
+> @symphony/testkit@0.1.0 typecheck
+> tsc --noEmit
+
+
+> @symphony/api@0.1.0 typecheck
+> tsc --noEmit
+
+
+> @symphony/workspace@0.1.0 typecheck
+> tsc --noEmit
+
+
+> symphony-prototype@1.0.0 verify:arch
+> npx depcruise packages/domain/src packages/contracts/src packages/db/src packages/testkit/src apps/api/src apps/workspace/src --config .dependency-cruiser.cjs
+
+
+✔ no dependency violations found (114 modules, 171 dependencies cruised)
+
+
+> symphony-prototype@1.0.0 test:unit
+> cd packages/domain && npx vitest run --reporter=verbose
+
+
+[1m[7m[36m RUN [39m[27m[22m [36mv2.1.9 [39m[90m/home/runner/work/CooperativeManagement/CooperativeManagement/packages/domain[39m
+
+ [32m✓[39m src/identity/__tests__/auth.test.ts[2m > [22mAuthService[2m > [22mtemporaryCredential_isHashedArgon2id
+ [32m✓[39m src/kernel/__tests__/tenant-isolation.test.ts[2m > [22mTenant isolation (INV-001)[2m > [22mcommandForAnotherTenant_isRejected
+ [32m✓[39m src/kernel/__tests__/tenant-isolation.test.ts[2m > [22mTenant isolation (INV-001)[2m > [22mrepositoryLoad_neverReturnsAnotherTenantsRecord
+ [32m✓[39m src/kernel/__tests__/tenant-isolation.test.ts[2m > [22mTenant isolation (INV-001)[2m > [22meventsFromAnotherTenant_notVisible
+ [32m✓[39m src/kernel/__tests__/command-bus.test.ts[2m > [22mCommandBus[2m > [22mrepeatedCommandId_doesNotApplyTwice
+ [32m✓[39m src/kernel/__tests__/command-bus.test.ts[2m > [22mCommandBus[2m > [22mstaleExpectedVersion_isRejected
+ [32m✓[39m src/kernel/__tests__/command-bus.test.ts[2m > [22mCommandBus[2m > [22mdbFailure_rollsBackAll
+ [32m✓[39m src/kernel/__tests__/command-bus.test.ts[2m > [22mCommandBus[2m > [22mconcurrentCommands_onlyOneWins
+ [32m✓[39m src/kernel/__tests__/command-bus.test.ts[2m > [22mCommandBus[2m > [22mcrossTenantCommand_isRejected
+ [32m✓[39m src/kernel/__tests__/command-bus.test.ts[2m > [22mCommandBus[2m > [22munauthorisedCommand_mutatesNothing
+ [32m✓[39m src/identity/__tests__/auth.test.ts[2m > [22mAuthService[2m > [22mtemporaryCredential_singleUse
+ [32m✓[39m src/authz/__tests__/policy.test.ts[2m > [22mPolicyEngine[2m > [22mgrantCapacity_IFV_allowedByChairperson
+ [32m✓[39m src/authz/__tests__/policy.test.ts[2m > [22mPolicyEngine[2m > [22mgrantCapacity_IFV_deniedToSecretary
+ [32m✓[39m src/authz/__tests__/policy.test.ts[2m > [22mPolicyEngine[2m > [22mIFV_cannotVerifyOwnSuppliedVersion
+ [32m✓[39m src/authz/__tests__/policy.test.ts[2m > [22mPolicyEngine[2m > [22mIFV_boundToOrganisation_cannotActOnAnother
+ [32m✓[39m src/authz/__tests__/policy.test.ts[2m > [22mPolicyEngine[2m > [22minstitutionalRole_cannotWriteEvidence
+ [32m✓[39m src/authz/__tests__/policy.test.ts[2m > [22mPolicyEngine[2m > [22mrevokedCapacity_isNoLongerEffective
+ [32m✓[39m src/authz/__tests__/policy.test.ts[2m > [22mPolicyEngine[2m > [22mdelegation_extendsCapacity
+ [32m✓[39m src/authz/__tests__/capacity-service.test.ts[2m > [22mCapacityService[2m > [22mgrantCapacity_allowed_byChairperson
+ [32m✓[39m src/authz/__tests__/capacity-service.test.ts[2m > [22mCapacityService[2m > [22mgrantCapacity_denied_toSecretary
+ [32m✓[39m src/authz/__tests__/capacity-service.test.ts[2m > [22mCapacityService[2m > [22mrevokeCapacity_allowed_byChairperson
+ [32m✓[39m src/authz/__tests__/capacity-service.test.ts[2m > [22mCapacityService[2m > [22mrevokeCapacity_annotatesExistingFindings
+ [32m✓[39m src/identity/__tests__/auth.test.ts[2m > [22mAuthService[2m > [22mtemporaryCredential_isExpiredAfterDefault72h
+ [32m✓[39m src/privacy/__tests__/pii-vault.test.ts[2m > [22mKeyProvider — PII vault[2m > [22mencrypt_thenDecrypt_returnsSamePlaintext
+ [32m✓[39m src/privacy/__tests__/pii-vault.test.ts[2m > [22mKeyProvider — PII vault[2m > [22mdifferentPersonKeys_producesDifferentCiphertext
+ [32m✓[39m src/privacy/__tests__/pii-vault.test.ts[2m > [22mKeyProvider — PII vault[2m > [22mblindIndex_matchesSamePlaintext
+ [32m✓[39m src/privacy/__tests__/pii-vault.test.ts[2m > [22mKeyProvider — PII vault[2m > [22mblindIndex_differentPepper_doesNotMatch
+ [32m✓[39m src/privacy/__tests__/pii-vault.test.ts[2m > [22mKeyProvider — PII vault[2m > [22mcryptoShred_keyDeleted_ciphertextUnreadable
+ [32m✓[39m src/privacy/__tests__/pii-vault.test.ts[2m > [22mKeyProvider — PII vault[2m > [22mnrcPattern_neverInEventPayload
+ [32m✓[39m src/privacy/__tests__/pii-vault.test.ts[2m > [22mKeyProvider — PII vault[2m > [22mnrcPattern_neverInLog
+ [32m✓[39m src/identity/__tests__/auth.test.ts[2m > [22mAuthService[2m > [22mfirstLogin_requiresPasswordChange
+ [32m✓[39m src/privacy/__tests__/test-data-mode.test.ts[2m > [22mDataModeGuard[2m > [22mtestMode_rejectsRealNRC
+ [32m✓[39m src/privacy/__tests__/test-data-mode.test.ts[2m > [22mDataModeGuard[2m > [22mtestMode_acceptsSyntheticNRC
+ [32m✓[39m src/privacy/__tests__/test-data-mode.test.ts[2m > [22mDataModeGuard[2m > [22mtestMode_rejectsRealCoopRegNumber
+ [32m✓[39m src/privacy/__tests__/test-data-mode.test.ts[2m > [22mDataModeGuard[2m > [22mtestMode_acceptsSyntheticCoopRegNumber
+ [32m✓[39m src/privacy/__tests__/test-data-mode.test.ts[2m > [22mDataModeGuard[2m > [22mrealMode_outsideApprovedRegion_refusesToStart
+ [32m✓[39m src/privacy/__tests__/test-data-mode.test.ts[2m > [22mDataModeGuard[2m > [22mrealMode_approvedRegion_starts
+ [32m✓[39m src/privacy/__tests__/test-data-mode.test.ts[2m > [22mPurgeSeedService[2m > [22mpurgeToSeed_removesAllTenantData
+ [32m✓[39m src/identity/__tests__/auth.test.ts[2m > [22mAuthService[2m > [22mauthenticationEvent_containsNoPII
+ [32m✓[39m src/identity/__tests__/auth.test.ts[2m > [22mAuthService[2m > [22mcredential_neverAppearsInEventPayload
+ [32m✓[39m src/privacy/__tests__/consent.test.ts[2m > [22mConsentService[2m > [22mrecordConsent_before_PII_entry
+ [32m✓[39m src/privacy/__tests__/consent.test.ts[2m > [22mConsentService[2m > [22mwithdrawConsent_triggersRetentionEvaluation
+ [32m✓[39m src/privacy/__tests__/consent.test.ts[2m > [22mConsentService[2m > [22mpublicRegisterFields_useLegalObligation_notConsent
+ [32m✓[39m src/authz/__tests__/policy-table.test.ts[2m > [22mPolicyEngine — policy table[2m > [22m'Chairperson may grant IFV'
+ [32m✓[39m src/authz/__tests__/policy-table.test.ts[2m > [22mPolicyEngine — policy table[2m > [22m'Vice-Chairperson may grant IFV'
+ [32m✓[39m src/authz/__tests__/policy-table.test.ts[2m > [22mPolicyEngine — policy table[2m > [22m'Secretary may NOT grant IFV'
+ [32m✓[39m src/authz/__tests__/policy-table.test.ts[2m > [22mPolicyEngine — policy table[2m > [22m'Treasurer may NOT grant IFV'
+ [32m✓[39m src/authz/__tests__/policy-table.test.ts[2m > [22mPolicyEngine — policy table[2m > [22m'Platform enroller may grant IFV'
+ [32m✓[39m src/authz/__tests__/policy-table.test.ts[2m > [22mPolicyEngine — policy table[2m > [22m'IFV holder alone may NOT grant IFV'
+ [32m✓[39m src/authz/__tests__/policy-table.test.ts[2m > [22mPolicyEngine — policy table[2m > [22m'IFV cannot verify own supplied versio…'
+ [32m✓[39m src/authz/__tests__/policy-table.test.ts[2m > [22mPolicyEngine — policy table[2m > [22m'IFV may verify version supplied by an…'
+ [32m✓[39m src/authz/__tests__/policy-table.test.ts[2m > [22mPolicyEngine — policy table[2m > [22m'IFV cannot act on another org\'s vers…'
+ [32m✓[39m src/authz/__tests__/policy-table.test.ts[2m > [22mPolicyEngine — policy table[2m > [22m'No IFV capacity → deny RecordFinding'
+ [32m✓[39m src/authz/__tests__/policy-table.test.ts[2m > [22mPolicyEngine — policy table[2m > [22m'Expired IFV capacity → deny'
+ [32m✓[39m src/authz/__tests__/policy-table.test.ts[2m > [22mPolicyEngine — policy table[2m > [22m'pfi_analyst cannot AddEvidence'
+ [32m✓[39m src/authz/__tests__/policy-table.test.ts[2m > [22mPolicyEngine — policy table[2m > [22m'pfi_analyst cannot AmendClaim'
+ [32m✓[39m src/authz/__tests__/policy-table.test.ts[2m > [22mPolicyEngine — policy table[2m > [22m'union_ta cannot AdmitEvidence'
+ [32m✓[39m src/authz/__tests__/policy-table.test.ts[2m > [22mPolicyEngine — policy table[2m > [22m'fund_manager cannot ApproveMinutes'
+ [32m✓[39m src/authz/__tests__/policy-table.test.ts[2m > [22mPolicyEngine — policy table[2m > [22m'ta cannot RecordTaCompletion (write)'
+ [32m✓[39m src/authz/__tests__/policy-table.test.ts[2m > [22mPolicyEngine — policy table[2m > [22m'external_verifier cannot RecordFindin…'
+ [32m✓[39m src/authz/__tests__/policy-table.test.ts[2m > [22mPolicyEngine — policy table[2m > [22m'pfi_credit cannot GrantCapacity'
+ [32m✓[39m src/authz/__tests__/policy-table.test.ts[2m > [22mPolicyEngine — policy table[2m > [22m'Chairperson may ApproveMinutes'
+ [32m✓[39m src/authz/__tests__/policy-table.test.ts[2m > [22mPolicyEngine — policy table[2m > [22m'Vice-Chairperson may ApproveMinutes'
+ [32m✓[39m src/authz/__tests__/policy-table.test.ts[2m > [22mPolicyEngine — policy table[2m > [22m'Secretary may ApproveMinutes'
+ [32m✓[39m src/authz/__tests__/policy-table.test.ts[2m > [22mPolicyEngine — policy table[2m > [22m'Plain member cannot ApproveMinutes'
+ [32m✓[39m src/authz/__tests__/policy-table.test.ts[2m > [22mPolicyEngine — policy table[2m > [22m'acting_officer delegation allows Appr…'
+ [32m✓[39m src/authz/__tests__/policy-table.test.ts[2m > [22mPolicyEngine — policy table[2m > [22m'Chairperson cannot act on another org…'
+ [32m✓[39m src/authz/__tests__/policy-table.test.ts[2m > [22mPolicyEngine — policy table[2m > [22m'Secretary cannot add evidence to anot…'
+ [32m✓[39m src/privacy/__tests__/retention.test.ts[2m > [22mRetentionPolicy[2m > [22mmemberDataRetention_twoYearFloor
+ [32m✓[39m src/privacy/__tests__/retention.test.ts[2m > [22mRetentionPolicy[2m > [22mcryptoShred_keepsTransactionFacts
+
+[2m Test Files [22m [1m[32m10 passed[39m[22m[90m (10)[39m
+[2m      Tests [22m [1m[32m70 passed[39m[22m[90m (70)[39m
+[2m   Start at [22m 09:11:25
+[2m   Duration [22m 1.27s[2m (transform 294ms, setup 0ms, collect 588ms, tests 852ms, environment 2ms, prepare 628ms)[22m
+
+
+> symphony-prototype@1.0.0 test:db:migrations
+> node tools/require_migration_test_db.mjs && npm run test:migrations --workspace @symphony/db
+
+Migration test database configured: symphony_test
+
+> @symphony/db@0.1.0 test:migrations
+> vitest run --reporter=verbose src/__tests__/migration-runner-config.test.ts src/__tests__/migration-executor.test.ts src/__tests__/migration-runner.integration.test.ts
+
+
+[1m[7m[36m RUN [39m[27m[22m [36mv2.1.9 [39m[90m/home/runner/work/CooperativeManagement/CooperativeManagement/packages/db[39m
+
+ [32m✓[39m src/__tests__/migration-executor.test.ts[2m > [22mexecuteSqlMigration[2m > [22mcommits the SQL and migration ledger row in one transaction
+ [32m✓[39m src/__tests__/migration-executor.test.ts[2m > [22mexecuteSqlMigration[2m > [22mrolls back a failed migration and never records it as applied
+ [32m✓[39m src/__tests__/migration-runner-config.test.ts[2m > [22mmigration runner configuration safety[2m > [22maccepts and safely quotes only the canonical schema
+ [32m✓[39m src/__tests__/migration-runner-config.test.ts[2m > [22mmigration runner configuration safety[2m > [22mrejects schema "public" before opening a database connection
+ [32m✓[39m src/__tests__/migration-runner-config.test.ts[2m > [22mmigration runner configuration safety[2m > [22mrejects schema "symphony; DROP SCHEMA public CASCADE" before opening a database connection
+ [32m✓[39m src/__tests__/migration-runner-config.test.ts[2m > [22mmigration runner configuration safety[2m > [22mrejects schema "\"symphony\"" before opening a database connection
+ [32m✓[39m src/__tests__/migration-runner.integration.test.ts[2m > [22mPostgreSQL migration runner integration[2m > [22mserializes concurrent clean installs and makes replay a no-op[33m 700[2mms[22m[39m
+ [32m✓[39m src/__tests__/migration-runner.integration.test.ts[2m > [22mPostgreSQL migration runner integration[2m > [22mrolls back a failed PostgreSQL migration without a ledger row and safely retries it
+ [32m✓[39m src/__tests__/migration-runner.integration.test.ts[2m > [22mPostgreSQL migration runner integration[2m > [22mretains required schema invariants and applies the Phase 0 global seeds[33m 368[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m3 passed[39m[22m[90m (3)[39m
+[2m      Tests [22m [1m[32m9 passed[39m[22m[90m (9)[39m
+[2m   Start at [22m 09:11:27
+[2m   Duration [22m 1.41s[2m (transform 107ms, setup 0ms, collect 160ms, tests 1.69s, environment 1ms, prepare 185ms)[22m
+
+
+> symphony-prototype@1.0.0 test:bdd
+> cross-env NODE_OPTIONS=--import=tsx npx cucumber-js --config cucumber.cjs --profile default
+
+..............................................................................................................................................................................................F---F---F---F---F---F---F---F--F--
+
+Failed scenarios:
+  1) Navigation is scoped to the persona and every screen has a URL # features/10_workspace_and_capabilities.feature:17
+       Given the workspace is running with seed data in test mode # packages/testkit/src/step-definitions/workspace-steps.ts:131
+           AssertionError [ERR_ASSERTION]: Expected workspace file to exist: c:\Workspace\GitHub\Prototype\apps\workspace/vite.config.ts
+               + expected - actual
+           
+               -false
+               +true
+           
+               at assertFileExists (/home/runner/work/CooperativeManagement/CooperativeManagement/packages/testkit/src/step-definitions/workspace-steps.ts:121:10)
+               at SymphonyWorld.<anonymous> (/home/runner/work/CooperativeManagement/CooperativeManagement/packages/testkit/src/step-definitions/workspace-steps.ts:140:5)
+  2) Navigation is scoped to the persona and every screen has a URL # features/10_workspace_and_capabilities.feature:18
+       Given the workspace is running with seed data in test mode # packages/testkit/src/step-definitions/workspace-steps.ts:131
+           AssertionError [ERR_ASSERTION]: Expected workspace file to exist: c:\Workspace\GitHub\Prototype\apps\workspace/vite.config.ts
+               + expected - actual
+           
+               -false
+               +true
+           
+               at assertFileExists (/home/runner/work/CooperativeManagement/CooperativeManagement/packages/testkit/src/step-definitions/workspace-steps.ts:121:10)
+               at SymphonyWorld.<anonymous> (/home/runner/work/CooperativeManagement/CooperativeManagement/packages/testkit/src/step-definitions/workspace-steps.ts:140:5)
+  3) Navigation is scoped to the persona and every screen has a URL # features/10_workspace_and_capabilities.feature:19
+       Given the workspace is running with seed data in test mode # packages/testkit/src/step-definitions/workspace-steps.ts:131
+           AssertionError [ERR_ASSERTION]: Expected workspace file to exist: c:\Workspace\GitHub\Prototype\apps\workspace/vite.config.ts
+               + expected - actual
+           
+               -false
+               +true
+           
+               at assertFileExists (/home/runner/work/CooperativeManagement/CooperativeManagement/packages/testkit/src/step-definitions/workspace-steps.ts:121:10)
+               at SymphonyWorld.<anonymous> (/home/runner/work/CooperativeManagement/CooperativeManagement/packages/testkit/src/step-definitions/workspace-steps.ts:140:5)
+  4) Navigation is scoped to the persona and every screen has a URL # features/10_workspace_and_capabilities.feature:20
+       Given the workspace is running with seed data in test mode # packages/testkit/src/step-definitions/workspace-steps.ts:131
+           AssertionError [ERR_ASSERTION]: Expected workspace file to exist: c:\Workspace\GitHub\Prototype\apps\workspace/vite.config.ts
+               + expected - actual
+           
+               -false
+               +true
+           
+               at assertFileExists (/home/runner/work/CooperativeManagement/CooperativeManagement/packages/testkit/src/step-definitions/workspace-steps.ts:121:10)
+               at SymphonyWorld.<anonymous> (/home/runner/work/CooperativeManagement/CooperativeManagement/packages/testkit/src/step-definitions/workspace-steps.ts:140:5)
+  5) Navigation is scoped to the persona and every screen has a URL # features/10_workspace_and_capabilities.feature:21
+       Given the workspace is running with seed data in test mode # packages/testkit/src/step-definitions/workspace-steps.ts:131
+           AssertionError [ERR_ASSERTION]: Expected workspace file to exist: c:\Workspace\GitHub\Prototype\apps\workspace/vite.config.ts
+               + expected - actual
+           
+               -false
+               +true
+           
+               at assertFileExists (/home/runner/work/CooperativeManagement/CooperativeManagement/packages/testkit/src/step-definitions/workspace-steps.ts:121:10)
+               at SymphonyWorld.<anonymous> (/home/runner/work/CooperativeManagement/CooperativeManagement/packages/testkit/src/step-definitions/workspace-steps.ts:140:5)
+  6) Route changes move focus and survive reload # features/10_workspace_and_capabilities.feature:24
+       Given the workspace is running with seed data in test mode # packages/testkit/src/step-definitions/workspace-steps.ts:131
+           AssertionError [ERR_ASSERTION]: Expected workspace file to exist: c:\Workspace\GitHub\Prototype\apps\workspace/vite.config.ts
+               + expected - actual
+           
+               -false
+               +true
+           
+               at assertFileExists (/home/runner/work/CooperativeManagement/CooperativeManagement/packages/testkit/src/step-definitions/workspace-steps.ts:121:10)
+               at SymphonyWorld.<anonymous> (/home/runner/work/CooperativeManagement/CooperativeManagement/packages/testkit/src/step-definitions/workspace-steps.ts:140:5)
+  7) No enum text reaches the user # features/10_workspace_and_capabilities.feature:30
+       Given the workspace is running with seed data in test mode # packages/testkit/src/step-definitions/workspace-steps.ts:131
+           AssertionError [ERR_ASSERTION]: Expected workspace file to exist: c:\Workspace\GitHub\Prototype\apps\workspace/vite.config.ts
+               + expected - actual
+           
+               -false
+               +true
+           
+               at assertFileExists (/home/runner/work/CooperativeManagement/CooperativeManagement/packages/testkit/src/step-definitions/workspace-steps.ts:121:10)
+               at SymphonyWorld.<anonymous> (/home/runner/work/CooperativeManagement/CooperativeManagement/packages/testkit/src/step-definitions/workspace-steps.ts:140:5)
+  8) Verified chips carry scope, verifier, version and class # features/10_workspace_and_capabilities.feature:36
+       Given the workspace is running with seed data in test mode # packages/testkit/src/step-definitions/workspace-steps.ts:131
+           AssertionError [ERR_ASSERTION]: Expected workspace file to exist: c:\Workspace\GitHub\Prototype\apps\workspace/vite.config.ts
+               + expected - actual
+           
+               -false
+               +true
+           
+               at assertFileExists (/home/runner/work/CooperativeManagement/CooperativeManagement/packages/testkit/src/step-definitions/workspace-steps.ts:121:10)
+               at SymphonyWorld.<anonymous> (/home/runner/work/CooperativeManagement/CooperativeManagement/packages/testkit/src/step-definitions/workspace-steps.ts:140:5)
+  9) Audience-relative wording is shown to institutions # features/10_workspace_and_capabilities.feature:118
+       Given the workspace is running with seed data in test mode # packages/testkit/src/step-definitions/workspace-steps.ts:131
+           AssertionError [ERR_ASSERTION]: Expected workspace file to exist: c:\Workspace\GitHub\Prototype\apps\workspace/vite.config.ts
+               + expected - actual
+           
+               -false
+               +true
+           
+               at assertFileExists (/home/runner/work/CooperativeManagement/CooperativeManagement/packages/testkit/src/step-definitions/workspace-steps.ts:121:10)
+               at SymphonyWorld.<anonymous> (/home/runner/work/CooperativeManagement/CooperativeManagement/packages/testkit/src/step-definitions/workspace-steps.ts:140:5)
+
+49 scenarios (40 passed, 9 failed)
+224 steps (190 passed, 25 skipped, 9 failed)
+0m 0.317s (0m 0.231s executing your code)

@@ -36,8 +36,11 @@ class LocalReceiptStore implements CommandReceiptStore {
   async get(id: string, tenantId: string): Promise<CommandReceipt | null> {
     return this.store.get(`${tenantId}:${id}`) ?? null;
   }
-  async save(r: CommandReceipt): Promise<void> {
-    this.store.set(`${r.tenant_id}:${r.command_id}`, r);
+  async save(r: CommandReceipt): Promise<boolean> {
+    const key = `${r.tenant_id}:${r.command_id}`;
+    if (this.store.has(key)) return false;
+    this.store.set(key, r);
+    return true;
   }
 }
 

@@ -34,10 +34,10 @@ export class PostgresCommandReceiptStore implements CommandReceiptStore {
     return this.schema.parse(value);
   }
 
-  async save(receipt: CommandReceipt, context?: CommandTransactionContext): Promise<void> {
+  async save(receipt: CommandReceipt, context?: CommandTransactionContext): Promise<boolean> {
     const valid = this.schema.parse(receipt);
     const trx = transactionFor(context);
-    await trx.insertInto('symphony.command_receipts').values({
+    const inserted = await trx.insertInto('symphony.command_receipts').values({
       tenant_id: valid.tenant_id,
       command_id: valid.command_id,
       actor_user_id: valid.actor_user_id,
@@ -49,7 +49,8 @@ export class PostgresCommandReceiptStore implements CommandReceiptStore {
       result_classification: valid.result_classification,
       result_schema_version: valid.result_schema_version,
       safe_result: JSON.stringify(valid.safe_result),
-    }).execute();
+    }).onConflict((conflict) => conflict.columns(['tenant_id', 'command_id']).doNothing()).executeTakeFirst();
+    return inserted.numInsertedOrUpdatedRows === 1n;
   }
 }
 
