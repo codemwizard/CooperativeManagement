@@ -368,15 +368,15 @@ describe('WP0.12 evidence contract', () => {
 });
 
 describe('WP1.2 evidence sub-gates', () => {
-  it('keeps WP1.2 open with the completed sub-gates and blocked pinned-toolchain evidence explicit', () => {
+  it('accepts the completed WP1.2 gate with both sub-gates and pinned-toolchain evidence', () => {
     const schema = readJson('evidence/phase1/task-evidence.schema.json');
     const envelope = readJson('evidence/phase1/wp1.2/task-evidence.json');
     expect(validateEvidence(envelope, schema)).toEqual([]);
-    expect(envelope.status.implementation).toBe('partial');
-    expect(envelope.status.gate_verified).toBe('blocked');
+    expect(envelope.status.implementation).toBe('complete');
+    expect(envelope.status.gate_verified).toBe('passed');
     expect(envelope.sub_gates.map((gate: Record<string, any>) => gate.status)).toEqual(['passed', 'passed']);
     expect(envelope.commands.some((command: Record<string, any>) => command.result === 'passed')).toBe(true);
-    expect(envelope.commands.filter((command: Record<string, any>) => command.result === 'blocked').map((command: Record<string, any>) => command.artifact)).toEqual(['evidence/phase1/wp1.2/toolchain-verify.log']);
+    expect(envelope.commands.every((command: Record<string, any>) => command.result === 'passed')).toBe(true);
   });
 
   const passingWp1Record = () => {
