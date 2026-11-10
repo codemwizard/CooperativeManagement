@@ -1,0 +1,5 @@
+
+> symphony-prototype@1.0.0 verify:toolchain
+> node tools/verify_toolchain.mjs
+
+Toolchain mismatch in: running npm (11.19.0)

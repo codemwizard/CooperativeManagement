@@ -1,0 +1,15 @@
+
+> symphony-prototype@1.0.0 test:toolchain
+> node --test tests/tooling/verify_toolchain.test.mjs
+
+✔ accepts a fully aligned local and CI matrix (9.9628ms)
+✔ reports mismatched declarations and actual runtime versions (0.9635ms)
+✔ rejects floating major-only and mismatched minor PostgreSQL image tags (2.7118ms)
+ℹ tests 3
+ℹ suites 0
+ℹ pass 3
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 291.0287

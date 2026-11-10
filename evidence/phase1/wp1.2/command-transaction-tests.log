@@ -1,0 +1,22 @@
+
+> @symphony/db@0.1.0 test:db
+> vitest run --reporter=verbose src/__tests__/command-transaction.integration.test.ts
+
+
+ RUN  v2.1.9 C:/Workspace/GitHub/Prototype/packages/db
+
+ ✓ src/__tests__/command-transaction.integration.test.ts > WP1.2-A PostgreSQL transaction boundary > runs the actual CommandBus persistence ports on one PostgreSQL transaction
+ ✓ src/__tests__/command-transaction.integration.test.ts > WP1.2-A PostgreSQL transaction boundary > rolls receipt, state, event, and outbox writes back at each failing write boundary
+ ✓ src/__tests__/command-transaction.integration.test.ts > WP1.2-A PostgreSQL transaction boundary > clears transaction-local tenant context after both commit and rollback
+ ✓ src/__tests__/command-transaction.integration.test.ts > WP1.2-A PostgreSQL transaction boundary > commits a PostgreSQL denial audit only after rollback, and fails closed when audit insert fails 360ms
+
+ Test Files  1 passed (1)
+      Tests  4 passed (4)
+   Start at  11:44:05
+   Duration  4.22s (transform 308ms, setup 0ms, collect 2.63s, tests 939ms, environment 0ms, prepare 216ms)
+
+(node:29352) DeprecationWarning: Calling client.query() when the client is already executing a query is deprecated and will be removed in pg@9.0. Use async/await or an external async flow control mechanism instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+stderr | src/__tests__/command-transaction.integration.test.ts > WP1.2-A PostgreSQL transaction boundary > commits a PostgreSQL denial audit only after rollback, and fails closed when audit insert fails
+security_audit_write_failed
+
