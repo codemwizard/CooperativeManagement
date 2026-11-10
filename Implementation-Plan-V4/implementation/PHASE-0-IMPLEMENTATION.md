@@ -65,7 +65,7 @@
   _Verifier check: command exits 0 and outputs version 18.x._
 
 - [x] **0.2.2** Create `docker-compose.yml` at the repo root with services:
-  - `db`: `postgres:18-alpine`, port 5432, `symphony` database, `symphony` schema, volume `pgdata`, env from `.env` template
+  - `db`: `postgres:18.0-alpine`, port 5432, `symphony` database, `symphony` schema, volume `pgdata`, env from `.env` template
   - `db-test`: ephemeral PostgreSQL 18 for integration tests (port 5433)
   
   _Verifier check: `docker compose up db -d` starts without error; `docker compose ps` shows `db` as healthy._
@@ -80,7 +80,7 @@
 - [x] **0.2.5** Create `.github/workflows/ci.yml` with jobs:
   - `lint-and-typecheck` — runs `npm run lint` and `npm run typecheck`
   - `unit-tests` — runs `npm run test:unit`
-  - `db-integration` — spins up `postgres:18` service, runs `npm run test:db`
+  - `db-integration` — spins up `postgres:18.0-alpine` service, runs `npm run test:db`
   - `legacy-verify` — runs `npm run verify:all` (legacy suite)
   - `bdd` — runs `npm run test:bdd`
   - `trace-gate` — runs `npm run verify:trace`
