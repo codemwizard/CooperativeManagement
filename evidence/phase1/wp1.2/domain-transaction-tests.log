@@ -10,6 +10,6 @@ npm notice run vitest run --reporter=verbose src/kernel/__tests__/command-bus-tr
 
  Test Files  1 passed (1)
       Tests  4 passed (4)
-   Start at  12:53:33
-   Duration  1.28s (transform 327ms, setup 0ms, collect 422ms, tests 21ms, environment 0ms, prepare 372ms)
+   Start at  13:00:36
+   Duration  1.01s (transform 209ms, setup 0ms, collect 271ms, tests 29ms, environment 0ms, prepare 319ms)
 

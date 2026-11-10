@@ -1,8 +1,8 @@
 npm notice run symphony-prototype@1.0.0 test:toolchain
 npm notice run node --test tests/tooling/verify_toolchain.test.mjs
-✔ accepts a fully aligned local and CI matrix (15.4705ms)
-✔ reports mismatched declarations and actual runtime versions (0.3709ms)
-✔ rejects floating major-only and mismatched minor PostgreSQL image tags (1.2454ms)
+✔ accepts a fully aligned local and CI matrix (11.0226ms)
+✔ reports mismatched declarations and actual runtime versions (0.9174ms)
+✔ rejects floating major-only and mismatched minor PostgreSQL image tags (1.4378ms)
 ℹ tests 3
 ℹ suites 0
 ℹ pass 3
@@ -10,4 +10,4 @@ npm notice run node --test tests/tooling/verify_toolchain.test.mjs
 ℹ cancelled 0
 ℹ skipped 0
 ℹ todo 0
-ℹ duration_ms 224.0595
+ℹ duration_ms 268.8996

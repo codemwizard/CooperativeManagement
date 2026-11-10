@@ -4,19 +4,17 @@ npm notice run vitest run --reporter=verbose
  RUN  v2.1.9 C:/Workspace/GitHub/Prototype/packages/domain
 
  ✓ src/identity/__tests__/auth.test.ts > AuthService > temporaryCredential_isHashedArgon2id
- ✓ src/identity/__tests__/auth.test.ts > AuthService > temporaryCredential_singleUse
- ✓ src/identity/__tests__/auth.test.ts > AuthService > temporaryCredential_isExpiredAfterDefault72h
- ✓ src/identity/__tests__/auth.test.ts > AuthService > temporaryCredential_expiresAtExact72HourBoundary 578ms
- ✓ src/kernel/__tests__/tenant-isolation.test.ts > Tenant isolation (INV-001) > commandForAnotherTenant_isRejected
- ✓ src/kernel/__tests__/tenant-isolation.test.ts > Tenant isolation (INV-001) > repositoryLoad_neverReturnsAnotherTenantsRecord
- ✓ src/kernel/__tests__/tenant-isolation.test.ts > Tenant isolation (INV-001) > eventsFromAnotherTenant_notVisible 460ms
- ✓ src/kernel/__tests__/command-bus.test.ts > CommandBus > repeatedCommandId_doesNotApplyTwice 469ms
+ ✓ src/kernel/__tests__/command-bus.test.ts > CommandBus > repeatedCommandId_doesNotApplyTwice
  ✓ src/kernel/__tests__/command-bus.test.ts > CommandBus > staleExpectedVersion_isRejected
  ✓ src/kernel/__tests__/command-bus.test.ts > CommandBus > dbFailure_rollsBackAll
  ✓ src/kernel/__tests__/command-bus.test.ts > CommandBus > concurrentCommands_onlyOneWins
  ✓ src/kernel/__tests__/command-bus.test.ts > CommandBus > crossTenantCommand_isRejected
  ✓ src/kernel/__tests__/command-bus.test.ts > CommandBus > unauthorisedCommand_mutatesNothing
- ✓ src/identity/__tests__/auth.test.ts > AuthService > firstLogin_requiresPasswordChange 650ms
+ ✓ src/kernel/__tests__/tenant-isolation.test.ts > Tenant isolation (INV-001) > commandForAnotherTenant_isRejected
+ ✓ src/kernel/__tests__/tenant-isolation.test.ts > Tenant isolation (INV-001) > repositoryLoad_neverReturnsAnotherTenantsRecord
+ ✓ src/kernel/__tests__/tenant-isolation.test.ts > Tenant isolation (INV-001) > eventsFromAnotherTenant_notVisible
+ ✓ src/identity/__tests__/auth.test.ts > AuthService > temporaryCredential_singleUse 453ms
+ ✓ src/identity/__tests__/auth.test.ts > AuthService > temporaryCredential_isExpiredAfterDefault72h 336ms
  ✓ src/authz/__tests__/policy.test.ts > PolicyEngine > grantCapacity_IFV_allowedByChairperson
  ✓ src/authz/__tests__/policy.test.ts > PolicyEngine > grantCapacity_IFV_deniedToSecretary
  ✓ src/authz/__tests__/policy.test.ts > PolicyEngine > IFV_cannotVerifyOwnSuppliedVersion
@@ -28,8 +26,8 @@ npm notice run vitest run --reporter=verbose
  ✓ src/kernel/__tests__/command-bus-transaction.test.ts > WP1.2-A transaction context and WP1.2-B denial audit boundary > rolls back the command transaction before recording a denial without policy detail
  ✓ src/kernel/__tests__/command-bus-transaction.test.ts > WP1.2-A transaction context and WP1.2-B denial audit boundary > returns a retryable classification when the required audit write fails
  ✓ src/kernel/__tests__/command-bus-transaction.test.ts > WP1.2-A transaction context and WP1.2-B denial audit boundary > fails closed without trusted actor and tenant context and audits mismatched context as the trusted actor
- ✓ src/identity/__tests__/auth.test.ts > AuthService > authenticationEvent_containsNoPII 657ms
- ✓ src/identity/__tests__/auth.test.ts > AuthService > credential_neverAppearsInEventPayload
+ ✓ src/identity/__tests__/auth.test.ts > AuthService > temporaryCredential_expiresAtExact72HourBoundary 1016ms
+ ✓ src/identity/__tests__/auth.test.ts > AuthService > firstLogin_requiresPasswordChange 474ms
  ✓ src/authz/__tests__/capacity-service.test.ts > CapacityService > grantCapacity_allowed_byChairperson
  ✓ src/authz/__tests__/capacity-service.test.ts > CapacityService > grantCapacity_denied_toSecretary
  ✓ src/authz/__tests__/capacity-service.test.ts > CapacityService > revokeCapacity_allowed_byChairperson
@@ -41,6 +39,8 @@ npm notice run vitest run --reporter=verbose
  ✓ src/privacy/__tests__/pii-vault.test.ts > KeyProvider — PII vault > cryptoShred_keyDeleted_ciphertextUnreadable
  ✓ src/privacy/__tests__/pii-vault.test.ts > KeyProvider — PII vault > nrcPattern_neverInEventPayload
  ✓ src/privacy/__tests__/pii-vault.test.ts > KeyProvider — PII vault > nrcPattern_neverInLog
+ ✓ src/identity/__tests__/auth.test.ts > AuthService > authenticationEvent_containsNoPII 544ms
+ ✓ src/identity/__tests__/auth.test.ts > AuthService > credential_neverAppearsInEventPayload
  ✓ src/kernel/__tests__/command-digest.test.ts > WP1.1 command semantic digest > keeps the digest implementation and persisted receipt version labels aligned
  ✓ src/kernel/__tests__/command-digest.test.ts > WP1.1 command semantic digest > matches the approved RFC 8785 canonical semantic-envelope vector
  ✓ src/kernel/__tests__/command-digest.test.ts > WP1.1 command semantic digest > excludes lookup and transport metadata while retaining semantic changes
@@ -93,6 +93,6 @@ npm notice run vitest run --reporter=verbose
 
  Test Files  13 passed (13)
       Tests  87 passed (87)
-   Start at  12:53:36
-   Duration  6.43s (transform 1.47s, setup 0ms, collect 3.46s, tests 3.63s, environment 6ms, prepare 4.18s)
+   Start at  13:00:39
+   Duration  6.11s (transform 1.09s, setup 0ms, collect 2.80s, tests 3.28s, environment 6ms, prepare 4.51s)
 

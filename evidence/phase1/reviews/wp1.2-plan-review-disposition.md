@@ -51,6 +51,6 @@ A real PostgreSQL CommandBus test now covers authorization denial, command trans
 
 
 
-The installed npm 12.2.0 CLI was verified and used without installing software. All WP1.2 domain, PostgreSQL command/audit, migration, Phase 1 contract, typecheck, architecture, and toolchain checks passed after commit `270f2e479b04a66e7bade0f89382c7201fd0a989`; the evidence record pins this exact source revision. WP1.2-A and WP1.2-B pass. Independent Phase 1 closure review remains separate and is not claimed here.
+The installed npm 12.2.0 CLI was verified and used without installing software. All WP1.2 domain, PostgreSQL command/audit, migration, Phase 1 contract, typecheck, architecture, and toolchain checks passed after commit `29317ff15dbb8010aa8768bb9ae451b54476875d`; the evidence record pins this exact source revision. WP1.2-A and WP1.2-B pass. Independent Phase 1 closure review remains separate and is not claimed here.
 
 The final pinned run used npm 12.2.0 and PostgreSQL 18.0 / package build 18.0-2. All task-level WP1.2 checks pass; independent Phase 1 closure review remains a separate process.

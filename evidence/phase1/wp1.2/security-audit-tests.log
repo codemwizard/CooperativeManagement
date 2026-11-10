@@ -7,10 +7,10 @@ npm notice run vitest run --reporter=verbose src/__tests__/security-attempt-audi
  ✓ src/__tests__/security-attempt-audit.integration.test.ts > WP1.2-B security-attempt audit mode guard > refuses unknown mode before opening a database transaction
  ✓ src/__tests__/security-attempt-audit.integration.test.ts > WP1.2-B security-attempt audit mode guard > refuses real-data mode before opening a database transaction
  ✓ src/__tests__/security-attempt-audit.integration.test.ts > WP1.2-B security-attempt audit mode guard > refuses non-synthetic test data before opening a database transaction
- ✓ src/__tests__/security-attempt-audit.integration.test.ts > WP1.2-B PostgreSQL security-attempt persistence > commits the minimized denial record in a separate transaction 346ms
+ ✓ src/__tests__/security-attempt-audit.integration.test.ts > WP1.2-B PostgreSQL security-attempt persistence > commits the minimized denial record in a separate transaction
 
  Test Files  1 passed (1)
       Tests  5 passed (5)
-   Start at  12:53:50
-   Duration  1.64s (transform 69ms, setup 0ms, collect 750ms, tests 355ms, environment 0ms, prepare 161ms)
+   Start at  13:00:53
+   Duration  1.46s (transform 67ms, setup 0ms, collect 732ms, tests 202ms, environment 0ms, prepare 147ms)
 
