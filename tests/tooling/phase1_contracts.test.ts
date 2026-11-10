@@ -338,6 +338,9 @@ describe('WP0.12 evidence contract', () => {
     ['invalid status', (record: Record<string, any>) => { record.status.implementation = 'done'; }],
     ['secret-shaped property', (record: Record<string, any>) => { record.claims.api_key = 'not-a-real-secret'; }],
     ['absolute artifact path', (record: Record<string, any>) => { record.commands[0].artifact = 'C:/private/run.log'; }],
+    ['parent traversal artifact path', (record: Record<string, any>) => { record.commands[0].artifact = '../../outside.log'; }],
+    ['nested parent traversal artifact path', (record: Record<string, any>) => { record.commands[0].artifact = 'evidence/../../../outside.log'; }],
+    ['dot-segment artifact path', (record: Record<string, any>) => { record.commands[0].artifact = 'evidence/./run.log'; }],
   ])('rejects %s', (_name, mutate) => {
     const schema = readJson('evidence/phase1/task-evidence.schema.json');
     const record = structuredClone(readJson('evidence/phase1/examples/wp0-12.example.json')) as Record<string, any>;
@@ -365,14 +368,61 @@ describe('WP0.12 evidence contract', () => {
 });
 
 describe('WP1.2 evidence sub-gates', () => {
+  it('keeps WP1.2 open with the completed sub-gates and blocked pinned-toolchain evidence explicit', () => {
+    const schema = readJson('evidence/phase1/task-evidence.schema.json');
+    const envelope = readJson('evidence/phase1/wp1.2/task-evidence.json');
+    expect(validateEvidence(envelope, schema)).toEqual([]);
+    expect(envelope.status.implementation).toBe('partial');
+    expect(envelope.status.gate_verified).toBe('blocked');
+    expect(envelope.sub_gates.map((gate: Record<string, any>) => gate.status)).toEqual(['passed', 'passed']);
+    expect(envelope.commands.some((command: Record<string, any>) => command.result === 'passed')).toBe(true);
+    expect(envelope.commands.filter((command: Record<string, any>) => command.result === 'blocked').map((command: Record<string, any>) => command.artifact)).toEqual(['evidence/phase1/wp1.2/toolchain-verify.log']);
+  });
+
   const passingWp1Record = () => {
     const record = structuredClone(readJson('evidence/phase1/examples/wp0-12.example.json')) as Record<string, any>;
     record.task_id = 'WP1.2';
     record.status.gate_verified = 'passed';
+    record.commit = '0123456789abcdef0123456789abcdef01234567';
+    const commands = [
+      {
+        command: 'npm run test:unit --workspace @symphony/domain -- src/kernel/__tests__/command-bus-transaction.test.ts',
+        result: 'passed',
+        artifact: 'evidence/phase1/wp1.2/domain-transaction-tests.log',
+      },
+      {
+        command: 'npm run test:db --workspace @symphony/db -- src/__tests__/command-transaction.integration.test.ts',
+        result: 'passed',
+        artifact: 'evidence/phase1/wp1.2/command-transaction-tests.log',
+      },
+      {
+        command: 'npm run test:db --workspace @symphony/db -- src/__tests__/security-attempt-audit.integration.test.ts',
+        result: 'passed',
+        artifact: 'evidence/phase1/wp1.2/security-audit-tests.log',
+      },
+      {
+        command: 'npm run test:db:migrations',
+        result: 'passed',
+        artifact: 'evidence/phase1/wp1.2/migration-tests.log',
+      },
+      {
+        command: 'npm run typecheck:v4',
+        result: 'passed',
+        artifact: 'evidence/phase1/wp1.2/typecheck-v4.log',
+      },
+      {
+        command: 'npm run verify:arch',
+        result: 'passed',
+        artifact: 'evidence/phase1/wp1.2/verify-arch.log',
+      },
+    ];
+    record.commands = commands;
     record.sub_gates = ['WP1.2-A', 'WP1.2-B'].map((gate_id) => ({
       gate_id,
       status: 'passed',
-      commands: [{ command: 'npm run verify:arch', result: 'passed', artifact: 'evidence/phase1/wp1.2/subgate.log' }],
+      commands: gate_id === 'WP1.2-A'
+        ? [commands[0], commands[1], commands[3]]
+        : [commands[2], commands[1], commands[3]],
     }));
     return record;
   };
@@ -386,12 +436,55 @@ describe('WP1.2 evidence sub-gates', () => {
     expect(validateEvidence(incomplete, schema).join(' ')).toMatch(/sub_gates/);
   });
 
+  it('requires an immutable SHA and all audit, end-to-end, and migration evidence for a pass', () => {
+    const schema = readJson('evidence/phase1/task-evidence.schema.json');
+    const workingTree = passingWp1Record();
+    workingTree.commit = 'working-tree';
+    expect(validateEvidence(workingTree, schema).join(' ')).toMatch(/commit/);
+
+    for (const artifact of ['security-audit-tests.log', 'command-transaction-tests.log', 'migration-tests.log']) {
+      const incomplete = passingWp1Record();
+      incomplete.sub_gates[1].commands = incomplete.sub_gates[1].commands.filter((command: Record<string, string>) => !command.artifact.endsWith(artifact));
+      expect(validateEvidence(incomplete, schema).join(' ')).toMatch(/sub_gates/);
+    }
+  });
+
   it('rejects an overall WP1.2 pass while either sub-gate or one of its commands is pending', () => {
     const schema = readJson('evidence/phase1/task-evidence.schema.json');
     const incomplete = passingWp1Record();
     incomplete.sub_gates[1].status = 'pending';
     incomplete.sub_gates[1].commands[0].result = 'not_run';
     expect(validateEvidence(incomplete, schema).join(' ')).toMatch(/sub_gates/);
+  });
+
+  it('rejects a sub-gate marked passed when one of its commands failed even if the overall task is pending', () => {
+    const schema = readJson('evidence/phase1/task-evidence.schema.json');
+    const inconsistent = passingWp1Record();
+    inconsistent.status.gate_verified = 'pending';
+    inconsistent.sub_gates[0].commands[1].result = 'failed';
+    expect(validateEvidence(inconsistent, schema).join(' ')).toMatch(/sub_gates/);
+  });
+
+  it('allows both sub-gates to pass while task-level checks remain pending', () => {
+    const schema = readJson('evidence/phase1/task-evidence.schema.json');
+    const pendingOverall = passingWp1Record();
+    pendingOverall.status.gate_verified = 'pending';
+    pendingOverall.commands[4].result = 'not_run';
+    expect(validateEvidence(pendingOverall, schema)).toEqual([]);
+  });
+
+  it('rejects an overall pass until every task-level command has passed', () => {
+    const schema = readJson('evidence/phase1/task-evidence.schema.json');
+    const incomplete = passingWp1Record();
+    incomplete.commands[4].result = 'not_run';
+    expect(validateEvidence(incomplete, schema).join(' ')).toMatch(/commands/);
+  });
+
+  it('rejects traversal artifacts nested in a sub-gate command', () => {
+    const schema = readJson('evidence/phase1/task-evidence.schema.json');
+    const unsafe = passingWp1Record();
+    unsafe.sub_gates[0].commands[0].artifact = 'evidence/../../../outside.log';
+    expect(validateEvidence(unsafe, schema).join(' ')).toMatch(/repository-relative path/);
   });
 });
 

@@ -246,7 +246,7 @@ Run static/type/architecture checks and focused tests continuously; do not wait 
 
 ### WP7 — Complete toolchain/typecheck/CI command and failure-propagation gate
 
-**Finding:** P1-09, supporting P1-01–08/10/11. **Authority:** Node 26.7.0 and npm 12.2.0 are the active owner-directed toolchain pins; historical Phase 0 artifacts record npm 11.19.0. PostgreSQL 18.6 is the CI service version; ADR-005 and retained CI evidence.
+**Finding:** P1-09, supporting P1-01–08/10/11. **Authority:** Node 26.7.0 and npm 12.2.0 are the active owner-directed toolchain pins; historical Phase 0 artifacts record npm 11.19.0. PostgreSQL server 18.0 (installed package build 18.0-2) is the active target; the earlier CI 18.6 run remains historical evidence.
 **Likely paths:** root `package.json`, workspace scripts/manifests, solution TS configs, `.github/workflows/ci.yml`, Playwright/Cucumber config, migration/seed tools, CI evidence collector.
 
 1. Keep exact runtime pins consistent with `.nvmrc`, package engines, npm lockfile/packageManager, Docker Compose, CI matrix, and docs. Active pins are Node 26.7.0/npm 12.2.0; historical Phase 0 reports record npm 11.19.0 and remain unchanged. The owner directed the new active npm pin on 2026-11-07; the Phase 0 gate must be rerun under the active pins before WP0.13 closure.
@@ -254,7 +254,7 @@ Run static/type/architecture checks and focused tests continuously; do not wait 
 3. Add explicit scripts for API tests, workspace build/typecheck, command tests, full DB integration, BDD, UI/Playwright, a11y, trace, architecture, privacy/purge nonfunctional tests, and legacy floor. Reconcile `test:ui` with existing legacy runner: use a distinct `test:workspace` or similarly unambiguous name; do not silently replace legacy E2E coverage.
 4. Create root `verify:phase1` with a fixed, documented order. It must include `verify:phase0` or the equivalent Phase 0 floor, plus all Phase 1 suites, migrations on clean PostgreSQL 18, API/auth, workspace build/typecheck, BDD/trace, a11y and no-mock login browser tests. It must never include Phase 2 feature claims.
 5. Add script contract tests that inspect each invoked command and prove it runs the intended project/spec files. A successful `echo`, no-op target, `--if-present`, empty test discovery, zero enabled scenarios, or swallowed exit code is a gate failure.
-6. CI provisions an isolated PostgreSQL 18.6 service/database, readiness-probes it, applies all forward-only migrations from zero, seeds deterministic fixtures, and cleans up in `finally`/job teardown. Service failures must be reported as infrastructure/setup failures, not mislabeled product test failures.
+6. CI provisions an isolated PostgreSQL 18.0 service/database matching the installed server target, readiness-probes it, applies all forward-only migrations from zero, seeds deterministic fixtures, and cleans up in `finally`/job teardown. Service failures must be reported as infrastructure/setup failures, not mislabeled product test failures.
 7. CI runs all required checks from a clean checkout on the pinned toolchain. Preserve command, commit SHA, runtime/service versions, suite counts, skipped/pending counts, artifacts and sanitized logs. Mask secrets; never upload `.env`, DB URLs, temp credentials, or PII.
 8. Add negative proof: a CI contract test deliberately substitutes a required child command returning nonzero and asserts aggregate fails; another removes/renames a required script in a fixture manifest and asserts preflight fails. This prevents silent gate gaps.
 
@@ -301,7 +301,7 @@ No “test” may merely assert a method was called when the requirement is a pe
 - No `any`, unsafe casts that bypass validation, unchecked client authority, SQL interpolation of untrusted values, dynamic purge-table names from user input, or plaintext secrets/PII in telemetry.
 - Parameterize SQL. Validate all external input at API/CLI boundaries and enforce DB constraints for integrity conditions. Use least-privilege service accounts and pool cleanup.
 - Make mutation boundaries explicit and atomic. Handle uniqueness/concurrency errors as domain outcomes; never retry a non-idempotent operation blindly.
-- Migrations are forward-only, immutable after application, tested on empty and seeded PostgreSQL 18.6, and include required constraints/indexes/RLS. Any schema change includes rollback/failure expectations, compatibility notes, and exact migration test evidence.
+- Migrations are forward-only, immutable after application, tested on empty and seeded PostgreSQL 18.0, and include required constraints/indexes/RLS. Any schema change includes rollback/failure expectations, compatibility notes, and exact migration test evidence.
 - Errors have stable codes, safe client messages and internal structured context without secrets. Logs identify correlation/command/tenant pseudonym where appropriate but omit member identifiers and credentials.
 - Configure time, ID generation and crypto randomness through appropriate ports for deterministic tests; production secrets and cryptographic keys come from validated configuration/provider, never source code.
 - Bound request body, pagination, query, password work, purge duration/batch size as appropriate. Test resource-limit and shutdown paths.

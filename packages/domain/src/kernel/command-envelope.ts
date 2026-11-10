@@ -15,5 +15,7 @@ export interface CommandEnvelope<TPayload> {
   readonly expectedVersion: number;
   readonly correlationId: string;
   readonly type: string;
+  /** Version of the registered strict command validator used to normalize payload. */
+  readonly schemaVersion: number;
   readonly payload: TPayload;
 }

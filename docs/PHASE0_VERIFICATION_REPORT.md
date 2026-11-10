@@ -1,5 +1,7 @@
 # Phase 0 Remediation Verification Report
 
+> **Historical version note (2026-11-10):** This report preserves the versions actually used in the 2026-11-06 Phase 0 runs, including the PostgreSQL 18.6 CI image. The active project target was later aligned to the installed PostgreSQL server 18.0 / package build 18.0-2; see `toolchain.json`. Historical run claims below are not current toolchain requirements.
+
 **Status:** Phase 0 remediation complete; Phase 1 login E2E failures carried forward
 **Date:** 6 November 2026 (Africa/Johannesburg)  
 **Original remediation commit:** `e69a43c8a3b2821ca1b9cad3780ab0015d2461a7` (`main`, pushed to `origin`)

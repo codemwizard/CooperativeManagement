@@ -18,6 +18,8 @@
 
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { randomUUID } from 'node:crypto';
+import { createHmac } from 'node:crypto';
+import { z } from 'zod';
 import { FakeClock, SequentialIds } from '@symphony/testkit';
 import { CommandBus, type CommandEnvelope, type AggregateRoot, type Clock, type CommandReceipt, type CommandReceiptStore, type DomainEvent, type IdGen, type OutboxMessage, type PolicyDecision, type PolicyStore, type Repository, OptimisticConcurrencyError } from '@symphony/domain';
 
@@ -35,7 +37,7 @@ class LocalReceiptStore implements CommandReceiptStore {
     return this.store.get(`${tenantId}:${id}`) ?? null;
   }
   async save(r: CommandReceipt): Promise<void> {
-    this.store.set(`${r.tenantId}:${r.commandId}`, r);
+    this.store.set(`${r.tenant_id}:${r.command_id}`, r);
   }
 }
 
@@ -96,6 +98,10 @@ function makeBus(repo: TestRepository) {
     policyStore: new AllowPolicy(),
     clock: clockPort,
     idGen: idGenPort,
+    transactionRunner: { run: async <T>(_tenant: string, work: (ctx: import('../ports.js').CommandTransactionContext) => Promise<T>) => work({ transactionId: Symbol() }) },
+    securityAttemptWriter: { record: async () => undefined },
+    digestKeyProvider: { activeVersion: () => 'test-v1', hmac: async (version: string, bytes: Uint8Array) => createHmac('sha256', version).update(bytes).digest() },
+    resultDataSchemas: { TenantTestCommand: z.record(z.unknown()) },
   });
 }
 
@@ -111,6 +117,7 @@ function makeEnvelope(tenantId: string, actorUserId: string, commandId: string):
     expectedVersion: 0,
     correlationId: `corr-${commandId}`,
     type: 'TenantTestCommand',
+    schemaVersion: 1,
     payload: { label: 'test' },
   };
 }
@@ -136,12 +143,12 @@ describe('Tenant isolation (INV-001)', () => {
         events: [],
         data: {},
       }),
-      { actorTenantId: TENANT_A }, // ← actor session is TENANT_A
+      { trustedPrincipal: { actorUserId: ACTOR_A, tenantId: TENANT_A } }, // trusted session is TENANT_A
     );
 
     expect(result.ok).toBe(false);
     if (!result.ok) {
-      expect(result.code).toBe('NOT_AUTHORISED_FOR_ORGANISATION');
+      expect(result.code).toBe('UNAUTHORIZED');
     }
 
     // No state was mutated in either tenant
@@ -182,7 +189,7 @@ describe('Tenant isolation (INV-001)', () => {
 
     // Issue a command under TENANT_B — produces an event
     const aggId = randomUUID();
-    const envelope = makeEnvelope(TENANT_B, '00000000-0000-0000-0001-bbbbbbbbbbbb', 'cmd-tenant-b-event');
+    const envelope = makeEnvelope(TENANT_B, '00000000-0000-0000-0001-bbbbbbbbbbbb', randomUUID());
     await bus.dispatch(
       envelope,
       async (_env, _ctx) => ({
@@ -202,6 +209,7 @@ describe('Tenant isolation (INV-001)', () => {
         ],
         data: {},
       }),
+      { trustedPrincipal: { actorUserId: envelope.actorUserId, tenantId: envelope.tenantId } },
     );
 
     // The event was written (1 event total)

@@ -44,7 +44,7 @@
         "properties": {
           "command": { "type": "string", "minLength": 1, "maxLength": 240 },
           "result": { "enum": ["passed", "failed", "blocked", "not_run"] },
-          "artifact": { "type": "string", "pattern": "^(?:[A-Za-z0-9_.-]+/)*[A-Za-z0-9_.-]+$" }
+          "artifact": { "type": "string", "pattern": "^(?!/)(?![A-Za-z]:)(?!.*(?:^|/)\\.{1,2}(?:/|$))[A-Za-z0-9_.-]+(?:/[A-Za-z0-9_.-]+)*$" }
         }
       }
     },
@@ -70,11 +70,32 @@
               "properties": {
                 "command": { "type": "string", "minLength": 1, "maxLength": 240 },
                 "result": { "enum": ["passed", "failed", "blocked", "not_run"] },
-                "artifact": { "type": "string", "pattern": "^(?:[A-Za-z0-9_.-]+/)*[A-Za-z0-9_.-]+$" }
+                "artifact": { "type": "string", "pattern": "^(?!/)(?![A-Za-z]:)(?!.*(?:^|/)\\.{1,2}(?:/|$))[A-Za-z0-9_.-]+(?:/[A-Za-z0-9_.-]+)*$" }
               }
             }
           }
-        }
+        },
+        "allOf": [
+          {
+            "if": { "properties": { "status": { "const": "passed" } }, "required": ["status"] },
+            "then": { "properties": { "commands": { "items": { "properties": { "result": { "const": "passed" } }, "required": ["result"] } } } }
+          },
+          {
+            "if": { "properties": { "gate_id": { "const": "WP1.2-B" }, "status": { "const": "passed" } }, "required": ["gate_id", "status"] },
+            "then": {
+              "properties": {
+                "commands": {
+                  "minItems": 3,
+                  "allOf": [
+                    { "contains": { "properties": { "artifact": { "pattern": "security-audit-tests\\.log$" }, "result": { "const": "passed" } }, "required": ["artifact", "result"] } },
+                    { "contains": { "properties": { "artifact": { "pattern": "command-transaction-tests\\.log$" }, "result": { "const": "passed" } }, "required": ["artifact", "result"] } },
+                    { "contains": { "properties": { "artifact": { "pattern": "migration-tests\\.log$" }, "result": { "const": "passed" } }, "required": ["artifact", "result"] } }
+                  ]
+                }
+              }
+            }
+          }
+        ]
       }
     },
     "claims": {
@@ -115,6 +136,7 @@
       "then": {
         "required": ["sub_gates"],
         "properties": {
+          "commit": { "pattern": "^(?:[0-9a-f]{40}|working-tree)$" },
           "sub_gates": {
             "allOf": [
               { "contains": { "properties": { "gate_id": { "const": "WP1.2-A" } }, "required": ["gate_id"] }, "minContains": 1, "maxContains": 1 },
@@ -133,7 +155,11 @@
         "required": ["task_id", "status"]
       },
       "then": {
-        "properties": { "sub_gates": { "items": { "properties": { "status": { "const": "passed" }, "commands": { "items": { "properties": { "result": { "const": "passed" } } } } } } } }
+        "properties": {
+          "commit": { "pattern": "^[0-9a-f]{40}$" },
+          "commands": { "minItems": 6, "items": { "properties": { "result": { "const": "passed" } }, "required": ["result"] } },
+          "sub_gates": { "items": { "properties": { "status": { "const": "passed" } } } }
+        }
       }
     }
   ]

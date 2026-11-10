@@ -20,19 +20,22 @@ export function validateToolchain({
   if (rootLock?.engines?.npm !== packageJson.engines.npm) failures.push('package-lock.json npm engine');
   if (!readme.includes(`Node.js ${expected.node}`)) failures.push('README Node version');
   if (!readme.includes(`npm ${expected.npm}`)) failures.push('README npm version');
-  if (!readme.includes(`PostgreSQL ${expected.postgresqlMajor}`)) failures.push('README PostgreSQL version');
+  if (!readme.includes(`PostgreSQL ${expected.postgresqlVersion}`)) failures.push('README PostgreSQL version');
+  if (expected.postgresqlPackageVersion && !readme.includes(`package build ${expected.postgresqlPackageVersion}`)) {
+    failures.push('README PostgreSQL package build');
+  }
 
   const ciNodeVersions = [...workflow.matchAll(/node-version:\s*['"]?([^\s'"#]+)/g)].map((match) => match[1]);
   if (ciNodeVersions.length === 0 || ciNodeVersions.some((version) => version !== expected.node)) {
     failures.push('CI Node versions');
   }
   if (!workflow.includes(`npm@${expected.npm}`)) failures.push('CI npm version pin');
-  const ciPostgresMajors = [...workflow.matchAll(/image:\s*postgres:(\d+)(?:-[^\s]+)?/g)].map((match) => Number(match[1]));
-  if (ciPostgresMajors.length === 0 || ciPostgresMajors.some((major) => major !== expected.postgresqlMajor)) {
+  const ciPostgresVersions = [...workflow.matchAll(/image:\s*postgres:(\d+\.\d+(?:\.\d+)?)(?:-[^\s]+)?/g)].map((match) => match[1]);
+  if (ciPostgresVersions.length === 0 || ciPostgresVersions.some((version) => version !== expected.postgresqlVersion)) {
     failures.push('CI PostgreSQL versions');
   }
-  const postgresMajors = [...compose.matchAll(/image:\s*postgres:(\d+)(?:-[^\s]+)?/g)].map((match) => Number(match[1]));
-  if (postgresMajors.length === 0 || postgresMajors.some((major) => major !== expected.postgresqlMajor)) {
+  const postgresVersions = [...compose.matchAll(/image:\s*postgres:(\d+\.\d+(?:\.\d+)?)(?:-[^\s]+)?/g)].map((match) => match[1]);
+  if (postgresVersions.length === 0 || postgresVersions.some((version) => version !== expected.postgresqlVersion)) {
     failures.push('Docker Compose PostgreSQL versions');
   }
   if (actualNode !== expected.node) failures.push(`running Node (${actualNode})`);

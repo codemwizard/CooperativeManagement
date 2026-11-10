@@ -39,12 +39,25 @@ export function validateEvidence(record, schema) {
   const validate = ajv.compile(schema);
   const errors = validate(record) ? [] : (validate.errors ?? []).map((error) => `${error.instancePath || '$'} ${error.message ?? 'is invalid'}`);
   errors.push(...collectUnsafeEvidence(record));
-  for (const [index, command] of (record?.commands ?? []).entries()) {
-    if (typeof command?.artifact === 'string' && (path.isAbsolute(command.artifact) || command.artifact.split(/[\\/]/).includes('..'))) {
-      errors.push(`$.commands[${index}].artifact must be a repository-relative path`);
-    }
-    if (typeof command?.command === 'string' && SENSITIVE_VALUE.test(command.command)) {
-      errors.push(`$.commands[${index}].command contains a secret or connection string`);
+  const commandGroups = [
+    ['commands', record?.commands ?? []],
+    ...((record?.sub_gates ?? []).map((gate, gateIndex) => [`sub_gates[${gateIndex}].commands`, gate?.commands ?? []])),
+  ];
+  for (const [group, commands] of commandGroups) {
+    for (const [index, command] of commands.entries()) {
+      if (typeof command?.artifact === 'string') {
+        const segments = command.artifact.split(/[\\/]/);
+        const resolved = path.resolve(ROOT, command.artifact);
+        const relative = path.relative(ROOT, resolved);
+        const escapesRoot = relative === '..' || relative.startsWith(`..${path.sep}`) || path.isAbsolute(relative);
+        if (path.isAbsolute(command.artifact) || path.posix.isAbsolute(command.artifact) || path.win32.isAbsolute(command.artifact)
+          || segments.some((segment) => segment === '.' || segment === '..') || escapesRoot) {
+          errors.push(`$.${group}[${index}].artifact must resolve to a repository-relative path`);
+        }
+      }
+      if (typeof command?.command === 'string' && SENSITIVE_VALUE.test(command.command)) {
+        errors.push(`$.${group}[${index}].command contains a secret or connection string`);
+      }
     }
   }
   return [...new Set(errors)];
@@ -221,7 +234,7 @@ export function validateRuntimeMode(matrix, config) {
 
 export function validateTenantTableInventory(inventory, migrationTexts) {
   const errors = [];
-  const entries = inventory?.tables ?? [];
+  const entries = [...(inventory?.tables ?? []), ...(inventory?.planned_phase1_tables ?? [])];
   const names = entries.map((entry) => entry.table);
   if (new Set(names).size !== names.length) errors.push('tenant table inventory contains duplicate table names');
   const allowedClasses = new Set(['tenant_scoped', 'global_catalogue_read_only', 'control_plane_restricted']);
@@ -249,9 +262,9 @@ export function validateTenantTableInventory(inventory, migrationTexts) {
 
 export function validateTenantPolicyMatrix(matrix, inventory) {
   const errors = [];
-  const entries = matrix?.tables ?? [];
+  const entries = [...(matrix?.tables ?? []), ...(matrix?.planned_phase1_tables ?? [])];
   const byName = new Map(entries.map((entry) => [entry.table, entry]));
-  const source = new Map((inventory?.tables ?? []).map((entry) => [entry.table, entry]));
+  const source = new Map([...(inventory?.tables ?? []), ...(inventory?.planned_phase1_tables ?? [])].map((entry) => [entry.table, entry]));
   if (byName.size !== entries.length) errors.push('tenant policy matrix contains duplicate table names');
   if (byName.size !== source.size) errors.push('tenant policy matrix does not cover the complete migration inventory');
   for (const [name, sourceEntry] of source) {
@@ -264,7 +277,10 @@ export function validateTenantPolicyMatrix(matrix, inventory) {
       if (entry.required_rls !== 'ENABLE+FORCE') errors.push(`${name} tenant policy must require both ENABLE and FORCE RLS`);
       if (entry.explicit_tenant_predicate !== true) errors.push(`${name} requires an explicit tenant predicate in addition to RLS`);
       if (typeof entry.scope_resolution !== 'string' || entry.scope_resolution.trim().length < 20) errors.push(`${name} lacks a tenant resolution path`);
-      if (!(entry.permitted_sql_operations ?? []).includes('SELECT')) errors.push(`${name} lacks an explicit tenant read grant`);
+      if (name === 'security_attempts') {
+        if (JSON.stringify(entry.permitted_sql_operations) !== '["INSERT"]') errors.push(`${name} must be INSERT-only for the ordinary application role`);
+        if (!String(entry.access_policy ?? '').includes('No SELECT')) errors.push(`${name} must explicitly prohibit ordinary application reads`);
+      } else if (!(entry.permitted_sql_operations ?? []).includes('SELECT')) errors.push(`${name} lacks an explicit tenant read grant`);
     } else if (sourceEntry.classification === 'global_catalogue_read_only') {
       if (JSON.stringify(entry.permitted_sql_operations) !== '["SELECT"]') errors.push(`${name} global catalogue must be SELECT-only`);
     } else if ((entry.permitted_sql_operations ?? []).length !== 0 || entry.ordinary_runtime_role !== 'no ordinary application grant') {
@@ -303,9 +319,18 @@ export function validateAuthorityDependencyInventory(inventory, migrationInvento
 
 export function validatePurgeTablePolicyMatrix(matrix, inventory) {
   const errors = [];
-  const expectedDelete = new Set((inventory?.tables ?? []).filter((entry) => entry.classification === 'tenant_scoped').map((entry) => entry.table));
+  const plannedPreserveRows = matrix?.planned_preserve_tables ?? [];
+  const plannedPreserve = new Set(plannedPreserveRows.map((entry) => entry.table));
+  const inventoryTables = [...(inventory?.tables ?? []), ...(inventory?.planned_phase1_tables ?? [])];
+  const expectedDelete = new Set(inventoryTables.filter((entry) => entry.classification === 'tenant_scoped' && !plannedPreserve.has(entry.table)).map((entry) => entry.table));
   for (const name of ['tenants', 'event_outbox', 'enroller_assignments', 'requirement_definitions', 'enforcement_policies', 'duty_matrix_rows', 'precedence_policies', 'membership_rules', 'acceptance_policies', 'meeting_rules', 'resolution_class_rules']) expectedDelete.add(name);
-  const expectedPreserve = new Set((inventory?.tables ?? []).filter((entry) => entry.classification === 'global_catalogue_read_only').map((entry) => entry.table));
+  const expectedPreserve = new Set(inventoryTables.filter((entry) => entry.classification === 'global_catalogue_read_only').map((entry) => entry.table));
+  for (const entry of plannedPreserveRows) {
+    if (!entry.disposition?.includes('preserve')) errors.push(`${entry.table} lacks a preserve disposition`);
+    if (typeof entry.reason !== 'string' || entry.reason.trim().length < 20) errors.push(`${entry.table} lacks a preserve rationale`);
+    if (plannedPreserve.has(entry.table) && !inventoryTables.some((table) => table.table === entry.table)) errors.push(`${entry.table} is absent from migration inventory`);
+    expectedPreserve.add(entry.table);
+  }
   for (const name of ['legal_sources', 'position_combination_rules', 'retention_policies']) expectedPreserve.add(name);
   const deleteRows = matrix?.delete_tables ?? [];
   const order = matrix?.delete_dependency_order ?? [];
@@ -315,7 +340,9 @@ export function validatePurgeTablePolicyMatrix(matrix, inventory) {
   if (new Set(order).size !== order.length || order.length !== deletes.length || order.some((name, index) => name !== deletes[index])) errors.push('purge deletion order must include every allowed table exactly once in declared order');
   for (const name of expectedDelete) if (!deletes.includes(name)) errors.push(`${name} is missing from the purge delete policy`);
   for (const name of deletes) if (!expectedDelete.has(name)) errors.push(`${name} is not approved for purge deletion`);
-  if (JSON.stringify([...preserve].sort()) !== JSON.stringify([...expectedPreserve].sort())) errors.push('purge preservation set differs from the approved global/control catalogue set');
+  const effectivePreserve = [...preserve, ...plannedPreserveRows.map((entry) => entry.table)];
+  if (new Set(effectivePreserve).size !== effectivePreserve.length) errors.push('purge preservation policy contains duplicate tables');
+  if (JSON.stringify([...effectivePreserve].sort()) !== JSON.stringify([...expectedPreserve].sort())) errors.push('purge preservation set differs from the approved global/control catalogue and audit set');
   if (deletes.includes(matrix?.audit_ledger?.table)) errors.push('purge audit ledger must never be in the delete allowlist');
   for (const entry of deleteRows) {
     if (typeof entry.predicate !== 'string' || entry.predicate.trim().length < 10) errors.push(`${entry.table} lacks an explicit deletion predicate`);
@@ -326,7 +353,7 @@ export function validatePurgeTablePolicyMatrix(matrix, inventory) {
   if (matrix?.target?.database_marker !== 'symphony-disposable-test:v1') errors.push('purge target marker value is missing or incorrect');
   if (matrix?.purge_role_contract?.name !== 'symphony_phase1_purger' || matrix?.purge_role_contract?.status !== 'capability contract proposed; role not provisioned') errors.push('dedicated purge role contract must be explicit and must not claim provisioning');
   if ((matrix?.execution_constraints ?? []).some((line) => /CASCADE|TRUNCATE|DROP SCHEMA|dynamic all-table/i.test(line)) === false) errors.push('purge contract must explicitly prohibit broad destructive SQL');
-  if (new Set([...deletes, ...preserve]).size !== (inventory?.tables ?? []).length) errors.push('purge policy must classify every migration table as delete or preserve');
+  if (new Set([...deletes, ...effectivePreserve]).size !== inventoryTables.length) errors.push('purge policy must classify every migration table as delete or preserve');
   return [...new Set(errors)];
 }
 
@@ -456,7 +483,8 @@ function main() {
   console.log('Phase 1 gate manifest: all mandatory commands and BDD scenario source IDs resolve.');
   console.log(`Runtime mode contract: ${modeMatrix.profiles.length} allowed profiles; every other pair is rejected.`);
   const rlsProtected = tenantInventory.tables.filter((entry) => entry.rls_current).length;
-  console.log(`Tenant inventory: ${tenantInventory.tables.length} migrated tables classified; ${rlsProtected} currently have ENABLE+FORCE RLS.`);
+  const plannedTenantTables = tenantInventory.planned_phase1_tables ?? [];
+  console.log(`Tenant inventory: ${tenantInventory.tables.length} baseline + ${plannedTenantTables.length} planned table(s) (${tenantInventory.tables.length + plannedTenantTables.length} migration tables); ${rlsProtected} baseline tables currently have ENABLE+FORCE RLS.`);
   const closureBlockers = validateDependencyGraph(graph, recordMap, 'WP0.13', readiness);
   const closureApproved = readiness.project_owner_signed
     && readiness.phase0_candidate_passed

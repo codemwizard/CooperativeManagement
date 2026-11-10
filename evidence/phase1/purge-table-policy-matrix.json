@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "source": "53-table root migration inventory plus PostgreSQL 18.0 pg_constraint foreign-key catalog from symphony_phase1_test",
+  "source": "53-table baseline migration inventory plus planned WP1.2 security_attempts and PostgreSQL 18.0 pg_constraint foreign-key catalog from symphony_phase1_test",
   "status": "WP0 proposed, reviewable table/row allowlist; no destructive statements executed",
   "target": {
     "database": "symphony_phase1_test",
@@ -321,7 +321,7 @@
     {
       "table": "security_attempts",
       "disposition": "preserve_append_only_security_history_outside_purge_allowlist",
-      "reason": "Authenticated command-denial observations are security audit records; the purge role has no DELETE grant. This planned table is added by WP1.2 migration 0010_security_attempts.sql and is not part of the current 53-table inventory."
+      "reason": "Authenticated command-denial observations are security audit records; the purge role has no DELETE grant. Migration 0010 creates this table, which is explicitly preserved outside the purge allowlist."
     }
   ],
   "audit_ledger": {

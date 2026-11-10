@@ -13,10 +13,13 @@
  */
 
 import { describe, it, expect, beforeEach } from 'vitest';
+import { createHmac } from 'node:crypto';
+import { z } from 'zod';
 import { FakeClock } from '@symphony/testkit';
 import { SequentialIds } from '@symphony/testkit';
 import { CommandEnvelope } from '../command-envelope.js';
 import { CommandBus } from '../command-bus.js';
+import type { CommandTransactionContext } from '../ports.js';
 import {
   AggregateRoot,
   Clock,
@@ -44,7 +47,7 @@ class InMemoryReceiptStore implements CommandReceiptStore {
   }
 
   async save(receipt: CommandReceipt): Promise<void> {
-    const key = `${receipt.tenantId}:${receipt.commandId}`;
+    const key = `${receipt.tenant_id}:${receipt.command_id}`;
     this.receipts.set(key, receipt);
   }
 }
@@ -102,6 +105,9 @@ describe('CommandBus', () => {
   let receiptStore: InMemoryReceiptStore;
   let policyStore: InMemoryPolicyStore;
   let bus: CommandBus<TestAggregate>;
+  const transactionRunner = { run: async <T>(_tenant: string, work: (ctx: CommandTransactionContext) => Promise<T>) => work({ transactionId: Symbol() }) };
+  const securityAttemptWriter = { record: async () => undefined };
+  const digestKeyProvider = { activeVersion: () => 'test-v1', hmac: async (version: string, bytes: Uint8Array) => createHmac('sha256', version).update(bytes).digest() };
 
   const tenantId = '00000000-0000-0000-0000-000000000001';
   const otherTenantId = '00000000-0000-0000-0000-000000000002';
@@ -123,6 +129,10 @@ describe('CommandBus', () => {
       policyStore,
       clock: clockPort,
       idGen: idGenPort,
+      transactionRunner,
+      securityAttemptWriter,
+      digestKeyProvider,
+      resultDataSchemas: { SetValue: z.record(z.unknown()) },
     });
   });
 
@@ -137,6 +147,7 @@ describe('CommandBus', () => {
       expectedVersion: 0,
       correlationId: 'corr-1',
       type: 'SetValue',
+      schemaVersion: 1,
       payload: { newValue: 'first' },
     };
 
@@ -162,10 +173,11 @@ describe('CommandBus', () => {
       };
     };
 
-    const res1 = await bus.dispatch(envelope, handler);
+    const trusted = { trustedPrincipal: { actorUserId, tenantId } };
+    const res1 = await bus.dispatch(envelope, handler, trusted);
     expect(res1.ok).toBe(true);
 
-    const res2 = await bus.dispatch(envelope, handler);
+    const res2 = await bus.dispatch(envelope, handler, trusted);
     expect(res2.ok).toBe(true);
     expect(applyCount).toBe(1); // handler must not be executed twice
   });
@@ -179,7 +191,7 @@ describe('CommandBus', () => {
     });
 
     const envelope: CommandEnvelope<{ newValue: string }> = {
-      commandId: 'cmd-stale',
+      commandId: '00000000-0000-0000-0000-000000000098',
       tenantId,
       actorUserId,
       occurredAt: clock.nowIso(),
@@ -188,6 +200,7 @@ describe('CommandBus', () => {
       expectedVersion: 1, // Stale! Current version is 2
       correlationId: 'corr-2',
       type: 'SetValue',
+      schemaVersion: 1,
       payload: { newValue: 'stale-update' },
     };
 
@@ -200,7 +213,7 @@ describe('CommandBus', () => {
       },
       events: [],
       data: { updated: true },
-    }));
+    }), { trustedPrincipal: { actorUserId, tenantId } });
 
     expect(result.ok).toBe(false);
     if (!result.ok) {
@@ -213,7 +226,7 @@ describe('CommandBus', () => {
     repository.simulateDbFailure = true;
 
     const envelope: CommandEnvelope<{ newValue: string }> = {
-      commandId: 'cmd-db-fail',
+      commandId: '00000000-0000-0000-0000-000000000097',
       tenantId,
       actorUserId,
       occurredAt: clock.nowIso(),
@@ -222,6 +235,7 @@ describe('CommandBus', () => {
       expectedVersion: 0,
       correlationId: 'corr-3',
       type: 'SetValue',
+      schemaVersion: 1,
       payload: { newValue: 'failure-attempt' },
     };
 
@@ -230,7 +244,7 @@ describe('CommandBus', () => {
         newState: { id: aggregateId, tenantId, version: 1, value: env.payload.newValue },
         events: [
           {
-            id: 'evt-1',
+            id: '00000000-0000-0000-0000-000000000096',
             tenantId,
             aggregateId,
             aggregateType: 'TestAggregate',
@@ -242,7 +256,7 @@ describe('CommandBus', () => {
           },
         ],
         data: { success: true },
-      }))
+      }), { trustedPrincipal: { actorUserId, tenantId } })
     ).rejects.toThrow('Database connection failed');
 
     expect(repository.store.has(aggregateId)).toBe(false);
@@ -259,7 +273,7 @@ describe('CommandBus', () => {
     });
 
     const envA: CommandEnvelope<{ newValue: string }> = {
-      commandId: 'cmd-a',
+      commandId: '00000000-0000-0000-0000-000000000095',
       tenantId,
       actorUserId,
       occurredAt: clock.nowIso(),
@@ -268,11 +282,12 @@ describe('CommandBus', () => {
       expectedVersion: 1,
       correlationId: 'corr-a',
       type: 'SetValue',
+      schemaVersion: 1,
       payload: { newValue: 'from-a' },
     };
 
     const envB: CommandEnvelope<{ newValue: string }> = {
-      commandId: 'cmd-b',
+      commandId: '00000000-0000-0000-0000-000000000094',
       tenantId,
       actorUserId,
       occurredAt: clock.nowIso(),
@@ -281,6 +296,7 @@ describe('CommandBus', () => {
       expectedVersion: 1,
       correlationId: 'corr-b',
       type: 'SetValue',
+      schemaVersion: 1,
       payload: { newValue: 'from-b' },
     };
 
@@ -291,8 +307,8 @@ describe('CommandBus', () => {
     });
 
     const [resA, resB] = await Promise.all([
-      bus.dispatch(envA, handler),
-      bus.dispatch(envB, handler),
+      bus.dispatch(envA, handler, { trustedPrincipal: { actorUserId, tenantId } }),
+      bus.dispatch(envB, handler, { trustedPrincipal: { actorUserId, tenantId } }),
     ]);
 
     const successes = [resA, resB].filter((r) => r.ok);
@@ -313,6 +329,7 @@ describe('CommandBus', () => {
       expectedVersion: 0,
       correlationId: 'corr-cross',
       type: 'SetValue',
+      schemaVersion: 1,
       payload: { newValue: 'cross' },
     };
 
@@ -324,12 +341,12 @@ describe('CommandBus', () => {
         events: [],
         data: {},
       }),
-      { actorTenantId: otherTenantId }
+      { trustedPrincipal: { actorUserId, tenantId: otherTenantId } }
     );
 
     expect(result.ok).toBe(false);
     if (!result.ok) {
-      expect(result.code).toBe('NOT_AUTHORISED_FOR_ORGANISATION');
+      expect(result.code).toBe('UNAUTHORIZED');
     }
   });
 
@@ -346,6 +363,7 @@ describe('CommandBus', () => {
       expectedVersion: 0,
       correlationId: 'corr-unauth',
       type: 'SetValue',
+      schemaVersion: 1,
       payload: { newValue: 'forbidden' },
     };
 
@@ -353,7 +371,7 @@ describe('CommandBus', () => {
       newState: { id: aggregateId, tenantId, version: 1, value: env.payload.newValue },
       events: [],
       data: {},
-    }));
+    }), { trustedPrincipal: { actorUserId, tenantId } });
 
     expect(result.ok).toBe(false);
     if (!result.ok) {

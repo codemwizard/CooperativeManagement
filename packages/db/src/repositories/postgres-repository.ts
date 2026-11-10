@@ -4,20 +4,17 @@
  * PostgreSQL implementation of the domain Repository<T> port.
  *
  * Persistence contract (INV-019 / AUD-001):
- *   save() wraps the aggregate state upsert, domain event insert, and
- *   event_outbox insert in a single Kysely transaction. If any step fails,
- *   the whole transaction rolls back — no partial state can persist.
+ *   Command-path reads/writes require the transaction context created by
+ *   PostgresCommandTransactionRunner. save() uses that same Kysely transaction
+ *   for state, domain events, and outbox rows; it never opens a nested tx.
  *
  * Optimistic concurrency (INV-019):
  *   The state upsert uses a conditional WHERE version = expectedVersion clause.
  *   If no row is updated/inserted the repository throws OptimisticConcurrencyError.
  *
  * Tenant isolation (AUD-004 / AUD-005):
- *   Every load() includes WHERE tenant_id = tenantId.
- *   The save() inserts tenant_id on the state row, event rows, and outbox rows.
- *   Additionally, SET LOCAL app.current_tenant_id = $tenantId is issued at the
- *   start of every transaction to satisfy the defence-in-depth RLS policy on
- *   domain_events and command_receipts (migration 0008).
+ *   Every load() includes WHERE tenant_id = tenantId. The transaction runner
+ *   sets transaction-local app.tenant_id from authenticated server context.
  */
 
 import type { Kysely, Transaction } from 'kysely';
@@ -28,6 +25,7 @@ import {
   OptimisticConcurrencyError,
   OutboxMessage,
   Repository,
+  CommandTransactionContext,
 } from '@symphony/domain';
 import type { SymphonyDatabase } from '../types/database.js';
 
@@ -41,16 +39,16 @@ export class PostgresRepository<TAggregate extends AggregateRoot>
 
   // ─── load ──────────────────────────────────────────────────────────────────
 
-  async load(id: string, tenantId: string): Promise<TAggregate | null> {
-    // Set RLS context — load may be called outside a transaction
-    await sql`SELECT set_config('app.current_tenant_id', ${sql.lit(tenantId)}, false)`.execute(this.db);
-
-    const row = await this.db
+  async load(id: string, tenantId: string, context?: CommandTransactionContext): Promise<TAggregate | null> {
+    if (context === undefined) throw new Error('PostgresRepository command reads require a transaction context');
+    const trx = transactionFor(context);
+    await sql`SELECT pg_advisory_xact_lock(hashtextextended('symphony.aggregate:' || ${tenantId} || ':' || ${id}, 0))`.execute(trx);
+    const builder = trx
       .selectFrom('symphony.aggregate_states')
       .selectAll()
       .where('id', '=', id)
-      .where('tenant_id', '=', tenantId)
-      .executeTakeFirst();
+      .where('tenant_id', '=', tenantId);
+    const row = await builder.forUpdate().executeTakeFirst();
 
     if (row === undefined) return null;
     return row.state as TAggregate;
@@ -63,21 +61,23 @@ export class PostgresRepository<TAggregate extends AggregateRoot>
     expectedVersion: number,
     events: readonly DomainEvent[],
     outboxMessages: readonly OutboxMessage[],
+    context?: CommandTransactionContext,
   ): Promise<void> {
-    await this.db.transaction().execute(async (trx) => {
-      // Set RLS tenant context for the duration of this transaction (LOCAL = tx-scoped)
-      await sql`SET LOCAL app.current_tenant_id = ${sql.lit(aggregate.tenantId)}`.execute(trx);
+    if (context === undefined) throw new Error('PostgresRepository command writes require a transaction context');
+    await this.saveInTransaction(aggregate, expectedVersion, events, outboxMessages, context);
+  }
 
-      await this.upsertAggregateState(trx, aggregate, expectedVersion);
-
-      if (events.length > 0) {
-        await this.insertEvents(trx, events);
-      }
-
-      if (outboxMessages.length > 0) {
-        await this.insertOutboxMessages(trx, outboxMessages, events);
-      }
-    });
+  private async saveInTransaction(
+    aggregate: TAggregate,
+    expectedVersion: number,
+    events: readonly DomainEvent[],
+    outboxMessages: readonly OutboxMessage[],
+    context: CommandTransactionContext,
+  ): Promise<void> {
+    const trx = transactionFor(context);
+    await this.upsertAggregateState(trx, aggregate, expectedVersion);
+    if (events.length > 0) await this.insertEvents(trx, events);
+    if (outboxMessages.length > 0) await this.insertOutboxMessages(trx, outboxMessages, events);
   }
 
   // ─── private helpers ───────────────────────────────────────────────────────
@@ -198,5 +198,16 @@ export class PostgresRepository<TAggregate extends AggregateRoot>
       )
       .execute();
   }
+}
+
+export interface PostgresCommandTransactionContext extends CommandTransactionContext {
+  readonly kyselyTransaction: Transaction<SymphonyDatabase>;
+}
+
+function transactionFor(context: CommandTransactionContext): Transaction<SymphonyDatabase> {
+  if (!('kyselyTransaction' in context)) {
+    throw new TypeError('PostgresRepository requires a PostgreSQL command transaction context');
+  }
+  return (context as PostgresCommandTransactionContext).kyselyTransaction;
 }
 

@@ -13,7 +13,8 @@ export type CommandErrorCode =
   | 'UNAUTHORIZED'
   | 'PRECONDITION_FAILED'
   | 'DOMAIN_VIOLATION'
-  | 'NOT_FOUND';
+  | 'NOT_FOUND'
+  | 'COMMAND_TEMPORARILY_UNAVAILABLE';
 
 export type CommandResult<T> =
   | {

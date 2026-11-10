@@ -29,7 +29,7 @@
       "explicit_tenant_predicate": true,
       "tenant_context": "SET LOCAL app.tenant_id only from authenticated server context; insert policy binds tenant_id to that context.",
       "access_policy": "Append-only authenticated command-denial observation only. No SELECT, UPDATE or DELETE for ordinary app role. Unauthenticated authentication attempts use WP5's separate security audit path. Audit failure cannot authorize a command or create a business receipt.",
-      "status": "Planned WP1.2 migration 0010_security_attempts.sql; WP1.5 migration 0011_tenant_rls_app_role.sql must add it to the migrated-table inventory and apply ENABLE+FORCE RLS and the INSERT-only grant/policy before product use."
+      "status": "Created by WP1.2 migration 0010_security_attempts.sql; WP1.5 migration 0011_tenant_rls_app_role.sql must apply ENABLE+FORCE RLS and the INSERT-only grant/policy before product use."
     }
   ],
   "tables": [

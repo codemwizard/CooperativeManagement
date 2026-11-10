@@ -16,8 +16,8 @@
     {"id":"project_authority","path":"docs/phase1.zip","role":"Source document archive considered by the prior review; compare its snapshot with current indexed repository documents"},
     {"id":"project_authority","path":"Implementation-Plan-V4/implementation/PHASE-0-IMPLEMENTATION.md","role":"Phase 0 implementation baseline and carry-forward context"},
     {"id":"project_authority","path":"Implementation-Plan-V4/implementation/PHASE-0-REMEDIATION-IMPLEMENTATION.md","role":"Phase 0 remediation history and carry-forward context"},
-    {"id":"project_authority","path":"Implementation-Plan-V4/implementation/PHASE-1-IMPLEMENTATION.md","role":"Historical Phase 1 implementation outline; reconcile against current v2.1.3 plan"},
-    {"id":"project_authority","path":"Implementation-Plan-V4/implementation/PHASE-1-REMEDIATION-PLAN.md","role":"Historical initial remediation plan; superseded by the v2.1 targeted amendment and current v2.1.3 execution plan"},
+    {"id":"project_authority","path":"Implementation-Plan-V4/implementation/PHASE-1-IMPLEMENTATION.md","role":"Historical Phase 1 implementation outline; reconcile against current v2.1.4 plan"},
+    {"id":"project_authority","path":"Implementation-Plan-V4/implementation/PHASE-1-REMEDIATION-PLAN.md","role":"Historical initial remediation plan; superseded by the v2.1 targeted amendment and current v2.1.4 execution plan"},
     {"id":"project_authority","path":"Implementation-Plan-V4/01-current-state-and-readiness-gap.md","role":"Baseline state and prior readiness gap"},
     {"id":"project_authority","path":"Implementation-Plan-V4/02-decision-register.md","role":"Decision authority and historical/current decisions"},
     {"id":"project_authority","path":"Implementation-Plan-V4/03-specification-delta.md","role":"Normative requirements and specification deltas"},
@@ -50,7 +50,7 @@
     {"id":"requirements_and_features","path":"features/08_meetings_and_resolutions.feature","role":"Runnable BDD copy consumed by repository cucumber configuration; compare with canonical source"},
     {"id":"requirements_and_features","path":"features/09_commands_audit_and_integrity.feature","role":"Runnable BDD copy consumed by repository cucumber configuration; compare with canonical source"},
     {"id":"requirements_and_features","path":"features/10_workspace_and_capabilities.feature","role":"Runnable BDD copy consumed by repository cucumber configuration; compare with canonical source"},
-    {"id":"plan_and_contracts","path":"Implementation-Plan-V4/implementation/PHASE-1-REMEDIATION-PLAN-v2.md","role":"Current Phase 1 execution baseline; v2.1.3 WP1.2 carry-forward clarification"},
+    {"id":"plan_and_contracts","path":"Implementation-Plan-V4/implementation/PHASE-1-REMEDIATION-PLAN-v2.md","role":"Current Phase 1 execution baseline; v2.1.4 WP1.2 targeted corrections"},
     {"id":"plan_and_contracts","path":"Implementation-Plan-V4/implementation/PHASE-1-CLOSURE-DECISIONS-AND-ACTIONS.md","role":"Historical decision/action register; superseded only where explicitly stated by current baseline"},
     {"id":"plan_and_contracts","path":"Implementation-Plan-V4/implementation/README.md","role":"Implementation plan directory navigation"},
     {"id":"plan_and_contracts","path":"docs/phase1/PHASE1_CONTRACT_BASELINE.md","role":"WP0 closure boundary, decision baseline, sources and carry-forward"},
@@ -137,11 +137,12 @@
   "required_artifacts": [
     {"id":"prior_wp0_independent_review_report","path":"docs/Independent-Review-Report-Phase-1_Remediation-Plan_v2.md","status":"present; candidate f1fa5f9413747c0ac3cbd73413179101d33f653e","required_for":"Reproducing/confirming the historical claim that prior WP0 independent-review conditions were met"},
     {"id":"prior_wp0_validator_stdout","path":"evidence/phase1/reviews/wp0-closure-validator-output.txt","status":"not_retained; task record contains command/result summary only","required_for":"Raw stdout from node tools/phase1-contracts.js on the historical WP0 closure candidate"},
-    {"id":"source_review_attachment","path":"C:\\Users\\User\\.codex\\attachments\\cc6e3d66-86bc-4278-8d40-930a8840cf6b\\Pasted text.txt","sha256":"b5ea2818392d355d60bd6057016d4bf4f61cb31e6549a68398bcac7261908e32","status":"provided_outside_repository; disposition captured in evidence/phase1/reviews/phase1-v2.1-review-disposition.md","required_for":"Original wording of the 2026-11-08 review findings"},
+    {"id":"source_review_attachment","attachment_id":"phase1_plan_review_2026-11-08","sha256":"b5ea2818392d355d60bd6057016d4bf4f61cb31e6549a68398bcac7261908e32","status":"provided_outside_repository; disposition captured in evidence/phase1/reviews/phase1-v2.1-review-disposition.md","required_for":"Original wording of the 2026-11-08 review findings"},
     {"id":"candidate_ci_output","path":"candidate-specific immutable CI artifact location","status":"must_be_supplied_per_review","required_for":"Any candidate implementation or gate-pass claim"},
     {"id":"candidate_sha256_manifest","path":"evidence/phase1/reviews/<candidate-short-sha>/sha256-manifest.json","status":"generate_per_candidate","required_for":"Binding inspected documents and evidence to the reviewed commit"},
     {"id":"independent_review_report","path":"evidence/phase1/reviews/phase1-review-<candidate-short-sha>-<reviewer>-vN.md","status":"required_per_review","required_for":"Review verdict and findings"},
-    {"id":"wp1.2_plan_review_attachment","path":"C:\\Users\\User\\.codex\\attachments\\e3091cad-de2d-4f24-b3c4-1a44ff7e4ee1\\Pasted text.txt","sha256":"f75367a7425c8d74fad5e63f58236babc0bf8d1cbe83a43ebb0d47dac8fa4b2f","status":"provided_outside_repository; disposition captured in evidence/phase1/reviews/wp1.2-plan-review-disposition.md","required_for":"Source wording for the WP1.2 plan review findings and requested corrections"}
+    {"id":"wp1.2_plan_review_attachment","attachment_id":"wp1.2_plan_review_2026-11-09","sha256":"f75367a7425c8d74fad5e63f58236babc0bf8d1cbe83a43ebb0d47dac8fa4b2f","status":"provided_outside_repository; disposition captured in evidence/phase1/reviews/wp1.2-plan-review-disposition.md","required_for":"Source wording for the 2026-11-09 WP1.2 plan review findings and requested corrections"},
+    {"id":"wp1.2_patch_review_attachment","attachment_id":"wp1.2_patch_review_2026-11-10","sha256":"59cee4e87f15cd687250111a04342f19ec701e1252522275a4592338b696ca99","status":"provided_outside_repository; disposition captured in evidence/phase1/reviews/wp1.2-plan-review-disposition.md","required_for":"Source wording for the 2026-11-10 targeted WP1.2 patch review findings"}
   ],
   "review_commands": [
     "git status --porcelain",

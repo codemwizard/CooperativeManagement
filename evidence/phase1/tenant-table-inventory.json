@@ -56,6 +56,9 @@
     { "table": "resolution_class_rules", "classification": "control_plane_restricted", "scope_basis": "Organization rule with nullable organization_id; global fallback semantics require review.", "rls_current": false },
     { "table": "aggregate_states", "classification": "tenant_scoped", "scope_basis": "Direct tenant_id; aggregate projection state.", "rls_current": false }
   ],
-  "known_gap": "Only command_receipts and domain_events have ENABLE plus FORCE ROW LEVEL SECURITY in migrations/0008_rls_tenant_isolation.sql. The migration does not provision or grant a dedicated non-owner, non-superuser, non-BYPASSRLS application role. Every other tenant/control-plane table needs explicit review and test under a provisioned least-privilege role before WP0.3 passes.",
+  "planned_phase1_tables": [
+    { "table": "security_attempts", "classification": "tenant_scoped", "scope_basis": "Direct tenant_id; minimized pre-acceptance authorization observation. WP1.5 adds FORCE RLS and INSERT-only application access.", "rls_current": false }
+  ],
+  "known_gap": "Only command_receipts and domain_events have ENABLE plus FORCE ROW LEVEL SECURITY in migrations/0008_rls_tenant_isolation.sql. security_attempts is a planned tenant_scoped WP1.2 table; WP1.5 owns its RLS policy, INSERT-only application grant, and runtime role/policy proofs. No dedicated non-owner, non-superuser, non-BYPASSRLS application role is provisioned.",
   "status": "draft; database owner review required"
 }

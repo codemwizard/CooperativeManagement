@@ -38,7 +38,8 @@ try {
     console.error(`Toolchain mismatch in: ${failures.join(', ')}`);
     process.exitCode = 1;
   } else {
-    console.log(`PASS: Node ${process.versions.node}, npm ${npmVersion}, PostgreSQL ${JSON.parse(expectedText).postgresqlMajor}.`);
+    const expected = JSON.parse(expectedText);
+    console.log(`PASS: Node ${process.versions.node}, npm ${npmVersion}, PostgreSQL ${expected.postgresqlVersion} (package build ${expected.postgresqlPackageVersion}).`);
   }
 } catch (error) {
   console.error(`Toolchain verification failed: ${error instanceof Error ? error.message : String(error)}`);

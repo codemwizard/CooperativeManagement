@@ -11,6 +11,8 @@
  */
 
 import assert from 'node:assert/strict';
+import { createHmac } from 'node:crypto';
+import { z } from 'zod';
 import { Given, When, Then } from '@cucumber/cucumber';
 import type { SymphonyWorld } from './world.js';
 import {
@@ -47,7 +49,7 @@ class BddReceiptStore implements CommandReceiptStore {
   }
 
   async save(receipt: CommandReceipt): Promise<void> {
-    this.store.set(`${receipt.tenantId}:${receipt.commandId}`, receipt);
+    this.store.set(`${receipt.tenant_id}:${receipt.command_id}`, receipt);
   }
 }
 
@@ -133,6 +135,7 @@ function makeEnvelope<TPayload>(opts: {
     expectedVersion: opts.expectedVersion ?? 0,
     correlationId: `corr-${opts.commandId}`,
     type: opts.type,
+    schemaVersion: 1,
     payload: opts.payload,
   };
 }
@@ -146,6 +149,10 @@ function makeBus(repo: BddRepository, receiptStore: BddReceiptStore, clock: Fake
     policyStore: new BddPolicyStore(),
     clock: clockPort,
     idGen: idGenPort,
+    transactionRunner: { run: async <T>(_tenant: string, work: (ctx: import('@symphony/domain').CommandTransactionContext) => Promise<T>) => work({ transactionId: Symbol() }) },
+    securityAttemptWriter: { record: async () => undefined },
+    digestKeyProvider: { activeVersion: () => 'test-v1', hmac: async (version: string, bytes: Uint8Array) => createHmac('sha256', version).update(bytes).digest() },
+    resultDataSchemas: { AtomicTestCommand: z.record(z.unknown()), IdempotentTestCommand: z.record(z.unknown()), AmendClaim: z.record(z.unknown()) },
   });
 }
 
@@ -433,6 +440,10 @@ When(
       policyStore: new BddPolicyStore(),
       clock: clockPort,
       idGen: idGenPort,
+      transactionRunner: { run: async <T>(_tenant: string, work: (ctx: import('@symphony/domain').CommandTransactionContext) => Promise<T>) => work({ transactionId: Symbol() }) },
+      securityAttemptWriter: { record: async () => undefined },
+      digestKeyProvider: { activeVersion: () => 'test-v1', hmac: async (version: string, bytes: Uint8Array) => createHmac('sha256', version).update(bytes).digest() },
+      resultDataSchemas: { AmendClaim: z.record(z.unknown()) },
     });
 
     // Command targets Org B's tenant, but actor session is Org A's tenant
@@ -447,6 +458,7 @@ When(
       expectedVersion: 0,
       correlationId: 'corr-cross-org',
       type: 'AmendClaim',
+      schemaVersion: 1,
       payload: { targetEvidenceId: ids.next('evd') },
     };
 
@@ -457,7 +469,7 @@ When(
         events: [],
         data: {},
       }),
-      { actorTenantId: actorOrg.tenantId }, // ← actor belongs to Org A
+      { trustedPrincipal: { actorUserId: envelope.actorUserId, tenantId: actorOrg.tenantId } }, // trusted session belongs to Org A
     );
 
     if (!result.ok) {

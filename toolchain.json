@@ -1,5 +1,6 @@
 {
   "node": "26.7.0",
   "npm": "12.2.0",
-  "postgresqlMajor": 18
+  "postgresqlVersion": "18.0",
+  "postgresqlPackageVersion": "18.0-2"
 }

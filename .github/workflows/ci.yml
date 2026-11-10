@@ -24,7 +24,7 @@ jobs:
       - run: npm ci
       - name: Verify the local PostgreSQL lifecycle commands
         run: npm run db:start && npm run db:stop
-      - name: Start the isolated PostgreSQL 18 test service
+      - name: Start the isolated PostgreSQL 18.0 test service
         run: npm run db:test:start
       - name: Install Playwright browser for the legacy regression floor
         run: npx playwright install --with-deps chromium
@@ -58,7 +58,7 @@ jobs:
     runs-on: ubuntu-latest
     services:
       postgres:
-        image: postgres:18-alpine
+        image: postgres:18.0-alpine
         env:
           POSTGRES_DB: symphony_test
           POSTGRES_USER: symphony

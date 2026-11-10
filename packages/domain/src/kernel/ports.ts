@@ -27,16 +27,45 @@ export interface OutboxMessage<TPayload = unknown> {
 }
 
 export interface CommandReceipt<TResult = unknown> {
-  readonly commandId: string;
+  readonly tenant_id: string;
+  readonly command_id: string;
+  readonly actor_user_id: string;
+  readonly command_type: string;
+  readonly command_schema_version: string;
+  readonly canonicalization_version: 'jcs-rfc8785-v1';
+  readonly digest_key_version: string;
+  readonly semantic_digest: Uint8Array;
+  readonly result_classification: 'committed_success' | 'terminal_rejection';
+  readonly result_schema_version: 'command-result-v1';
+  readonly safe_result: TResult;
+  readonly recorded_at: string;
+}
+
+/** Opaque handle shared by every command-path read and write in one transaction. */
+export interface CommandTransactionContext {
+  readonly transactionId: symbol;
+}
+
+export interface CommandTransactionRunner {
+  run<T>(tenantId: string, work: (context: CommandTransactionContext) => Promise<T>): Promise<T>;
+}
+
+export type SecurityAttemptDenialCode =
+  | 'AUTHORIZATION_DENIED'
+  | 'NOT_AUTHORISED_FOR_ORGANISATION'
+  | 'TENANT_MISMATCH'
+  | 'READ_ONLY_ROLE';
+
+export interface SecurityAttempt {
   readonly tenantId: string;
   readonly actorUserId: string;
-  readonly type: string;
-  readonly payload: unknown;
-  readonly occurredAt: string;
-  readonly recordedAt: string;
-  readonly deviceId?: string | null;
-  readonly expectedVersion?: number | null;
-  readonly result: TResult;
+  readonly observedCommandId?: string;
+  readonly observedCommandType?: string;
+  readonly denialCode: SecurityAttemptDenialCode;
+}
+
+export interface SecurityAttemptWriter {
+  record(attempt: SecurityAttempt): Promise<void>;
 }
 
 export class OptimisticConcurrencyError extends Error {
@@ -62,12 +91,13 @@ export interface AggregateRoot {
 }
 
 export interface Repository<TAggregate extends AggregateRoot> {
-  load(id: string, tenantId: string): Promise<TAggregate | null>;
+  load(id: string, tenantId: string, context?: CommandTransactionContext): Promise<TAggregate | null>;
   save(
     aggregate: TAggregate,
     expectedVersion: number,
     events: readonly DomainEvent[],
-    outboxMessages: readonly OutboxMessage[]
+    outboxMessages: readonly OutboxMessage[],
+    context?: CommandTransactionContext
   ): Promise<void>;
 }
 
@@ -88,13 +118,14 @@ export interface PolicyStore {
     action: string,
     target: { readonly id: string; readonly type: string; readonly tenantId: string },
     actor: { readonly userId: string; readonly tenantId: string },
-    context?: Readonly<Record<string, unknown>>
+    policyContext: Readonly<Record<string, unknown>> | undefined,
+    transaction?: CommandTransactionContext
   ): Promise<PolicyDecision>;
 }
 
 export interface CommandReceiptStore {
-  get(commandId: string, tenantId: string): Promise<CommandReceipt | null>;
-  save(receipt: CommandReceipt): Promise<void>;
+  get(commandId: string, tenantId: string, context?: CommandTransactionContext): Promise<CommandReceipt | null>;
+  save(receipt: CommandReceipt, context?: CommandTransactionContext): Promise<void>;
 }
 
 export interface KeyProvider {

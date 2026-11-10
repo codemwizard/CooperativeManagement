@@ -250,6 +250,54 @@ describe.skipIf(testDatabaseUrl === undefined || testDatabaseUrl === '')(
 
     });
 
+    it('installs the minimized WP1.2 security-attempt table without business-command binding', async () => {
+      const columns = await pool.query<{ column_name: string; is_nullable: string; column_default: string | null; data_type: string; udt_name: string }>(
+        `SELECT column_name, is_nullable, column_default, data_type, udt_name
+         FROM information_schema.columns
+         WHERE table_schema = 'symphony' AND table_name = 'security_attempts'
+         ORDER BY ordinal_position`,
+      );
+      expect(columns.rows.map((row) => row.column_name)).toEqual([
+        'security_attempt_id', 'tenant_id', 'actor_user_id', 'observed_command_id',
+        'observed_command_type', 'denial_code', 'recorded_at',
+      ]);
+      expect(columns.rows.filter((row) => row.column_name !== 'observed_command_id' && row.column_name !== 'observed_command_type')
+        .every((row) => row.is_nullable === 'NO')).toBe(true);
+      expect(columns.rows.find((row) => row.column_name === 'security_attempt_id')?.column_default).toContain('gen_random_uuid');
+      const byName = new Map(columns.rows.map((row) => [row.column_name, row]));
+      expect(byName.get('security_attempt_id')).toMatchObject({ data_type: 'uuid', udt_name: 'uuid', is_nullable: 'NO' });
+      expect(byName.get('tenant_id')).toMatchObject({ data_type: 'uuid', udt_name: 'uuid', is_nullable: 'NO' });
+      expect(byName.get('actor_user_id')).toMatchObject({ data_type: 'uuid', udt_name: 'uuid', is_nullable: 'NO' });
+      expect(byName.get('observed_command_id')).toMatchObject({ data_type: 'uuid', udt_name: 'uuid', is_nullable: 'YES' });
+      expect(byName.get('observed_command_type')).toMatchObject({ data_type: 'text', udt_name: 'text', is_nullable: 'YES' });
+      expect(byName.get('denial_code')).toMatchObject({ data_type: 'text', udt_name: 'text', is_nullable: 'NO' });
+      expect(byName.get('recorded_at')).toMatchObject({ data_type: 'timestamp with time zone', udt_name: 'timestamptz', is_nullable: 'NO' });
+      expect(byName.get('recorded_at')?.column_default).toMatch(/now\(\)/i);
+      const constraints = await pool.query<{ definition: string }>(
+        `SELECT pg_get_constraintdef(oid) AS definition FROM pg_constraint
+         WHERE conrelid = 'symphony.security_attempts'::regclass`,
+      );
+      const definitions = constraints.rows.map((row) => row.definition).join('\n');
+      expect(definitions).toMatch(/PRIMARY KEY \(security_attempt_id\)/i);
+      expect(definitions).toMatch(/AUTHORIZATION_DENIED/);
+      expect(definitions).toMatch(/NOT_AUTHORISED_FOR_ORGANISATION/);
+      expect(definitions).toMatch(/TENANT_MISMATCH/);
+      expect(definitions).toMatch(/READ_ONLY_ROLE/);
+      const foreignKeys = await pool.query<{ definition: string }>(
+        `SELECT pg_get_constraintdef(oid) AS definition FROM pg_constraint
+         WHERE conrelid = 'symphony.security_attempts'::regclass AND contype = 'f'`,
+      );
+      expect(foreignKeys.rows.map((row) => row.definition)).toEqual(['FOREIGN KEY (tenant_id) REFERENCES tenants(id)']);
+      expect(definitions).not.toMatch(/UNIQUE \(tenant_id, command_id\)/i);
+      expect(columns.rows.map((row) => row.column_name)).not.toContain('semantic_digest');
+      expect(columns.rows.map((row) => row.column_name)).not.toContain('payload');
+      const tableAcl = await pool.query<{ acl: string }>(
+        `SELECT COALESCE(relacl::text, '') AS acl FROM pg_class
+         WHERE oid = 'symphony.security_attempts'::regclass`,
+      );
+      expect(tableAcl.rows[0]?.acl).not.toMatch(/symphony_app|(?:^|[,{])=/i);
+    });
+
     it('aborts WP1.1 migration on a non-empty legacy receipt table without changing it', async () => {
       const fixtureSchema = 'wp1_receipt_guard_fixture';
       const sqlText = await fs.readFile(path.join(migrationDirectory, '0009_command_receipts_v2.sql'), 'utf8');
