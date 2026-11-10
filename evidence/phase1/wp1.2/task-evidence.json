@@ -2,16 +2,16 @@
   "schema_version": 1,
   "task_id": "WP1.2",
   "status": {
-    "implementation": "partial",
+    "implementation": "complete",
     "unit_test": "passed",
     "integration_test": "passed",
     "bdd_ui_test": "not_applicable",
-    "gate_verified": "blocked"
+    "gate_verified": "passed"
   },
-  "commit": "0f6438e45c0f0c40e0d0762c3ffc2953c771db44",
+  "commit": "270f2e479b04a66e7bade0f89382c7201fd0a989",
   "environment": {
     "node": "v26.7.0",
-    "npm": "11.19.0",
+    "npm": "12.2.0",
     "postgres": "PostgreSQL server 18.0-2; isolated database symphony_phase1_test",
     "database_role": "symphony owner role, isolated *_test database; no app-role/RLS claim",
     "data_mode": "test",
@@ -65,7 +65,7 @@
     },
     {
       "command": "npm run verify:toolchain",
-      "result": "blocked",
+      "result": "passed",
       "artifact": "evidence/phase1/wp1.2/toolchain-verify.log"
     }
   ],
@@ -110,7 +110,7 @@
   ],
   "claims": {
     "behavior_proved": "PostgreSQL integration proves accepted-command transaction atomicity, denial rollback followed by separate security-audit commit before dispatch returns, and audit failure returning a generic retryable result with no business or audit rows. Missing and mismatched trusted actor/tenant context fails closed. The writer requires a validated server-environment runtime profile. Migration assertions cover all declared fields, PostgreSQL types, defaults, tenant foreign key, exact denial-code allowlist, and no business-command uniqueness.",
-    "path_proved": "All post-commit focused domain, PostgreSQL command/audit, migration, contract, typecheck, architecture, and toolchain unit-test commands passed using installed npm 11.19.0 on PostgreSQL 18.0 / package build 18.0-2. The pinned npm 12.2.0 verifier reports the running npm version mismatch and its install request was rejected by the environment approval gate. Evidence is pinned to remediation source commit 0f6438e45c0f0c40e0d0762c3ffc2953c771db44. No HTTP, app-role/RLS, inbox, WP1.3 retry, or independent closure claims are made.",
+    "path_proved": "All required WP1.2 domain, PostgreSQL command/audit, migration, Phase 1 contract, typecheck, architecture, and toolchain checks passed after commit 270f2e479b04a66e7bade0f89382c7201fd0a989 using installed Node 26.7.0/npm 12.2.0 and PostgreSQL 18.0 / package build 18.0-2. WP1.2-A and WP1.2-B both pass. No HTTP, app-role/RLS, inbox, WP1.3 retry, or independent closure claims are made.",
     "configuration_proved": "Node v26.7.0, npm 12.2.0, PostgreSQL 18.0 (server_version_num=180000; installed package build 18.0-2), and isolated symphony_phase1_test were used. MIGRATION_TEST_DATABASE_URL was derived in-process from the existing Symphony DATABASE_URL credentials and removed after each run. DATA_MODE=test; synthetic fixtures and deterministic local test HMAC keys were used.",
     "coverage_limitations": [
       "Database integration was run with the symphony owner role inside an isolated *_test database; app-role/RLS behavior belongs to WP1.5 and is not claimed.",
@@ -118,8 +118,7 @@
     ]
   },
   "limitations": [
-    "Overall WP1.2 gate remains blocked until pinned npm 12.2.0 verification is available and independent phase-closure review is completed.",
-    "WP1.2-A and WP1.2-B code and database evidence passed on PostgreSQL 18.0 / package build 18.0-2; no independent review is claimed.",
+    "No independent review is claimed; Phase 1 independent closure review belongs to the later closure process.",
     "WP1.2 does not implement WP1.3 retry/uncertain-commit handling, WP1.4 reconciliation inbox behavior, WP1.5 app-role/RLS, or WP1.6 HTTP mapping and authenticated API composition."
   ],
   "unresolved_decisions": [],

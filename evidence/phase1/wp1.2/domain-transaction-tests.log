@@ -1,7 +1,5 @@
-
-> @symphony/domain@0.1.0 test:unit
-> vitest run --reporter=verbose src/kernel/__tests__/command-bus-transaction.test.ts
-
+npm notice run @symphony/domain@0.1.0 test:unit
+npm notice run vitest run --reporter=verbose src/kernel/__tests__/command-bus-transaction.test.ts
 
  RUN  v2.1.9 C:/Workspace/GitHub/Prototype/packages/domain
 
@@ -12,6 +10,6 @@
 
  Test Files  1 passed (1)
       Tests  4 passed (4)
-   Start at  11:43:51
-   Duration  1.23s (transform 240ms, setup 0ms, collect 439ms, tests 15ms, environment 0ms, prepare 278ms)
+   Start at  12:53:33
+   Duration  1.28s (transform 327ms, setup 0ms, collect 422ms, tests 21ms, environment 0ms, prepare 372ms)
 

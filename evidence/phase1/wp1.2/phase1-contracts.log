@@ -1,21 +1,19 @@
-
-> symphony-prototype@1.0.0 verify:phase1:contracts
-> npm run test:phase1:contracts && node tools/phase1-contracts.js
-
-
-> symphony-prototype@1.0.0 test:phase1:contracts
-> npx vitest run tests/tooling/phase1_contracts.test.ts
-
+npm notice run symphony-prototype@1.0.0 verify:phase1:contracts
+npm notice run npm run test:phase1:contracts && node tools/phase1-contracts.js
+npm notice run symphony-prototype@1.0.0 test:phase1:contracts
+npm notice run npx vitest run tests/tooling/phase1_contracts.test.ts
+npm notice run symphony-prototype@1.0.0 npx
+npm notice run vitest run tests/tooling/phase1_contracts.test.ts
 
  RUN  v2.1.9 C:/Workspace/GitHub/Prototype
 
- ✓ tests/tooling/phase1_contracts.test.ts (105 tests) 5340ms
-   ✓ WP0.9 Phase 1 gate contract > proves a failing fixture command prevents later gate commands from running 4048ms
+ ✓ tests/tooling/phase1_contracts.test.ts (105 tests) 2346ms
+   ✓ WP0.9 Phase 1 gate contract > proves a failing fixture command prevents later gate commands from running 1482ms
 
  Test Files  1 passed (1)
       Tests  105 passed (105)
-   Start at  11:48:12
-   Duration  7.06s (transform 293ms, setup 0ms, collect 719ms, tests 5.34s, environment 0ms, prepare 349ms)
+   Start at  12:56:20
+   Duration  3.21s (transform 136ms, setup 0ms, collect 313ms, tests 2.35s, environment 0ms, prepare 166ms)
 
 Phase 1 WP0 contract artifacts are structurally valid.
 Dependency graph: 45 task nodes; all edges are known, justified and acyclic.

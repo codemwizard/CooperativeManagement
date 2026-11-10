@@ -1,23 +1,22 @@
-
-> @symphony/domain@0.1.0 test:unit
-> vitest run --reporter=verbose
-
+npm notice run @symphony/domain@0.1.0 test:unit
+npm notice run vitest run --reporter=verbose
 
  RUN  v2.1.9 C:/Workspace/GitHub/Prototype/packages/domain
 
  ✓ src/identity/__tests__/auth.test.ts > AuthService > temporaryCredential_isHashedArgon2id
- ✓ src/identity/__tests__/auth.test.ts > AuthService > temporaryCredential_singleUse 421ms
+ ✓ src/identity/__tests__/auth.test.ts > AuthService > temporaryCredential_singleUse
  ✓ src/identity/__tests__/auth.test.ts > AuthService > temporaryCredential_isExpiredAfterDefault72h
+ ✓ src/identity/__tests__/auth.test.ts > AuthService > temporaryCredential_expiresAtExact72HourBoundary 578ms
  ✓ src/kernel/__tests__/tenant-isolation.test.ts > Tenant isolation (INV-001) > commandForAnotherTenant_isRejected
  ✓ src/kernel/__tests__/tenant-isolation.test.ts > Tenant isolation (INV-001) > repositoryLoad_neverReturnsAnotherTenantsRecord
- ✓ src/kernel/__tests__/tenant-isolation.test.ts > Tenant isolation (INV-001) > eventsFromAnotherTenant_notVisible
- ✓ src/kernel/__tests__/command-bus.test.ts > CommandBus > repeatedCommandId_doesNotApplyTwice
+ ✓ src/kernel/__tests__/tenant-isolation.test.ts > Tenant isolation (INV-001) > eventsFromAnotherTenant_notVisible 460ms
+ ✓ src/kernel/__tests__/command-bus.test.ts > CommandBus > repeatedCommandId_doesNotApplyTwice 469ms
  ✓ src/kernel/__tests__/command-bus.test.ts > CommandBus > staleExpectedVersion_isRejected
  ✓ src/kernel/__tests__/command-bus.test.ts > CommandBus > dbFailure_rollsBackAll
  ✓ src/kernel/__tests__/command-bus.test.ts > CommandBus > concurrentCommands_onlyOneWins
  ✓ src/kernel/__tests__/command-bus.test.ts > CommandBus > crossTenantCommand_isRejected
  ✓ src/kernel/__tests__/command-bus.test.ts > CommandBus > unauthorisedCommand_mutatesNothing
- ✓ src/identity/__tests__/auth.test.ts > AuthService > temporaryCredential_expiresAtExact72HourBoundary 852ms
+ ✓ src/identity/__tests__/auth.test.ts > AuthService > firstLogin_requiresPasswordChange 650ms
  ✓ src/authz/__tests__/policy.test.ts > PolicyEngine > grantCapacity_IFV_allowedByChairperson
  ✓ src/authz/__tests__/policy.test.ts > PolicyEngine > grantCapacity_IFV_deniedToSecretary
  ✓ src/authz/__tests__/policy.test.ts > PolicyEngine > IFV_cannotVerifyOwnSuppliedVersion
@@ -29,8 +28,7 @@
  ✓ src/kernel/__tests__/command-bus-transaction.test.ts > WP1.2-A transaction context and WP1.2-B denial audit boundary > rolls back the command transaction before recording a denial without policy detail
  ✓ src/kernel/__tests__/command-bus-transaction.test.ts > WP1.2-A transaction context and WP1.2-B denial audit boundary > returns a retryable classification when the required audit write fails
  ✓ src/kernel/__tests__/command-bus-transaction.test.ts > WP1.2-A transaction context and WP1.2-B denial audit boundary > fails closed without trusted actor and tenant context and audits mismatched context as the trusted actor
- ✓ src/identity/__tests__/auth.test.ts > AuthService > firstLogin_requiresPasswordChange 802ms
- ✓ src/identity/__tests__/auth.test.ts > AuthService > authenticationEvent_containsNoPII 592ms
+ ✓ src/identity/__tests__/auth.test.ts > AuthService > authenticationEvent_containsNoPII 657ms
  ✓ src/identity/__tests__/auth.test.ts > AuthService > credential_neverAppearsInEventPayload
  ✓ src/authz/__tests__/capacity-service.test.ts > CapacityService > grantCapacity_allowed_byChairperson
  ✓ src/authz/__tests__/capacity-service.test.ts > CapacityService > grantCapacity_denied_toSecretary
@@ -95,6 +93,6 @@
 
  Test Files  13 passed (13)
       Tests  87 passed (87)
-   Start at  11:43:55
-   Duration  7.07s (transform 1.61s, setup 0ms, collect 3.90s, tests 3.40s, environment 11ms, prepare 4.91s)
+   Start at  12:53:36
+   Duration  6.43s (transform 1.47s, setup 0ms, collect 3.46s, tests 3.63s, environment 6ms, prepare 4.18s)
 
