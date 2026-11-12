@@ -3,7 +3,7 @@
   "source": "evidence/phase1/tenant-table-inventory.json checked against every root migration",
   "owner_decision": "D-03 strict tenant RLS and restricted role approved by explicit user direction 2026-11-07",
   "roles": {
-    "application": "symphony_app (proposed least-privilege runtime role; not provisioned)",
+    "application": "symphony_app (provisioned on local symphony_phase1_test; WP1.4 verified the reconciliation inbox boundary only; complete WP1.5 matrix and ephemeral CI bootstrap remain pending)",
     "migration": "symphony_migrator (proposed DDL identity; not provisioned)",
     "purge": "separate dedicated purge identity, no ordinary application inheritance"
   },
@@ -13,7 +13,7 @@
     "Every tenant-scoped query uses both RLS and an explicit server-derived tenant predicate.",
     "Global catalogues are SELECT-only for ordinary app role.",
     "Control-plane tables have no ordinary app-role grants; operation-specific grants require a named command, service identity, and audit behavior.",
-    "Current migration state is evidence of existing behavior only; two tables currently have ENABLE+FORCE, so WP1.5 must implement and test the rest under real restricted credentials."
+    "Current migration state is evidence of existing behavior only; three tables currently have ENABLE+FORCE. WP1.5 must implement and test the remaining tenant policies and all grants under real restricted credentials."
   ],
   "planned_phase1_tables": [
     {
@@ -22,14 +22,16 @@
       "scope_basis": "Authenticated command denial observation; tenant and actor are established by trusted server authentication context before insert.",
       "scope_resolution": "row.tenant_id must equal transaction-local app.tenant_id; if tenant context is unavailable, do not write this table.",
       "ordinary_runtime_role": "symphony_app",
-      "permitted_sql_operations": ["INSERT"],
+      "permitted_sql_operations": [
+        "INSERT"
+      ],
       "delete_grant": false,
       "required_rls": "ENABLE+FORCE",
       "current_rls_enabled_and_forced": false,
       "explicit_tenant_predicate": true,
       "tenant_context": "SET LOCAL app.tenant_id only from authenticated server context; insert policy binds tenant_id to that context.",
       "access_policy": "Append-only authenticated command-denial observation only. No SELECT, UPDATE or DELETE for ordinary app role. Unauthenticated authentication attempts use WP5's separate security audit path. Audit failure cannot authorize a command or create a business receipt.",
-      "status": "Created by WP1.2 migration 0010_security_attempts.sql; WP1.5 migration 0011_tenant_rls_app_role.sql must apply ENABLE+FORCE RLS and the INSERT-only grant/policy before product use."
+      "status": "Created by WP1.2 migration 0010_security_attempts.sql; WP1.5 migration 0013_tenant_rls_app_role.sql must apply ENABLE+FORCE RLS and the INSERT-only grant/policy before product use. The local symphony_app role exists; the full matrix and CI ephemeral-role gate remain pending."
     }
   ],
   "tables": [
@@ -46,7 +48,7 @@
       "explicit_tenant_predicate": false,
       "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
       "access_policy": "No ordinary runtime-role access. A separately named operation-specific service grant and audit contract must be mapped before implementation.",
-      "status": "WP0 proposed contract; no production/application grant or new policy migration claimed"
+      "status": "WP0 grant contract is proposed; the full matrix is not yet rolled out or verified. Local symphony_app role provisioning and scoped WP1.4 grants are recorded separately."
     },
     {
       "table": "command_receipts",
@@ -64,7 +66,26 @@
       "explicit_tenant_predicate": true,
       "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
       "access_policy": "Complete receipt rows are inserted once and immutable after commit. Tenant context is transaction-local, derived only from authenticated server context; every query also includes an explicit tenant predicate.",
-      "status": "WP0 proposed contract; no production/application grant or new policy migration claimed"
+      "status": "WP0 grant contract is proposed; the full matrix is not yet rolled out or verified. Local symphony_app role provisioning and scoped WP1.4 grants are recorded separately."
+    },
+    {
+      "table": "reconciliation_inbox",
+      "classification": "tenant_scoped",
+      "scope_basis": "Direct tenant_id; encrypted terminal-conflict payload and non-identifying lifecycle metadata.",
+      "scope_resolution": "row.tenant_id must equal transaction-local app.tenant_id; all repository operations also include explicit tenant_id predicate.",
+      "ordinary_runtime_role": "symphony_app",
+      "permitted_sql_operations": [
+        "SELECT",
+        "INSERT",
+        "UPDATE"
+      ],
+      "delete_grant": false,
+      "required_rls": "ENABLE+FORCE",
+      "current_rls_enabled_and_forced": true,
+      "explicit_tenant_predicate": true,
+      "tenant_context": "SET LOCAL app.tenant_id only from authenticated server context; policy binds tenant_id to that context.",
+      "access_policy": "Read only authorized tenant reconciliation records; insert only terminal conflict records; update lifecycle or clear expired ciphertext. No ordinary application DELETE.",
+      "status": "Created by WP1.4 migration 0012_reconciliation_inbox.sql with ENABLE+FORCE RLS; the WP1.4 task evidence proves local symphony_app SELECT/INSERT/UPDATE and denied DELETE plus tenant/context behavior. WP1.5 migration 0013 must retain these grants and include the inbox in full-matrix and CI actual-role proofs."
     },
     {
       "table": "domain_events",
@@ -82,22 +103,36 @@
       "explicit_tenant_predicate": true,
       "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
       "access_policy": "Append-only event rows are inserted and never updated or deleted. Tenant context is transaction-local, derived only from authenticated server context; every query also includes an explicit tenant predicate.",
-      "status": "WP0 proposed contract; no production/application grant or new policy migration claimed"
+      "status": "WP0 grant contract is proposed; the full matrix is not yet rolled out or verified. Local symphony_app role provisioning and scoped WP1.4 grants are recorded separately."
     },
     {
       "table": "event_outbox",
       "classification": "control_plane_restricted",
-      "scope_basis": "No direct tenant_id; joins through event_id and is worker-only.",
+      "scope_basis": "No direct tenant_id; command-path inserts and worker delivery lifecycle are privileged operations through separate interfaces.",
       "scope_resolution": "not_applicable",
       "ordinary_runtime_role": "no ordinary application grant",
       "permitted_sql_operations": [],
       "delete_grant": false,
-      "required_rls": "review_based_on_scope",
+      "required_rls": "ENABLE+FORCE for constrained function-owner INSERT",
       "current_rls_enabled_and_forced": false,
       "explicit_tenant_predicate": false,
       "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
-      "access_policy": "No ordinary runtime-role access. A separately named operation-specific service grant and audit contract must be mapped before implementation.",
-      "status": "WP0 proposed contract; no production/application grant or new policy migration claimed"
+      "operation_specific_capabilities": [
+        {
+          "name": "symphony.enqueue_command_outbox_message(uuid, uuid)",
+          "grantee": "symphony_app (EXECUTE only)",
+          "implementation": "SECURITY DEFINER function owned by dedicated NOLOGIN role symphony_outbox_writer (not the schema/migration owner); fixed safe search_path; fully qualified objects; parameterized IDs; PUBLIC EXECUTE revoked; EXECUTE granted only to symphony_app; forced-RLS INSERT policy TO symphony_outbox_writer permits only a pending row referencing a domain_events row whose tenant equals transaction-local app.tenant_id. Capability role has no memberships, no SET ROLE path, no login or table ownership; its only privileges are schema USAGE, INSERT on event_outbox and SELECT on domain_events.",
+          "forbidden_table_privileges": [
+            "SELECT",
+            "INSERT",
+            "UPDATE",
+            "DELETE",
+            "TRUNCATE"
+          ]
+        }
+      ],
+      "access_policy": "Keep the table unavailable to the ordinary application role. WP1.2's current PostgresRepository inserts outbox rows directly; WP1.5 must route that same-transaction operation through the named constrained function. Delivery reads and lifecycle updates remain worker-only and require their own future identity/interface.",
+      "status": "WP1.2 command implementation currently inserts outbox rows directly. WP1.5 must add and prove the constrained function interface in migration 0013; ordinary role table grants remain empty."
     },
     {
       "table": "capability_registry",
@@ -114,7 +149,7 @@
       "explicit_tenant_predicate": false,
       "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
       "access_policy": "No tenant policy; ordinary runtime role receives SELECT only.",
-      "status": "WP0 proposed contract; no production/application grant or new policy migration claimed"
+      "status": "WP0 grant contract is proposed; the full matrix is not yet rolled out or verified. Local symphony_app role provisioning and scoped WP1.4 grants are recorded separately."
     },
     {
       "table": "users",
@@ -133,7 +168,7 @@
       "explicit_tenant_predicate": true,
       "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
       "access_policy": "Tenant context is transaction-local, derived only from authenticated server context; every query also includes an explicit tenant predicate.",
-      "status": "WP0 proposed contract; no production/application grant or new policy migration claimed"
+      "status": "WP0 grant contract is proposed; the full matrix is not yet rolled out or verified. Local symphony_app role provisioning and scoped WP1.4 grants are recorded separately."
     },
     {
       "table": "persons",
@@ -152,7 +187,7 @@
       "explicit_tenant_predicate": true,
       "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
       "access_policy": "Tenant context is transaction-local, derived only from authenticated server context; every query also includes an explicit tenant predicate.",
-      "status": "WP0 proposed contract; no production/application grant or new policy migration claimed"
+      "status": "WP0 grant contract is proposed; the full matrix is not yet rolled out or verified. Local symphony_app role provisioning and scoped WP1.4 grants are recorded separately."
     },
     {
       "table": "person_identifiers",
@@ -171,7 +206,7 @@
       "explicit_tenant_predicate": true,
       "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
       "access_policy": "Tenant context is transaction-local, derived only from authenticated server context; every query also includes an explicit tenant predicate.",
-      "status": "WP0 proposed contract; no production/application grant or new policy migration claimed"
+      "status": "WP0 grant contract is proposed; the full matrix is not yet rolled out or verified. Local symphony_app role provisioning and scoped WP1.4 grants are recorded separately."
     },
     {
       "table": "person_pii_vault",
@@ -190,7 +225,7 @@
       "explicit_tenant_predicate": true,
       "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
       "access_policy": "Tenant context is transaction-local, derived only from authenticated server context; every query also includes an explicit tenant predicate.",
-      "status": "WP0 proposed contract; no production/application grant or new policy migration claimed"
+      "status": "WP0 grant contract is proposed; the full matrix is not yet rolled out or verified. Local symphony_app role provisioning and scoped WP1.4 grants are recorded separately."
     },
     {
       "table": "consent_records",
@@ -209,7 +244,7 @@
       "explicit_tenant_predicate": true,
       "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
       "access_policy": "Tenant context is transaction-local, derived only from authenticated server context; every query also includes an explicit tenant predicate.",
-      "status": "WP0 proposed contract; no production/application grant or new policy migration claimed"
+      "status": "WP0 grant contract is proposed; the full matrix is not yet rolled out or verified. Local symphony_app role provisioning and scoped WP1.4 grants are recorded separately."
     },
     {
       "table": "platform_roles",
@@ -226,7 +261,7 @@
       "explicit_tenant_predicate": false,
       "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
       "access_policy": "No tenant policy; ordinary runtime role receives SELECT only.",
-      "status": "WP0 proposed contract; no production/application grant or new policy migration claimed"
+      "status": "WP0 grant contract is proposed; the full matrix is not yet rolled out or verified. Local symphony_app role provisioning and scoped WP1.4 grants are recorded separately."
     },
     {
       "table": "user_role_assignments",
@@ -245,7 +280,7 @@
       "explicit_tenant_predicate": true,
       "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
       "access_policy": "Tenant context is transaction-local, derived only from authenticated server context; every query also includes an explicit tenant predicate.",
-      "status": "WP0 proposed contract; no production/application grant or new policy migration claimed"
+      "status": "WP0 grant contract is proposed; the full matrix is not yet rolled out or verified. Local symphony_app role provisioning and scoped WP1.4 grants are recorded separately."
     },
     {
       "table": "capacity_grants",
@@ -264,7 +299,7 @@
       "explicit_tenant_predicate": true,
       "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
       "access_policy": "Tenant context is transaction-local, derived only from authenticated server context; every query also includes an explicit tenant predicate.",
-      "status": "WP0 proposed contract; no production/application grant or new policy migration claimed"
+      "status": "WP0 grant contract is proposed; the full matrix is not yet rolled out or verified. Local symphony_app role provisioning and scoped WP1.4 grants are recorded separately."
     },
     {
       "table": "delegations",
@@ -283,7 +318,7 @@
       "explicit_tenant_predicate": true,
       "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
       "access_policy": "Tenant context is transaction-local, derived only from authenticated server context; every query also includes an explicit tenant predicate.",
-      "status": "WP0 proposed contract; no production/application grant or new policy migration claimed"
+      "status": "WP0 grant contract is proposed; the full matrix is not yet rolled out or verified. Local symphony_app role provisioning and scoped WP1.4 grants are recorded separately."
     },
     {
       "table": "authentication_events",
@@ -302,7 +337,7 @@
       "explicit_tenant_predicate": true,
       "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
       "access_policy": "Tenant context is transaction-local, derived only from authenticated server context; every query also includes an explicit tenant predicate.",
-      "status": "WP0 proposed contract; no production/application grant or new policy migration claimed"
+      "status": "WP0 grant contract is proposed; the full matrix is not yet rolled out or verified. Local symphony_app role provisioning and scoped WP1.4 grants are recorded separately."
     },
     {
       "table": "enrolment_sessions",
@@ -321,7 +356,7 @@
       "explicit_tenant_predicate": true,
       "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
       "access_policy": "Tenant context is transaction-local, derived only from authenticated server context; every query also includes an explicit tenant predicate.",
-      "status": "WP0 proposed contract; no production/application grant or new policy migration claimed"
+      "status": "WP0 grant contract is proposed; the full matrix is not yet rolled out or verified. Local symphony_app role provisioning and scoped WP1.4 grants are recorded separately."
     },
     {
       "table": "enroller_assignments",
@@ -336,7 +371,7 @@
       "explicit_tenant_predicate": false,
       "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
       "access_policy": "No ordinary runtime-role access. A separately named operation-specific service grant and audit contract must be mapped before implementation.",
-      "status": "WP0 proposed contract; no production/application grant or new policy migration claimed"
+      "status": "WP0 grant contract is proposed; the full matrix is not yet rolled out or verified. Local symphony_app role provisioning and scoped WP1.4 grants are recorded separately."
     },
     {
       "table": "enforcement_policies",
@@ -351,7 +386,7 @@
       "explicit_tenant_predicate": false,
       "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
       "access_policy": "No ordinary runtime-role access. A separately named operation-specific service grant and audit contract must be mapped before implementation.",
-      "status": "WP0 proposed contract; no production/application grant or new policy migration claimed"
+      "status": "WP0 grant contract is proposed; the full matrix is not yet rolled out or verified. Local symphony_app role provisioning and scoped WP1.4 grants are recorded separately."
     },
     {
       "table": "duty_matrix_rows",
@@ -366,7 +401,7 @@
       "explicit_tenant_predicate": false,
       "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
       "access_policy": "No ordinary runtime-role access. A separately named operation-specific service grant and audit contract must be mapped before implementation.",
-      "status": "WP0 proposed contract; no production/application grant or new policy migration claimed"
+      "status": "WP0 grant contract is proposed; the full matrix is not yet rolled out or verified. Local symphony_app role provisioning and scoped WP1.4 grants are recorded separately."
     },
     {
       "table": "approval_policies",
@@ -385,7 +420,7 @@
       "explicit_tenant_predicate": true,
       "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
       "access_policy": "Tenant context is transaction-local, derived only from authenticated server context; every query also includes an explicit tenant predicate.",
-      "status": "WP0 proposed contract; no production/application grant or new policy migration claimed"
+      "status": "WP0 grant contract is proposed; the full matrix is not yet rolled out or verified. Local symphony_app role provisioning and scoped WP1.4 grants are recorded separately."
     },
     {
       "table": "precedence_policies",
@@ -400,7 +435,7 @@
       "explicit_tenant_predicate": false,
       "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
       "access_policy": "No ordinary runtime-role access. A separately named operation-specific service grant and audit contract must be mapped before implementation.",
-      "status": "WP0 proposed contract; no production/application grant or new policy migration claimed"
+      "status": "WP0 grant contract is proposed; the full matrix is not yet rolled out or verified. Local symphony_app role provisioning and scoped WP1.4 grants are recorded separately."
     },
     {
       "table": "position_combination_rules",
@@ -415,7 +450,7 @@
       "explicit_tenant_predicate": false,
       "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
       "access_policy": "No ordinary runtime-role access. A separately named operation-specific service grant and audit contract must be mapped before implementation.",
-      "status": "WP0 proposed contract; no production/application grant or new policy migration claimed"
+      "status": "WP0 grant contract is proposed; the full matrix is not yet rolled out or verified. Local symphony_app role provisioning and scoped WP1.4 grants are recorded separately."
     },
     {
       "table": "retention_policies",
@@ -430,7 +465,7 @@
       "explicit_tenant_predicate": false,
       "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
       "access_policy": "No ordinary runtime-role access. A separately named operation-specific service grant and audit contract must be mapped before implementation.",
-      "status": "WP0 proposed contract; no production/application grant or new policy migration claimed"
+      "status": "WP0 grant contract is proposed; the full matrix is not yet rolled out or verified. Local symphony_app role provisioning and scoped WP1.4 grants are recorded separately."
     },
     {
       "table": "identity_check_methods",
@@ -447,7 +482,7 @@
       "explicit_tenant_predicate": false,
       "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
       "access_policy": "No tenant policy; ordinary runtime role receives SELECT only.",
-      "status": "WP0 proposed contract; no production/application grant or new policy migration claimed"
+      "status": "WP0 grant contract is proposed; the full matrix is not yet rolled out or verified. Local symphony_app role provisioning and scoped WP1.4 grants are recorded separately."
     },
     {
       "table": "membership_rules",
@@ -462,7 +497,7 @@
       "explicit_tenant_predicate": false,
       "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
       "access_policy": "No ordinary runtime-role access. A separately named operation-specific service grant and audit contract must be mapped before implementation.",
-      "status": "WP0 proposed contract; no production/application grant or new policy migration claimed"
+      "status": "WP0 grant contract is proposed; the full matrix is not yet rolled out or verified. Local symphony_app role provisioning and scoped WP1.4 grants are recorded separately."
     },
     {
       "table": "acceptance_policies",
@@ -477,7 +512,7 @@
       "explicit_tenant_predicate": false,
       "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
       "access_policy": "No ordinary runtime-role access. A separately named operation-specific service grant and audit contract must be mapped before implementation.",
-      "status": "WP0 proposed contract; no production/application grant or new policy migration claimed"
+      "status": "WP0 grant contract is proposed; the full matrix is not yet rolled out or verified. Local symphony_app role provisioning and scoped WP1.4 grants are recorded separately."
     },
     {
       "table": "organizations",
@@ -496,7 +531,7 @@
       "explicit_tenant_predicate": true,
       "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
       "access_policy": "Tenant context is transaction-local, derived only from authenticated server context; every query also includes an explicit tenant predicate.",
-      "status": "WP0 proposed contract; no production/application grant or new policy migration claimed"
+      "status": "WP0 grant contract is proposed; the full matrix is not yet rolled out or verified. Local symphony_app role provisioning and scoped WP1.4 grants are recorded separately."
     },
     {
       "table": "organization_identifiers",
@@ -515,7 +550,7 @@
       "explicit_tenant_predicate": true,
       "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
       "access_policy": "Tenant context is transaction-local, derived only from authenticated server context; every query also includes an explicit tenant predicate.",
-      "status": "WP0 proposed contract; no production/application grant or new policy migration claimed"
+      "status": "WP0 grant contract is proposed; the full matrix is not yet rolled out or verified. Local symphony_app role provisioning and scoped WP1.4 grants are recorded separately."
     },
     {
       "table": "organization_enrollment",
@@ -534,7 +569,7 @@
       "explicit_tenant_predicate": true,
       "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
       "access_policy": "Tenant context is transaction-local, derived only from authenticated server context; every query also includes an explicit tenant predicate.",
-      "status": "WP0 proposed contract; no production/application grant or new policy migration claimed"
+      "status": "WP0 grant contract is proposed; the full matrix is not yet rolled out or verified. Local symphony_app role provisioning and scoped WP1.4 grants are recorded separately."
     },
     {
       "table": "enrolment_handovers",
@@ -553,7 +588,7 @@
       "explicit_tenant_predicate": true,
       "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
       "access_policy": "Tenant context is transaction-local, derived only from authenticated server context; every query also includes an explicit tenant predicate.",
-      "status": "WP0 proposed contract; no production/application grant or new policy migration claimed"
+      "status": "WP0 grant contract is proposed; the full matrix is not yet rolled out or verified. Local symphony_app role provisioning and scoped WP1.4 grants are recorded separately."
     },
     {
       "table": "evidence_items",
@@ -572,7 +607,7 @@
       "explicit_tenant_predicate": true,
       "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
       "access_policy": "Tenant context is transaction-local, derived only from authenticated server context; every query also includes an explicit tenant predicate.",
-      "status": "WP0 proposed contract; no production/application grant or new policy migration claimed"
+      "status": "WP0 grant contract is proposed; the full matrix is not yet rolled out or verified. Local symphony_app role provisioning and scoped WP1.4 grants are recorded separately."
     },
     {
       "table": "evidence_versions",
@@ -591,7 +626,7 @@
       "explicit_tenant_predicate": true,
       "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
       "access_policy": "Tenant context is transaction-local, derived only from authenticated server context; every query also includes an explicit tenant predicate.",
-      "status": "WP0 proposed contract; no production/application grant or new policy migration claimed"
+      "status": "WP0 grant contract is proposed; the full matrix is not yet rolled out or verified. Local symphony_app role provisioning and scoped WP1.4 grants are recorded separately."
     },
     {
       "table": "evidence_support_items",
@@ -610,7 +645,7 @@
       "explicit_tenant_predicate": true,
       "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
       "access_policy": "Tenant context is transaction-local, derived only from authenticated server context; every query also includes an explicit tenant predicate.",
-      "status": "WP0 proposed contract; no production/application grant or new policy migration claimed"
+      "status": "WP0 grant contract is proposed; the full matrix is not yet rolled out or verified. Local symphony_app role provisioning and scoped WP1.4 grants are recorded separately."
     },
     {
       "table": "evidence_admissions",
@@ -629,7 +664,7 @@
       "explicit_tenant_predicate": true,
       "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
       "access_policy": "Tenant context is transaction-local, derived only from authenticated server context; every query also includes an explicit tenant predicate.",
-      "status": "WP0 proposed contract; no production/application grant or new policy migration claimed"
+      "status": "WP0 grant contract is proposed; the full matrix is not yet rolled out or verified. Local symphony_app role provisioning and scoped WP1.4 grants are recorded separately."
     },
     {
       "table": "record_approvals",
@@ -648,7 +683,7 @@
       "explicit_tenant_predicate": true,
       "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
       "access_policy": "Tenant context is transaction-local, derived only from authenticated server context; every query also includes an explicit tenant predicate.",
-      "status": "WP0 proposed contract; no production/application grant or new policy migration claimed"
+      "status": "WP0 grant contract is proposed; the full matrix is not yet rolled out or verified. Local symphony_app role provisioning and scoped WP1.4 grants are recorded separately."
     },
     {
       "table": "verification_assignments",
@@ -667,7 +702,7 @@
       "explicit_tenant_predicate": true,
       "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
       "access_policy": "Tenant context is transaction-local, derived only from authenticated server context; every query also includes an explicit tenant predicate.",
-      "status": "WP0 proposed contract; no production/application grant or new policy migration claimed"
+      "status": "WP0 grant contract is proposed; the full matrix is not yet rolled out or verified. Local symphony_app role provisioning and scoped WP1.4 grants are recorded separately."
     },
     {
       "table": "verification_findings",
@@ -686,7 +721,7 @@
       "explicit_tenant_predicate": true,
       "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
       "access_policy": "Tenant context is transaction-local, derived only from authenticated server context; every query also includes an explicit tenant predicate.",
-      "status": "WP0 proposed contract; no production/application grant or new policy migration claimed"
+      "status": "WP0 grant contract is proposed; the full matrix is not yet rolled out or verified. Local symphony_app role provisioning and scoped WP1.4 grants are recorded separately."
     },
     {
       "table": "platform_checks",
@@ -705,7 +740,7 @@
       "explicit_tenant_predicate": true,
       "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
       "access_policy": "Tenant context is transaction-local, derived only from authenticated server context; every query also includes an explicit tenant predicate.",
-      "status": "WP0 proposed contract; no production/application grant or new policy migration claimed"
+      "status": "WP0 grant contract is proposed; the full matrix is not yet rolled out or verified. Local symphony_app role provisioning and scoped WP1.4 grants are recorded separately."
     },
     {
       "table": "observation_attestations",
@@ -724,7 +759,7 @@
       "explicit_tenant_predicate": true,
       "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
       "access_policy": "Tenant context is transaction-local, derived only from authenticated server context; every query also includes an explicit tenant predicate.",
-      "status": "WP0 proposed contract; no production/application grant or new policy migration claimed"
+      "status": "WP0 grant contract is proposed; the full matrix is not yet rolled out or verified. Local symphony_app role provisioning and scoped WP1.4 grants are recorded separately."
     },
     {
       "table": "evidence_disputes",
@@ -743,7 +778,7 @@
       "explicit_tenant_predicate": true,
       "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
       "access_policy": "Tenant context is transaction-local, derived only from authenticated server context; every query also includes an explicit tenant predicate.",
-      "status": "WP0 proposed contract; no production/application grant or new policy migration claimed"
+      "status": "WP0 grant contract is proposed; the full matrix is not yet rolled out or verified. Local symphony_app role provisioning and scoped WP1.4 grants are recorded separately."
     },
     {
       "table": "evidence_relationships",
@@ -762,7 +797,7 @@
       "explicit_tenant_predicate": true,
       "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
       "access_policy": "Tenant context is transaction-local, derived only from authenticated server context; every query also includes an explicit tenant predicate.",
-      "status": "WP0 proposed contract; no production/application grant or new policy migration claimed"
+      "status": "WP0 grant contract is proposed; the full matrix is not yet rolled out or verified. Local symphony_app role provisioning and scoped WP1.4 grants are recorded separately."
     },
     {
       "table": "evidence_requirement_links",
@@ -781,7 +816,7 @@
       "explicit_tenant_predicate": true,
       "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
       "access_policy": "Tenant context is transaction-local, derived only from authenticated server context; every query also includes an explicit tenant predicate.",
-      "status": "WP0 proposed contract; no production/application grant or new policy migration claimed"
+      "status": "WP0 grant contract is proposed; the full matrix is not yet rolled out or verified. Local symphony_app role provisioning and scoped WP1.4 grants are recorded separately."
     },
     {
       "table": "appointments",
@@ -800,7 +835,7 @@
       "explicit_tenant_predicate": true,
       "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
       "access_policy": "Tenant context is transaction-local, derived only from authenticated server context; every query also includes an explicit tenant predicate.",
-      "status": "WP0 proposed contract; no production/application grant or new policy migration claimed"
+      "status": "WP0 grant contract is proposed; the full matrix is not yet rolled out or verified. Local symphony_app role provisioning and scoped WP1.4 grants are recorded separately."
     },
     {
       "table": "bylaw_documents",
@@ -819,7 +854,7 @@
       "explicit_tenant_predicate": true,
       "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
       "access_policy": "Tenant context is transaction-local, derived only from authenticated server context; every query also includes an explicit tenant predicate.",
-      "status": "WP0 proposed contract; no production/application grant or new policy migration claimed"
+      "status": "WP0 grant contract is proposed; the full matrix is not yet rolled out or verified. Local symphony_app role provisioning and scoped WP1.4 grants are recorded separately."
     },
     {
       "table": "bylaw_versions",
@@ -838,7 +873,7 @@
       "explicit_tenant_predicate": true,
       "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
       "access_policy": "Tenant context is transaction-local, derived only from authenticated server context; every query also includes an explicit tenant predicate.",
-      "status": "WP0 proposed contract; no production/application grant or new policy migration claimed"
+      "status": "WP0 grant contract is proposed; the full matrix is not yet rolled out or verified. Local symphony_app role provisioning and scoped WP1.4 grants are recorded separately."
     },
     {
       "table": "bylaw_provisions",
@@ -857,7 +892,7 @@
       "explicit_tenant_predicate": true,
       "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
       "access_policy": "Tenant context is transaction-local, derived only from authenticated server context; every query also includes an explicit tenant predicate.",
-      "status": "WP0 proposed contract; no production/application grant or new policy migration claimed"
+      "status": "WP0 grant contract is proposed; the full matrix is not yet rolled out or verified. Local symphony_app role provisioning and scoped WP1.4 grants are recorded separately."
     },
     {
       "table": "legal_sources",
@@ -872,7 +907,7 @@
       "explicit_tenant_predicate": false,
       "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
       "access_policy": "No ordinary runtime-role access. A separately named operation-specific service grant and audit contract must be mapped before implementation.",
-      "status": "WP0 proposed contract; no production/application grant or new policy migration claimed"
+      "status": "WP0 grant contract is proposed; the full matrix is not yet rolled out or verified. Local symphony_app role provisioning and scoped WP1.4 grants are recorded separately."
     },
     {
       "table": "requirement_definitions",
@@ -887,7 +922,7 @@
       "explicit_tenant_predicate": false,
       "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
       "access_policy": "No ordinary runtime-role access. A separately named operation-specific service grant and audit contract must be mapped before implementation.",
-      "status": "WP0 proposed contract; no production/application grant or new policy migration claimed"
+      "status": "WP0 grant contract is proposed; the full matrix is not yet rolled out or verified. Local symphony_app role provisioning and scoped WP1.4 grants are recorded separately."
     },
     {
       "table": "organization_requirements",
@@ -906,26 +941,22 @@
       "explicit_tenant_predicate": true,
       "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
       "access_policy": "Tenant context is transaction-local, derived only from authenticated server context; every query also includes an explicit tenant predicate.",
-      "status": "WP0 proposed contract; no production/application grant or new policy migration claimed"
+      "status": "WP0 grant contract is proposed; the full matrix is not yet rolled out or verified. Local symphony_app role provisioning and scoped WP1.4 grants are recorded separately."
     },
     {
       "table": "requirement_sources",
-      "classification": "tenant_scoped",
-      "scope_basis": "Tenant inherited through organization requirement.",
-      "scope_resolution": "Resolve tenant through declared parent relation: Tenant inherited through organization requirement.",
-      "ordinary_runtime_role": "symphony_app",
-      "permitted_sql_operations": [
-        "SELECT",
-        "INSERT",
-        "UPDATE"
-      ],
+      "classification": "control_plane_restricted",
+      "scope_basis": "Global legal-authority mapping attached to requirement_definitions; schema has no tenant/organization_requirement FK path.",
+      "scope_resolution": "not_applicable",
+      "ordinary_runtime_role": "no ordinary application grant",
+      "permitted_sql_operations": [],
       "delete_grant": false,
-      "required_rls": "ENABLE+FORCE",
+      "required_rls": "review_based_on_scope",
       "current_rls_enabled_and_forced": false,
-      "explicit_tenant_predicate": true,
+      "explicit_tenant_predicate": false,
       "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
-      "access_policy": "Tenant context is transaction-local, derived only from authenticated server context; every query also includes an explicit tenant predicate.",
-      "status": "WP0 proposed contract; no production/application grant or new policy migration claimed"
+      "access_policy": "No ordinary runtime table access. This maps global requirement definitions to global legal sources and cannot be assigned a tenant from its FK graph.",
+      "status": "WP1.5 schema audit correction: requirement_sources references requirement_definitions, not organization_requirements; no ordinary app grant until a tenant-owned requirement-source model is separately specified."
     },
     {
       "table": "meeting_rules",
@@ -940,7 +971,7 @@
       "explicit_tenant_predicate": false,
       "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
       "access_policy": "No ordinary runtime-role access. A separately named operation-specific service grant and audit contract must be mapped before implementation.",
-      "status": "WP0 proposed contract; no production/application grant or new policy migration claimed"
+      "status": "WP0 grant contract is proposed; the full matrix is not yet rolled out or verified. Local symphony_app role provisioning and scoped WP1.4 grants are recorded separately."
     },
     {
       "table": "resolution_class_rules",
@@ -955,7 +986,7 @@
       "explicit_tenant_predicate": false,
       "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
       "access_policy": "No ordinary runtime-role access. A separately named operation-specific service grant and audit contract must be mapped before implementation.",
-      "status": "WP0 proposed contract; no production/application grant or new policy migration claimed"
+      "status": "WP0 grant contract is proposed; the full matrix is not yet rolled out or verified. Local symphony_app role provisioning and scoped WP1.4 grants are recorded separately."
     },
     {
       "table": "aggregate_states",
@@ -974,7 +1005,22 @@
       "explicit_tenant_predicate": true,
       "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
       "access_policy": "Tenant context is transaction-local, derived only from authenticated server context; every query also includes an explicit tenant predicate.",
-      "status": "WP0 proposed contract; no production/application grant or new policy migration claimed"
+      "status": "WP0 grant contract is proposed; the full matrix is not yet rolled out or verified. Local symphony_app role provisioning and scoped WP1.4 grants are recorded separately."
     }
-  ]
+  ],
+  "policy_specification": {
+    "status": "candidate_frozen_pending_restricted_role_integration_and_review",
+    "required_manifest": "evidence/phase1/wp1.5-tenant-policy-manifest.json",
+    "required_fields": [
+      "parent_tables_and_foreign_keys",
+      "tenant_resolution_sql",
+      "missing_parent_behavior",
+      "cross_tenant_parent_behavior",
+      "insert_with_check",
+      "update_with_check",
+      "mismatch_fixture_and_test"
+    ],
+    "tenant_scoped_table_count": 37,
+    "rule": "The executable candidate expressions are in the WP1.5 manifest and migration 0013. Each inherited path was checked against root migration DDL and the live PostgreSQL 18.0 FK catalog. scope_resolution prose alone does not qualify. Integration tests must prove missing and mismatched parent behavior before this candidate is accepted."
+  }
 }

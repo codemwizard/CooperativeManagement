@@ -1,0 +1,44 @@
+{
+  "schema_version": 1,
+  "task_id": "WP1.5",
+  "status": {
+    "implementation": "complete",
+    "unit_test": "passed",
+    "integration_test": "blocked",
+    "bdd_ui_test": "not_applicable",
+    "gate_verified": "blocked"
+  },
+  "commit": "working-tree",
+  "environment": {
+    "node": "v26.7.0",
+    "npm": "12.2.0",
+    "postgres": "PostgreSQL 18.0-2; server_version_num=180000",
+    "database_role": "symphony for migration/fixture checks; symphony_app for restricted runtime checks; temporary symphony_outbox_writer membership remains granted to symphony",
+    "data_mode": "test",
+    "key_provider": "unknown"
+  },
+  "commands": [
+    { "command": "npm run db:migrate:test", "result": "passed", "artifact": "evidence/phase1/wp1.5/local-verification.md" },
+    { "command": "npm run test:migrations --workspace @symphony/db", "result": "passed", "artifact": "evidence/phase1/wp1.5/local-verification.md" },
+    { "command": "npm run typecheck:v4", "result": "passed", "artifact": "evidence/phase1/wp1.5/local-verification.md" },
+    { "command": "npm run verify:phase1:contracts", "result": "passed", "artifact": "evidence/phase1/wp1.5/local-verification.md" },
+    { "command": "WP1.5 live app privilege and RLS verification", "result": "passed", "artifact": "evidence/phase1/wp1.5/local-verification.md" },
+    { "command": "WP1.5 full restricted-role DB integration and CI bootstrap gate", "result": "blocked", "artifact": "evidence/phase1/wp1.5/local-verification.md" }
+  ],
+  "claims": {
+    "behavior_proved": "Migration 0013 applies and replays safely; the live app privilege matrix matches all 55 inventory rows; missing and empty tenant context return no rows or deny SELECT for all 37 tenant tables; focused cross-tenant, pool-reuse, catalogue/control-plane, and transactional outbox-function checks pass.",
+    "path_proved": "Migration runner, app-role SQL connections, matrix-based catalog audit, direct RLS probes, and transaction-local tenant context were exercised against symphony_phase1_test.",
+    "configuration_proved": "DATA_MODE=test, PostgreSQL 18.0-2, symphony_app as the application identity, and the symphony migration identity on symphony_phase1_test. No credentials are included in this record.",
+    "coverage_limitations": [
+      "The complete tenant-rls-app-role.integration.test.ts and DB integration suite were not run because PHASE1_TEST_ADMIN_DATABASE_URL is unavailable.",
+      "The temporary membership from symphony to symphony_outbox_writer remains; only the membership grantor/admin or CI finalizer can revoke it.",
+      "A clean-install CI run, migration-0013-specific failure atomicity proof, and complete outbox worker/append-only suite remain outstanding."
+    ]
+  },
+  "limitations": [
+    "WP1.5 is not closed. A successful effective privilege audit and focused smoke checks do not replace the required restricted-role integration and CI evidence.",
+    "Independent review is not claimed."
+  ],
+  "unresolved_decisions": [],
+  "reviewer": "Implementation self-review; no independent reviewer claimed."
+}

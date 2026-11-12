@@ -1,0 +1,406 @@
+{
+  "note": "Illustrative products. Do not display any real lender name.",
+  "destinations": [
+    {
+      "id": "A",
+      "display_name": "Lender A",
+      "kind": "lender",
+      "product": "Cooperative Production Facility",
+      "parameters": {
+        "request_range_zmw": [
+          100000,
+          500000
+        ],
+        "max_term_months": 36,
+        "purpose": [
+          "working_capital",
+          "equipment"
+        ],
+        "structure": "single facility to the cooperative"
+      },
+      "requirements": [
+        {
+          "id": "A1",
+          "title": "Registration current",
+          "group": "legal",
+          "rule": {
+            "kind": "evidence",
+            "evidence_type": "registration",
+            "min_level": "verified"
+          },
+          "applies_when": null,
+          "why": ""
+        },
+        {
+          "id": "A2",
+          "title": "Governance records (officers, loan resolution)",
+          "group": "governance",
+          "rule": {
+            "kind": "evidence",
+            "evidence_type": "governance",
+            "min_level": "verified"
+          },
+          "applies_when": null,
+          "why": ""
+        },
+        {
+          "id": "A3",
+          "title": "Member register",
+          "group": "membership",
+          "rule": {
+            "kind": "evidence",
+            "evidence_type": "member_register",
+            "min_level": "supported"
+          },
+          "applies_when": null,
+          "why": ""
+        },
+        {
+          "id": "A4",
+          "title": "Local-authority letter",
+          "group": "legal",
+          "rule": {
+            "kind": "evidence",
+            "evidence_type": "local_letter",
+            "min_level": "supported"
+          },
+          "applies_when": null,
+          "why": ""
+        },
+        {
+          "id": "A5",
+          "title": "Land-use right",
+          "group": "project",
+          "rule": {
+            "kind": "evidence",
+            "evidence_type": "land_right",
+            "min_level": "supported"
+          },
+          "applies_when": null,
+          "why": ""
+        },
+        {
+          "id": "A6",
+          "title": "Two consecutive seasons of farming",
+          "group": "project",
+          "rule": {
+            "kind": "evidence_count",
+            "evidence_type": "farming_history",
+            "count_field": "seasons",
+            "min_count": 2,
+            "min_level": "supported"
+          },
+          "applies_when": null,
+          "why": ""
+        },
+        {
+          "id": "A7",
+          "title": "Income or cash-flow records",
+          "group": "finance",
+          "rule": {
+            "kind": "evidence",
+            "evidence_type": "income_records",
+            "min_level": "supported"
+          },
+          "applies_when": null,
+          "why": ""
+        },
+        {
+          "id": "A8",
+          "title": "Water source verifiable",
+          "group": "project",
+          "rule": {
+            "kind": "evidence",
+            "evidence_type": "water_source",
+            "min_level": "supported"
+          },
+          "applies_when": {
+            "field": "project.irrigated",
+            "equals": true
+          },
+          "why": "Applies to irrigated projects only"
+        },
+        {
+          "id": "A9",
+          "title": "Equipment quotation",
+          "group": "project",
+          "rule": {
+            "kind": "evidence",
+            "evidence_type": "equipment_quote",
+            "min_level": "supported"
+          },
+          "applies_when": {
+            "field": "project.purpose",
+            "equals": "equipment"
+          },
+          "why": "Applies to equipment requests only"
+        },
+        {
+          "id": "A10",
+          "title": "Off-take arrangement",
+          "group": "market",
+          "rule": {
+            "kind": "assessment_time",
+            "evidence_type": "offtake"
+          },
+          "applies_when": null,
+          "why": "Determined by the lender at assessment. May be evidenced early."
+        },
+        {
+          "id": "A11",
+          "title": "Request fits product range",
+          "group": "fit",
+          "rule": {
+            "kind": "fit",
+            "check": "single_request",
+            "min_amount": 100000,
+            "max_amount": 500000,
+            "max_term_months": 36
+          },
+          "applies_when": null,
+          "why": "Cannot be closed with evidence. Closes only by restructuring the request."
+        }
+      ],
+      "covenants": [
+        {
+          "id": "quarterly_cash_statement",
+          "title": "Quarterly cash statement"
+        },
+        {
+          "id": "season_end_production_report",
+          "title": "Season-end production report"
+        },
+        {
+          "id": "registration_renewal_evidence",
+          "title": "Registration renewal evidence"
+        }
+      ]
+    },
+    {
+      "id": "B",
+      "display_name": "Lender B",
+      "kind": "lender",
+      "product": "Group Seasonal Facility",
+      "parameters": {
+        "request_range_zmw_per_group": [
+          10000,
+          50000
+        ],
+        "term_months": [
+          6,
+          12
+        ],
+        "purpose": [
+          "seasonal_inputs"
+        ],
+        "structure": "cooperative divided into groups, each with its own request",
+        "guarantee": "group guarantee over listed movable assets"
+      },
+      "requirements": [
+        {
+          "id": "B1",
+          "title": "Registration current",
+          "group": "legal",
+          "rule": {
+            "kind": "evidence",
+            "evidence_type": "registration",
+            "min_level": "verified"
+          },
+          "applies_when": null,
+          "why": ""
+        },
+        {
+          "id": "B2",
+          "title": "Governance records",
+          "group": "governance",
+          "rule": {
+            "kind": "evidence",
+            "evidence_type": "governance",
+            "min_level": "supported"
+          },
+          "applies_when": null,
+          "why": ""
+        },
+        {
+          "id": "B3",
+          "title": "Member register, identity checked",
+          "group": "membership",
+          "rule": {
+            "kind": "evidence",
+            "evidence_type": "member_register",
+            "min_level": "verified"
+          },
+          "applies_when": null,
+          "why": ""
+        },
+        {
+          "id": "B4",
+          "title": "Group structure defined",
+          "group": "membership",
+          "rule": {
+            "kind": "evidence",
+            "evidence_type": "group_structure",
+            "min_level": "supported"
+          },
+          "applies_when": null,
+          "why": ""
+        },
+        {
+          "id": "B5",
+          "title": "Asset inventory for group guarantee",
+          "group": "collateral_evidence",
+          "rule": {
+            "kind": "evidence",
+            "evidence_type": "asset_inventory",
+            "min_level": "supported"
+          },
+          "applies_when": null,
+          "why": "Evidence of assets only. Registering a security interest is out of scope."
+        },
+        {
+          "id": "B6",
+          "title": "One season of farming",
+          "group": "project",
+          "rule": {
+            "kind": "evidence_count",
+            "evidence_type": "farming_history",
+            "count_field": "seasons",
+            "min_count": 1,
+            "min_level": "supported"
+          },
+          "applies_when": null,
+          "why": ""
+        },
+        {
+          "id": "B7",
+          "title": "Per-group request within range and term",
+          "group": "fit",
+          "rule": {
+            "kind": "fit",
+            "check": "per_group_request",
+            "min_amount": 10000,
+            "max_amount": 50000,
+            "min_term_months": 6,
+            "max_term_months": 12
+          },
+          "applies_when": null,
+          "why": "Cannot be closed with evidence. Closes only by restructuring the request."
+        },
+        {
+          "id": "B8",
+          "title": "Off-take arrangement",
+          "group": "market",
+          "rule": {
+            "kind": "assessment_time",
+            "evidence_type": "offtake"
+          },
+          "applies_when": null,
+          "why": "Determined by the lender at assessment. May be evidenced early."
+        }
+      ],
+      "covenants": [
+        {
+          "id": "group_harvest_delivery",
+          "title": "Per-group harvest delivery record"
+        },
+        {
+          "id": "group_repayment_status",
+          "title": "Group attendance and repayment status"
+        },
+        {
+          "id": "asset_inventory_refresh",
+          "title": "Asset inventory refresh"
+        }
+      ]
+    },
+    {
+      "id": "N",
+      "display_name": "NABII Programme Pipeline",
+      "kind": "programme",
+      "product": "Readiness register for onward presentation",
+      "parameters": {
+        "purpose": "pipeline-readiness record",
+        "outputs": [
+          "readiness state",
+          "gaps closed",
+          "baseline captured"
+        ]
+      },
+      "requirements": [
+        {
+          "id": "N1",
+          "title": "Registration current",
+          "group": "legal",
+          "rule": {
+            "kind": "evidence",
+            "evidence_type": "registration",
+            "min_level": "supported"
+          },
+          "applies_when": null,
+          "why": ""
+        },
+        {
+          "id": "N2",
+          "title": "Governance records",
+          "group": "governance",
+          "rule": {
+            "kind": "evidence",
+            "evidence_type": "governance",
+            "min_level": "supported"
+          },
+          "applies_when": null,
+          "why": ""
+        },
+        {
+          "id": "N3",
+          "title": "Member register",
+          "group": "membership",
+          "rule": {
+            "kind": "evidence",
+            "evidence_type": "member_register",
+            "min_level": "supported"
+          },
+          "applies_when": null,
+          "why": ""
+        },
+        {
+          "id": "N4",
+          "title": "Project defined with location",
+          "group": "project",
+          "rule": {
+            "kind": "evidence",
+            "evidence_type": "project_definition",
+            "min_level": "supported"
+          },
+          "applies_when": null,
+          "why": ""
+        },
+        {
+          "id": "N5",
+          "title": "Environmental baseline",
+          "group": "environment",
+          "rule": {
+            "kind": "evidence",
+            "evidence_type": "environmental_baseline",
+            "min_level": "supported"
+          },
+          "applies_when": null,
+          "why": ""
+        },
+        {
+          "id": "N6",
+          "title": "Participation profile (women, youth)",
+          "group": "inclusion",
+          "rule": {
+            "kind": "evidence",
+            "evidence_type": "participation_profile",
+            "min_level": "supported"
+          },
+          "applies_when": null,
+          "why": ""
+        }
+      ],
+      "covenants": []
+    }
+  ]
+}

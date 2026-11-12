@@ -1,0 +1,33 @@
+{
+  "note": "GIIN IRIS+ metric mappings for cooperative ESG indicators. Aligned metrics catalog.",
+  "metrics": {
+    "PI4060": {
+      "code": "IRIS+ PI4060",
+      "title": "Smallholder Farmers Reached",
+      "category": "Social",
+      "description": "Number of active smallholder farmers participating in the enterprise",
+      "unit": "count"
+    },
+    "OI6213": {
+      "code": "IRIS+ OI6213",
+      "title": "Youth-Led Households",
+      "category": "Social",
+      "description": "Number of farming households led by individuals under 35 years of age",
+      "unit": "count"
+    },
+    "PI1540": {
+      "code": "IRIS+ PI1540",
+      "title": "Female Governance & Membership Share",
+      "category": "Social / Governance",
+      "description": "Percentage of female members and executive officers in cooperative leadership",
+      "unit": "percentage"
+    },
+    "PI2822": {
+      "code": "IRIS+ PI2822",
+      "title": "Sustainable Land & Water Management",
+      "category": "Environmental",
+      "description": "Hectares of farm land under sustainable agricultural, soil, and water management",
+      "unit": "hectares"
+    }
+  }
+}

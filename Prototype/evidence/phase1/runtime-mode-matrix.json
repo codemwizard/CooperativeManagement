@@ -1,0 +1,12 @@
+{
+  "version": 2,
+  "owner_acceptance": "assumed-approved-by-user-direction-2026-11-07",
+  "selector": "RUNTIME_PROFILE is the single authoritative composition selector; APP_ENV and DATA_MODE must match the selected profile and cannot independently enable capabilities.",
+  "profiles": [
+    { "id": "test", "APP_ENV": "test", "DATA_MODE": "test", "database": "isolated-disposable", "app_role": "least-privilege", "key_provider": "ephemeral-test", "identities": "synthetic-only", "residency": "not-required-for-synthetic-data", "demo": "disabled", "purge": "dedicated-purge-role-only" },
+    { "id": "demo", "APP_ENV": "development", "DATA_MODE": "test", "database": "disposable-synthetic-demo", "app_role": "least-privilege", "key_provider": "development-demo", "identities": "synthetic-only", "residency": "not-required-for-synthetic-data", "demo": "designated-actor-and-tenant-only", "purge": "disabled" },
+    { "id": "real-data-staging", "APP_ENV": "staging", "DATA_MODE": "real", "database": "persistent-approved", "app_role": "least-privilege", "key_provider": "approved-managed", "identities": "approved-real-data", "residency": "approved-region-required-before-readiness", "demo": "disabled", "purge": "disabled" },
+    { "id": "production", "APP_ENV": "production", "DATA_MODE": "real", "database": "persistent-production", "app_role": "least-privilege", "key_provider": "approved-production", "identities": "approved-real-data", "residency": "approved-region-required-before-readiness", "demo": "disabled", "purge": "disabled" }
+  ],
+  "rule": "A missing, unknown or conflicting RUNTIME_PROFILE/APP_ENV/DATA_MODE combination is rejected before listening or connecting with a mutating role. Test and demo accept only synthetic data. Staging and production require approved residency, approved non-test key provider and privacy controls before readiness. VITE_DEMO is presentation-only. Demo authorization is server-side and never provides general tenant or purge authority."
+}

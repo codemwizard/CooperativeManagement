@@ -1,0 +1,86 @@
+{
+  "note": "Proposed modelling choices (not facts about any institution). Edit with approval. Class applies to an open requirement (state unresolved). A requirement in state exception is always class 'blocked'. Fit-rule requirements are always class 'restructure'.",
+  "classes": {
+    "standard": "Routine documentation or records work the cooperative can complete with ordinary support",
+    "specialist": "Work needing specialist input, such as financial reconstruction or field boundary capture",
+    "restructure": "The request does not fit the product. Closed only by restructuring the request",
+    "blocked": "Evidence is stale or disputed. Needs an external renewal or an independent re-verification"
+  },
+  "by_evidence_type": {
+    "registration": {
+      "class": "standard",
+      "owner_role": "secretary",
+      "action": "Verify or renew the registration"
+    },
+    "governance": {
+      "class": "standard",
+      "owner_role": "secretary",
+      "action": "Hold the meeting, upload minutes, obtain chairman sign-off, then field verification"
+    },
+    "member_register": {
+      "class": "standard",
+      "owner_role": "secretary",
+      "action": "Reconcile the member register and verify identities"
+    },
+    "local_letter": {
+      "class": "standard",
+      "owner_role": "chairman",
+      "action": "Obtain the local-authority letter"
+    },
+    "land_right": {
+      "class": "specialist",
+      "owner_role": "chairman",
+      "action": "Record the land-use right with a field boundary capture"
+    },
+    "farming_history": {
+      "class": "standard",
+      "owner_role": "treasurer",
+      "action": "Compile programme records for the required seasons"
+    },
+    "income_records": {
+      "class": "specialist",
+      "owner_role": "treasurer",
+      "action": "Reconstruct income from the records available"
+    },
+    "water_source": {
+      "class": "specialist",
+      "owner_role": "chairman",
+      "action": "Evidence the water source"
+    },
+    "equipment_quote": {
+      "class": "standard",
+      "owner_role": "treasurer",
+      "action": "Obtain the equipment quotation"
+    },
+    "group_structure": {
+      "class": "standard",
+      "owner_role": "chairman",
+      "action": "Define the groups and their members"
+    },
+    "asset_inventory": {
+      "class": "specialist",
+      "owner_role": "secretary",
+      "action": "Inventory the assets and have them field verified"
+    },
+    "environmental_baseline": {
+      "class": "specialist",
+      "owner_role": "chairman",
+      "action": "Capture the baseline in the field (boundary and photographs)"
+    },
+    "project_definition": {
+      "class": "standard",
+      "owner_role": "chairman",
+      "action": "Define the project and its location"
+    },
+    "participation_profile": {
+      "class": "standard",
+      "owner_role": "secretary",
+      "action": "Record the participation profile"
+    }
+  },
+  "fit": {
+    "class": "restructure",
+    "owner_role": "chairman",
+    "action": "Restructure the request to fit the product"
+  }
+}

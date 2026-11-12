@@ -1,0 +1,21 @@
+
+ RUN  v2.1.9 C:/Workspace/GitHub/Prototype/packages/domain
+
+ ✓ src/kernel/__tests__/command-receipt-contract.test.ts > WP1.1 durable command receipt contract > accepts a tenant-scoped receipt with a versioned safe result
+ ✓ src/kernel/__tests__/command-receipt-contract.test.ts > WP1.1 durable command receipt contract > uses a strict success variant with non-negative version and UUID event ids
+ ✓ src/kernel/__tests__/command-receipt-contract.test.ts > WP1.1 durable command receipt contract > accepts only the terminal VERSION_CONFLICT result shape
+ ✓ src/kernel/__tests__/command-receipt-contract.test.ts > WP1.1 durable command receipt contract > rejects unkeyed or wrong-length digests and unsupported contract versions
+ ✓ src/kernel/__tests__/command-receipt-contract.test.ts > WP1.1 durable command receipt contract > rejects payload and unapproved receipt fields rather than persisting request material
+ ✓ src/kernel/__tests__/command-receipt-contract.test.ts > WP1.1 durable command receipt contract > exposes stable snake-case types without widening the result union
+ ✓ src/kernel/__tests__/command-digest.test.ts > WP1.1 command semantic digest > keeps the digest implementation and persisted receipt version labels aligned
+ ✓ src/kernel/__tests__/command-digest.test.ts > WP1.1 command semantic digest > matches the approved RFC 8785 canonical semantic-envelope vector
+ ✓ src/kernel/__tests__/command-digest.test.ts > WP1.1 command semantic digest > excludes lookup and transport metadata while retaining semantic changes
+ ✓ src/kernel/__tests__/command-digest.test.ts > WP1.1 command semantic digest > uses the active key version and returns a 32-byte HMAC digest
+ ✓ src/kernel/__tests__/command-digest.test.ts > WP1.1 command semantic digest > replays with the stored historical key version and fails closed when it is unavailable
+ ✓ src/kernel/__tests__/command-digest.test.ts > WP1.1 command semantic digest > rejects invalid JSON values and unavailable canonicalization versions
+
+ Test Files  2 passed (2)
+      Tests  12 passed (12)
+   Start at  22:20:00
+   Duration  1.02s (transform 195ms, setup 0ms, collect 383ms, tests 47ms, environment 1ms, prepare 474ms)
+

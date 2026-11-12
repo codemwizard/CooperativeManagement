@@ -15,10 +15,12 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { createHmac } from 'node:crypto';
 import { z } from 'zod';
+import { terminalConflictResultSchema } from '@symphony/contracts';
 import { FakeClock } from '@symphony/testkit';
 import { SequentialIds } from '@symphony/testkit';
 import { CommandEnvelope } from '../command-envelope.js';
 import { CommandBus } from '../command-bus.js';
+import { LocalDevKeyProvider } from '../../privacy/key-provider.js';
 import type { CommandTransactionContext } from '../ports.js';
 import {
   AggregateRoot,
@@ -32,6 +34,8 @@ import {
   PolicyDecision,
   PolicyStore,
   Repository,
+  EncryptedReconciliationInboxItem,
+  ReconciliationInboxStore,
 } from '../ports.js';
 
 interface TestAggregate extends AggregateRoot {
@@ -50,6 +54,27 @@ class InMemoryReceiptStore implements CommandReceiptStore {
     const key = `${receipt.tenant_id}:${receipt.command_id}`;
     if (this.receipts.has(key)) return false;
     this.receipts.set(key, receipt);
+    return true;
+  }
+}
+
+class InMemoryReconciliationInboxStore implements ReconciliationInboxStore {
+  readonly items = new Map<string, EncryptedReconciliationInboxItem>();
+  async save(item: EncryptedReconciliationInboxItem): Promise<void> { this.items.set(item.reconciliation_id, item); }
+  async get(id: string, tenantId: string): Promise<EncryptedReconciliationInboxItem | null> {
+    const item = this.items.get(id);
+    return item?.tenant_id === tenantId ? item : null;
+  }
+  async transition(id: string, tenantId: string, next: 'resolved' | 'superseded', updatedAt: string): Promise<boolean> {
+    const item = await this.get(id, tenantId);
+    if (!item || item.lifecycle !== 'open') return false;
+    this.items.set(id, { ...item, lifecycle: next, updated_at: updatedAt });
+    return true;
+  }
+  async expire(id: string, tenantId: string, now: string): Promise<boolean> {
+    const item = await this.get(id, tenantId);
+    if (!item || item.lifecycle === 'expired' || item.expires_at > now) return false;
+    this.items.set(id, { ...item, payload_ciphertext: new Uint8Array(), encryption_key_ref: '', lifecycle: 'expired', updated_at: now, tombstoned_at: now });
     return true;
   }
 }
@@ -106,6 +131,8 @@ describe('CommandBus', () => {
   let repository: InMemoryTestRepository;
   let receiptStore: InMemoryReceiptStore;
   let policyStore: InMemoryPolicyStore;
+  let reconciliationInboxStore: InMemoryReconciliationInboxStore;
+  let fieldEncryption: LocalDevKeyProvider;
   let bus: CommandBus<TestAggregate>;
   const transactionRunner = { run: async <T>(_tenant: string, work: (ctx: CommandTransactionContext) => Promise<T>) => work({ transactionId: Symbol() }) };
   const securityAttemptWriter = { record: async () => undefined };
@@ -124,6 +151,8 @@ describe('CommandBus', () => {
     repository = new InMemoryTestRepository();
     receiptStore = new InMemoryReceiptStore();
     policyStore = new InMemoryPolicyStore();
+    reconciliationInboxStore = new InMemoryReconciliationInboxStore();
+    fieldEncryption = new LocalDevKeyProvider({ rootKeyHex: 'b'.repeat(64), pepper: Buffer.from('test-only') });
 
     bus = new CommandBus({
       repository,
@@ -135,6 +164,12 @@ describe('CommandBus', () => {
       securityAttemptWriter,
       digestKeyProvider,
       resultDataSchemas: { SetValue: z.record(z.unknown()) },
+      reconciliationInboxStore,
+      reconciliationDataSchemas: { SetValue: z.object({ newValue: z.string() }).strict() },
+      fieldEncryption,
+      reconciliationRetentionPolicy: {
+        expiryFor: async ({ recordedAt }) => new Date(Date.parse(recordedAt) + 86_400_000).toISOString(),
+      },
     });
   });
 
@@ -215,12 +250,37 @@ describe('CommandBus', () => {
       },
       events: [],
       data: { updated: true },
-    }), { trustedPrincipal: { actorUserId, tenantId } });
+    }), { trustedPrincipal: { actorUserId, tenantId }, aggregateId });
 
     expect(result.ok).toBe(false);
     if (!result.ok) {
       expect(result.code).toBe('STALE_VERSION');
     }
+    const terminalReceipt = receiptStore.receipts.get(`${tenantId}:${envelope.commandId}`);
+    expect(terminalReceipt?.result_classification).toBe('terminal_rejection');
+    expect(terminalReceipt?.safe_result).toMatchObject({
+      ok: false,
+      code: 'VERSION_CONFLICT',
+      aggregate_id: aggregateId,
+      expected_version: 1,
+      observed_version: 2,
+    });
+    const parsedTerminal = terminalConflictResultSchema.safeParse(terminalReceipt?.safe_result);
+    expect(parsedTerminal.success).toBe(true);
+    const reconciliationId = parsedTerminal.success ? parsedTerminal.data.reconciliation_id : undefined;
+    expect(reconciliationId).toBeDefined();
+    const item = reconciliationInboxStore.items.get(reconciliationId ?? '');
+    expect(item).toBeDefined();
+    expect(Buffer.from(item?.payload_ciphertext ?? []).toString('utf8')).not.toContain('stale-update');
+    const clear = await fieldEncryption.decrypt(Buffer.from(item?.payload_ciphertext ?? []), item?.encryption_key_ref ?? '');
+    expect(JSON.parse(clear.toString('utf8'))).toMatchObject({
+      command_id: envelope.commandId,
+      original_actor_id: actorUserId,
+      target_aggregate_id: aggregateId,
+      expected_version: 1,
+      observed_version: 2,
+      changes: { newValue: 'stale-update' },
+    });
     expect(repository.store.get(aggregateId)?.value).toBe('existing');
   });
 
@@ -309,8 +369,8 @@ describe('CommandBus', () => {
     });
 
     const [resA, resB] = await Promise.all([
-      bus.dispatch(envA, handler, { trustedPrincipal: { actorUserId, tenantId } }),
-      bus.dispatch(envB, handler, { trustedPrincipal: { actorUserId, tenantId } }),
+      bus.dispatch(envA, handler, { trustedPrincipal: { actorUserId, tenantId }, aggregateId }),
+      bus.dispatch(envB, handler, { trustedPrincipal: { actorUserId, tenantId }, aggregateId }),
     ]);
 
     const successes = [resA, resB].filter((r) => r.ok);

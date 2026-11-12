@@ -13,12 +13,13 @@ import type { AggregateRoot, CommandEnvelope, CommandReceipt } from '@symphony/d
 import type { SymphonyDatabase } from '../types/database.js';
 
 interface TestAggregate extends AggregateRoot { readonly label: string }
-const databaseUrl = process.env['MIGRATION_TEST_DATABASE_URL'];
+const databaseUrl = process.env['PHASE1_TEST_ADMIN_DATABASE_URL'];
+const appDatabaseUrl = process.env['PHASE1_TEST_APP_DATABASE_URL'];
 
-describe.skipIf(!databaseUrl)('WP1.2-A PostgreSQL transaction boundary', () => {
+describe.skipIf(!databaseUrl || !appDatabaseUrl)('WP1.2-A PostgreSQL transaction boundary', () => {
   const pool = new pg.Pool({ connectionString: databaseUrl });
-  const db = createDb(databaseUrl ?? '', { max: 1 });
-  const recoveryDb = createDb(databaseUrl ?? '', { max: 1 });
+  const db = createDb(appDatabaseUrl ?? '', { max: 1 });
+  const recoveryDb = createDb(appDatabaseUrl ?? '', { max: 1 });
   const tenantId = randomUUID();
   const receiptStore = new PostgresCommandReceiptStore({ 'test.command': z.object({ value: z.string() }).strict() });
   const runner = new PostgresCommandTransactionRunner(db, { recoveryDb });
@@ -38,13 +39,11 @@ describe.skipIf(!databaseUrl)('WP1.2-A PostgreSQL transaction boundary', () => {
     expect(process.env['DATA_MODE']).toBe('test');
     expect(Number(identity.rows[0]?.server_version_num)).toBe(180000);
     await pool.query('INSERT INTO symphony.tenants (id, name) VALUES ($1, $2)', [tenantId, 'wp1.2-synthetic-fixture']);
-    await sql`SELECT set_config('app.current_tenant_id', ${tenantId}, false)`.execute(db);
-
     const eventIds = [randomUUID(), randomUUID()];
     fixtureEventIds.push(...eventIds);
     const client = await pool.connect();
     try {
-      await client.query('SELECT set_config(\'app.current_tenant_id\', $1, false)', [tenantId]);
+      await client.query('SELECT set_config(\'app.tenant_id\', $1, false)', [tenantId]);
       for (const id of eventIds) {
         await client.query(
           `INSERT INTO symphony.domain_events (id, tenant_id, aggregate_id, aggregate_type, event_type, payload, occurred_at, sequence)
@@ -79,13 +78,15 @@ describe.skipIf(!databaseUrl)('WP1.2-A PostgreSQL transaction boundary', () => {
     const client = await pool.connect();
     try {
       await client.query('BEGIN');
-      await client.query('SELECT set_config(\'app.current_tenant_id\', $1, true)', [tenantId]);
+      await client.query('SELECT set_config(\'app.tenant_id\', $1, true)', [tenantId]);
       await client.query('ALTER TABLE symphony.domain_events DISABLE TRIGGER domain_events_immutability');
       const allEventIds = [...fixtureEventIds, ...commandEventIds];
       if (allEventIds.length > 0) await client.query('DELETE FROM symphony.domain_events WHERE id = ANY($1::uuid[])', [allEventIds]);
       await client.query('ALTER TABLE symphony.domain_events ENABLE TRIGGER domain_events_immutability');
       await client.query('DELETE FROM symphony.command_receipts WHERE tenant_id = $1', [tenantId]);
+      await client.query('ALTER TABLE symphony.security_attempts DISABLE TRIGGER security_attempts_append_only');
       await client.query('DELETE FROM symphony.security_attempts WHERE tenant_id = $1', [tenantId]);
+      await client.query('ALTER TABLE symphony.security_attempts ENABLE TRIGGER security_attempts_append_only');
       await client.query('DELETE FROM symphony.aggregate_states WHERE tenant_id = $1', [tenantId]);
       await client.query('DELETE FROM symphony.tenants WHERE id = $1', [tenantId]);
       await client.query('COMMIT');
@@ -145,7 +146,7 @@ describe.skipIf(!databaseUrl)('WP1.2-A PostgreSQL transaction boundary', () => {
     const observer = await pool.connect();
     try {
       await observer.query('BEGIN');
-      await observer.query('SELECT set_config(\'app.current_tenant_id\', $1, true)', [tenantId]);
+      await observer.query('SELECT set_config(\'app.tenant_id\', $1, true)', [tenantId]);
       const persisted = await observer.query<{ receipts: string; states: string; events: string; outbox: string }>(
         `SELECT
           (SELECT count(*)::text FROM symphony.command_receipts WHERE tenant_id = $1 AND command_id = $2) AS receipts,
@@ -203,7 +204,7 @@ describe.skipIf(!databaseUrl)('WP1.2-A PostgreSQL transaction boundary', () => {
       const observer = await pool.connect();
       try {
         await observer.query('BEGIN');
-        await observer.query('SELECT set_config(\'app.current_tenant_id\', $1, true)', [tenantId]);
+        await observer.query('SELECT set_config(\'app.tenant_id\', $1, true)', [tenantId]);
         const [receiptRows, stateRows, eventRows, outboxRows] = await Promise.all([
           observer.query('SELECT 1 FROM symphony.command_receipts WHERE tenant_id = $1 AND command_id = $2 AND command_id <> $3', [tenantId, scenario.commandId, fixtureReceiptId]),
           observer.query('SELECT 1 FROM symphony.aggregate_states WHERE tenant_id = $1 AND id = $2 AND id <> $3', [tenantId, scenario.aggregateId, fixtureAggregateId]),
@@ -267,7 +268,7 @@ describe.skipIf(!databaseUrl)('WP1.2-A PostgreSQL transaction boundary', () => {
     const observer = await pool.connect();
     try {
       await observer.query('BEGIN');
-      await observer.query('SELECT set_config(\'app.current_tenant_id\', $1, true)', [tenantId]);
+      await observer.query('SELECT set_config(\'app.tenant_id\', $1, true)', [tenantId]);
       const rows = await observer.query<{ command_id: string; actor_user_id: string; audit: string; receipt: string; state: string; event: string; outbox: string }>(
         `SELECT $1::uuid AS command_id, $2::uuid AS actor_user_id,
           (SELECT count(*)::text FROM symphony.security_attempts WHERE tenant_id=$3 AND actor_user_id=$2 AND observed_command_id=$1) AS audit,
@@ -292,4 +293,3 @@ describe.skipIf(!databaseUrl)('WP1.2-A PostgreSQL transaction boundary', () => {
     } finally { observer.release(); }
   });
 });
-

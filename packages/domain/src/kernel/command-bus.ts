@@ -15,12 +15,17 @@
 import { CommandEnvelope } from './command-envelope.js';
 import { CommandResult } from './command-result.js';
 import { computeCommandDigest, verifyCommandDigest } from './command-digest.js';
-import { createCommandReceiptSchema, type CommandResultDataSchemas } from '@symphony/contracts';
+import {
+  createCommandReceiptSchema,
+  type CommandReconciliationDataSchemas,
+  type CommandResultDataSchemas,
+} from '@symphony/contracts';
 import {
   AggregateRoot,
   Clock,
   CommandReceipt,
   CommandReceiptStore,
+  EncryptedReconciliationInboxItem,
   CommandTransactionContext,
   CommandTransactionRunner,
   DomainEvent,
@@ -30,6 +35,9 @@ import {
   PolicyStore,
   Repository,
   RetryableCommandTransactionError,
+  ReconciliationInboxStore,
+  ReconciliationRetentionPolicy,
+  KeyProvider,
   SecurityAttemptDenialCode,
   SecurityAttemptWriter,
   CommandDigestKeyProvider,
@@ -73,6 +81,10 @@ export interface CommandBusDependencies<TAggregate extends AggregateRoot> {
   readonly securityAttemptWriter: SecurityAttemptWriter;
   readonly digestKeyProvider: CommandDigestKeyProvider;
   readonly resultDataSchemas: CommandResultDataSchemas;
+  readonly reconciliationInboxStore?: ReconciliationInboxStore;
+  readonly reconciliationDataSchemas?: CommandReconciliationDataSchemas;
+  readonly fieldEncryption?: Pick<KeyProvider, 'encrypt'>;
+  readonly reconciliationRetentionPolicy?: ReconciliationRetentionPolicy;
 }
 
 export class CommandBus<TAggregate extends AggregateRoot> {
@@ -188,6 +200,13 @@ export class CommandBus<TAggregate extends AggregateRoot> {
       throw new AuthorizationDenied(asDenialCode(policyDecision.reason));
     }
 
+    if (existingAggregate !== null && existingAggregate.version !== envelope.expectedVersion) {
+      return this.persistTerminalConflict<TData, TPayload>(envelope, targetAggregateId ?? existingAggregate.id, existingAggregate.version, transaction);
+    }
+    if (existingAggregate === null && envelope.expectedVersion > 0) {
+      return { ok: false, code: 'NOT_FOUND', detail: 'Command target is unavailable' };
+    }
+
     // 5. Execute domain transition handler
     const context: CommandHandlerContext<TAggregate> = {
       aggregate: existingAggregate,
@@ -251,6 +270,107 @@ export class CommandBus<TAggregate extends AggregateRoot> {
     return result;
   }
 
+  private async persistTerminalConflict<TData, TPayload>(
+    envelope: CommandEnvelope<TPayload>,
+    aggregateId: string,
+    observedVersion: number,
+    transaction: CommandTransactionContext,
+  ): Promise<CommandResult<TData>> {
+    const inboxStore = this.deps.reconciliationInboxStore;
+    const reconciliationSchema = this.deps.reconciliationDataSchemas?.[envelope.type];
+    const fieldEncryption = this.deps.fieldEncryption;
+    const retentionPolicy = this.deps.reconciliationRetentionPolicy;
+    if (!inboxStore || !reconciliationSchema || !fieldEncryption || !retentionPolicy) {
+      throw new RetryableCommandTransactionError();
+    }
+
+    const validatedChanges = reconciliationSchema.safeParse(envelope.payload);
+    if (!validatedChanges.success) throw new RetryableCommandTransactionError();
+
+    const recordedAt = this.deps.clock.now();
+    const expiresAt = await retentionPolicy.expiryFor({
+      tenantId: envelope.tenantId,
+      commandType: envelope.type,
+      recordedAt,
+    });
+    if (!Number.isFinite(Date.parse(expiresAt)) || Date.parse(expiresAt) <= Date.parse(recordedAt)) {
+      throw new RetryableCommandTransactionError();
+    }
+
+    const reconciliationId = this.deps.idGen.generate();
+    const encryptedPayload = {
+      command_id: envelope.commandId,
+      original_actor_id: envelope.actorUserId,
+      target_aggregate_id: aggregateId,
+      expected_version: envelope.expectedVersion,
+      observed_version: observedVersion,
+      changes: validatedChanges.data,
+    };
+    let ciphertext: Uint8Array;
+    try {
+      ciphertext = await fieldEncryption.encrypt(
+        new TextEncoder().encode(JSON.stringify(encryptedPayload)),
+        reconciliationId,
+      );
+    } catch {
+      throw new RetryableCommandTransactionError();
+    }
+
+    const digest = await computeCommandDigest({
+      tenant_id: envelope.tenantId,
+      actor_id: envelope.actorUserId,
+      command_id: envelope.commandId,
+      command_type: envelope.type,
+      command_schema_version: envelope.schemaVersion,
+      expected_aggregate_version: envelope.expectedVersion,
+      payload: envelope.payload as Readonly<Record<string, import('./command-digest.js').JsonValue>>,
+    }, this.deps.digestKeyProvider);
+    const receipt: CommandReceipt = {
+      tenant_id: envelope.tenantId,
+      command_id: envelope.commandId,
+      actor_user_id: envelope.actorUserId,
+      command_type: envelope.type,
+      command_schema_version: String(envelope.schemaVersion),
+      canonicalization_version: digest.canonicalization_version,
+      digest_key_version: digest.key_version,
+      semantic_digest: digest.semantic_digest,
+      result_classification: 'terminal_rejection',
+      result_schema_version: 'command-result-v1',
+      safe_result: {
+        schema_version: 'command-result-v1',
+        ok: false,
+        code: 'VERSION_CONFLICT',
+        aggregate_id: aggregateId,
+        expected_version: envelope.expectedVersion,
+        observed_version: observedVersion,
+        reconciliation_id: reconciliationId,
+      },
+      recorded_at: recordedAt,
+    };
+    createCommandReceiptSchema(this.deps.resultDataSchemas).parse(receipt);
+    const saved = await this.deps.receiptStore.save(receipt, transaction);
+    if (!saved) {
+      const winner = await this.deps.receiptStore.get(envelope.commandId, envelope.tenantId, transaction);
+      if (winner === null) throw new RetryableCommandTransactionError();
+      return this.replayReceipt<TData, TPayload>(winner, envelope);
+    }
+
+    const inboxItem: EncryptedReconciliationInboxItem = {
+      reconciliation_id: reconciliationId,
+      tenant_id: envelope.tenantId,
+      payload_ciphertext: ciphertext,
+      encryption_key_ref: reconciliationId,
+      reason_code: 'VERSION_CONFLICT',
+      lifecycle: 'open',
+      created_at: recordedAt,
+      updated_at: recordedAt,
+      expires_at: expiresAt,
+      tombstoned_at: null,
+    };
+    await inboxStore.save(inboxItem, transaction);
+    return { ok: false, code: 'STALE_VERSION', detail: 'Command version conflict' };
+  }
+
   private async replayReceipt<TData, TPayload>(
     receipt: CommandReceipt,
     envelope: CommandEnvelope<TPayload>,
@@ -274,7 +394,9 @@ export class CommandBus<TAggregate extends AggregateRoot> {
       return { ok: false, code: 'IDEMPOTENCY_KEY_REUSED', detail: 'Idempotency key cannot be reused' };
     }
     const validated = createCommandReceiptSchema(this.deps.resultDataSchemas).parse(receipt);
-    if (!validated.safe_result.ok) throw new Error('Terminal receipt replay is owned by WP1.4');
+    if (!validated.safe_result.ok) {
+      return { ok: false, code: 'STALE_VERSION', detail: 'Command version conflict' };
+    }
     return {
       ok: true,
       aggregateVersion: validated.safe_result.aggregate_version,

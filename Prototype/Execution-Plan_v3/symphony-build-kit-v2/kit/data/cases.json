@@ -1,0 +1,1341 @@
+{
+  "note": "Fictional cooperatives. Evidence level codes: asserted < supported < verified.",
+  "cases": [
+    {
+      "id": "case-1",
+      "name": "Chisamba Farmers Cooperative",
+      "district": "Chibombo",
+      "province": "Central",
+      "programme": "Readiness Cohort 1",
+      "activity": "Maize",
+      "members": 74,
+      "officers": {
+        "chairman": "Joseph Mwale",
+        "secretary": "Mary Phiri",
+        "treasurer": "Grace Tembo"
+      },
+      "demo_role": "Hero. Full journey.",
+      "notes": "Not ready for Lender A (A2, A6). Closing both makes it ready. Still not ready for Lender B. Ready for the programme throughout.",
+      "project": {
+        "name": "2027 Climate-Smart Maize Production & Aggregation",
+        "crop": "Maize",
+        "hectares": 180,
+        "season": "2026/27",
+        "purpose": "working_capital",
+        "irrigated": false,
+        "location": {
+          "description": "Main field",
+          "lat_lng_captured": true
+        },
+        "request": {
+          "structure": "single",
+          "amount": 300000,
+          "term_months": 24
+        }
+      },
+      "evidence": {
+        "registration": {
+          "level": "verified",
+          "supplied_by": "c1.secretary",
+          "supplied_on": "2026-07-14",
+          "verified_by": "fa.mulenga",
+          "verified_on": "2026-08-12",
+          "valid_until": "2027-03-31",
+          "limitation": "Verified in the field. Registry not independently queried.",
+          "history": [],
+          "registration_number": "CS/2011/1007"
+        },
+        "governance": {
+          "level": "supported",
+          "supplied_by": "c1.secretary",
+          "supplied_on": "2026-07-14",
+          "verified_by": null,
+          "verified_on": null,
+          "valid_until": null,
+          "limitation": "Supplied by the cooperative. Not independently checked.",
+          "history": [
+            {
+              "level": "asserted",
+              "on": "2026-05-02",
+              "by": "c1.chairman",
+              "note": "Stated in self-assessment"
+            }
+          ]
+        },
+        "member_register": {
+          "level": "supported",
+          "supplied_by": "c1.secretary",
+          "supplied_on": "2026-07-14",
+          "verified_by": null,
+          "verified_on": null,
+          "valid_until": null,
+          "limitation": "Supplied by the cooperative. Not independently checked.",
+          "history": []
+        },
+        "local_letter": {
+          "level": "supported",
+          "supplied_by": "c1.chairman",
+          "supplied_on": "2026-07-14",
+          "verified_by": null,
+          "verified_on": null,
+          "valid_until": null,
+          "limitation": "Supplied by the cooperative. Not independently checked.",
+          "history": []
+        },
+        "land_right": {
+          "level": "supported",
+          "supplied_by": "c1.chairman",
+          "supplied_on": "2026-07-14",
+          "verified_by": null,
+          "verified_on": null,
+          "valid_until": null,
+          "limitation": "Supplied by the cooperative. Not independently checked.",
+          "history": []
+        },
+        "farming_history": {
+          "level": "supported",
+          "supplied_by": "c1.treasurer",
+          "supplied_on": "2026-07-14",
+          "verified_by": null,
+          "verified_on": null,
+          "valid_until": null,
+          "limitation": "Supplied by the cooperative. Not independently checked.",
+          "history": [],
+          "seasons": 1,
+          "basis": "Programme records and member testimony"
+        },
+        "income_records": {
+          "level": "supported",
+          "supplied_by": "c1.treasurer",
+          "supplied_on": "2026-07-14",
+          "verified_by": null,
+          "verified_on": null,
+          "valid_until": null,
+          "limitation": "Supplied by the cooperative. Not independently checked.",
+          "history": []
+        },
+        "environmental_baseline": {
+          "level": "supported",
+          "supplied_by": "c1.chairman",
+          "supplied_on": "2026-07-14",
+          "verified_by": null,
+          "verified_on": null,
+          "valid_until": null,
+          "limitation": "Supplied by the cooperative. Not independently checked.",
+          "history": []
+        },
+        "project_definition": {
+          "level": "supported",
+          "supplied_by": "c1.chairman",
+          "supplied_on": "2026-07-14",
+          "verified_by": null,
+          "verified_on": null,
+          "valid_until": null,
+          "limitation": "Supplied by the cooperative. Not independently checked.",
+          "history": []
+        },
+        "participation_profile": {
+          "level": "supported",
+          "supplied_by": "c1.secretary",
+          "supplied_on": "2026-07-14",
+          "verified_by": null,
+          "verified_on": null,
+          "valid_until": null,
+          "limitation": "Supplied by the cooperative. Not independently checked.",
+          "history": []
+        }
+      },
+      "events": [],
+      "financing": null,
+      "presentation": null
+    },
+    {
+      "id": "case-2",
+      "name": "Mkushi Growers Cooperative",
+      "district": "Mkushi",
+      "province": "Central",
+      "programme": "Readiness Cohort 1",
+      "activity": "Soya",
+      "members": 52,
+      "officers": {
+        "chairman": "Peter Zulu",
+        "secretary": "Ruth Chanda",
+        "treasurer": "Daniel Mumba"
+      },
+      "demo_role": "Pipeline: close to ready.",
+      "notes": "Only A7 (income records) open for Lender A.",
+      "project": {
+        "name": "2027 Soya Production",
+        "crop": "Soya",
+        "hectares": 140,
+        "season": "2026/27",
+        "purpose": "working_capital",
+        "irrigated": false,
+        "location": {
+          "description": "Main field",
+          "lat_lng_captured": true
+        },
+        "request": {
+          "structure": "single",
+          "amount": 200000,
+          "term_months": 24
+        }
+      },
+      "evidence": {
+        "registration": {
+          "level": "verified",
+          "supplied_by": "c2.secretary",
+          "supplied_on": "2026-07-14",
+          "verified_by": "fa.banda",
+          "verified_on": "2026-08-12",
+          "valid_until": "2027-03-31",
+          "limitation": "Verified in the field. Registry not independently queried.",
+          "history": [],
+          "registration_number": "CS/2012/1014"
+        },
+        "governance": {
+          "level": "verified",
+          "supplied_by": "c2.secretary",
+          "supplied_on": "2026-07-14",
+          "verified_by": "fa.banda",
+          "verified_on": "2026-08-12",
+          "valid_until": null,
+          "limitation": "Sighted by field agent. Issuing body not contacted.",
+          "history": []
+        },
+        "member_register": {
+          "level": "supported",
+          "supplied_by": "c2.secretary",
+          "supplied_on": "2026-07-14",
+          "verified_by": null,
+          "verified_on": null,
+          "valid_until": null,
+          "limitation": "Supplied by the cooperative. Not independently checked.",
+          "history": []
+        },
+        "local_letter": {
+          "level": "supported",
+          "supplied_by": "c2.chairman",
+          "supplied_on": "2026-07-14",
+          "verified_by": null,
+          "verified_on": null,
+          "valid_until": null,
+          "limitation": "Supplied by the cooperative. Not independently checked.",
+          "history": []
+        },
+        "land_right": {
+          "level": "supported",
+          "supplied_by": "c2.chairman",
+          "supplied_on": "2026-07-14",
+          "verified_by": null,
+          "verified_on": null,
+          "valid_until": null,
+          "limitation": "Supplied by the cooperative. Not independently checked.",
+          "history": []
+        },
+        "farming_history": {
+          "level": "supported",
+          "supplied_by": "c2.treasurer",
+          "supplied_on": "2026-07-14",
+          "verified_by": null,
+          "verified_on": null,
+          "valid_until": null,
+          "limitation": "Supplied by the cooperative. Not independently checked.",
+          "history": [],
+          "seasons": 2,
+          "basis": "Programme records and member testimony"
+        },
+        "environmental_baseline": {
+          "level": "supported",
+          "supplied_by": "c2.chairman",
+          "supplied_on": "2026-07-14",
+          "verified_by": null,
+          "verified_on": null,
+          "valid_until": null,
+          "limitation": "Supplied by the cooperative. Not independently checked.",
+          "history": []
+        },
+        "project_definition": {
+          "level": "supported",
+          "supplied_by": "c2.chairman",
+          "supplied_on": "2026-07-14",
+          "verified_by": null,
+          "verified_on": null,
+          "valid_until": null,
+          "limitation": "Supplied by the cooperative. Not independently checked.",
+          "history": []
+        },
+        "participation_profile": {
+          "level": "supported",
+          "supplied_by": "c2.secretary",
+          "supplied_on": "2026-07-14",
+          "verified_by": null,
+          "verified_on": null,
+          "valid_until": null,
+          "limitation": "Supplied by the cooperative. Not independently checked.",
+          "history": []
+        }
+      },
+      "events": [],
+      "financing": null,
+      "presentation": null
+    },
+    {
+      "id": "case-3",
+      "name": "Lufwanyama Women's Cooperative",
+      "district": "Lufwanyama",
+      "province": "Copperbelt",
+      "programme": "Readiness Cohort 1",
+      "activity": "Groundnuts",
+      "members": 48,
+      "officers": {
+        "chairman": "Esther Banda",
+        "secretary": "Agnes Lungu",
+        "treasurer": "Mercy Sakala"
+      },
+      "demo_role": "Exception example.",
+      "notes": "Registration was verified but expired on 2026-09-30. Exception on every destination. Becomes ready for Lender A if the demo date is set before expiry.",
+      "project": {
+        "name": "2027 Groundnut Production",
+        "crop": "Groundnuts",
+        "hectares": 90,
+        "season": "2026/27",
+        "purpose": "working_capital",
+        "irrigated": false,
+        "location": {
+          "description": "Main field",
+          "lat_lng_captured": true
+        },
+        "request": {
+          "structure": "single",
+          "amount": 150000,
+          "term_months": 24
+        }
+      },
+      "evidence": {
+        "registration": {
+          "level": "verified",
+          "supplied_by": "c3.secretary",
+          "supplied_on": "2026-07-14",
+          "verified_by": "fa.mulenga",
+          "verified_on": "2026-08-12",
+          "valid_until": "2026-09-30",
+          "limitation": "Verified in the field. Registry not independently queried.",
+          "history": [],
+          "registration_number": "CS/2013/1021"
+        },
+        "governance": {
+          "level": "verified",
+          "supplied_by": "c3.secretary",
+          "supplied_on": "2026-07-14",
+          "verified_by": "fa.mulenga",
+          "verified_on": "2026-08-12",
+          "valid_until": null,
+          "limitation": "Sighted by field agent. Issuing body not contacted.",
+          "history": []
+        },
+        "member_register": {
+          "level": "supported",
+          "supplied_by": "c3.secretary",
+          "supplied_on": "2026-07-14",
+          "verified_by": null,
+          "verified_on": null,
+          "valid_until": null,
+          "limitation": "Supplied by the cooperative. Not independently checked.",
+          "history": []
+        },
+        "local_letter": {
+          "level": "supported",
+          "supplied_by": "c3.chairman",
+          "supplied_on": "2026-07-14",
+          "verified_by": null,
+          "verified_on": null,
+          "valid_until": null,
+          "limitation": "Supplied by the cooperative. Not independently checked.",
+          "history": []
+        },
+        "land_right": {
+          "level": "supported",
+          "supplied_by": "c3.chairman",
+          "supplied_on": "2026-07-14",
+          "verified_by": null,
+          "verified_on": null,
+          "valid_until": null,
+          "limitation": "Supplied by the cooperative. Not independently checked.",
+          "history": []
+        },
+        "farming_history": {
+          "level": "supported",
+          "supplied_by": "c3.treasurer",
+          "supplied_on": "2026-07-14",
+          "verified_by": null,
+          "verified_on": null,
+          "valid_until": null,
+          "limitation": "Supplied by the cooperative. Not independently checked.",
+          "history": [],
+          "seasons": 2,
+          "basis": "Programme records and member testimony"
+        },
+        "income_records": {
+          "level": "supported",
+          "supplied_by": "c3.treasurer",
+          "supplied_on": "2026-07-14",
+          "verified_by": null,
+          "verified_on": null,
+          "valid_until": null,
+          "limitation": "Supplied by the cooperative. Not independently checked.",
+          "history": []
+        },
+        "environmental_baseline": {
+          "level": "supported",
+          "supplied_by": "c3.chairman",
+          "supplied_on": "2026-07-14",
+          "verified_by": null,
+          "verified_on": null,
+          "valid_until": null,
+          "limitation": "Supplied by the cooperative. Not independently checked.",
+          "history": []
+        },
+        "project_definition": {
+          "level": "supported",
+          "supplied_by": "c3.chairman",
+          "supplied_on": "2026-07-14",
+          "verified_by": null,
+          "verified_on": null,
+          "valid_until": null,
+          "limitation": "Supplied by the cooperative. Not independently checked.",
+          "history": []
+        },
+        "participation_profile": {
+          "level": "supported",
+          "supplied_by": "c3.secretary",
+          "supplied_on": "2026-07-14",
+          "verified_by": null,
+          "verified_on": null,
+          "valid_until": null,
+          "limitation": "Supplied by the cooperative. Not independently checked.",
+          "history": []
+        }
+      },
+      "events": [],
+      "financing": null,
+      "presentation": null
+    },
+    {
+      "id": "case-4",
+      "name": "Kapiri Maize Group",
+      "district": "Kapiri Mposhi",
+      "province": "Central",
+      "programme": "Readiness Cohort 1",
+      "activity": "Maize",
+      "members": 39,
+      "officers": {
+        "chairman": "Isaac Phiri",
+        "secretary": "Joyce Kunda",
+        "treasurer": "Moses Chibwe"
+      },
+      "demo_role": "NABII live remediation.",
+      "notes": "Mid-remediation. Governance and member register only asserted. No baseline.",
+      "project": {
+        "name": "2027 Maize Production",
+        "crop": "Maize",
+        "hectares": 70,
+        "season": "2026/27",
+        "purpose": "working_capital",
+        "irrigated": false,
+        "location": {
+          "description": "Main field",
+          "lat_lng_captured": true
+        },
+        "request": {
+          "structure": "single",
+          "amount": 200000,
+          "term_months": 24
+        }
+      },
+      "evidence": {
+        "registration": {
+          "level": "supported",
+          "supplied_by": "c4.secretary",
+          "supplied_on": "2026-07-14",
+          "verified_by": null,
+          "verified_on": null,
+          "valid_until": "2027-06-30",
+          "limitation": "Supplied by the cooperative. Not independently checked.",
+          "history": [],
+          "registration_number": "CS/2014/1028"
+        },
+        "governance": {
+          "level": "asserted",
+          "supplied_by": "c4.secretary",
+          "supplied_on": "2026-07-14",
+          "verified_by": null,
+          "verified_on": null,
+          "valid_until": null,
+          "limitation": "Stated by the cooperative. No record attached.",
+          "history": []
+        },
+        "member_register": {
+          "level": "asserted",
+          "supplied_by": "c4.secretary",
+          "supplied_on": "2026-07-14",
+          "verified_by": null,
+          "verified_on": null,
+          "valid_until": null,
+          "limitation": "Stated by the cooperative. No record attached.",
+          "history": []
+        },
+        "local_letter": {
+          "level": "supported",
+          "supplied_by": "c4.chairman",
+          "supplied_on": "2026-07-14",
+          "verified_by": null,
+          "verified_on": null,
+          "valid_until": null,
+          "limitation": "Supplied by the cooperative. Not independently checked.",
+          "history": []
+        },
+        "farming_history": {
+          "level": "supported",
+          "supplied_by": "c4.treasurer",
+          "supplied_on": "2026-07-14",
+          "verified_by": null,
+          "verified_on": null,
+          "valid_until": null,
+          "limitation": "Supplied by the cooperative. Not independently checked.",
+          "history": [],
+          "seasons": 1,
+          "basis": "Programme records and member testimony"
+        },
+        "project_definition": {
+          "level": "supported",
+          "supplied_by": "c4.chairman",
+          "supplied_on": "2026-07-14",
+          "verified_by": null,
+          "verified_on": null,
+          "valid_until": null,
+          "limitation": "Supplied by the cooperative. Not independently checked.",
+          "history": []
+        },
+        "participation_profile": {
+          "level": "asserted",
+          "supplied_by": "c4.secretary",
+          "supplied_on": "2026-07-14",
+          "verified_by": null,
+          "verified_on": null,
+          "valid_until": null,
+          "limitation": "Stated by the cooperative. No record attached.",
+          "history": []
+        }
+      },
+      "events": [],
+      "financing": null,
+      "presentation": null
+    },
+    {
+      "id": "case-5",
+      "name": "Mumbwa Irrigators Cooperative",
+      "district": "Mumbwa",
+      "province": "Central",
+      "programme": "Readiness Cohort 1",
+      "activity": "Vegetables (irrigated)",
+      "members": 31,
+      "officers": {
+        "chairman": "Francis Mulenga",
+        "secretary": "Alice Daka",
+        "treasurer": "Patrick Njovu"
+      },
+      "demo_role": "Applicability demo.",
+      "notes": "A8 (water source) applies only because the project is irrigated.",
+      "project": {
+        "name": "2027 Irrigated Vegetable Production",
+        "crop": "Vegetables",
+        "hectares": 45,
+        "season": "2026/27",
+        "purpose": "working_capital",
+        "irrigated": true,
+        "location": {
+          "description": "Main field",
+          "lat_lng_captured": true
+        },
+        "request": {
+          "structure": "single",
+          "amount": 250000,
+          "term_months": 24
+        }
+      },
+      "evidence": {
+        "registration": {
+          "level": "verified",
+          "supplied_by": "c5.secretary",
+          "supplied_on": "2026-07-14",
+          "verified_by": "fa.mulenga",
+          "verified_on": "2026-08-12",
+          "valid_until": "2027-03-31",
+          "limitation": "Verified in the field. Registry not independently queried.",
+          "history": [],
+          "registration_number": "CS/2015/1035"
+        },
+        "governance": {
+          "level": "verified",
+          "supplied_by": "c5.secretary",
+          "supplied_on": "2026-07-14",
+          "verified_by": "fa.mulenga",
+          "verified_on": "2026-08-12",
+          "valid_until": null,
+          "limitation": "Sighted by field agent. Issuing body not contacted.",
+          "history": []
+        },
+        "member_register": {
+          "level": "supported",
+          "supplied_by": "c5.secretary",
+          "supplied_on": "2026-07-14",
+          "verified_by": null,
+          "verified_on": null,
+          "valid_until": null,
+          "limitation": "Supplied by the cooperative. Not independently checked.",
+          "history": []
+        },
+        "local_letter": {
+          "level": "supported",
+          "supplied_by": "c5.chairman",
+          "supplied_on": "2026-07-14",
+          "verified_by": null,
+          "verified_on": null,
+          "valid_until": null,
+          "limitation": "Supplied by the cooperative. Not independently checked.",
+          "history": []
+        },
+        "land_right": {
+          "level": "supported",
+          "supplied_by": "c5.chairman",
+          "supplied_on": "2026-07-14",
+          "verified_by": null,
+          "verified_on": null,
+          "valid_until": null,
+          "limitation": "Supplied by the cooperative. Not independently checked.",
+          "history": []
+        },
+        "farming_history": {
+          "level": "supported",
+          "supplied_by": "c5.treasurer",
+          "supplied_on": "2026-07-14",
+          "verified_by": null,
+          "verified_on": null,
+          "valid_until": null,
+          "limitation": "Supplied by the cooperative. Not independently checked.",
+          "history": [],
+          "seasons": 2,
+          "basis": "Programme records and member testimony"
+        },
+        "income_records": {
+          "level": "supported",
+          "supplied_by": "c5.treasurer",
+          "supplied_on": "2026-07-14",
+          "verified_by": null,
+          "verified_on": null,
+          "valid_until": null,
+          "limitation": "Supplied by the cooperative. Not independently checked.",
+          "history": []
+        },
+        "environmental_baseline": {
+          "level": "supported",
+          "supplied_by": "c5.chairman",
+          "supplied_on": "2026-07-14",
+          "verified_by": null,
+          "verified_on": null,
+          "valid_until": null,
+          "limitation": "Supplied by the cooperative. Not independently checked.",
+          "history": []
+        },
+        "water_source": {
+          "level": "supported",
+          "supplied_by": "c5.chairman",
+          "supplied_on": "2026-07-14",
+          "verified_by": null,
+          "verified_on": null,
+          "valid_until": null,
+          "limitation": "Supplied by the cooperative. Not independently checked.",
+          "history": []
+        },
+        "project_definition": {
+          "level": "supported",
+          "supplied_by": "c5.chairman",
+          "supplied_on": "2026-07-14",
+          "verified_by": null,
+          "verified_on": null,
+          "valid_until": null,
+          "limitation": "Supplied by the cooperative. Not independently checked.",
+          "history": []
+        },
+        "participation_profile": {
+          "level": "supported",
+          "supplied_by": "c5.secretary",
+          "supplied_on": "2026-07-14",
+          "verified_by": null,
+          "verified_on": null,
+          "valid_until": null,
+          "limitation": "Supplied by the cooperative. Not independently checked.",
+          "history": []
+        }
+      },
+      "events": [],
+      "financing": null,
+      "presentation": null
+    },
+    {
+      "id": "case-6",
+      "name": "Katete Youth Farmers Cooperative",
+      "district": "Katete",
+      "province": "Eastern",
+      "programme": "Readiness Cohort 2",
+      "activity": "Cotton",
+      "members": 44,
+      "officers": {
+        "chairman": "Brian Tembo",
+        "secretary": "Naomi Zimba",
+        "treasurer": "Felix Ngoma"
+      },
+      "demo_role": "Bank tour: portfolio, monitoring current.",
+      "notes": "Financed by Lender A. All covenants current.",
+      "project": {
+        "name": "2026/27 Cotton Production",
+        "crop": "Cotton",
+        "hectares": 110,
+        "season": "2026/27",
+        "purpose": "working_capital",
+        "irrigated": false,
+        "location": {
+          "description": "Main field",
+          "lat_lng_captured": true
+        },
+        "request": {
+          "structure": "single",
+          "amount": 180000,
+          "term_months": 24
+        }
+      },
+      "evidence": {
+        "registration": {
+          "level": "verified",
+          "supplied_by": "c6.secretary",
+          "supplied_on": "2026-07-14",
+          "verified_by": "fa.banda",
+          "verified_on": "2026-08-12",
+          "valid_until": "2027-03-31",
+          "limitation": "Verified in the field. Registry not independently queried.",
+          "history": [],
+          "registration_number": "CS/2016/1042"
+        },
+        "governance": {
+          "level": "verified",
+          "supplied_by": "c6.secretary",
+          "supplied_on": "2026-07-14",
+          "verified_by": "fa.banda",
+          "verified_on": "2026-08-12",
+          "valid_until": null,
+          "limitation": "Sighted by field agent. Issuing body not contacted.",
+          "history": []
+        },
+        "member_register": {
+          "level": "supported",
+          "supplied_by": "c6.secretary",
+          "supplied_on": "2026-07-14",
+          "verified_by": null,
+          "verified_on": null,
+          "valid_until": null,
+          "limitation": "Supplied by the cooperative. Not independently checked.",
+          "history": []
+        },
+        "local_letter": {
+          "level": "supported",
+          "supplied_by": "c6.chairman",
+          "supplied_on": "2026-07-14",
+          "verified_by": null,
+          "verified_on": null,
+          "valid_until": null,
+          "limitation": "Supplied by the cooperative. Not independently checked.",
+          "history": []
+        },
+        "land_right": {
+          "level": "supported",
+          "supplied_by": "c6.chairman",
+          "supplied_on": "2026-07-14",
+          "verified_by": null,
+          "verified_on": null,
+          "valid_until": null,
+          "limitation": "Supplied by the cooperative. Not independently checked.",
+          "history": []
+        },
+        "farming_history": {
+          "level": "supported",
+          "supplied_by": "c6.treasurer",
+          "supplied_on": "2026-07-14",
+          "verified_by": null,
+          "verified_on": null,
+          "valid_until": null,
+          "limitation": "Supplied by the cooperative. Not independently checked.",
+          "history": [],
+          "seasons": 2,
+          "basis": "Programme records and member testimony"
+        },
+        "income_records": {
+          "level": "supported",
+          "supplied_by": "c6.treasurer",
+          "supplied_on": "2026-07-14",
+          "verified_by": null,
+          "verified_on": null,
+          "valid_until": null,
+          "limitation": "Supplied by the cooperative. Not independently checked.",
+          "history": []
+        },
+        "environmental_baseline": {
+          "level": "supported",
+          "supplied_by": "c6.chairman",
+          "supplied_on": "2026-07-14",
+          "verified_by": null,
+          "verified_on": null,
+          "valid_until": null,
+          "limitation": "Supplied by the cooperative. Not independently checked.",
+          "history": []
+        },
+        "project_definition": {
+          "level": "supported",
+          "supplied_by": "c6.chairman",
+          "supplied_on": "2026-07-14",
+          "verified_by": null,
+          "verified_on": null,
+          "valid_until": null,
+          "limitation": "Supplied by the cooperative. Not independently checked.",
+          "history": []
+        },
+        "participation_profile": {
+          "level": "supported",
+          "supplied_by": "c6.secretary",
+          "supplied_on": "2026-07-14",
+          "verified_by": null,
+          "verified_on": null,
+          "valid_until": null,
+          "limitation": "Supplied by the cooperative. Not independently checked.",
+          "history": []
+        }
+      },
+      "events": [],
+      "financing": {
+        "destination": "A",
+        "status": "financed",
+        "facility": {
+          "amount": 180000,
+          "term_months": 24,
+          "disbursed_on": "2026-06-10",
+          "use_of_proceeds": [
+            {
+              "item": "Seed and fertiliser",
+              "planned": 120000,
+              "evidenced": 120000
+            },
+            {
+              "item": "Equipment hire",
+              "planned": 60000,
+              "evidenced": 45000
+            }
+          ]
+        },
+        "covenants": [
+          {
+            "id": "quarterly_cash_statement",
+            "due_date": "2026-12-15",
+            "received": false,
+            "last_received": "2026-09-14"
+          },
+          {
+            "id": "season_end_production_report",
+            "due_date": "2027-06-30",
+            "received": false,
+            "last_received": null
+          },
+          {
+            "id": "registration_renewal_evidence",
+            "due_date": "2027-03-31",
+            "received": false,
+            "last_received": null
+          }
+        ]
+      },
+      "presentation": null
+    },
+    {
+      "id": "case-7",
+      "name": "Choma Dairy Cooperative",
+      "district": "Choma",
+      "province": "Southern",
+      "programme": "Readiness Cohort 2",
+      "activity": "Dairy",
+      "members": 58,
+      "officers": {
+        "chairman": "Charles Hamoonga",
+        "secretary": "Beatrice Muleya",
+        "treasurer": "Simon Mweemba"
+      },
+      "demo_role": "Bank tour: monitoring exception.",
+      "notes": "Financed by Lender A. Quarterly cash statement overdue.",
+      "project": {
+        "name": "2026/27 Dairy Production",
+        "crop": "Dairy",
+        "hectares": 60,
+        "season": "2026/27",
+        "purpose": "working_capital",
+        "irrigated": false,
+        "location": {
+          "description": "Main field",
+          "lat_lng_captured": true
+        },
+        "request": {
+          "structure": "single",
+          "amount": 350000,
+          "term_months": 24
+        }
+      },
+      "evidence": {
+        "registration": {
+          "level": "verified",
+          "supplied_by": "c7.secretary",
+          "supplied_on": "2026-07-14",
+          "verified_by": "fa.mulenga",
+          "verified_on": "2026-08-12",
+          "valid_until": "2027-03-31",
+          "limitation": "Verified in the field. Registry not independently queried.",
+          "history": [],
+          "registration_number": "CS/2017/1049"
+        },
+        "governance": {
+          "level": "verified",
+          "supplied_by": "c7.secretary",
+          "supplied_on": "2026-07-14",
+          "verified_by": "fa.mulenga",
+          "verified_on": "2026-08-12",
+          "valid_until": null,
+          "limitation": "Sighted by field agent. Issuing body not contacted.",
+          "history": []
+        },
+        "member_register": {
+          "level": "supported",
+          "supplied_by": "c7.secretary",
+          "supplied_on": "2026-07-14",
+          "verified_by": null,
+          "verified_on": null,
+          "valid_until": null,
+          "limitation": "Supplied by the cooperative. Not independently checked.",
+          "history": []
+        },
+        "local_letter": {
+          "level": "supported",
+          "supplied_by": "c7.chairman",
+          "supplied_on": "2026-07-14",
+          "verified_by": null,
+          "verified_on": null,
+          "valid_until": null,
+          "limitation": "Supplied by the cooperative. Not independently checked.",
+          "history": []
+        },
+        "land_right": {
+          "level": "supported",
+          "supplied_by": "c7.chairman",
+          "supplied_on": "2026-07-14",
+          "verified_by": null,
+          "verified_on": null,
+          "valid_until": null,
+          "limitation": "Supplied by the cooperative. Not independently checked.",
+          "history": []
+        },
+        "farming_history": {
+          "level": "supported",
+          "supplied_by": "c7.treasurer",
+          "supplied_on": "2026-07-14",
+          "verified_by": null,
+          "verified_on": null,
+          "valid_until": null,
+          "limitation": "Supplied by the cooperative. Not independently checked.",
+          "history": [],
+          "seasons": 2,
+          "basis": "Programme records and member testimony"
+        },
+        "income_records": {
+          "level": "supported",
+          "supplied_by": "c7.treasurer",
+          "supplied_on": "2026-07-14",
+          "verified_by": null,
+          "verified_on": null,
+          "valid_until": null,
+          "limitation": "Supplied by the cooperative. Not independently checked.",
+          "history": []
+        },
+        "environmental_baseline": {
+          "level": "supported",
+          "supplied_by": "c7.chairman",
+          "supplied_on": "2026-07-14",
+          "verified_by": null,
+          "verified_on": null,
+          "valid_until": null,
+          "limitation": "Supplied by the cooperative. Not independently checked.",
+          "history": []
+        },
+        "project_definition": {
+          "level": "supported",
+          "supplied_by": "c7.chairman",
+          "supplied_on": "2026-07-14",
+          "verified_by": null,
+          "verified_on": null,
+          "valid_until": null,
+          "limitation": "Supplied by the cooperative. Not independently checked.",
+          "history": []
+        },
+        "participation_profile": {
+          "level": "supported",
+          "supplied_by": "c7.secretary",
+          "supplied_on": "2026-07-14",
+          "verified_by": null,
+          "verified_on": null,
+          "valid_until": null,
+          "limitation": "Supplied by the cooperative. Not independently checked.",
+          "history": []
+        }
+      },
+      "events": [],
+      "financing": {
+        "destination": "A",
+        "status": "financed",
+        "facility": {
+          "amount": 350000,
+          "term_months": 24,
+          "disbursed_on": "2026-06-10",
+          "use_of_proceeds": [
+            {
+              "item": "Feed and veterinary inputs",
+              "planned": 250000,
+              "evidenced": 210000
+            },
+            {
+              "item": "Cold-storage equipment hire",
+              "planned": 100000,
+              "evidenced": 100000
+            }
+          ]
+        },
+        "covenants": [
+          {
+            "id": "quarterly_cash_statement",
+            "due_date": "2026-09-15",
+            "received": false,
+            "last_received": "2026-06-15"
+          },
+          {
+            "id": "season_end_production_report",
+            "due_date": "2027-06-30",
+            "received": false,
+            "last_received": null
+          },
+          {
+            "id": "registration_renewal_evidence",
+            "due_date": "2027-03-31",
+            "received": false,
+            "last_received": null
+          }
+        ]
+      },
+      "presentation": null
+    },
+    {
+      "id": "case-8",
+      "name": "Serenje Smallholders Cooperative",
+      "district": "Serenje",
+      "province": "Central",
+      "programme": "Readiness Cohort 2",
+      "activity": "Maize",
+      "members": 67,
+      "officers": {
+        "chairman": "Albert Kasonde",
+        "secretary": "Lilian Mwansa",
+        "treasurer": "George Chola"
+      },
+      "demo_role": "Bank tour: lender decision flow.",
+      "notes": "Ready for Lender A, presented, lender requests more evidence. Shows that readiness is not approval.",
+      "project": {
+        "name": "2027 Maize Production",
+        "crop": "Maize",
+        "hectares": 160,
+        "season": "2026/27",
+        "purpose": "working_capital",
+        "irrigated": false,
+        "location": {
+          "description": "Main field",
+          "lat_lng_captured": true
+        },
+        "request": {
+          "structure": "single",
+          "amount": 220000,
+          "term_months": 24
+        }
+      },
+      "evidence": {
+        "registration": {
+          "level": "verified",
+          "supplied_by": "c8.secretary",
+          "supplied_on": "2026-07-14",
+          "verified_by": "fa.banda",
+          "verified_on": "2026-08-12",
+          "valid_until": "2027-03-31",
+          "limitation": "Verified in the field. Registry not independently queried.",
+          "history": [],
+          "registration_number": "CS/2018/1056"
+        },
+        "governance": {
+          "level": "verified",
+          "supplied_by": "c8.secretary",
+          "supplied_on": "2026-07-14",
+          "verified_by": "fa.banda",
+          "verified_on": "2026-08-12",
+          "valid_until": null,
+          "limitation": "Sighted by field agent. Issuing body not contacted.",
+          "history": []
+        },
+        "member_register": {
+          "level": "supported",
+          "supplied_by": "c8.secretary",
+          "supplied_on": "2026-07-14",
+          "verified_by": null,
+          "verified_on": null,
+          "valid_until": null,
+          "limitation": "Supplied by the cooperative. Not independently checked.",
+          "history": []
+        },
+        "local_letter": {
+          "level": "supported",
+          "supplied_by": "c8.chairman",
+          "supplied_on": "2026-07-14",
+          "verified_by": null,
+          "verified_on": null,
+          "valid_until": null,
+          "limitation": "Supplied by the cooperative. Not independently checked.",
+          "history": []
+        },
+        "land_right": {
+          "level": "supported",
+          "supplied_by": "c8.chairman",
+          "supplied_on": "2026-07-14",
+          "verified_by": null,
+          "verified_on": null,
+          "valid_until": null,
+          "limitation": "Supplied by the cooperative. Not independently checked.",
+          "history": []
+        },
+        "farming_history": {
+          "level": "supported",
+          "supplied_by": "c8.treasurer",
+          "supplied_on": "2026-07-14",
+          "verified_by": null,
+          "verified_on": null,
+          "valid_until": null,
+          "limitation": "Supplied by the cooperative. Not independently checked.",
+          "history": [],
+          "seasons": 2,
+          "basis": "Programme records and member testimony"
+        },
+        "income_records": {
+          "level": "supported",
+          "supplied_by": "c8.treasurer",
+          "supplied_on": "2026-07-14",
+          "verified_by": null,
+          "verified_on": null,
+          "valid_until": null,
+          "limitation": "Supplied by the cooperative. Not independently checked.",
+          "history": []
+        },
+        "environmental_baseline": {
+          "level": "supported",
+          "supplied_by": "c8.chairman",
+          "supplied_on": "2026-07-14",
+          "verified_by": null,
+          "verified_on": null,
+          "valid_until": null,
+          "limitation": "Supplied by the cooperative. Not independently checked.",
+          "history": []
+        },
+        "project_definition": {
+          "level": "supported",
+          "supplied_by": "c8.chairman",
+          "supplied_on": "2026-07-14",
+          "verified_by": null,
+          "verified_on": null,
+          "valid_until": null,
+          "limitation": "Supplied by the cooperative. Not independently checked.",
+          "history": []
+        },
+        "participation_profile": {
+          "level": "supported",
+          "supplied_by": "c8.secretary",
+          "supplied_on": "2026-07-14",
+          "verified_by": null,
+          "verified_on": null,
+          "valid_until": null,
+          "limitation": "Supplied by the cooperative. Not independently checked.",
+          "history": []
+        }
+      },
+      "events": [],
+      "financing": null,
+      "presentation": {
+        "destination": "A",
+        "presented_on": "2026-09-20",
+        "lender_response": {
+          "status": "more_evidence_requested",
+          "requirement": "A7",
+          "requested_on": "2026-09-28",
+          "note": "Bank or mobile-money statements for the last two seasons."
+        }
+      }
+    },
+    {
+      "id": "case-9",
+      "name": "Mpongwe Groups Cooperative",
+      "district": "Mpongwe",
+      "province": "Copperbelt",
+      "programme": "Readiness Cohort 2",
+      "activity": "Maize and groundnuts",
+      "members": 90,
+      "officers": {
+        "chairman": "Samuel Mutale",
+        "secretary": "Doreen Kabwe",
+        "treasurer": "Henry Musonda"
+      },
+      "demo_role": "Reverse of the hero.",
+      "notes": "Ready for Lender B. Not ready for Lender A (A2, A4, A5, A6, A11).",
+      "project": {
+        "name": "2026/27 Group Seasonal Inputs",
+        "crop": "Maize",
+        "hectares": 120,
+        "season": "2026/27",
+        "purpose": "seasonal_inputs",
+        "irrigated": false,
+        "location": {
+          "description": "Main field",
+          "lat_lng_captured": true
+        },
+        "request": {
+          "structure": "per_group",
+          "amount_per_group": 25000,
+          "groups": 6,
+          "term_months": 9
+        }
+      },
+      "evidence": {
+        "registration": {
+          "level": "verified",
+          "supplied_by": "c9.secretary",
+          "supplied_on": "2026-07-14",
+          "verified_by": "fa.mulenga",
+          "verified_on": "2026-08-12",
+          "valid_until": "2027-03-31",
+          "limitation": "Verified in the field. Registry not independently queried.",
+          "history": [],
+          "registration_number": "CS/2019/1063"
+        },
+        "governance": {
+          "level": "supported",
+          "supplied_by": "c9.secretary",
+          "supplied_on": "2026-07-14",
+          "verified_by": null,
+          "verified_on": null,
+          "valid_until": null,
+          "limitation": "Supplied by the cooperative. Not independently checked.",
+          "history": []
+        },
+        "member_register": {
+          "level": "verified",
+          "supplied_by": "c9.secretary",
+          "supplied_on": "2026-07-14",
+          "verified_by": "fa.mulenga",
+          "verified_on": "2026-08-12",
+          "valid_until": null,
+          "limitation": "Sighted by field agent. Issuing body not contacted.",
+          "history": []
+        },
+        "farming_history": {
+          "level": "supported",
+          "supplied_by": "c9.treasurer",
+          "supplied_on": "2026-07-14",
+          "verified_by": null,
+          "verified_on": null,
+          "valid_until": null,
+          "limitation": "Supplied by the cooperative. Not independently checked.",
+          "history": [],
+          "seasons": 1,
+          "basis": "Programme records and member testimony"
+        },
+        "income_records": {
+          "level": "supported",
+          "supplied_by": "c9.treasurer",
+          "supplied_on": "2026-07-14",
+          "verified_by": null,
+          "verified_on": null,
+          "valid_until": null,
+          "limitation": "Supplied by the cooperative. Not independently checked.",
+          "history": []
+        },
+        "environmental_baseline": {
+          "level": "supported",
+          "supplied_by": "c9.chairman",
+          "supplied_on": "2026-07-14",
+          "verified_by": null,
+          "verified_on": null,
+          "valid_until": null,
+          "limitation": "Supplied by the cooperative. Not independently checked.",
+          "history": []
+        },
+        "group_structure": {
+          "level": "supported",
+          "supplied_by": "c9.chairman",
+          "supplied_on": "2026-07-14",
+          "verified_by": null,
+          "verified_on": null,
+          "valid_until": null,
+          "limitation": "Supplied by the cooperative. Not independently checked.",
+          "history": []
+        },
+        "asset_inventory": {
+          "level": "supported",
+          "supplied_by": "c9.secretary",
+          "supplied_on": "2026-07-14",
+          "verified_by": null,
+          "verified_on": null,
+          "valid_until": null,
+          "limitation": "Supplied by the cooperative. Not independently checked.",
+          "history": []
+        },
+        "project_definition": {
+          "level": "supported",
+          "supplied_by": "c9.chairman",
+          "supplied_on": "2026-07-14",
+          "verified_by": null,
+          "verified_on": null,
+          "valid_until": null,
+          "limitation": "Supplied by the cooperative. Not independently checked.",
+          "history": []
+        },
+        "participation_profile": {
+          "level": "supported",
+          "supplied_by": "c9.secretary",
+          "supplied_on": "2026-07-14",
+          "verified_by": null,
+          "verified_on": null,
+          "valid_until": null,
+          "limitation": "Supplied by the cooperative. Not independently checked.",
+          "history": []
+        }
+      },
+      "events": [],
+      "financing": null,
+      "presentation": null
+    }
+  ]
+}

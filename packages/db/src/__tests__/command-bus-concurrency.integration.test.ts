@@ -5,39 +5,44 @@ import { Kysely, PostgresDialect } from 'kysely';
 import { z } from 'zod';
 import { CommandBus } from '@symphony/domain';
 import type { AggregateRoot, CommandEnvelope, CommandTransactionContext, CommandTransactionRunner } from '@symphony/domain';
+import { LocalDevKeyProvider } from '../../../domain/src/privacy/key-provider.js';
 import { PostgresCommandReceiptStore } from '../repositories/postgres-command-receipt-store.js';
 import { PostgresCommandTransactionRunner } from '../repositories/postgres-command-transaction.js';
+import { PostgresReconciliationInboxStore } from '../repositories/postgres-reconciliation-inbox-store.js';
 import { PostgresRepository } from '../repositories/postgres-repository.js';
 import type { SymphonyDatabase } from '../types/database.js';
 
 interface TestAggregate extends AggregateRoot { readonly value: string }
 interface Payload { readonly aggregateId: string; readonly value: string }
-const databaseUrl = process.env['MIGRATION_TEST_DATABASE_URL'];
+const databaseUrl = process.env['PHASE1_TEST_ADMIN_DATABASE_URL'];
+const appDatabaseUrl = process.env['PHASE1_TEST_APP_DATABASE_URL'];
 const schemas = {
   'test.command': z.object({ value: z.string() }).strict(),
   'test.command.other': z.object({ value: z.string() }).strict(),
 };
 
-describe.skipIf(!databaseUrl)('WP1.3 PostgreSQL command concurrency and recovery', () => {
+describe.skipIf(!databaseUrl || !appDatabaseUrl)('WP1.3 PostgreSQL command concurrency and recovery', () => {
   const tenantId = randomUUID();
   // The current local migration policy still reads this legacy setting. Set it
   // only on isolated *_test connections; the command runner sets app.tenant_id
   // transaction-locally, as required by the active contract.
   const commandPool = new pg.Pool({
-    connectionString: databaseUrl,
+    connectionString: appDatabaseUrl,
     max: 12,
-    onConnect: async (client) => { await client.query("SELECT set_config('app.current_tenant_id', $1, false)", [tenantId]); },
+    onConnect: async (client) => { await client.query("SELECT set_config('app.tenant_id', $1, false)", [tenantId]); },
   });
   const recoveryPool = new pg.Pool({
-    connectionString: databaseUrl,
+    connectionString: appDatabaseUrl,
     max: 4,
-    onConnect: async (client) => { await client.query("SELECT set_config('app.current_tenant_id', $1, false)", [tenantId]); },
+    onConnect: async (client) => { await client.query("SELECT set_config('app.tenant_id', $1, false)", [tenantId]); },
   });
   const pool = new pg.Pool({ connectionString: databaseUrl, max: 12 });
   const db = new Kysely<SymphonyDatabase>({ dialect: new PostgresDialect({ pool: commandPool }) });
   const recoveryDb = new Kysely<SymphonyDatabase>({ dialect: new PostgresDialect({ pool: recoveryPool }) });
   const repository = new PostgresRepository<TestAggregate>(db, 'Wp13TestAggregate');
   const receiptStore = new PostgresCommandReceiptStore(schemas);
+  const reconciliationInboxStore = new PostgresReconciliationInboxStore();
+  const fieldEncryption = new LocalDevKeyProvider({ rootKeyHex: 'd'.repeat(64), pepper: Buffer.from('wp1.3-test-only') });
   const actorId = randomUUID();
 
   beforeAll(async () => {
@@ -55,7 +60,8 @@ describe.skipIf(!databaseUrl)('WP1.3 PostgreSQL command concurrency and recovery
     const client = await pool.connect();
     try {
       await client.query('BEGIN');
-      await client.query("SELECT set_config('app.current_tenant_id', $1, true)", [tenantId]);
+      await client.query("SELECT set_config('app.tenant_id', $1, true)", [tenantId]);
+      await client.query('DELETE FROM symphony.reconciliation_inbox WHERE tenant_id = $1', [tenantId]);
       await client.query('DELETE FROM symphony.event_outbox WHERE event_id IN (SELECT id FROM symphony.domain_events WHERE tenant_id = $1)', [tenantId]);
       await client.query('ALTER TABLE symphony.domain_events DISABLE TRIGGER domain_events_immutability');
       await client.query('DELETE FROM symphony.domain_events WHERE tenant_id = $1', [tenantId]);
@@ -90,6 +96,13 @@ describe.skipIf(!databaseUrl)('WP1.3 PostgreSQL command concurrency and recovery
       hmac: async (keyVersion, bytes) => createHmac('sha256', keyVersion).update(bytes).digest(),
     },
     resultDataSchemas: schemas,
+    reconciliationInboxStore,
+    reconciliationDataSchemas: {
+      'test.command': z.object({ aggregateId: z.string().uuid(), value: z.string() }).strict(),
+      'test.command.other': z.object({ aggregateId: z.string().uuid(), value: z.string() }).strict(),
+    },
+    fieldEncryption,
+    reconciliationRetentionPolicy: { expiryFor: async () => '2030-01-02T00:00:00.000Z' },
   });
 
   const envelope = (aggregateId: string, commandId = randomUUID(), value = 'one', actor = actorId, type = 'test.command', expectedVersion = 0): CommandEnvelope<Payload> => ({
@@ -129,7 +142,7 @@ describe.skipIf(!databaseUrl)('WP1.3 PostgreSQL command concurrency and recovery
     const client = await pool.connect();
     try {
       await client.query('BEGIN');
-      await client.query("SELECT set_config('app.current_tenant_id', $1, true)", [tenantId]);
+      await client.query("SELECT set_config('app.tenant_id', $1, true)", [tenantId]);
       const result = await client.query<{ receipts: string; states: string; events: string; outbox: string; version: number | null }>(
         `SELECT
           (SELECT count(*)::text FROM symphony.command_receipts WHERE tenant_id = $1 AND command_id = $2) AS receipts,

@@ -146,6 +146,40 @@ export interface CommandReceiptStore {
   save(receipt: CommandReceipt, context?: CommandTransactionContext): Promise<boolean>;
 }
 
+export type ReconciliationLifecycle = 'open' | 'resolved' | 'superseded' | 'expired';
+
+/** The inbox stores only encrypted command-specific reconciliation data plus non-identifying lifecycle metadata. */
+export interface EncryptedReconciliationInboxItem {
+  readonly reconciliation_id: string;
+  readonly tenant_id: string;
+  readonly payload_ciphertext: Uint8Array;
+  readonly encryption_key_ref: string;
+  readonly reason_code: 'VERSION_CONFLICT';
+  readonly lifecycle: ReconciliationLifecycle;
+  readonly created_at: string;
+  readonly updated_at: string;
+  readonly expires_at: string;
+  readonly tombstoned_at: string | null;
+}
+
+export interface ReconciliationInboxStore {
+  save(item: EncryptedReconciliationInboxItem, context?: CommandTransactionContext): Promise<void>;
+  get(reconciliationId: string, tenantId: string, context?: CommandTransactionContext): Promise<EncryptedReconciliationInboxItem | null>;
+  transition(
+    reconciliationId: string,
+    tenantId: string,
+    next: 'resolved' | 'superseded',
+    updatedAt: string,
+    context?: CommandTransactionContext,
+  ): Promise<boolean>;
+  expire(reconciliationId: string, tenantId: string, now: string, context?: CommandTransactionContext): Promise<boolean>;
+}
+
+/** Supplies the approved per-category retention expiry; no duration is hardcoded by the command bus. */
+export interface ReconciliationRetentionPolicy {
+  expiryFor(input: { readonly tenantId: string; readonly commandType: string; readonly recordedAt: string }): Promise<string>;
+}
+
 export interface KeyProvider {
   encrypt(plaintext: Uint8Array, keyRef: string): Promise<Uint8Array>;
   decrypt(ciphertext: Uint8Array, keyRef: string): Promise<Uint8Array>;

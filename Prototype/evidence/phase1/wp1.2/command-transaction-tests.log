@@ -1,0 +1,20 @@
+npm notice run @symphony/db@0.1.0 test:db
+npm notice run vitest run --reporter=verbose src/__tests__/command-transaction.integration.test.ts
+
+ RUN  v2.1.9 C:/Workspace/GitHub/Prototype/packages/db
+
+ ✓ src/__tests__/command-transaction.integration.test.ts > WP1.2-A PostgreSQL transaction boundary > runs the actual CommandBus persistence ports on one PostgreSQL transaction
+(node:4964) DeprecationWarning: Calling client.query() when the client is already executing a query is deprecated and will be removed in pg@9.0. Use async/await or an external async flow control mechanism instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+ ✓ src/__tests__/command-transaction.integration.test.ts > WP1.2-A PostgreSQL transaction boundary > rolls receipt, state, event, and outbox writes back at each failing write boundary
+ ✓ src/__tests__/command-transaction.integration.test.ts > WP1.2-A PostgreSQL transaction boundary > clears transaction-local tenant context after both commit and rollback
+stderr | src/__tests__/command-transaction.integration.test.ts > WP1.2-A PostgreSQL transaction boundary > commits a PostgreSQL denial audit only after rollback, and fails closed when audit insert fails
+security_audit_write_failed
+
+ ✓ src/__tests__/command-transaction.integration.test.ts > WP1.2-A PostgreSQL transaction boundary > commits a PostgreSQL denial audit only after rollback, and fails closed when audit insert fails
+
+ Test Files  1 passed (1)
+      Tests  4 passed (4)
+   Start at  13:00:47
+   Duration  3.71s (transform 231ms, setup 0ms, collect 2.04s, tests 1.05s, environment 0ms, prepare 183ms)
+

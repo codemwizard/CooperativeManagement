@@ -17,10 +17,12 @@
  * and cleaned up in afterEach via CASCADE-safe deletes.
  */
 
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterAll, afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { randomUUID } from 'node:crypto';
-import { sql, type Kysely } from 'kysely';
+import pg from 'pg';
+import type { Kysely } from 'kysely';
 import { createDb } from '../db/client.js';
+import { PostgresCommandTransactionRunner } from '../repositories/postgres-command-transaction.js';
 import { PostgresRepository } from '../repositories/postgres-repository.js';
 import {
   AggregateRoot,
@@ -65,65 +67,51 @@ function makeOutbox(eventId: string): OutboxMessage {
 
 // ─── Shared setup ─────────────────────────────────────────────────────────────
 
-const DATABASE_URL =
-  process.env['DATABASE_URL'] ??
-  'postgresql://symphony:symphony_dev@127.0.0.1:5432/symphony';
+const APP_DATABASE_URL = process.env['PHASE1_TEST_APP_DATABASE_URL'];
+const ADMIN_DATABASE_URL = process.env['PHASE1_TEST_ADMIN_DATABASE_URL'];
+const admin = new pg.Pool({ connectionString: ADMIN_DATABASE_URL });
 
 let db: Kysely<SymphonyDatabase>;
+let recoveryDb: Kysely<SymphonyDatabase>;
+let runner: PostgresCommandTransactionRunner;
 let tenantId: string;
 
+describe.skipIf(!APP_DATABASE_URL || !ADMIN_DATABASE_URL)('PostgresRepository', () => {
 beforeEach(async () => {
-  // Single-connection pool ensures set_config is visible across all test statements
-  db = createDb(DATABASE_URL, { max: 1 });
+  // Application statements run with transaction-local tenant context.
+  db = createDb(APP_DATABASE_URL ?? '', { max: 1 });
+  recoveryDb = createDb(APP_DATABASE_URL ?? '', { max: 1 });
+  runner = new PostgresCommandTransactionRunner(db, { recoveryDb });
   tenantId = randomUUID();
 
-  // Set the RLS tenant context for this connection (non-LOCAL persists across stmts)
-  await sql`SELECT set_config('app.current_tenant_id', ${sql.lit(tenantId)}, false)`.execute(db);
+  // Tenant fixtures are provisioned by the test administrator.
+  await admin.query('INSERT INTO symphony.tenants (id, name) VALUES ($1,$2)', [tenantId, `test-tenant-${tenantId}`]);
+});
 
-  // Insert a fresh tenant for this test
-  await db
-    .insertInto('symphony.tenants')
-    .values({ id: tenantId, name: `test-tenant-${tenantId}` })
-    .execute();
+afterAll(async () => {
+  await admin.end();
 });
 
 afterEach(async () => {
-  // Keep trigger changes and cleanup atomic. PostgreSQL's table lock prevents
-  // concurrent test files from observing the trigger in its disabled state.
-  await db.transaction().execute(async (trx) => {
-    await sql`SELECT set_config('app.current_tenant_id', ${sql.lit(tenantId)}, false)`.execute(trx);
-    await sql`ALTER TABLE symphony.domain_events DISABLE TRIGGER domain_events_immutability`.execute(trx);
-    try {
-      await trx.deleteFrom('symphony.event_outbox')
-        .where('event_id', 'in',
-          trx.selectFrom('symphony.domain_events')
-            .select('id')
-            .where('tenant_id', '=', tenantId)
-        )
-        .execute();
+  await admin.query('BEGIN');
+  try {
+    await admin.query('DELETE FROM symphony.event_outbox WHERE event_id IN (SELECT id FROM symphony.domain_events WHERE tenant_id=$1)', [tenantId]);
+    await admin.query('DELETE FROM symphony.aggregate_states WHERE tenant_id=$1', [tenantId]);
+    await admin.query('ALTER TABLE symphony.domain_events DISABLE TRIGGER domain_events_immutability');
+    await admin.query('DELETE FROM symphony.domain_events WHERE tenant_id=$1', [tenantId]);
+    await admin.query('ALTER TABLE symphony.domain_events ENABLE TRIGGER domain_events_immutability');
+    await admin.query('DELETE FROM symphony.tenants WHERE id=$1', [tenantId]);
+    await admin.query('COMMIT');
+  } catch (error) {
+    await admin.query('ROLLBACK');
+    throw error;
+  }
 
-      await trx.deleteFrom('symphony.domain_events')
-        .where('tenant_id', '=', tenantId)
-        .execute();
-    } finally {
-      await sql`ALTER TABLE symphony.domain_events ENABLE TRIGGER domain_events_immutability`.execute(trx);
-    }
-
-    await trx.deleteFrom('symphony.aggregate_states')
-      .where('tenant_id', '=', tenantId)
-      .execute();
-
-    await trx.deleteFrom('symphony.tenants')
-      .where('id', '=', tenantId)
-      .execute();
-  });
-
-  await db.destroy();
+  await Promise.all([db.destroy(), recoveryDb.destroy()]);
 });
 
 // ─── Tests ────────────────────────────────────────────────────────────────────
 
-describe('PostgresRepository', () => {
   it('concurrentVersions_onlyOneCommits', async () => {
     /**
      * Two savers both believe the aggregate is new (expectedVersion = 0).
@@ -141,8 +129,8 @@ describe('PostgresRepository', () => {
 
     // Fire both saves concurrently
     const [result1, result2] = await Promise.allSettled([
-      repo.save(agg1, 0, [ev1], []),
-      repo.save(agg2, 0, [ev2], []),
+      runner.run(tenantId, (context) => repo.save(agg1, 0, [ev1], [], context)),
+      runner.run(tenantId, (context) => repo.save(agg2, 0, [ev2], [], context)),
     ]);
 
     const successes = [result1, result2].filter((r) => r.status === 'fulfilled');
@@ -155,22 +143,12 @@ describe('PostgresRepository', () => {
     expect(err).toBeInstanceOf(OptimisticConcurrencyError);
 
     // Verify only one state row exists
-    const rows = await db
-      .selectFrom('symphony.aggregate_states')
-      .selectAll()
-      .where('id', '=', aggId)
-      .where('tenant_id', '=', tenantId)
-      .execute();
-    expect(rows).toHaveLength(1);
+    const rows = await admin.query('SELECT id FROM symphony.aggregate_states WHERE id=$1 AND tenant_id=$2', [aggId, tenantId]);
+    expect(rows.rowCount).toBe(1);
 
     // Verify only one event was written
-    const events = await db
-      .selectFrom('symphony.domain_events')
-      .selectAll()
-      .where('aggregate_id', '=', aggId)
-      .where('tenant_id', '=', tenantId)
-      .execute();
-    expect(events).toHaveLength(1);
+    const events = await admin.query('SELECT id FROM symphony.domain_events WHERE aggregate_id=$1 AND tenant_id=$2', [aggId, tenantId]);
+    expect(events.rowCount).toBe(1);
   });
 
   it('rollbackOnEventInsertFailure', async () => {
@@ -185,19 +163,11 @@ describe('PostgresRepository', () => {
     const conflictingEventId = randomUUID();
 
     // Pre-insert the event directly so the duplicate will fail
-    await db
-      .insertInto('symphony.domain_events')
-      .values({
-        id: conflictingEventId,
-        tenant_id: tenantId,
-        aggregate_id: aggId,
-        aggregate_type: 'TestAggregate',
-        event_type: 'PreExisting',
-        payload: JSON.stringify({}) as unknown,
-        occurred_at: new Date(),
-        sequence: 0,
-      })
-      .execute();
+    await admin.query(
+      `INSERT INTO symphony.domain_events (id,tenant_id,aggregate_id,aggregate_type,event_type,payload,occurred_at,sequence)
+       VALUES ($1,$2,$3,'TestAggregate','PreExisting','{}',now(),0)`,
+      [conflictingEventId, tenantId, aggId],
+    );
 
     // Now also need an aggregate_states row so we don't collide on that
     // (we're testing event failure, not state failure)
@@ -224,26 +194,17 @@ describe('PostgresRepository', () => {
     const outbox = makeOutbox(conflictingEventId);
 
     await expect(
-      repo.save(agg, 0, [duplicateEvent], [outbox]),
+      runner.run(tenantId, (context) => repo.save(agg, 0, [duplicateEvent], [outbox], context)),
     ).rejects.toThrow();
 
     // State row must NOT exist — the transaction rolled back
-    const stateRows = await db
-      .selectFrom('symphony.aggregate_states')
-      .selectAll()
-      .where('id', '=', freshAggId)
-      .where('tenant_id', '=', tenantId)
-      .execute();
-    expect(stateRows).toHaveLength(0);
+    const stateRows = await admin.query('SELECT id FROM symphony.aggregate_states WHERE id=$1 AND tenant_id=$2', [freshAggId, tenantId]);
+    expect(stateRows.rowCount).toBe(0);
 
     // No outbox row for the conflicting event either
-    const outboxRows = await db
-      .selectFrom('symphony.event_outbox')
-      .selectAll()
-      .where('event_id', '=', conflictingEventId)
-      .execute();
+    const outboxRows = await admin.query('SELECT id FROM symphony.event_outbox WHERE event_id=$1', [conflictingEventId]);
     // Only the pre-existing event is there if any outbox was for it — but we
     // did not insert any outbox for the pre-existing event, so 0 rows
-    expect(outboxRows).toHaveLength(0);
+    expect(outboxRows.rowCount).toBe(0);
   });
 });

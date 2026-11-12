@@ -24,6 +24,8 @@
 
 import { createCipheriv, createDecipheriv, createHmac, randomBytes } from 'node:crypto';
 
+const ENCRYPTED_FIELD_VERSION_PREFIX = Buffer.from('SFE1', 'ascii');
+
 // ─── Classified error ─────────────────────────────────────────────────────────
 
 export type PiiVaultErrorCode = 'KEY_DELETED' | 'DECRYPT_FAILED' | 'KEY_NOT_FOUND';
@@ -40,10 +42,18 @@ export class PiiVaultError extends Error {
 
 // ─── Port interface ───────────────────────────────────────────────────────────
 
+export interface KeyProviderMetadata {
+  readonly provider: string;
+  readonly key_version: string;
+  readonly status: 'not_for_production' | 'approved_non_test';
+}
+
 export interface KeyProvider {
+  /** Non-secret algorithm/version and deployment-scope metadata; never key material. */
+  readonly metadata: KeyProviderMetadata;
   /**
    * Encrypt plaintext using a per-person data key identified by keyRef.
-   * Returns a Buffer containing: [IV (12 bytes)] [ciphertext] [auth tag (16 bytes)]
+   * Returns a Buffer containing: [format/version (4 bytes)] [IV (12 bytes)] [ciphertext] [auth tag (16 bytes)].
    */
   encrypt(plaintext: Buffer, keyRef: string): Promise<Buffer>;
 
@@ -92,6 +102,12 @@ export interface LocalDevKeyProviderOptions {
  * implemented by marking a keyRef as deleted (simulating KMS key destruction).
  */
 export class LocalDevKeyProvider implements KeyProvider {
+  readonly metadata = Object.freeze({
+    provider: 'LocalDevKeyProvider',
+    key_version: 'local-dev-aes-256-gcm-v1',
+    status: 'not_for_production' as const,
+  });
+
   private readonly rootKek: Buffer;
   private readonly defaultPepper: Buffer;
   private readonly deletedKeys = new Set<string>();
@@ -127,8 +143,8 @@ export class LocalDevKeyProvider implements KeyProvider {
     const encrypted = Buffer.concat([cipher.update(plaintext), cipher.final()]);
     const authTag = cipher.getAuthTag(); // 16 bytes
 
-    // Layout: [IV (12)] [ciphertext] [authTag (16)]
-    return Buffer.concat([iv, encrypted, authTag]);
+    // Layout: [format/version (4)] [IV (12)] [ciphertext] [authTag (16)]
+    return Buffer.concat([ENCRYPTED_FIELD_VERSION_PREFIX, iv, encrypted, authTag]);
   }
 
   async decrypt(ciphertext: Buffer, keyRef: string): Promise<Buffer> {
@@ -136,14 +152,17 @@ export class LocalDevKeyProvider implements KeyProvider {
       throw new PiiVaultError('KEY_DELETED', `Key "${keyRef}" has been deleted`);
     }
 
-    if (ciphertext.length < 28) {
-      // 12 (IV) + 0 (empty plaintext) + 16 (tag) = 28 minimum
+    if (!ciphertext.subarray(0, ENCRYPTED_FIELD_VERSION_PREFIX.length).equals(ENCRYPTED_FIELD_VERSION_PREFIX)) {
+      throw new PiiVaultError('DECRYPT_FAILED', 'Unsupported encrypted field version');
+    }
+    if (ciphertext.length < 32) {
+      // 4 (format/version) + 12 (IV) + 0 (empty plaintext) + 16 (tag) = 32 minimum
       throw new PiiVaultError('DECRYPT_FAILED', 'Ciphertext too short');
     }
 
-    const iv = ciphertext.subarray(0, 12);
+    const iv = ciphertext.subarray(4, 16);
     const authTag = ciphertext.subarray(ciphertext.length - 16);
-    const encrypted = ciphertext.subarray(12, ciphertext.length - 16);
+    const encrypted = ciphertext.subarray(16, ciphertext.length - 16);
 
     const dek = this.deriveDek(keyRef);
 

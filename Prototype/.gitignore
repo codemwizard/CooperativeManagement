@@ -1,0 +1,19 @@
+node_modules/
+dist/
+*.tsbuildinfo
+.vercel/
+# *.log
+.DS_Store
+__pycache__/
+test-results/
+playwright-report/
+/artifacts/
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# V4 build output
+dist/
+

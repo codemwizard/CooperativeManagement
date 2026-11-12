@@ -1,0 +1,104 @@
+name: Symphony Phase 0 Gate
+
+on:
+  push:
+    branches: [main, master, 'phase/*']
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  phase0-gate:
+    name: Reproducible Phase 0 foundation
+    runs-on: ubuntu-latest
+    env:
+      DATA_MODE: test
+      MIGRATION_TEST_DATABASE_URL: postgresql://symphony:symphony_dev@localhost:5433/symphony_test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '26.7.0'
+          cache: npm
+      - name: Pin npm version
+        run: npm install --global npm@12.2.0
+      - run: npm ci
+      - name: Verify the local PostgreSQL lifecycle commands
+        run: npm run db:start && npm run db:stop
+      - name: Start the isolated PostgreSQL 18.0 test service
+        run: npm run db:test:start
+      - name: Install Playwright browser for the legacy regression floor
+        run: npx playwright install --with-deps chromium
+      - name: Prepare retained gate evidence
+        run: mkdir -p artifacts
+      - name: Run the mandatory Phase 0 gate
+        id: phase0
+        shell: bash
+        run: npm run verify:phase0 2>&1 | tee artifacts/phase0-gate.raw.log
+      - name: Write sanitized Phase 0 CI evidence
+        if: always()
+        env:
+          PHASE0_GATE_OUTCOME: ${{ steps.phase0.outcome }}
+        run: node tools/write_ci_evidence.mjs
+      - name: Retain Phase 0 CI evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: phase0-evidence-${{ github.sha }}
+          path: |
+            artifacts/phase0-ci-evidence.json
+            artifacts/phase0-gate.sanitized.log
+          if-no-files-found: error
+          retention-days: 90
+      - name: Stop the isolated PostgreSQL service
+        if: always()
+        run: npm run db:test:stop
+
+  db-integration:
+    name: Existing DB integration suite
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:18.0-alpine
+        env:
+          POSTGRES_DB: symphony_test
+          POSTGRES_USER: symphony
+          POSTGRES_PASSWORD: symphony_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+    env:
+      DATABASE_URL: postgresql://symphony:symphony_test@localhost:5432/symphony_test
+      DATABASE_SCHEMA: symphony
+      DATA_MODE: test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '26.7.0'
+          cache: npm
+      - name: Pin npm version
+        run: npm install --global npm@12.2.0
+      - run: npm ci
+      - run: npm run db:migrate:test
+      - run: npm run test:db --workspace @symphony/db
+
+  legacy-e2e:
+    name: Existing full legacy E2E suite
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '26.7.0'
+          cache: npm
+      - name: Pin npm version
+        run: npm install --global npm@12.2.0
+      - run: npm ci
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+      - name: Run the full legacy suite, including Phase 1 E2E
+        run: npm run verify:all

@@ -1,0 +1,1165 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Symphony capture event v1",
+  "description": "One automatically captured interaction event. Never contains typed text, PINs or personal data.",
+  "type": "object",
+  "required": [
+    "v",
+    "session_id",
+    "seq",
+    "t_ms",
+    "ts",
+    "type",
+    "screen_id",
+    "tour_id",
+    "tour_step",
+    "case_id",
+    "destination_id",
+    "role",
+    "payload"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "v": {
+      "const": 1
+    },
+    "session_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9._-]{3,64}$"
+    },
+    "seq": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "t_ms": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "ts": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "type": {
+      "enum": [
+        "session_start",
+        "session_end",
+        "screen_view",
+        "screen_leave",
+        "idle_start",
+        "idle_end",
+        "visibility",
+        "tour_start",
+        "tour_step",
+        "tour_exit",
+        "tour_complete",
+        "off_script",
+        "ui_click",
+        "destination_switch",
+        "role_switch",
+        "case_select",
+        "action_result",
+        "readiness_change",
+        "traceability_open",
+        "drilldown",
+        "outcome_recorded",
+        "evidence_admission",
+        "evidence_request",
+        "dossier_export",
+        "help_open",
+        "reset_demo",
+        "export",
+        "error"
+      ]
+    },
+    "screen_id": {
+      "enum": [
+        "login",
+        "enrollment",
+        "sme_dashboard",
+        "org_state",
+        "project_state",
+        "requirements",
+        "gap_remediation",
+        "readiness_basis",
+        "destination_projection",
+        "present_modal",
+        "lender_assessment",
+        "facility_monitoring",
+        "portfolio",
+        "claim_view",
+        "nabii_pipeline",
+        "nabii_cohort",
+        "nabii_directory",
+        "verifier_queue",
+        "verifier_workbench",
+        "tour_launcher",
+        null
+      ]
+    },
+    "tour_id": {
+      "enum": [
+        "bank",
+        "nabii",
+        null
+      ]
+    },
+    "tour_step": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "case_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "destination_id": {
+      "enum": [
+        "A",
+        "B",
+        "N",
+        null
+      ]
+    },
+    "role": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "payload": {
+      "type": "object"
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "session_start"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "type": "object",
+            "required": [
+              "audience",
+              "label",
+              "app_version",
+              "viewport",
+              "device_class",
+              "demo_date"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "audience": {
+                "enum": [
+                  "bank",
+                  "nabii",
+                  "other",
+                  "unlabelled"
+                ]
+              },
+              "label": {
+                "type": "string"
+              },
+              "app_version": {
+                "type": "string"
+              },
+              "viewport": {
+                "type": "object"
+              },
+              "device_class": {
+                "enum": [
+                  "desktop",
+                  "tablet",
+                  "phone"
+                ]
+              },
+              "demo_date": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "session_end"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "type": "object",
+            "required": [
+              "reason",
+              "duration_ms",
+              "active_ms"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "reason": {
+                "enum": [
+                  "chord",
+                  "idle_timeout",
+                  "tour_complete",
+                  "page_hide",
+                  "reset"
+                ]
+              },
+              "duration_ms": {
+                "type": "integer"
+              },
+              "active_ms": {
+                "type": "integer"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "screen_view"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "type": "object",
+            "required": [
+              "previous_screen",
+              "via"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "previous_screen": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "via": {
+                "enum": [
+                  "initial",
+                  "nav",
+                  "tour",
+                  "drilldown",
+                  "link",
+                  "back"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "screen_leave"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "type": "object",
+            "required": [
+              "dwell_ms",
+              "active_ms"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "dwell_ms": {
+                "type": "integer"
+              },
+              "active_ms": {
+                "type": "integer"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "idle_start"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "type": "object",
+            "required": [
+              "threshold_ms"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "threshold_ms": {
+                "type": "integer"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "idle_end"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "type": "object",
+            "required": [
+              "idle_ms"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "idle_ms": {
+                "type": "integer"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "visibility"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "type": "object",
+            "required": [
+              "state"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "state": {
+                "enum": [
+                  "hidden",
+                  "visible"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "tour_start"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "type": "object",
+            "required": [
+              "tour_id",
+              "step_total"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "tour_id": {
+                "enum": [
+                  "bank",
+                  "nabii"
+                ]
+              },
+              "step_total": {
+                "type": "integer"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "tour_step"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "type": "object",
+            "required": [
+              "step_id",
+              "step_index",
+              "step_total",
+              "direction"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "step_id": {
+                "type": "string"
+              },
+              "step_index": {
+                "type": "integer"
+              },
+              "step_total": {
+                "type": "integer"
+              },
+              "direction": {
+                "enum": [
+                  "next",
+                  "back",
+                  "jump"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "tour_exit"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "type": "object",
+            "required": [
+              "step_id",
+              "step_index",
+              "completed_fraction"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "step_id": {
+                "type": "string"
+              },
+              "step_index": {
+                "type": "integer"
+              },
+              "completed_fraction": {
+                "type": "number"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "tour_complete"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "type": "object",
+            "required": [
+              "duration_ms"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "duration_ms": {
+                "type": "integer"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "off_script"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "type": "object",
+            "required": [
+              "expected_screen",
+              "actual_screen"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "expected_screen": {
+                "type": "string"
+              },
+              "actual_screen": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "ui_click"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "type": "object",
+            "required": [
+              "testid"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "testid": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "destination_switch"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "type": "object",
+            "required": [
+              "from",
+              "to"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "from": {
+                "enum": [
+                  "A",
+                  "B",
+                  "N"
+                ]
+              },
+              "to": {
+                "enum": [
+                  "A",
+                  "B",
+                  "N"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "role_switch"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "type": "object",
+            "required": [
+              "from",
+              "to"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "from": {
+                "type": "string"
+              },
+              "to": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "case_select"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "type": "object",
+            "required": [
+              "from",
+              "to"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "from": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "to": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "action_result"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "type": "object",
+            "required": [
+              "action",
+              "ok",
+              "code",
+              "changed_requirements"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "action": {
+                "type": "string"
+              },
+              "ok": {
+                "type": "boolean"
+              },
+              "code": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "changed_requirements": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "readiness_change"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "type": "object",
+            "required": [
+              "destination_id",
+              "before",
+              "after",
+              "unresolved_before",
+              "unresolved_after"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "destination_id": {
+                "enum": [
+                  "A",
+                  "B",
+                  "N"
+                ]
+              },
+              "before": {
+                "type": "boolean"
+              },
+              "after": {
+                "type": "boolean"
+              },
+              "unresolved_before": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "unresolved_after": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "traceability_open"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "type": "object",
+            "required": [
+              "level",
+              "requirement_id",
+              "evidence_type",
+              "clicks_from_state"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "level": {
+                "enum": [
+                  "chain",
+                  "evidence"
+                ]
+              },
+              "requirement_id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "evidence_type": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "clicks_from_state": {
+                "type": "integer"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "drilldown"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "type": "object",
+            "required": [
+              "from",
+              "to",
+              "clicks"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "from": {
+                "type": "string"
+              },
+              "to": {
+                "type": "string"
+              },
+              "clicks": {
+                "type": "integer"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "outcome_recorded"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "type": "object",
+            "required": [
+              "outcome"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "outcome": {
+                "enum": [
+                  "approved",
+                  "declined",
+                  "deferred",
+                  "more_evidence_requested"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "evidence_admission"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "type": "object",
+            "required": [
+              "requirement_id",
+              "status"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "requirement_id": {
+                "type": "string"
+              },
+              "status": {
+                "enum": [
+                  "accepted",
+                  "requires_independent_query",
+                  "rejected"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "evidence_request"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "type": "object",
+            "required": [
+              "requirement_id"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "requirement_id": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "dossier_export"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "type": "object",
+            "required": [
+              "format",
+              "destination_id"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "format": {
+                "enum": [
+                  "json",
+                  "csv",
+                  "print"
+                ]
+              },
+              "destination_id": {
+                "enum": [
+                  "A",
+                  "B",
+                  "N"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "help_open"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "type": "object",
+            "required": [
+              "help_id",
+              "pattern",
+              "via"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "help_id": {
+                "type": "string"
+              },
+              "pattern": {
+                "enum": [
+                  "tooltip",
+                  "popover",
+                  "helper",
+                  "tour"
+                ]
+              },
+              "via": {
+                "enum": [
+                  "hover",
+                  "focus",
+                  "tap",
+                  "key"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "reset_demo"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "type": "object",
+            "required": [],
+            "additionalProperties": false,
+            "properties": {}
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "export"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "type": "object",
+            "required": [
+              "format"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "format": {
+                "enum": [
+                  "session_json",
+                  "all_json",
+                  "events_csv",
+                  "screens_csv",
+                  "sessions_csv"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "error"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "type": "object",
+            "required": [
+              "message",
+              "source"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "message": {
+                "type": "string",
+                "maxLength": 200
+              },
+              "source": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
+}

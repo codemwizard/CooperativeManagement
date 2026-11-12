@@ -1,0 +1,190 @@
+{
+  "version": "1.0",
+  "note": "Tour bubbles. Anchors are data-testid values and must exist in the built UI (test H6). expected_screen feeds the off_script capture event.",
+  "steps": [
+    {
+      "tour_id": "bank",
+      "step_id": "b1",
+      "expected_screen": "lender_assessment",
+      "anchor_testid": "lender-case-header",
+      "text": "This case was presented to Lender A as a frozen snapshot. Everything on it can be traced to its source.",
+      "advance": "click"
+    },
+    {
+      "tour_id": "bank",
+      "step_id": "b2",
+      "expected_screen": "lender_assessment",
+      "anchor_testid": "evidence-admission-table",
+      "text": "Each requirement shows its evidence, who verified it, and its limitation. The lender decides what to accept.",
+      "advance": "click"
+    },
+    {
+      "tour_id": "bank",
+      "step_id": "b3",
+      "expected_screen": "destination_projection",
+      "anchor_testid": "destination-tab-B",
+      "text": "Switch to Lender B. Same enterprise, same project, different requirements and a different result.",
+      "advance": "click"
+    },
+    {
+      "tour_id": "bank",
+      "step_id": "b4",
+      "expected_screen": "lender_assessment",
+      "anchor_testid": "raise-dispute-btn",
+      "text": "Raise a dispute on the income records and watch the requirement turn into an exception.",
+      "advance": "click"
+    },
+    {
+      "tour_id": "bank",
+      "step_id": "b5",
+      "expected_screen": "lender_assessment",
+      "anchor_testid": "readiness-badge",
+      "text": "Readiness is recomputed from the evidence. It was not edited by anyone.",
+      "advance": "click"
+    },
+    {
+      "tour_id": "bank",
+      "step_id": "b6",
+      "expected_screen": "requirements",
+      "anchor_testid": "resolve-dispute-btn",
+      "text": "A different field agent re-verifies the evidence. Uploading a new record would not have closed the dispute.",
+      "advance": "click"
+    },
+    {
+      "tour_id": "bank",
+      "step_id": "b7",
+      "expected_screen": "lender_assessment",
+      "anchor_testid": "assign-verification-btn",
+      "text": "Assign verification of the same evidence to the lender's own verifier.",
+      "advance": "click"
+    },
+    {
+      "tour_id": "bank",
+      "step_id": "b8",
+      "expected_screen": "verifier_queue",
+      "anchor_testid": "verifier-queue-row-asg-1",
+      "text": "The verifier sees their queue, opens the assignment and records a finding. A finding never changes the evidence.",
+      "advance": "click"
+    },
+    {
+      "tour_id": "bank",
+      "step_id": "b9",
+      "expected_screen": "lender_assessment",
+      "anchor_testid": "relied-btn",
+      "text": "The lender records its own reliance decision. It is not an approval.",
+      "advance": "click"
+    },
+    {
+      "tour_id": "bank",
+      "step_id": "b10",
+      "expected_screen": "lender_assessment",
+      "anchor_testid": "outcome-select",
+      "text": "The lender chooses an outcome. Nothing is pre-selected and Symphony never decides.",
+      "advance": "click"
+    },
+    {
+      "tour_id": "bank",
+      "step_id": "b11",
+      "expected_screen": "facility_monitoring",
+      "anchor_testid": "covenant-row-quarterly_cash_statement",
+      "text": "After financing, the same evidence is the baseline for monitoring. This covenant is overdue.",
+      "advance": "click"
+    },
+    {
+      "tour_id": "bank",
+      "step_id": "b12",
+      "expected_screen": "portfolio",
+      "anchor_testid": "portfolio-exposure",
+      "text": "Every number here is computed and can be followed down to its evidence.",
+      "advance": "click"
+    },
+    {
+      "tour_id": "bank",
+      "step_id": "b13",
+      "expected_screen": "lender_assessment",
+      "anchor_testid": "export-csv-btn",
+      "text": "Export the readiness record. It is not mapped to any institution's system.",
+      "advance": "click"
+    },
+    {
+      "tour_id": "nabii",
+      "step_id": "n1",
+      "expected_screen": "nabii_pipeline",
+      "anchor_testid": "funnel-stage-enrolled",
+      "text": "Cooperatives move through stages. Every count is computed from the same engine the lenders see.",
+      "advance": "click"
+    },
+    {
+      "tour_id": "nabii",
+      "step_id": "n2",
+      "expected_screen": "nabii_pipeline",
+      "anchor_testid": "funnel-stage-ready_programme",
+      "text": "Click a stage to list the cooperatives in it.",
+      "advance": "click"
+    },
+    {
+      "tour_id": "nabii",
+      "step_id": "n3",
+      "expected_screen": "nabii_cohort",
+      "anchor_testid": "cohort-row-readiness-cohort-1",
+      "text": "Baseline against current for a cohort. Gaps closed shows progress since the demo was loaded.",
+      "advance": "click"
+    },
+    {
+      "tour_id": "nabii",
+      "step_id": "n4",
+      "expected_screen": "nabii_cohort",
+      "anchor_testid": "intervention-class-filter",
+      "text": "Open requirements are grouped by the kind of support they need.",
+      "advance": "click"
+    },
+    {
+      "tour_id": "nabii",
+      "step_id": "n5",
+      "expected_screen": "nabii_cohort",
+      "anchor_testid": "intervention-row-case-3-N1",
+      "text": "A stale registration is blocked. It needs a renewal that happens outside the platform.",
+      "advance": "click"
+    },
+    {
+      "tour_id": "nabii",
+      "step_id": "n6",
+      "expected_screen": "gap_remediation",
+      "anchor_testid": "remediate-governance-btn",
+      "text": "Close a governance gap: minutes, sign-off, then independent verification.",
+      "advance": "click"
+    },
+    {
+      "tour_id": "nabii",
+      "step_id": "n7",
+      "expected_screen": "destination_projection",
+      "anchor_testid": "destination-tab-B",
+      "text": "Switch destination to see the same state against different requirements.",
+      "advance": "click"
+    },
+    {
+      "tour_id": "nabii",
+      "step_id": "n8",
+      "expected_screen": "project_state",
+      "anchor_testid": "metric-card-environmental-baseline",
+      "text": "The baseline captured at readiness is the starting point for any later monitoring.",
+      "advance": "click"
+    },
+    {
+      "tour_id": "nabii",
+      "step_id": "n9",
+      "expected_screen": "present_modal",
+      "anchor_testid": "present-btn",
+      "text": "Presenting freezes a snapshot for the lender, who then assesses independently.",
+      "advance": "click"
+    },
+    {
+      "tour_id": "nabii",
+      "step_id": "n10",
+      "expected_screen": "nabii_pipeline",
+      "anchor_testid": "role-switcher",
+      "text": "Switch to a technical assistance user. They see only their own cohort.",
+      "advance": "click"
+    }
+  ]
+}

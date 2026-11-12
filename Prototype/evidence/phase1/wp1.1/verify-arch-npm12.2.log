@@ -1,0 +1,7 @@
+npm notice run symphony-prototype@1.0.0 verify:arch
+npm notice run npx depcruise packages/domain/src packages/contracts/src packages/db/src packages/testkit/src apps/api/src apps/workspace/src --config .dependency-cruiser.cjs
+npm notice run symphony-prototype@1.0.0 npx
+npm notice run depcruise packages/domain/src packages/contracts/src packages/db/src packages/testkit/src apps/api/src apps/workspace/src --config .dependency-cruiser.cjs
+
+✔ no dependency violations found (120 modules, 186 dependencies cruised)
+

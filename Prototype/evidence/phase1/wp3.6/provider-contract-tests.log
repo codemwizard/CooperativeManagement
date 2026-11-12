@@ -1,0 +1,3 @@
+Command: npm run test:unit --workspace @symphony/domain -- src/privacy/__tests__/pii-vault.test.ts
+Result: passed (1 test file, 12 tests)
+Coverage: round-trip, randomized ciphertext, provider metadata/version/scope, wrong-key and tamper rejection, unsupported version, key separation, blind-index behavior, and existing privacy canary checks.

@@ -85,6 +85,22 @@ export interface SecurityAttemptTable {
 
 export type SecurityAttemptRow = Selectable<SecurityAttemptTable>;
 
+export interface ReconciliationInboxTable {
+  reconciliation_id: string;
+  tenant_id: string;
+  payload_ciphertext: Uint8Array | null;
+  encryption_key_ref: string | null;
+  reason_code: 'VERSION_CONFLICT';
+  lifecycle: 'open' | 'resolved' | 'superseded' | 'expired';
+  created_at: Date;
+  updated_at: Date;
+  expires_at: Date;
+  tombstoned_at: Date | null;
+}
+
+export type ReconciliationInboxRow = Selectable<ReconciliationInboxTable>;
+export type InsertReconciliationInbox = Insertable<ReconciliationInboxTable>;
+
 // ─── tenants ──────────────────────────────────────────────────────────────────
 
 export interface TenantTable {
@@ -101,6 +117,7 @@ export interface SymphonyDatabase {
   'symphony.event_outbox': EventOutboxTable;
   'symphony.command_receipts': CommandReceiptTable;
   'symphony.security_attempts': SecurityAttemptTable;
+  'symphony.reconciliation_inbox': ReconciliationInboxTable;
   'symphony.tenants': TenantTable;
 }
 

@@ -1,0 +1,45 @@
+{
+  "note": "Synthetic national-level pipeline aggregates. Labelled illustrative context.",
+  "headline": {
+    "total_enterprises": 50,
+    "pipeline_demand_zmw": 14200000,
+    "smallholders_reached": 7200,
+    "women_participation_pct": 54,
+    "youth_led_households_pct": 38,
+    "total_declared_assets_zmw": 24800000,
+    "members_livestock_share_zmw": 18600000,
+    "cooperative_assets_share_zmw": 6200000
+  },
+  "states_distribution": {
+    "remediation_required": 14,
+    "assessment_ready": 18,
+    "initial_record": 8,
+    "evidence_progressing": 10
+  },
+  "provinces": [
+    {
+      "province": "Central",
+      "enterprises": 22,
+      "pipeline_zmw": 6400000,
+      "modelled_cases": 6
+    },
+    {
+      "province": "Southern",
+      "enterprises": 16,
+      "pipeline_zmw": 4800000,
+      "modelled_cases": 2
+    },
+    {
+      "province": "Copperbelt",
+      "enterprises": 8,
+      "pipeline_zmw": 2100000,
+      "modelled_cases": 1
+    },
+    {
+      "province": "Eastern",
+      "enterprises": 4,
+      "pipeline_zmw": 900000,
+      "modelled_cases": 1
+    }
+  ]
+}

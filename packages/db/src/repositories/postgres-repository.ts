@@ -179,24 +179,18 @@ export class PostgresRepository<TAggregate extends AggregateRoot>
     // Build a lookup from event id to event
     const eventById = new Map(events.map((e) => [e.id, e]));
 
-    await trx
-      .insertInto('symphony.event_outbox')
-      .values(
-        messages.map((m) => {
-          // Verify the referenced event exists in this batch
-          if (!eventById.has(m.eventId)) {
-            throw new Error(
-              `OutboxMessage ${m.id} references unknown eventId ${m.eventId}`,
-            );
-          }
-          return {
-            id: m.id,
-            event_id: m.eventId,
-            status: m.status,
-          };
-        }),
-      )
-      .execute();
+    for (const message of messages) {
+      if (!eventById.has(message.eventId)) {
+        throw new Error(
+          `OutboxMessage ${message.id} references unknown eventId ${message.eventId}`,
+        );
+      }
+      if (message.status !== 'pending') {
+        throw new Error(`OutboxMessage ${message.id} must be pending when enqueued`);
+      }
+      await sql`SELECT symphony.enqueue_command_outbox_message(${message.id}::uuid, ${message.eventId}::uuid)`
+        .execute(trx);
+    }
   }
 }
 

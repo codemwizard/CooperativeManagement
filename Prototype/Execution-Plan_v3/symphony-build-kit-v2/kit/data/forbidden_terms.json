@@ -1,0 +1,34 @@
+{
+  "note": "Case-insensitive scan of all UI strings, seed data, exports and source files (excluding this file and the kit docs). Not exhaustive: add any lender a viewer might recognise.",
+  "terms": [
+    "Zanaco",
+    "Agora",
+    "AMZ",
+    "Stanbic",
+    "Absa",
+    "FNB",
+    "First National Bank",
+    "Standard Chartered",
+    "Indo-Zambia",
+    "Access Bank",
+    "Ecobank",
+    "Citibank",
+    "UBA",
+    "United Bank for Africa",
+    "Atlas Mara",
+    "Bank of China",
+    "First Alliance",
+    "Investrust",
+    "ZNCB",
+    "Zambia National Commercial",
+    "Development Bank of Zambia",
+    "Cavmont",
+    "Bayport",
+    "AFC",
+    "Agricultural Finance Company"
+  ],
+  "allowed_names": [
+    "NABII",
+    "Bank of Zambia (as programme background only)"
+  ]
+}

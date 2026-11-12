@@ -1,0 +1,34 @@
+{
+  "version": 1,
+  "decision": "D-10 approved by explicit owner direction 2026-11-07; password complexity and numeric rate-delay parameters remain WP5 implementation inputs because the supplied sources do not provide them.",
+  "session": {
+    "representation": "opaque server-side session; browser receives no bearer token in JSON, URL or persistent storage",
+    "cookie": { "httpOnly": true, "secure": true, "sameSite": "Lax", "path": "/" },
+    "idle_timeout_seconds": 1800,
+    "absolute_timeout_seconds": 43200,
+    "equality_at_expiry": "expired",
+    "multiple_sessions": "permitted; independent revocation",
+    "login_rotation": true,
+    "privilege_or_tenant_change_rotation": true,
+    "logout_revokes": "current session only",
+    "password_change_revokes": "all sessions; require fresh login",
+    "remember_me_override": false
+  },
+  "temporary_credential": { "lifetime_seconds": 259200, "single_use": true, "forced_change": true, "runtime_override": false, "equality_at_expiry": "expired" },
+  "unsafe_request_protection": { "synchronizer_token_required": true, "origin_required": true, "csrf_header": "X-CSRF-Token", "browser_token_storage": "memory only" },
+  "forced_change_allowlist": [
+    { "method": "GET", "path": "/auth/csrf", "purpose": "issue/refresh synchronizer token" },
+    { "method": "GET", "path": "/auth/session", "purpose": "read minimal session state and current CSRF token" },
+    { "method": "POST", "path": "/auth/change-password", "purpose": "complete required credential change" },
+    { "method": "POST", "path": "/auth/logout", "purpose": "revoke current session" }
+  ],
+  "explicitly_denied_while_forced_change": [
+    { "method": "POST", "path": "/auth/login" },
+    { "method": "GET", "path": "/members" },
+    { "method": "POST", "path": "/commands" },
+    { "method": "DELETE", "path": "/anything" }
+  ],
+  "rate_limit": { "dimensions": ["account", "source"], "behavior": "progressive delay", "failure_response": "generic", "permanent_lockout": false, "numeric_parameters": "not specified in supplied source; must be sourced before WP5 completes" },
+  "password_policy": { "rule": "not specified in supplied source; must be sourced before WP5 completes" },
+  "runtime_evidence_owner": "WP5.1-WP5.5; WP0 tests pure policy and boundaries only"
+}

@@ -1,0 +1,42 @@
+
+> @symphony/db@0.1.0 test:db
+> vitest run --reporter=verbose src/__tests__/command-bus-concurrency.integration.test.ts src/__tests__/command-transaction.integration.test.ts src/__tests__/security-attempt-audit.integration.test.ts
+
+
+ RUN  v2.1.9 C:/Workspace/GitHub/Prototype/packages/db
+
+ ✓ src/__tests__/security-attempt-audit.integration.test.ts > WP1.2-B security-attempt audit mode guard > refuses missing mode before opening a database transaction
+ ✓ src/__tests__/security-attempt-audit.integration.test.ts > WP1.2-B security-attempt audit mode guard > refuses unknown mode before opening a database transaction
+ ✓ src/__tests__/security-attempt-audit.integration.test.ts > WP1.2-B security-attempt audit mode guard > refuses real-data mode before opening a database transaction
+ ✓ src/__tests__/security-attempt-audit.integration.test.ts > WP1.2-B security-attempt audit mode guard > refuses non-synthetic test data before opening a database transaction
+ ✓ src/__tests__/security-attempt-audit.integration.test.ts > WP1.2-B PostgreSQL security-attempt persistence > commits the minimized denial record in a separate transaction 366ms
+stdout | src/__tests__/command-bus-concurrency.integration.test.ts > WP1.3 PostgreSQL command concurrency and recovery
+WP1.3 test target: symphony_phase1_test; PostgreSQL server_version_num=180000; database_role=symphony; DATA_MODE=test
+
+ ✓ src/__tests__/command-transaction.integration.test.ts > WP1.2-A PostgreSQL transaction boundary > runs the actual CommandBus persistence ports on one PostgreSQL transaction
+(node:24880) DeprecationWarning: Calling client.query() when the client is already executing a query is deprecated and will be removed in pg@9.0. Use async/await or an external async flow control mechanism instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+ ✓ src/__tests__/command-transaction.integration.test.ts > WP1.2-A PostgreSQL transaction boundary > rolls receipt, state, event, and outbox writes back at each failing write boundary
+ ✓ src/__tests__/command-transaction.integration.test.ts > WP1.2-A PostgreSQL transaction boundary > clears transaction-local tenant context after both commit and rollback
+ ✓ src/__tests__/command-bus-concurrency.integration.test.ts > WP1.3 PostgreSQL command concurrency and recovery > serializes identical concurrent submissions and returns the one committed result
+stderr | src/__tests__/command-transaction.integration.test.ts > WP1.2-A PostgreSQL transaction boundary > commits a PostgreSQL denial audit only after rollback, and fails closed when audit insert fails
+security_audit_write_failed
+
+ ✓ src/__tests__/command-bus-concurrency.integration.test.ts > WP1.3 PostgreSQL command concurrency and recovery > allows the waiting identical command to execute once when the original owner rolls back
+ ✓ src/__tests__/command-transaction.integration.test.ts > WP1.2-A PostgreSQL transaction boundary > commits a PostgreSQL denial audit only after rollback, and fails closed when audit insert fails
+ ✓ src/__tests__/command-bus-concurrency.integration.test.ts > WP1.3 PostgreSQL command concurrency and recovery > rejects actor, type, and semantic-envelope reuse without adding side effects
+ ✓ src/__tests__/command-bus-concurrency.integration.test.ts > WP1.3 PostgreSQL command concurrency and recovery > resolves unique receipt-key contention without committing the losing aggregate effects
+ ✓ src/__tests__/command-bus-concurrency.integration.test.ts > WP1.3 PostgreSQL command concurrency and recovery > prevents two different commands with the same expected version from overwriting one another
+ ✓ src/__tests__/command-bus-concurrency.integration.test.ts > WP1.3 PostgreSQL command concurrency and recovery > retries only serialization and deadlock failures within three total attempts
+ ✓ src/__tests__/command-bus-concurrency.integration.test.ts > WP1.3 PostgreSQL command concurrency and recovery > stops after three retryable transaction failures and returns a generic retryable result
+ ✓ src/__tests__/command-bus-concurrency.integration.test.ts > WP1.3 PostgreSQL command concurrency and recovery > does not retry non-serialization integrity failures
+ ✓ src/__tests__/command-bus-concurrency.integration.test.ts > WP1.3 PostgreSQL command concurrency and recovery > resolves a committed response loss on a fresh connection without rerunning the handler
+ ✓ src/__tests__/command-bus-concurrency.integration.test.ts > WP1.3 PostgreSQL command concurrency and recovery > re-enters once after a healthy fresh lookup proves an uncertain commit did not persist
+ ✓ src/__tests__/command-bus-concurrency.integration.test.ts > WP1.3 PostgreSQL command concurrency and recovery > counts uncertain-commit re-entry within the three-attempt transaction limit
+ ✓ src/__tests__/command-bus-concurrency.integration.test.ts > WP1.3 PostgreSQL command concurrency and recovery > returns outcome-neutral retryable unavailable when the fresh receipt lookup fails
+
+ Test Files  3 passed (3)
+      Tests  21 passed (21)
+   Start at  04:35:59
+   Duration  4.70s (transform 1.38s, setup 0ms, collect 7.03s, tests 1.96s, environment 2ms, prepare 1.28s)
+

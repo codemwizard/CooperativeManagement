@@ -1,0 +1,53 @@
+{
+  "schema_version": 1,
+  "task_id": "WP3.6",
+  "status": {
+    "implementation": "complete",
+    "unit_test": "passed",
+    "integration_test": "not_applicable",
+    "bdd_ui_test": "not_applicable",
+    "gate_verified": "passed"
+  },
+  "commit": "working-tree",
+  "environment": {
+    "node": "v26.7.0",
+    "npm": "12.2.0",
+    "postgres": "not-required",
+    "database_role": "not-used",
+    "data_mode": "test",
+    "key_provider": "local-test"
+  },
+  "commands": [
+    {
+      "command": "npm run test:unit --workspace @symphony/domain -- src/privacy/__tests__/pii-vault.test.ts",
+      "result": "passed",
+      "artifact": "evidence/phase1/wp3.6/provider-contract-tests.log"
+    },
+    {
+      "command": "npm run typecheck:v4",
+      "result": "passed",
+      "artifact": "evidence/phase1/wp3.6/typecheck.log"
+    }
+  ],
+  "claims": {
+    "behavior_proved": "The generic provider round-trips bytes, uses randomized authenticated encryption with an SFE1 envelope version, identifies its local/test-only status without plaintext metadata, and fails closed for wrong keys, tampering and unsupported envelope versions.",
+    "path_proved": "Focused provider contract tests and full workspace typecheck passed. No identifier vault, blind-index implementation, database encryption, or production key custody is claimed by WP3.6.",
+    "configuration_proved": "LocalDevKeyProvider metadata reports status not_for_production; no production provider is composed or claimed.",
+    "coverage_limitations": [
+      "The implementation's original red run was observed during the WP1.4 work but raw output was not retained; the focused green run is retained here.",
+      "WP1.4 separately owns persisted inbox ciphertext and plaintext-absence checks. WP3.4 owns deployment key lifecycle, backup and restore semantics."
+    ]
+  },
+  "limitations": [
+    "LocalDevKeyProvider is explicitly unsuitable for production; no real-data readiness claim is made."
+  ],
+  "unresolved_decisions": [],
+  "deferred_followups": [
+    {
+      "task_id": "WP3.4",
+      "scope": "Define and verify deployment-specific key lifecycle and deletion behavior.",
+      "acceptance_evidence": "WP3.4 lifecycle evidence for selected production adapter, backups, replicas and restore behavior."
+    }
+  ],
+  "reviewer": "Implementation self-review; independent review is not claimed."
+}

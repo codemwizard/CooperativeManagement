@@ -1,0 +1,44 @@
+{
+  "note": "Demonstration contact directory for traceable claims. Fictional contacts.",
+  "contacts": [
+    {
+      "id": "contact-fa-banda-01",
+      "contact_id": "contact-fa-banda-01",
+      "name": "Gift Mulenga",
+      "role": "Cooperative Field Agent",
+      "organisation": "Chisamba Farmers Cooperative",
+      "note": "Fictional contact reference. Not a real person."
+    },
+    {
+      "contact_id": "cnt-fa-001",
+      "name": "Gift Mulenga",
+      "role": "Cooperative Field Agent: internal, not independent",
+      "phone": "+260 97 712 3456",
+      "email": "gift.mulenga@chisamba.coop.zm",
+      "location": "Chisamba West Agricultural Camp",
+      "coordinates": {
+        "lat": -14.9812,
+        "lng": 28.3245
+      },
+      "nrc": "284719/11/1",
+      "designated_scope": "Livestock inventory enumeration & member field audit",
+      "cooperative_id": "case-1"
+    },
+    {
+      "contact_id": "cnt-ch-001",
+      "name": "Joseph Mwale",
+      "role": "Chairman",
+      "phone": "+260 96 623 4567",
+      "email": "joseph.mwale@chisamba.coop.zm",
+      "cooperative_id": "case-1"
+    },
+    {
+      "contact_id": "cnt-sec-001",
+      "name": "Mary Phiri",
+      "role": "Secretary",
+      "phone": "+260 97 834 5678",
+      "email": "mary.phiri@chisamba.coop.zm",
+      "cooperative_id": "case-1"
+    }
+  ]
+}

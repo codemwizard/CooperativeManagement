@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "source": "53-table baseline migration inventory plus planned WP1.2 security_attempts and PostgreSQL 18.0 pg_constraint foreign-key catalog from symphony_phase1_test",
+  "source": "53-table baseline migration inventory plus WP1.2 security_attempts and WP1.4 reconciliation_inbox; PostgreSQL 18.0 pg_constraint foreign-key catalog from symphony_phase1_test",
   "status": "WP0 proposed, reviewable table/row allowlist; no destructive statements executed",
   "target": {
     "database": "symphony_phase1_test",
@@ -34,6 +34,7 @@
     "bylaw_documents",
     "capacity_grants",
     "command_receipts",
+    "reconciliation_inbox",
     "consent_records",
     "delegations",
     "duty_matrix_rows",
@@ -60,7 +61,6 @@
     "platform_checks",
     "precedence_policies",
     "record_approvals",
-    "requirement_sources",
     "requirement_definitions",
     "resolution_class_rules",
     "user_role_assignments",
@@ -122,6 +122,11 @@
       "table": "command_receipts",
       "disposition": "delete_all_rows_in_marked_isolated_test_database",
       "predicate": "TRUE only after DB marker/profile/role guard passes"
+    },
+    {
+      "table": "reconciliation_inbox",
+      "disposition": "delete_all_rows_in_marked_isolated_test_database",
+      "predicate": "TRUE only after DB marker/profile/role guard passes; encrypted payload follows WP1.4 lifecycle expiry before purge"
     },
     {
       "table": "consent_records",
@@ -254,11 +259,6 @@
       "predicate": "TRUE only after DB marker/profile/role guard passes"
     },
     {
-      "table": "requirement_sources",
-      "disposition": "delete_all_rows_in_marked_isolated_test_database",
-      "predicate": "TRUE only after DB marker/profile/role guard passes"
-    },
-    {
       "table": "requirement_definitions",
       "disposition": "delete_test_tenant_rows_only",
       "predicate": "cooperative_id IN captured_test_tenant_organization_ids"
@@ -322,6 +322,11 @@
       "table": "security_attempts",
       "disposition": "preserve_append_only_security_history_outside_purge_allowlist",
       "reason": "Authenticated command-denial observations are security audit records; the purge role has no DELETE grant. Migration 0010 creates this table, which is explicitly preserved outside the purge allowlist."
+    },
+    {
+      "table": "requirement_sources",
+      "disposition": "preserve_global_requirement_legal_source_mappings",
+      "reason": "Root migration 0006 links requirement_sources to global requirement_definitions and legal_sources; it has no organization or tenant ownership path and is preserved with the restricted global catalogue."
     }
   ],
   "audit_ledger": {

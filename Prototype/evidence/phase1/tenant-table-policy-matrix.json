@@ -1,0 +1,1003 @@
+{
+  "version": 1,
+  "source": "evidence/phase1/tenant-table-inventory.json checked against every root migration",
+  "owner_decision": "D-03 strict tenant RLS and restricted role approved by explicit user direction 2026-11-07",
+  "roles": {
+    "application": "symphony_app (provisioned on local symphony_phase1_test; WP1.4 verified the reconciliation inbox boundary only; complete WP1.5 matrix and ephemeral CI bootstrap remain pending)",
+    "migration": "symphony_migrator (proposed DDL identity; not provisioned)",
+    "purge": "separate dedicated purge identity, no ordinary application inheritance"
+  },
+  "invariants": [
+    "All tenant_scoped tables require ENABLE and FORCE ROW LEVEL SECURITY before product use.",
+    "Runtime role is not owner, superuser, or BYPASSRLS; no DDL and no DELETE grants.",
+    "Every tenant-scoped query uses both RLS and an explicit server-derived tenant predicate.",
+    "Global catalogues are SELECT-only for ordinary app role.",
+    "Control-plane tables have no ordinary app-role grants; operation-specific grants require a named command, service identity, and audit behavior.",
+    "Current migration state is evidence of existing behavior only; three tables currently have ENABLE+FORCE. WP1.5 must implement and test the remaining tenant policies and all grants under real restricted credentials."
+  ],
+  "planned_phase1_tables": [
+    {
+      "table": "security_attempts",
+      "classification": "tenant_scoped",
+      "scope_basis": "Authenticated command denial observation; tenant and actor are established by trusted server authentication context before insert.",
+      "scope_resolution": "row.tenant_id must equal transaction-local app.tenant_id; if tenant context is unavailable, do not write this table.",
+      "ordinary_runtime_role": "symphony_app",
+      "permitted_sql_operations": ["INSERT"],
+      "delete_grant": false,
+      "required_rls": "ENABLE+FORCE",
+      "current_rls_enabled_and_forced": false,
+      "explicit_tenant_predicate": true,
+      "tenant_context": "SET LOCAL app.tenant_id only from authenticated server context; insert policy binds tenant_id to that context.",
+      "access_policy": "Append-only authenticated command-denial observation only. No SELECT, UPDATE or DELETE for ordinary app role. Unauthenticated authentication attempts use WP5's separate security audit path. Audit failure cannot authorize a command or create a business receipt.",
+      "status": "Created by WP1.2 migration 0010_security_attempts.sql; WP1.5 migration 0013_tenant_rls_app_role.sql must apply ENABLE+FORCE RLS and the INSERT-only grant/policy before product use. The local symphony_app role exists; the full matrix and CI ephemeral-role gate remain pending."
+    }
+  ],
+  "tables": [
+    {
+      "table": "tenants",
+      "classification": "control_plane_restricted",
+      "scope_basis": "Top-level tenant registry; tenant creation/maintenance is privileged.",
+      "scope_resolution": "not_applicable",
+      "ordinary_runtime_role": "no ordinary application grant",
+      "permitted_sql_operations": [],
+      "delete_grant": false,
+      "required_rls": "review_based_on_scope",
+      "current_rls_enabled_and_forced": false,
+      "explicit_tenant_predicate": false,
+      "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
+      "access_policy": "No ordinary runtime-role access. A separately named operation-specific service grant and audit contract must be mapped before implementation.",
+      "status": "WP0 grant contract is proposed; the full matrix is not yet rolled out or verified. Local symphony_app role provisioning and scoped WP1.4 grants are recorded separately."
+    },
+    {
+      "table": "command_receipts",
+      "classification": "tenant_scoped",
+      "scope_basis": "Direct tenant_id; immutable idempotency receipt data.",
+      "scope_resolution": "row.tenant_id matches transaction-local authenticated tenant context",
+      "ordinary_runtime_role": "symphony_app",
+      "permitted_sql_operations": [
+        "SELECT",
+        "INSERT"
+      ],
+      "delete_grant": false,
+      "required_rls": "ENABLE+FORCE",
+      "current_rls_enabled_and_forced": true,
+      "explicit_tenant_predicate": true,
+      "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
+      "access_policy": "Complete receipt rows are inserted once and immutable after commit. Tenant context is transaction-local, derived only from authenticated server context; every query also includes an explicit tenant predicate.",
+      "status": "WP0 grant contract is proposed; the full matrix is not yet rolled out or verified. Local symphony_app role provisioning and scoped WP1.4 grants are recorded separately."
+    },
+    {
+      "table": "reconciliation_inbox",
+      "classification": "tenant_scoped",
+      "scope_basis": "Direct tenant_id; encrypted terminal-conflict payload and non-identifying lifecycle metadata.",
+      "scope_resolution": "row.tenant_id must equal transaction-local app.tenant_id; all repository operations also include explicit tenant_id predicate.",
+      "ordinary_runtime_role": "symphony_app",
+      "permitted_sql_operations": ["SELECT", "INSERT", "UPDATE"],
+      "delete_grant": false,
+      "required_rls": "ENABLE+FORCE",
+      "current_rls_enabled_and_forced": true,
+      "explicit_tenant_predicate": true,
+      "tenant_context": "SET LOCAL app.tenant_id only from authenticated server context; policy binds tenant_id to that context.",
+      "access_policy": "Read only authorized tenant reconciliation records; insert only terminal conflict records; update lifecycle or clear expired ciphertext. No ordinary application DELETE.",
+      "status": "Created by WP1.4 migration 0012_reconciliation_inbox.sql with ENABLE+FORCE RLS; the WP1.4 task evidence proves local symphony_app SELECT/INSERT/UPDATE and denied DELETE plus tenant/context behavior. WP1.5 migration 0013 must retain these grants and include the inbox in full-matrix and CI actual-role proofs."
+    },
+    {
+      "table": "domain_events",
+      "classification": "tenant_scoped",
+      "scope_basis": "Direct tenant_id; append-only business audit.",
+      "scope_resolution": "row.tenant_id matches transaction-local authenticated tenant context",
+      "ordinary_runtime_role": "symphony_app",
+      "permitted_sql_operations": [
+        "SELECT",
+        "INSERT"
+      ],
+      "delete_grant": false,
+      "required_rls": "ENABLE+FORCE",
+      "current_rls_enabled_and_forced": true,
+      "explicit_tenant_predicate": true,
+      "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
+      "access_policy": "Append-only event rows are inserted and never updated or deleted. Tenant context is transaction-local, derived only from authenticated server context; every query also includes an explicit tenant predicate.",
+      "status": "WP0 grant contract is proposed; the full matrix is not yet rolled out or verified. Local symphony_app role provisioning and scoped WP1.4 grants are recorded separately."
+    },
+    {
+      "table": "event_outbox",
+      "classification": "control_plane_restricted",
+      "scope_basis": "No direct tenant_id; command-path inserts and worker delivery lifecycle are privileged operations through separate interfaces.",
+      "scope_resolution": "not_applicable",
+      "ordinary_runtime_role": "no ordinary application grant",
+      "permitted_sql_operations": [],
+      "delete_grant": false,
+      "required_rls": "ENABLE+FORCE for constrained function-owner INSERT",
+      "current_rls_enabled_and_forced": false,
+      "explicit_tenant_predicate": false,
+      "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
+      "operation_specific_capabilities": [
+        {
+          "name": "symphony.enqueue_command_outbox_message(uuid, uuid)",
+          "grantee": "symphony_app (EXECUTE only)",
+          "implementation": "SECURITY DEFINER function owned by the schema owner, fixed safe search_path, fully qualified objects, parameterized IDs, PUBLIC EXECUTE revoked, and an RLS check that the referenced event belongs to transaction-local app.tenant_id; inserts only a pending outbox row.",
+          "forbidden_table_privileges": ["SELECT", "INSERT", "UPDATE", "DELETE", "TRUNCATE"]
+        }
+      ],
+      "access_policy": "Keep the table unavailable to the ordinary application role. WP1.2's current PostgresRepository inserts outbox rows directly; WP1.5 must route that same-transaction operation through the named constrained function. Delivery reads and lifecycle updates remain worker-only and require their own future identity/interface.",
+      "status": "WP1.2 command implementation currently inserts outbox rows directly. WP1.5 must add and prove the constrained function interface in migration 0013; ordinary role table grants remain empty."
+    },
+    {
+      "table": "capability_registry",
+      "classification": "global_catalogue_read_only",
+      "scope_basis": "Global module capability catalogue.",
+      "scope_resolution": "not_applicable",
+      "ordinary_runtime_role": "symphony_app",
+      "permitted_sql_operations": [
+        "SELECT"
+      ],
+      "delete_grant": false,
+      "required_rls": "not_applicable_global",
+      "current_rls_enabled_and_forced": false,
+      "explicit_tenant_predicate": false,
+      "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
+      "access_policy": "No tenant policy; ordinary runtime role receives SELECT only.",
+      "status": "WP0 grant contract is proposed; the full matrix is not yet rolled out or verified. Local symphony_app role provisioning and scoped WP1.4 grants are recorded separately."
+    },
+    {
+      "table": "users",
+      "classification": "tenant_scoped",
+      "scope_basis": "Direct tenant_id and tenant-local email uniqueness.",
+      "scope_resolution": "row.tenant_id matches transaction-local authenticated tenant context",
+      "ordinary_runtime_role": "symphony_app",
+      "permitted_sql_operations": [
+        "SELECT",
+        "INSERT",
+        "UPDATE"
+      ],
+      "delete_grant": false,
+      "required_rls": "ENABLE+FORCE",
+      "current_rls_enabled_and_forced": false,
+      "explicit_tenant_predicate": true,
+      "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
+      "access_policy": "Tenant context is transaction-local, derived only from authenticated server context; every query also includes an explicit tenant predicate.",
+      "status": "WP0 grant contract is proposed; the full matrix is not yet rolled out or verified. Local symphony_app role provisioning and scoped WP1.4 grants are recorded separately."
+    },
+    {
+      "table": "persons",
+      "classification": "tenant_scoped",
+      "scope_basis": "Direct tenant_id; pseudonymous identity shell.",
+      "scope_resolution": "row.tenant_id matches transaction-local authenticated tenant context",
+      "ordinary_runtime_role": "symphony_app",
+      "permitted_sql_operations": [
+        "SELECT",
+        "INSERT",
+        "UPDATE"
+      ],
+      "delete_grant": false,
+      "required_rls": "ENABLE+FORCE",
+      "current_rls_enabled_and_forced": false,
+      "explicit_tenant_predicate": true,
+      "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
+      "access_policy": "Tenant context is transaction-local, derived only from authenticated server context; every query also includes an explicit tenant predicate.",
+      "status": "WP0 grant contract is proposed; the full matrix is not yet rolled out or verified. Local symphony_app role provisioning and scoped WP1.4 grants are recorded separately."
+    },
+    {
+      "table": "person_identifiers",
+      "classification": "tenant_scoped",
+      "scope_basis": "Tenant scope inherited through person_id; contains encrypted identifier and blind index.",
+      "scope_resolution": "Resolve tenant through declared parent relation: Tenant scope inherited through person_id; contains encrypted identifier and blind index.",
+      "ordinary_runtime_role": "symphony_app",
+      "permitted_sql_operations": [
+        "SELECT",
+        "INSERT",
+        "UPDATE"
+      ],
+      "delete_grant": false,
+      "required_rls": "ENABLE+FORCE",
+      "current_rls_enabled_and_forced": false,
+      "explicit_tenant_predicate": true,
+      "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
+      "access_policy": "Tenant context is transaction-local, derived only from authenticated server context; every query also includes an explicit tenant predicate.",
+      "status": "WP0 grant contract is proposed; the full matrix is not yet rolled out or verified. Local symphony_app role provisioning and scoped WP1.4 grants are recorded separately."
+    },
+    {
+      "table": "person_pii_vault",
+      "classification": "tenant_scoped",
+      "scope_basis": "Tenant scope inherited through person_id; contains encrypted PII.",
+      "scope_resolution": "Resolve tenant through declared parent relation: Tenant scope inherited through person_id; contains encrypted PII.",
+      "ordinary_runtime_role": "symphony_app",
+      "permitted_sql_operations": [
+        "SELECT",
+        "INSERT",
+        "UPDATE"
+      ],
+      "delete_grant": false,
+      "required_rls": "ENABLE+FORCE",
+      "current_rls_enabled_and_forced": false,
+      "explicit_tenant_predicate": true,
+      "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
+      "access_policy": "Tenant context is transaction-local, derived only from authenticated server context; every query also includes an explicit tenant predicate.",
+      "status": "WP0 grant contract is proposed; the full matrix is not yet rolled out or verified. Local symphony_app role provisioning and scoped WP1.4 grants are recorded separately."
+    },
+    {
+      "table": "consent_records",
+      "classification": "tenant_scoped",
+      "scope_basis": "Tenant scope inherited through person_id; consent and lawful-basis facts.",
+      "scope_resolution": "Resolve tenant through declared parent relation: Tenant scope inherited through person_id; consent and lawful-basis facts.",
+      "ordinary_runtime_role": "symphony_app",
+      "permitted_sql_operations": [
+        "SELECT",
+        "INSERT",
+        "UPDATE"
+      ],
+      "delete_grant": false,
+      "required_rls": "ENABLE+FORCE",
+      "current_rls_enabled_and_forced": false,
+      "explicit_tenant_predicate": true,
+      "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
+      "access_policy": "Tenant context is transaction-local, derived only from authenticated server context; every query also includes an explicit tenant predicate.",
+      "status": "WP0 grant contract is proposed; the full matrix is not yet rolled out or verified. Local symphony_app role provisioning and scoped WP1.4 grants are recorded separately."
+    },
+    {
+      "table": "platform_roles",
+      "classification": "global_catalogue_read_only",
+      "scope_basis": "Global role definitions; tenant assignments are separate.",
+      "scope_resolution": "not_applicable",
+      "ordinary_runtime_role": "symphony_app",
+      "permitted_sql_operations": [
+        "SELECT"
+      ],
+      "delete_grant": false,
+      "required_rls": "not_applicable_global",
+      "current_rls_enabled_and_forced": false,
+      "explicit_tenant_predicate": false,
+      "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
+      "access_policy": "No tenant policy; ordinary runtime role receives SELECT only.",
+      "status": "WP0 grant contract is proposed; the full matrix is not yet rolled out or verified. Local symphony_app role provisioning and scoped WP1.4 grants are recorded separately."
+    },
+    {
+      "table": "user_role_assignments",
+      "classification": "tenant_scoped",
+      "scope_basis": "Direct tenant_id; role membership is tenant-scoped.",
+      "scope_resolution": "row.tenant_id matches transaction-local authenticated tenant context",
+      "ordinary_runtime_role": "symphony_app",
+      "permitted_sql_operations": [
+        "SELECT",
+        "INSERT",
+        "UPDATE"
+      ],
+      "delete_grant": false,
+      "required_rls": "ENABLE+FORCE",
+      "current_rls_enabled_and_forced": false,
+      "explicit_tenant_predicate": true,
+      "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
+      "access_policy": "Tenant context is transaction-local, derived only from authenticated server context; every query also includes an explicit tenant predicate.",
+      "status": "WP0 grant contract is proposed; the full matrix is not yet rolled out or verified. Local symphony_app role provisioning and scoped WP1.4 grants are recorded separately."
+    },
+    {
+      "table": "capacity_grants",
+      "classification": "tenant_scoped",
+      "scope_basis": "Organization/user scope; tenant derived from organization and user.",
+      "scope_resolution": "Resolve tenant through declared parent relation: Organization/user scope; tenant derived from organization and user.",
+      "ordinary_runtime_role": "symphony_app",
+      "permitted_sql_operations": [
+        "SELECT",
+        "INSERT",
+        "UPDATE"
+      ],
+      "delete_grant": false,
+      "required_rls": "ENABLE+FORCE",
+      "current_rls_enabled_and_forced": false,
+      "explicit_tenant_predicate": true,
+      "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
+      "access_policy": "Tenant context is transaction-local, derived only from authenticated server context; every query also includes an explicit tenant predicate.",
+      "status": "WP0 grant contract is proposed; the full matrix is not yet rolled out or verified. Local symphony_app role provisioning and scoped WP1.4 grants are recorded separately."
+    },
+    {
+      "table": "delegations",
+      "classification": "tenant_scoped",
+      "scope_basis": "Organization scope; tenant derived from organization and participants.",
+      "scope_resolution": "Resolve tenant through declared parent relation: Organization scope; tenant derived from organization and participants.",
+      "ordinary_runtime_role": "symphony_app",
+      "permitted_sql_operations": [
+        "SELECT",
+        "INSERT",
+        "UPDATE"
+      ],
+      "delete_grant": false,
+      "required_rls": "ENABLE+FORCE",
+      "current_rls_enabled_and_forced": false,
+      "explicit_tenant_predicate": true,
+      "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
+      "access_policy": "Tenant context is transaction-local, derived only from authenticated server context; every query also includes an explicit tenant predicate.",
+      "status": "WP0 grant contract is proposed; the full matrix is not yet rolled out or verified. Local symphony_app role provisioning and scoped WP1.4 grants are recorded separately."
+    },
+    {
+      "table": "authentication_events",
+      "classification": "tenant_scoped",
+      "scope_basis": "Tenant derived through user_id; authentication audit.",
+      "scope_resolution": "Resolve tenant through declared parent relation: Tenant derived through user_id; authentication audit.",
+      "ordinary_runtime_role": "symphony_app",
+      "permitted_sql_operations": [
+        "SELECT",
+        "INSERT",
+        "UPDATE"
+      ],
+      "delete_grant": false,
+      "required_rls": "ENABLE+FORCE",
+      "current_rls_enabled_and_forced": false,
+      "explicit_tenant_predicate": true,
+      "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
+      "access_policy": "Tenant context is transaction-local, derived only from authenticated server context; every query also includes an explicit tenant predicate.",
+      "status": "WP0 grant contract is proposed; the full matrix is not yet rolled out or verified. Local symphony_app role provisioning and scoped WP1.4 grants are recorded separately."
+    },
+    {
+      "table": "enrolment_sessions",
+      "classification": "tenant_scoped",
+      "scope_basis": "Direct tenant_id and organization scope.",
+      "scope_resolution": "row.tenant_id matches transaction-local authenticated tenant context",
+      "ordinary_runtime_role": "symphony_app",
+      "permitted_sql_operations": [
+        "SELECT",
+        "INSERT",
+        "UPDATE"
+      ],
+      "delete_grant": false,
+      "required_rls": "ENABLE+FORCE",
+      "current_rls_enabled_and_forced": false,
+      "explicit_tenant_predicate": true,
+      "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
+      "access_policy": "Tenant context is transaction-local, derived only from authenticated server context; every query also includes an explicit tenant predicate.",
+      "status": "WP0 grant contract is proposed; the full matrix is not yet rolled out or verified. Local symphony_app role provisioning and scoped WP1.4 grants are recorded separately."
+    },
+    {
+      "table": "enroller_assignments",
+      "classification": "control_plane_restricted",
+      "scope_basis": "Platform assignment/scope; no direct tenant_id.",
+      "scope_resolution": "not_applicable",
+      "ordinary_runtime_role": "no ordinary application grant",
+      "permitted_sql_operations": [],
+      "delete_grant": false,
+      "required_rls": "review_based_on_scope",
+      "current_rls_enabled_and_forced": false,
+      "explicit_tenant_predicate": false,
+      "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
+      "access_policy": "No ordinary runtime-role access. A separately named operation-specific service grant and audit contract must be mapped before implementation.",
+      "status": "WP0 grant contract is proposed; the full matrix is not yet rolled out or verified. Local symphony_app role provisioning and scoped WP1.4 grants are recorded separately."
+    },
+    {
+      "table": "enforcement_policies",
+      "classification": "control_plane_restricted",
+      "scope_basis": "Organization policy with nullable organization_id; global fallback semantics need an explicit grant boundary.",
+      "scope_resolution": "not_applicable",
+      "ordinary_runtime_role": "no ordinary application grant",
+      "permitted_sql_operations": [],
+      "delete_grant": false,
+      "required_rls": "review_based_on_scope",
+      "current_rls_enabled_and_forced": false,
+      "explicit_tenant_predicate": false,
+      "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
+      "access_policy": "No ordinary runtime-role access. A separately named operation-specific service grant and audit contract must be mapped before implementation.",
+      "status": "WP0 grant contract is proposed; the full matrix is not yet rolled out or verified. Local symphony_app role provisioning and scoped WP1.4 grants are recorded separately."
+    },
+    {
+      "table": "duty_matrix_rows",
+      "classification": "control_plane_restricted",
+      "scope_basis": "Organization policy with nullable organization_id; configuration writes must be privileged.",
+      "scope_resolution": "not_applicable",
+      "ordinary_runtime_role": "no ordinary application grant",
+      "permitted_sql_operations": [],
+      "delete_grant": false,
+      "required_rls": "review_based_on_scope",
+      "current_rls_enabled_and_forced": false,
+      "explicit_tenant_predicate": false,
+      "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
+      "access_policy": "No ordinary runtime-role access. A separately named operation-specific service grant and audit contract must be mapped before implementation.",
+      "status": "WP0 grant contract is proposed; the full matrix is not yet rolled out or verified. Local symphony_app role provisioning and scoped WP1.4 grants are recorded separately."
+    },
+    {
+      "table": "approval_policies",
+      "classification": "tenant_scoped",
+      "scope_basis": "Organization policy; tenant derived from organization_id.",
+      "scope_resolution": "Resolve tenant through declared parent relation: Organization policy; tenant derived from organization_id.",
+      "ordinary_runtime_role": "symphony_app",
+      "permitted_sql_operations": [
+        "SELECT",
+        "INSERT",
+        "UPDATE"
+      ],
+      "delete_grant": false,
+      "required_rls": "ENABLE+FORCE",
+      "current_rls_enabled_and_forced": false,
+      "explicit_tenant_predicate": true,
+      "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
+      "access_policy": "Tenant context is transaction-local, derived only from authenticated server context; every query also includes an explicit tenant predicate.",
+      "status": "WP0 grant contract is proposed; the full matrix is not yet rolled out or verified. Local symphony_app role provisioning and scoped WP1.4 grants are recorded separately."
+    },
+    {
+      "table": "precedence_policies",
+      "classification": "control_plane_restricted",
+      "scope_basis": "Organization policy with nullable organization_id and global default.",
+      "scope_resolution": "not_applicable",
+      "ordinary_runtime_role": "no ordinary application grant",
+      "permitted_sql_operations": [],
+      "delete_grant": false,
+      "required_rls": "review_based_on_scope",
+      "current_rls_enabled_and_forced": false,
+      "explicit_tenant_predicate": false,
+      "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
+      "access_policy": "No ordinary runtime-role access. A separately named operation-specific service grant and audit contract must be mapped before implementation.",
+      "status": "WP0 grant contract is proposed; the full matrix is not yet rolled out or verified. Local symphony_app role provisioning and scoped WP1.4 grants are recorded separately."
+    },
+    {
+      "table": "position_combination_rules",
+      "classification": "control_plane_restricted",
+      "scope_basis": "Shared governance policy configuration; not tenant-keyed.",
+      "scope_resolution": "not_applicable",
+      "ordinary_runtime_role": "no ordinary application grant",
+      "permitted_sql_operations": [],
+      "delete_grant": false,
+      "required_rls": "review_based_on_scope",
+      "current_rls_enabled_and_forced": false,
+      "explicit_tenant_predicate": false,
+      "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
+      "access_policy": "No ordinary runtime-role access. A separately named operation-specific service grant and audit contract must be mapped before implementation.",
+      "status": "WP0 grant contract is proposed; the full matrix is not yet rolled out or verified. Local symphony_app role provisioning and scoped WP1.4 grants are recorded separately."
+    },
+    {
+      "table": "retention_policies",
+      "classification": "control_plane_restricted",
+      "scope_basis": "Global retention policy values; changes require controlled review.",
+      "scope_resolution": "not_applicable",
+      "ordinary_runtime_role": "no ordinary application grant",
+      "permitted_sql_operations": [],
+      "delete_grant": false,
+      "required_rls": "review_based_on_scope",
+      "current_rls_enabled_and_forced": false,
+      "explicit_tenant_predicate": false,
+      "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
+      "access_policy": "No ordinary runtime-role access. A separately named operation-specific service grant and audit contract must be mapped before implementation.",
+      "status": "WP0 grant contract is proposed; the full matrix is not yet rolled out or verified. Local symphony_app role provisioning and scoped WP1.4 grants are recorded separately."
+    },
+    {
+      "table": "identity_check_methods",
+      "classification": "global_catalogue_read_only",
+      "scope_basis": "Global list of identity-check methods.",
+      "scope_resolution": "not_applicable",
+      "ordinary_runtime_role": "symphony_app",
+      "permitted_sql_operations": [
+        "SELECT"
+      ],
+      "delete_grant": false,
+      "required_rls": "not_applicable_global",
+      "current_rls_enabled_and_forced": false,
+      "explicit_tenant_predicate": false,
+      "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
+      "access_policy": "No tenant policy; ordinary runtime role receives SELECT only.",
+      "status": "WP0 grant contract is proposed; the full matrix is not yet rolled out or verified. Local symphony_app role provisioning and scoped WP1.4 grants are recorded separately."
+    },
+    {
+      "table": "membership_rules",
+      "classification": "control_plane_restricted",
+      "scope_basis": "Organization policy with nullable organization_id and global fallback ambiguity.",
+      "scope_resolution": "not_applicable",
+      "ordinary_runtime_role": "no ordinary application grant",
+      "permitted_sql_operations": [],
+      "delete_grant": false,
+      "required_rls": "review_based_on_scope",
+      "current_rls_enabled_and_forced": false,
+      "explicit_tenant_predicate": false,
+      "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
+      "access_policy": "No ordinary runtime-role access. A separately named operation-specific service grant and audit contract must be mapped before implementation.",
+      "status": "WP0 grant contract is proposed; the full matrix is not yet rolled out or verified. Local symphony_app role provisioning and scoped WP1.4 grants are recorded separately."
+    },
+    {
+      "table": "acceptance_policies",
+      "classification": "control_plane_restricted",
+      "scope_basis": "Organization/audience policy with nullable organization_id.",
+      "scope_resolution": "not_applicable",
+      "ordinary_runtime_role": "no ordinary application grant",
+      "permitted_sql_operations": [],
+      "delete_grant": false,
+      "required_rls": "review_based_on_scope",
+      "current_rls_enabled_and_forced": false,
+      "explicit_tenant_predicate": false,
+      "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
+      "access_policy": "No ordinary runtime-role access. A separately named operation-specific service grant and audit contract must be mapped before implementation.",
+      "status": "WP0 grant contract is proposed; the full matrix is not yet rolled out or verified. Local symphony_app role provisioning and scoped WP1.4 grants are recorded separately."
+    },
+    {
+      "table": "organizations",
+      "classification": "tenant_scoped",
+      "scope_basis": "Direct tenant_id column scopes each organization record to one tenant.",
+      "scope_resolution": "row.tenant_id matches transaction-local authenticated tenant context",
+      "ordinary_runtime_role": "symphony_app",
+      "permitted_sql_operations": [
+        "SELECT",
+        "INSERT",
+        "UPDATE"
+      ],
+      "delete_grant": false,
+      "required_rls": "ENABLE+FORCE",
+      "current_rls_enabled_and_forced": false,
+      "explicit_tenant_predicate": true,
+      "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
+      "access_policy": "Tenant context is transaction-local, derived only from authenticated server context; every query also includes an explicit tenant predicate.",
+      "status": "WP0 grant contract is proposed; the full matrix is not yet rolled out or verified. Local symphony_app role provisioning and scoped WP1.4 grants are recorded separately."
+    },
+    {
+      "table": "organization_identifiers",
+      "classification": "tenant_scoped",
+      "scope_basis": "Tenant inherited through organization_id; identifier data.",
+      "scope_resolution": "Resolve tenant through declared parent relation: Tenant inherited through organization_id; identifier data.",
+      "ordinary_runtime_role": "symphony_app",
+      "permitted_sql_operations": [
+        "SELECT",
+        "INSERT",
+        "UPDATE"
+      ],
+      "delete_grant": false,
+      "required_rls": "ENABLE+FORCE",
+      "current_rls_enabled_and_forced": false,
+      "explicit_tenant_predicate": true,
+      "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
+      "access_policy": "Tenant context is transaction-local, derived only from authenticated server context; every query also includes an explicit tenant predicate.",
+      "status": "WP0 grant contract is proposed; the full matrix is not yet rolled out or verified. Local symphony_app role provisioning and scoped WP1.4 grants are recorded separately."
+    },
+    {
+      "table": "organization_enrollment",
+      "classification": "tenant_scoped",
+      "scope_basis": "Tenant inherited through organization_id.",
+      "scope_resolution": "Resolve tenant through declared parent relation: Tenant inherited through organization_id.",
+      "ordinary_runtime_role": "symphony_app",
+      "permitted_sql_operations": [
+        "SELECT",
+        "INSERT",
+        "UPDATE"
+      ],
+      "delete_grant": false,
+      "required_rls": "ENABLE+FORCE",
+      "current_rls_enabled_and_forced": false,
+      "explicit_tenant_predicate": true,
+      "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
+      "access_policy": "Tenant context is transaction-local, derived only from authenticated server context; every query also includes an explicit tenant predicate.",
+      "status": "WP0 grant contract is proposed; the full matrix is not yet rolled out or verified. Local symphony_app role provisioning and scoped WP1.4 grants are recorded separately."
+    },
+    {
+      "table": "enrolment_handovers",
+      "classification": "tenant_scoped",
+      "scope_basis": "Tenant inherited through organization_id.",
+      "scope_resolution": "Resolve tenant through declared parent relation: Tenant inherited through organization_id.",
+      "ordinary_runtime_role": "symphony_app",
+      "permitted_sql_operations": [
+        "SELECT",
+        "INSERT",
+        "UPDATE"
+      ],
+      "delete_grant": false,
+      "required_rls": "ENABLE+FORCE",
+      "current_rls_enabled_and_forced": false,
+      "explicit_tenant_predicate": true,
+      "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
+      "access_policy": "Tenant context is transaction-local, derived only from authenticated server context; every query also includes an explicit tenant predicate.",
+      "status": "WP0 grant contract is proposed; the full matrix is not yet rolled out or verified. Local symphony_app role provisioning and scoped WP1.4 grants are recorded separately."
+    },
+    {
+      "table": "evidence_items",
+      "classification": "tenant_scoped",
+      "scope_basis": "Cooperative record; tenant relation must be verified from organization/aggregate key.",
+      "scope_resolution": "Resolve tenant through declared parent relation: Cooperative record; tenant relation must be verified from organization/aggregate key.",
+      "ordinary_runtime_role": "symphony_app",
+      "permitted_sql_operations": [
+        "SELECT",
+        "INSERT",
+        "UPDATE"
+      ],
+      "delete_grant": false,
+      "required_rls": "ENABLE+FORCE",
+      "current_rls_enabled_and_forced": false,
+      "explicit_tenant_predicate": true,
+      "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
+      "access_policy": "Tenant context is transaction-local, derived only from authenticated server context; every query also includes an explicit tenant predicate.",
+      "status": "WP0 grant contract is proposed; the full matrix is not yet rolled out or verified. Local symphony_app role provisioning and scoped WP1.4 grants are recorded separately."
+    },
+    {
+      "table": "evidence_versions",
+      "classification": "tenant_scoped",
+      "scope_basis": "Tenant inherited through evidence item; immutable content versions.",
+      "scope_resolution": "Resolve tenant through declared parent relation: Tenant inherited through evidence item; immutable content versions.",
+      "ordinary_runtime_role": "symphony_app",
+      "permitted_sql_operations": [
+        "SELECT",
+        "INSERT",
+        "UPDATE"
+      ],
+      "delete_grant": false,
+      "required_rls": "ENABLE+FORCE",
+      "current_rls_enabled_and_forced": false,
+      "explicit_tenant_predicate": true,
+      "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
+      "access_policy": "Tenant context is transaction-local, derived only from authenticated server context; every query also includes an explicit tenant predicate.",
+      "status": "WP0 grant contract is proposed; the full matrix is not yet rolled out or verified. Local symphony_app role provisioning and scoped WP1.4 grants are recorded separately."
+    },
+    {
+      "table": "evidence_support_items",
+      "classification": "tenant_scoped",
+      "scope_basis": "Tenant inherited through evidence item/version.",
+      "scope_resolution": "Resolve tenant through declared parent relation: Tenant inherited through evidence item/version.",
+      "ordinary_runtime_role": "symphony_app",
+      "permitted_sql_operations": [
+        "SELECT",
+        "INSERT",
+        "UPDATE"
+      ],
+      "delete_grant": false,
+      "required_rls": "ENABLE+FORCE",
+      "current_rls_enabled_and_forced": false,
+      "explicit_tenant_predicate": true,
+      "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
+      "access_policy": "Tenant context is transaction-local, derived only from authenticated server context; every query also includes an explicit tenant predicate.",
+      "status": "WP0 grant contract is proposed; the full matrix is not yet rolled out or verified. Local symphony_app role provisioning and scoped WP1.4 grants are recorded separately."
+    },
+    {
+      "table": "evidence_admissions",
+      "classification": "tenant_scoped",
+      "scope_basis": "Tenant inherited through evidence item/version.",
+      "scope_resolution": "Resolve tenant through declared parent relation: Tenant inherited through evidence item/version.",
+      "ordinary_runtime_role": "symphony_app",
+      "permitted_sql_operations": [
+        "SELECT",
+        "INSERT",
+        "UPDATE"
+      ],
+      "delete_grant": false,
+      "required_rls": "ENABLE+FORCE",
+      "current_rls_enabled_and_forced": false,
+      "explicit_tenant_predicate": true,
+      "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
+      "access_policy": "Tenant context is transaction-local, derived only from authenticated server context; every query also includes an explicit tenant predicate.",
+      "status": "WP0 grant contract is proposed; the full matrix is not yet rolled out or verified. Local symphony_app role provisioning and scoped WP1.4 grants are recorded separately."
+    },
+    {
+      "table": "record_approvals",
+      "classification": "tenant_scoped",
+      "scope_basis": "Tenant inherited through cooperative record.",
+      "scope_resolution": "Resolve tenant through declared parent relation: Tenant inherited through cooperative record.",
+      "ordinary_runtime_role": "symphony_app",
+      "permitted_sql_operations": [
+        "SELECT",
+        "INSERT",
+        "UPDATE"
+      ],
+      "delete_grant": false,
+      "required_rls": "ENABLE+FORCE",
+      "current_rls_enabled_and_forced": false,
+      "explicit_tenant_predicate": true,
+      "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
+      "access_policy": "Tenant context is transaction-local, derived only from authenticated server context; every query also includes an explicit tenant predicate.",
+      "status": "WP0 grant contract is proposed; the full matrix is not yet rolled out or verified. Local symphony_app role provisioning and scoped WP1.4 grants are recorded separately."
+    },
+    {
+      "table": "verification_assignments",
+      "classification": "tenant_scoped",
+      "scope_basis": "Tenant inherited through organization and evidence scope.",
+      "scope_resolution": "Resolve tenant through declared parent relation: Tenant inherited through organization and evidence scope.",
+      "ordinary_runtime_role": "symphony_app",
+      "permitted_sql_operations": [
+        "SELECT",
+        "INSERT",
+        "UPDATE"
+      ],
+      "delete_grant": false,
+      "required_rls": "ENABLE+FORCE",
+      "current_rls_enabled_and_forced": false,
+      "explicit_tenant_predicate": true,
+      "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
+      "access_policy": "Tenant context is transaction-local, derived only from authenticated server context; every query also includes an explicit tenant predicate.",
+      "status": "WP0 grant contract is proposed; the full matrix is not yet rolled out or verified. Local symphony_app role provisioning and scoped WP1.4 grants are recorded separately."
+    },
+    {
+      "table": "verification_findings",
+      "classification": "tenant_scoped",
+      "scope_basis": "Tenant inherited through assignment/evidence; immutable findings.",
+      "scope_resolution": "Resolve tenant through declared parent relation: Tenant inherited through assignment/evidence; immutable findings.",
+      "ordinary_runtime_role": "symphony_app",
+      "permitted_sql_operations": [
+        "SELECT",
+        "INSERT",
+        "UPDATE"
+      ],
+      "delete_grant": false,
+      "required_rls": "ENABLE+FORCE",
+      "current_rls_enabled_and_forced": false,
+      "explicit_tenant_predicate": true,
+      "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
+      "access_policy": "Tenant context is transaction-local, derived only from authenticated server context; every query also includes an explicit tenant predicate.",
+      "status": "WP0 grant contract is proposed; the full matrix is not yet rolled out or verified. Local symphony_app role provisioning and scoped WP1.4 grants are recorded separately."
+    },
+    {
+      "table": "platform_checks",
+      "classification": "tenant_scoped",
+      "scope_basis": "Tenant inherited through organization and source record.",
+      "scope_resolution": "Resolve tenant through declared parent relation: Tenant inherited through organization and source record.",
+      "ordinary_runtime_role": "symphony_app",
+      "permitted_sql_operations": [
+        "SELECT",
+        "INSERT",
+        "UPDATE"
+      ],
+      "delete_grant": false,
+      "required_rls": "ENABLE+FORCE",
+      "current_rls_enabled_and_forced": false,
+      "explicit_tenant_predicate": true,
+      "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
+      "access_policy": "Tenant context is transaction-local, derived only from authenticated server context; every query also includes an explicit tenant predicate.",
+      "status": "WP0 grant contract is proposed; the full matrix is not yet rolled out or verified. Local symphony_app role provisioning and scoped WP1.4 grants are recorded separately."
+    },
+    {
+      "table": "observation_attestations",
+      "classification": "tenant_scoped",
+      "scope_basis": "Tenant inherited through the observed record.",
+      "scope_resolution": "Resolve tenant through declared parent relation: Tenant inherited through the observed record.",
+      "ordinary_runtime_role": "symphony_app",
+      "permitted_sql_operations": [
+        "SELECT",
+        "INSERT",
+        "UPDATE"
+      ],
+      "delete_grant": false,
+      "required_rls": "ENABLE+FORCE",
+      "current_rls_enabled_and_forced": false,
+      "explicit_tenant_predicate": true,
+      "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
+      "access_policy": "Tenant context is transaction-local, derived only from authenticated server context; every query also includes an explicit tenant predicate.",
+      "status": "WP0 grant contract is proposed; the full matrix is not yet rolled out or verified. Local symphony_app role provisioning and scoped WP1.4 grants are recorded separately."
+    },
+    {
+      "table": "evidence_disputes",
+      "classification": "tenant_scoped",
+      "scope_basis": "Tenant inherited through evidence item/version.",
+      "scope_resolution": "Resolve tenant through declared parent relation: Tenant inherited through evidence item/version.",
+      "ordinary_runtime_role": "symphony_app",
+      "permitted_sql_operations": [
+        "SELECT",
+        "INSERT",
+        "UPDATE"
+      ],
+      "delete_grant": false,
+      "required_rls": "ENABLE+FORCE",
+      "current_rls_enabled_and_forced": false,
+      "explicit_tenant_predicate": true,
+      "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
+      "access_policy": "Tenant context is transaction-local, derived only from authenticated server context; every query also includes an explicit tenant predicate.",
+      "status": "WP0 grant contract is proposed; the full matrix is not yet rolled out or verified. Local symphony_app role provisioning and scoped WP1.4 grants are recorded separately."
+    },
+    {
+      "table": "evidence_relationships",
+      "classification": "tenant_scoped",
+      "scope_basis": "Tenant inherited through linked evidence records.",
+      "scope_resolution": "Resolve tenant through declared parent relation: Tenant inherited through linked evidence records.",
+      "ordinary_runtime_role": "symphony_app",
+      "permitted_sql_operations": [
+        "SELECT",
+        "INSERT",
+        "UPDATE"
+      ],
+      "delete_grant": false,
+      "required_rls": "ENABLE+FORCE",
+      "current_rls_enabled_and_forced": false,
+      "explicit_tenant_predicate": true,
+      "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
+      "access_policy": "Tenant context is transaction-local, derived only from authenticated server context; every query also includes an explicit tenant predicate.",
+      "status": "WP0 grant contract is proposed; the full matrix is not yet rolled out or verified. Local symphony_app role provisioning and scoped WP1.4 grants are recorded separately."
+    },
+    {
+      "table": "evidence_requirement_links",
+      "classification": "tenant_scoped",
+      "scope_basis": "Tenant inherited through evidence and organization requirement.",
+      "scope_resolution": "Resolve tenant through declared parent relation: Tenant inherited through evidence and organization requirement.",
+      "ordinary_runtime_role": "symphony_app",
+      "permitted_sql_operations": [
+        "SELECT",
+        "INSERT",
+        "UPDATE"
+      ],
+      "delete_grant": false,
+      "required_rls": "ENABLE+FORCE",
+      "current_rls_enabled_and_forced": false,
+      "explicit_tenant_predicate": true,
+      "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
+      "access_policy": "Tenant context is transaction-local, derived only from authenticated server context; every query also includes an explicit tenant predicate.",
+      "status": "WP0 grant contract is proposed; the full matrix is not yet rolled out or verified. Local symphony_app role provisioning and scoped WP1.4 grants are recorded separately."
+    },
+    {
+      "table": "appointments",
+      "classification": "tenant_scoped",
+      "scope_basis": "Organization-scoped appointment; tenant inherited from organization.",
+      "scope_resolution": "Resolve tenant through declared parent relation: Organization-scoped appointment; tenant inherited from organization.",
+      "ordinary_runtime_role": "symphony_app",
+      "permitted_sql_operations": [
+        "SELECT",
+        "INSERT",
+        "UPDATE"
+      ],
+      "delete_grant": false,
+      "required_rls": "ENABLE+FORCE",
+      "current_rls_enabled_and_forced": false,
+      "explicit_tenant_predicate": true,
+      "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
+      "access_policy": "Tenant context is transaction-local, derived only from authenticated server context; every query also includes an explicit tenant predicate.",
+      "status": "WP0 grant contract is proposed; the full matrix is not yet rolled out or verified. Local symphony_app role provisioning and scoped WP1.4 grants are recorded separately."
+    },
+    {
+      "table": "bylaw_documents",
+      "classification": "tenant_scoped",
+      "scope_basis": "Organization-scoped by-law document.",
+      "scope_resolution": "Resolve tenant through declared parent relation: Organization-scoped by-law document.",
+      "ordinary_runtime_role": "symphony_app",
+      "permitted_sql_operations": [
+        "SELECT",
+        "INSERT",
+        "UPDATE"
+      ],
+      "delete_grant": false,
+      "required_rls": "ENABLE+FORCE",
+      "current_rls_enabled_and_forced": false,
+      "explicit_tenant_predicate": true,
+      "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
+      "access_policy": "Tenant context is transaction-local, derived only from authenticated server context; every query also includes an explicit tenant predicate.",
+      "status": "WP0 grant contract is proposed; the full matrix is not yet rolled out or verified. Local symphony_app role provisioning and scoped WP1.4 grants are recorded separately."
+    },
+    {
+      "table": "bylaw_versions",
+      "classification": "tenant_scoped",
+      "scope_basis": "Tenant inherited through bylaw document.",
+      "scope_resolution": "Resolve tenant through declared parent relation: Tenant inherited through bylaw document.",
+      "ordinary_runtime_role": "symphony_app",
+      "permitted_sql_operations": [
+        "SELECT",
+        "INSERT",
+        "UPDATE"
+      ],
+      "delete_grant": false,
+      "required_rls": "ENABLE+FORCE",
+      "current_rls_enabled_and_forced": false,
+      "explicit_tenant_predicate": true,
+      "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
+      "access_policy": "Tenant context is transaction-local, derived only from authenticated server context; every query also includes an explicit tenant predicate.",
+      "status": "WP0 grant contract is proposed; the full matrix is not yet rolled out or verified. Local symphony_app role provisioning and scoped WP1.4 grants are recorded separately."
+    },
+    {
+      "table": "bylaw_provisions",
+      "classification": "tenant_scoped",
+      "scope_basis": "Tenant inherited through bylaw version.",
+      "scope_resolution": "Resolve tenant through declared parent relation: Tenant inherited through bylaw version.",
+      "ordinary_runtime_role": "symphony_app",
+      "permitted_sql_operations": [
+        "SELECT",
+        "INSERT",
+        "UPDATE"
+      ],
+      "delete_grant": false,
+      "required_rls": "ENABLE+FORCE",
+      "current_rls_enabled_and_forced": false,
+      "explicit_tenant_predicate": true,
+      "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
+      "access_policy": "Tenant context is transaction-local, derived only from authenticated server context; every query also includes an explicit tenant predicate.",
+      "status": "WP0 grant contract is proposed; the full matrix is not yet rolled out or verified. Local symphony_app role provisioning and scoped WP1.4 grants are recorded separately."
+    },
+    {
+      "table": "legal_sources",
+      "classification": "control_plane_restricted",
+      "scope_basis": "Global legal source catalogue; review/status changes must be privileged.",
+      "scope_resolution": "not_applicable",
+      "ordinary_runtime_role": "no ordinary application grant",
+      "permitted_sql_operations": [],
+      "delete_grant": false,
+      "required_rls": "review_based_on_scope",
+      "current_rls_enabled_and_forced": false,
+      "explicit_tenant_predicate": false,
+      "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
+      "access_policy": "No ordinary runtime-role access. A separately named operation-specific service grant and audit contract must be mapped before implementation.",
+      "status": "WP0 grant contract is proposed; the full matrix is not yet rolled out or verified. Local symphony_app role provisioning and scoped WP1.4 grants are recorded separately."
+    },
+    {
+      "table": "requirement_definitions",
+      "classification": "control_plane_restricted",
+      "scope_basis": "Global legal/requirement catalogue with validation metadata.",
+      "scope_resolution": "not_applicable",
+      "ordinary_runtime_role": "no ordinary application grant",
+      "permitted_sql_operations": [],
+      "delete_grant": false,
+      "required_rls": "review_based_on_scope",
+      "current_rls_enabled_and_forced": false,
+      "explicit_tenant_predicate": false,
+      "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
+      "access_policy": "No ordinary runtime-role access. A separately named operation-specific service grant and audit contract must be mapped before implementation.",
+      "status": "WP0 grant contract is proposed; the full matrix is not yet rolled out or verified. Local symphony_app role provisioning and scoped WP1.4 grants are recorded separately."
+    },
+    {
+      "table": "organization_requirements",
+      "classification": "tenant_scoped",
+      "scope_basis": "Tenant inherited through organization_id.",
+      "scope_resolution": "Resolve tenant through declared parent relation: Tenant inherited through organization_id.",
+      "ordinary_runtime_role": "symphony_app",
+      "permitted_sql_operations": [
+        "SELECT",
+        "INSERT",
+        "UPDATE"
+      ],
+      "delete_grant": false,
+      "required_rls": "ENABLE+FORCE",
+      "current_rls_enabled_and_forced": false,
+      "explicit_tenant_predicate": true,
+      "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
+      "access_policy": "Tenant context is transaction-local, derived only from authenticated server context; every query also includes an explicit tenant predicate.",
+      "status": "WP0 grant contract is proposed; the full matrix is not yet rolled out or verified. Local symphony_app role provisioning and scoped WP1.4 grants are recorded separately."
+    },
+    {
+      "table": "requirement_sources",
+      "classification": "tenant_scoped",
+      "scope_basis": "Tenant inherited through organization requirement.",
+      "scope_resolution": "Resolve tenant through declared parent relation: Tenant inherited through organization requirement.",
+      "ordinary_runtime_role": "symphony_app",
+      "permitted_sql_operations": [
+        "SELECT",
+        "INSERT",
+        "UPDATE"
+      ],
+      "delete_grant": false,
+      "required_rls": "ENABLE+FORCE",
+      "current_rls_enabled_and_forced": false,
+      "explicit_tenant_predicate": true,
+      "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
+      "access_policy": "Tenant context is transaction-local, derived only from authenticated server context; every query also includes an explicit tenant predicate.",
+      "status": "WP0 grant contract is proposed; the full matrix is not yet rolled out or verified. Local symphony_app role provisioning and scoped WP1.4 grants are recorded separately."
+    },
+    {
+      "table": "meeting_rules",
+      "classification": "control_plane_restricted",
+      "scope_basis": "Organization rule with nullable organization_id; global fallback semantics require review.",
+      "scope_resolution": "not_applicable",
+      "ordinary_runtime_role": "no ordinary application grant",
+      "permitted_sql_operations": [],
+      "delete_grant": false,
+      "required_rls": "review_based_on_scope",
+      "current_rls_enabled_and_forced": false,
+      "explicit_tenant_predicate": false,
+      "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
+      "access_policy": "No ordinary runtime-role access. A separately named operation-specific service grant and audit contract must be mapped before implementation.",
+      "status": "WP0 grant contract is proposed; the full matrix is not yet rolled out or verified. Local symphony_app role provisioning and scoped WP1.4 grants are recorded separately."
+    },
+    {
+      "table": "resolution_class_rules",
+      "classification": "control_plane_restricted",
+      "scope_basis": "Organization rule with nullable organization_id; global fallback semantics require review.",
+      "scope_resolution": "not_applicable",
+      "ordinary_runtime_role": "no ordinary application grant",
+      "permitted_sql_operations": [],
+      "delete_grant": false,
+      "required_rls": "review_based_on_scope",
+      "current_rls_enabled_and_forced": false,
+      "explicit_tenant_predicate": false,
+      "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
+      "access_policy": "No ordinary runtime-role access. A separately named operation-specific service grant and audit contract must be mapped before implementation.",
+      "status": "WP0 grant contract is proposed; the full matrix is not yet rolled out or verified. Local symphony_app role provisioning and scoped WP1.4 grants are recorded separately."
+    },
+    {
+      "table": "aggregate_states",
+      "classification": "tenant_scoped",
+      "scope_basis": "Direct tenant_id; aggregate projection state.",
+      "scope_resolution": "row.tenant_id matches transaction-local authenticated tenant context",
+      "ordinary_runtime_role": "symphony_app",
+      "permitted_sql_operations": [
+        "SELECT",
+        "INSERT",
+        "UPDATE"
+      ],
+      "delete_grant": false,
+      "required_rls": "ENABLE+FORCE",
+      "current_rls_enabled_and_forced": false,
+      "explicit_tenant_predicate": true,
+      "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
+      "access_policy": "Tenant context is transaction-local, derived only from authenticated server context; every query also includes an explicit tenant predicate.",
+      "status": "WP0 grant contract is proposed; the full matrix is not yet rolled out or verified. Local symphony_app role provisioning and scoped WP1.4 grants are recorded separately."
+    }
+  ]
+}

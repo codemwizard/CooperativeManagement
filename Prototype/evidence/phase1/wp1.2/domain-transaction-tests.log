@@ -1,0 +1,15 @@
+npm notice run @symphony/domain@0.1.0 test:unit
+npm notice run vitest run --reporter=verbose src/kernel/__tests__/command-bus-transaction.test.ts
+
+ RUN  v2.1.9 C:/Workspace/GitHub/Prototype/packages/domain
+
+ ✓ src/kernel/__tests__/command-bus-transaction.test.ts > WP1.2-A transaction context and WP1.2-B denial audit boundary > passes one context identity through receipt, aggregate, policy, and writes
+ ✓ src/kernel/__tests__/command-bus-transaction.test.ts > WP1.2-A transaction context and WP1.2-B denial audit boundary > rolls back the command transaction before recording a denial without policy detail
+ ✓ src/kernel/__tests__/command-bus-transaction.test.ts > WP1.2-A transaction context and WP1.2-B denial audit boundary > returns a retryable classification when the required audit write fails
+ ✓ src/kernel/__tests__/command-bus-transaction.test.ts > WP1.2-A transaction context and WP1.2-B denial audit boundary > fails closed without trusted actor and tenant context and audits mismatched context as the trusted actor
+
+ Test Files  1 passed (1)
+      Tests  4 passed (4)
+   Start at  13:00:36
+   Duration  1.01s (transform 209ms, setup 0ms, collect 271ms, tests 29ms, environment 0ms, prepare 319ms)
+

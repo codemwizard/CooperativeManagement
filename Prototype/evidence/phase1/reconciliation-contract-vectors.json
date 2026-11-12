@@ -1,0 +1,28 @@
+{
+  "version": 1,
+  "contract": "phase1-reconciliation-v2",
+  "model_only": true,
+  "now": "2030-01-01T00:00:00.000Z",
+  "open_item": {
+    "tenant_id": "tenant-01",
+    "original_actor_id": "actor-01",
+    "lifecycle": "open",
+    "expires_at": "2030-01-02T00:00:00.000Z"
+  },
+  "access_cases": [
+    { "id": "owner-current-member-and-permission", "actor_id": "actor-01", "tenant_id": "tenant-01", "member_active": true, "can_read_own": true, "can_take_over": false, "expected": { "outcome": "allow_read_original_actor" } },
+    { "id": "owner-membership-revoked", "actor_id": "actor-01", "tenant_id": "tenant-01", "member_active": false, "can_read_own": true, "can_take_over": false, "expected": { "outcome": "deny_non_disclosing" } },
+    { "id": "owner-read-permission-revoked", "actor_id": "actor-01", "tenant_id": "tenant-01", "member_active": true, "can_read_own": false, "can_take_over": false, "expected": { "outcome": "deny_non_disclosing" } },
+    { "id": "authorized-officer-takeover", "actor_id": "actor-02", "tenant_id": "tenant-01", "member_active": true, "can_read_own": false, "can_take_over": true, "expected": { "outcome": "allow_takeover", "audit_required": true } },
+    { "id": "unrelated-same-tenant-actor", "actor_id": "actor-03", "tenant_id": "tenant-01", "member_active": true, "can_read_own": false, "can_take_over": false, "expected": { "outcome": "deny_non_disclosing" } },
+    { "id": "cross-tenant-officer", "actor_id": "actor-02", "tenant_id": "tenant-02", "member_active": true, "can_read_own": false, "can_take_over": true, "expected": { "outcome": "deny_non_disclosing" } },
+    { "id": "expired-item", "actor_id": "actor-01", "tenant_id": "tenant-01", "member_active": true, "can_read_own": true, "can_take_over": false, "item_expires_at": "2029-12-31T23:59:59.999Z", "expected": { "outcome": "deny_non_disclosing" } },
+    { "id": "closed-item", "actor_id": "actor-01", "tenant_id": "tenant-01", "member_active": true, "can_read_own": true, "can_take_over": false, "item_lifecycle": "resolved", "expected": { "outcome": "deny_non_disclosing" } }
+  ],
+  "fresh_command_id_cases": [
+    { "id": "corrected-command-has-new-id", "original": "command-original", "corrected": "command-corrected", "expected": true },
+    { "id": "original-command-id-cannot-be-reused", "original": "command-original", "corrected": "command-original", "expected": false },
+    { "id": "empty-id-is-invalid", "original": "command-original", "corrected": "", "expected": false }
+  ],
+  "limitations": ["Pure decision model only; does not prove API authorization, database RLS, persistence, audit durability, encrypted payload deletion, replicas, backups or expiry scheduling."]
+}

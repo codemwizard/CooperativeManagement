@@ -1,0 +1,231 @@
+{
+  "roles": [
+    "secretary",
+    "treasurer",
+    "chairman",
+    "member",
+    "field_agent",
+    "pfi_analyst",
+    "pfi_credit",
+    "ta",
+    "verifier",
+    "fund_manager"
+  ],
+  "actions": {
+    "create_organization": [
+      "secretary",
+      "chairman"
+    ],
+    "create_project": [
+      "secretary",
+      "chairman"
+    ],
+    "edit_member_list": [
+      "secretary"
+    ],
+    "upload_minutes": [
+      "secretary"
+    ],
+    "signoff_minutes": [
+      "chairman"
+    ],
+    "add_evidence": [
+      "secretary",
+      "treasurer",
+      "chairman"
+    ],
+    "record_payment": [
+      "treasurer",
+      "member"
+    ],
+    "confirm_payment": [
+      "treasurer"
+    ],
+    "mark_verified": [
+      "field_agent"
+    ],
+    "restructure_request": [
+      "secretary",
+      "chairman"
+    ],
+    "switch_destination": [
+      "secretary",
+      "treasurer",
+      "chairman"
+    ],
+    "present_to_destination": [
+      "chairman"
+    ],
+    "raise_finding": [
+      "pfi_analyst",
+      "pfi_credit"
+    ],
+    "request_evidence": [
+      "pfi_analyst",
+      "pfi_credit"
+    ],
+    "record_outcome": [
+      "pfi_credit"
+    ],
+    "view_pipeline": [
+      "ta",
+      "fund_manager"
+    ],
+    "verify_claim": [
+      "verifier"
+    ],
+    "raise_dispute": [
+      "pfi_analyst",
+      "pfi_credit",
+      "verifier",
+      "ta",
+      "field_agent"
+    ],
+    "resolve_dispute": [
+      "field_agent"
+    ],
+    "withdraw_dispute": [
+      "pfi_analyst",
+      "pfi_credit",
+      "verifier",
+      "ta",
+      "field_agent"
+    ],
+    "assign_verification": [
+      "pfi_credit",
+      "pfi_analyst",
+      "ta"
+    ],
+    "record_verification_finding": [
+      "verifier"
+    ],
+    "record_reliance": [
+      "pfi_credit"
+    ],
+    "export_dossier": [
+      "secretary",
+      "treasurer",
+      "chairman",
+      "member",
+      "field_agent",
+      "pfi_analyst",
+      "pfi_credit",
+      "ta",
+      "fund_manager",
+      "verifier"
+    ],
+    "view_cohort": [
+      "ta",
+      "fund_manager"
+    ]
+  },
+  "constraints": [
+    {
+      "code": "SELF_VERIFICATION",
+      "rule": "mark_verified is blocked when actor.user_id equals evidence.supplied_by."
+    },
+    {
+      "code": "SELF_CONFIRMATION",
+      "rule": "confirm_payment is blocked when actor.user_id equals payment.recorded_by."
+    },
+    {
+      "code": "ROLE_NOT_PERMITTED",
+      "rule": "Any action by a role not listed for that action is blocked."
+    },
+    {
+      "code": "SIGNOFF_REQUIRED",
+      "rule": "mark_verified on governance evidence requires a prior signoff_minutes event."
+    },
+    {
+      "code": "READ_ONLY_ROLE",
+      "rule": "Lender, TA, fund manager and verifier roles cannot modify evidence items. Disputes, assignments, findings, reliance and requests are separate records."
+    },
+    {
+      "code": "DISPUTE_REASON_REQUIRED",
+      "rule": "A dispute needs a reason code and a note of 1 to 200 characters."
+    },
+    {
+      "code": "NO_SUCH_EVIDENCE",
+      "rule": "The evidence type is not on record for this case."
+    },
+    {
+      "code": "DISPUTE_ALREADY_OPEN",
+      "rule": "One open dispute is allowed per evidence type."
+    },
+    {
+      "code": "SELF_DISPUTE",
+      "rule": "A user cannot dispute evidence they supplied."
+    },
+    {
+      "code": "NO_OPEN_DISPUTE",
+      "rule": "There is no open dispute for this evidence."
+    },
+    {
+      "code": "NOT_DISPUTE_RAISER",
+      "rule": "Only the user who raised a dispute can withdraw it."
+    },
+    {
+      "code": "SAME_VERIFIER",
+      "rule": "Re-verification must be by a field agent other than the previous verifier."
+    },
+    {
+      "code": "NO_SUCH_TARGET",
+      "rule": "The claim or evidence to verify does not exist for this case."
+    },
+    {
+      "code": "NO_SUCH_VERIFIER",
+      "rule": "The assignee must be a verifier user."
+    },
+    {
+      "code": "NOT_ASSIGNEE",
+      "rule": "Only the assigned verifier can record a finding for the assignment."
+    },
+    {
+      "code": "ASSIGNMENT_COMPLETED",
+      "rule": "A finding has already been recorded for this assignment."
+    },
+    {
+      "code": "FINDING_FIELDS_REQUIRED",
+      "rule": "A finding needs a result, a scope and a limitation."
+    },
+    {
+      "code": "NO_FINDING",
+      "rule": "Reliance can only be recorded on an existing finding."
+    },
+    {
+      "code": "RELIANCE_ALREADY_RECORDED",
+      "rule": "This user has already recorded reliance on this finding."
+    },
+    {
+      "code": "ACCESS_DENIED_COHORT",
+      "rule": "This case is outside the user's assigned cohorts."
+    }
+  ],
+  "user_id_convention": "c{N}.{role} for cooperative officers (e.g. c1.secretary); fa.banda and fa.mulenga for field agents; pfi.credit1; ta.officer1; vvb.reviewer1",
+  "users": [
+    {
+      "user_id": "ta.officer1",
+      "role": "ta",
+      "cohorts": [
+        "Readiness Cohort 1"
+      ]
+    },
+    {
+      "user_id": "fm.officer1",
+      "role": "fund_manager",
+      "cohorts": "all"
+    },
+    {
+      "user_id": "pfi.credit1",
+      "role": "pfi_credit"
+    },
+    {
+      "user_id": "vrf.mulenga",
+      "role": "verifier"
+    },
+    {
+      "user_id": "vrf.sakala",
+      "role": "verifier"
+    }
+  ]
+}

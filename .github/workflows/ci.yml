@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       DATA_MODE: test
-      MIGRATION_TEST_DATABASE_URL: postgresql://symphony:symphony_dev@localhost:5433/symphony_test
+      PHASE1_TEST_ADMIN_DATABASE_URL: postgresql://symphony:symphony_dev@localhost:5433/symphony_test
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -26,6 +26,8 @@ jobs:
         run: npm run db:start && npm run db:stop
       - name: Start the isolated PostgreSQL 18.0 test service
         run: npm run db:test:start
+      - name: Provision WP1.5 ephemeral roles
+        run: node tools/bootstrap_wp1_5_database.mjs
       - name: Install Playwright browser for the legacy regression floor
         run: npx playwright install --with-deps chromium
       - name: Prepare retained gate evidence
@@ -34,6 +36,9 @@ jobs:
         id: phase0
         shell: bash
         run: npm run verify:phase0 2>&1 | tee artifacts/phase0-gate.raw.log
+      - name: Revoke temporary migration membership and verify WP1.5 role attributes
+        if: always()
+        run: node tools/finalize_wp1_5_database.mjs
       - name: Write sanitized Phase 0 CI evidence
         if: always()
         env:
@@ -54,7 +59,7 @@ jobs:
         run: npm run db:test:stop
 
   db-integration:
-    name: Existing DB integration suite
+    name: Restricted-role DB integration and WP1.5 tenant isolation
     runs-on: ubuntu-latest
     services:
       postgres:
@@ -71,9 +76,9 @@ jobs:
         ports:
           - 5432:5432
     env:
-      DATABASE_URL: postgresql://symphony:symphony_test@localhost:5432/symphony_test
       DATABASE_SCHEMA: symphony
       DATA_MODE: test
+      PHASE1_TEST_ADMIN_DATABASE_URL: postgresql://symphony:symphony_test@localhost:5432/symphony_test
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -83,8 +88,13 @@ jobs:
       - name: Pin npm version
         run: npm install --global npm@12.2.0
       - run: npm ci
+      - name: Provision disposable migration, application and outbox-writer roles
+        run: node tools/bootstrap_wp1_5_database.mjs
       - run: npm run db:migrate:test
       - run: npm run test:db --workspace @symphony/db
+      - name: Revoke temporary migration membership and verify final role attributes
+        if: always()
+        run: node tools/finalize_wp1_5_database.mjs
 
   legacy-e2e:
     name: Existing full legacy E2E suite

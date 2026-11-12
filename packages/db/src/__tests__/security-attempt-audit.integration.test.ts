@@ -23,8 +23,9 @@ describe('WP1.2-B security-attempt audit mode guard', () => {
 });
 
 const databaseUrl = process.env['MIGRATION_TEST_DATABASE_URL'];
-describe.skipIf(!databaseUrl)('WP1.2-B PostgreSQL security-attempt persistence', () => {
-  const pool = new pg.Pool({ connectionString: databaseUrl });
+const adminDatabaseUrl = process.env['PHASE1_TEST_ADMIN_DATABASE_URL'];
+describe.skipIf(!databaseUrl || !adminDatabaseUrl)('WP1.2-B PostgreSQL security-attempt persistence', () => {
+  const pool = new pg.Pool({ connectionString: adminDatabaseUrl ?? '' });
   const db = createDb(databaseUrl ?? '', { max: 1 });
   afterAll(async () => { await Promise.all([pool.end(), db.destroy()]); });
 
@@ -59,8 +60,21 @@ describe.skipIf(!databaseUrl)('WP1.2-B PostgreSQL security-attempt persistence',
       expect(observed.rows[0]).toMatchObject({ tenant_id: tenantId, actor_user_id: actorUserId, observed_command_type: 'membership.update', denial_code: 'READ_ONLY_ROLE' });
       expect(observed.rows[0]?.recorded_at).toBeInstanceOf(Date);
     } finally {
-      await pool.query('DELETE FROM symphony.security_attempts WHERE tenant_id = $1', [tenantId]);
-      await pool.query('DELETE FROM symphony.tenants WHERE id = $1', [tenantId]);
+      const cleanup = await pool.connect();
+      try {
+        await cleanup.query('BEGIN');
+        await cleanup.query("SELECT set_config('app.tenant_id', $1, true)", [tenantId]);
+        await cleanup.query('ALTER TABLE symphony.security_attempts DISABLE TRIGGER security_attempts_append_only');
+        await cleanup.query('DELETE FROM symphony.security_attempts WHERE tenant_id = $1', [tenantId]);
+        await cleanup.query('ALTER TABLE symphony.security_attempts ENABLE TRIGGER security_attempts_append_only');
+        await cleanup.query('DELETE FROM symphony.tenants WHERE id = $1', [tenantId]);
+        await cleanup.query('COMMIT');
+      } catch (cleanupError) {
+        await cleanup.query('ROLLBACK');
+        throw cleanupError;
+      } finally {
+        cleanup.release();
+      }
     }
   });
 });

@@ -1,0 +1,32 @@
+{
+  "name": "@symphony/domain",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Pure domain logic — no I/O, no React, no pg (ADR-006)",
+  "main": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./identity/auth-service": "./src/identity/auth-service.ts",
+    "./authz/policy-engine": "./src/authz/policy-engine.ts",
+    "./authz/capacity-service": "./src/authz/capacity-service.ts",
+    "./privacy/key-provider": "./src/privacy/key-provider.ts",
+    "./privacy/consent-service": "./src/privacy/consent-service.ts",
+    "./privacy/retention-policy": "./src/privacy/retention-policy.ts",
+    "./privacy/data-mode-guard": "./src/privacy/data-mode-guard.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test:unit": "vitest run --reporter=verbose"
+  },
+  "devDependencies": {
+    "@symphony/testkit": "*",
+    "typescript": "^5.5.3",
+    "vitest": "^2.1.1"
+  },
+  "dependencies": {
+    "argon2": "^0.45.2",
+    "json-canonicalize": "^3.0.1",
+    "@symphony/contracts": "*"
+  }
+}

@@ -1,4 +1,5 @@
 import { spawn } from 'node:child_process';
+import { randomUUID } from 'node:crypto';
 import { promises as fs } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -6,7 +7,10 @@ import pg from 'pg';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { executeSqlMigration } from '../migration-executor.js';
 
-const testDatabaseUrl = process.env['MIGRATION_TEST_DATABASE_URL'];
+const migrationBaseUrl = process.env['MIGRATION_TEST_DATABASE_URL'];
+const adminDatabaseUrl = process.env['PHASE1_TEST_ADMIN_DATABASE_URL'];
+let testDatabaseUrl: string | undefined;
+let isolatedDatabaseName: string | undefined;
 const runnerPath = fileURLToPath(new URL('../migrate.ts', import.meta.url));
 const migrationDirectory = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../../../migrations');
 
@@ -60,28 +64,63 @@ function runSeedProcess(filename: string): Promise<RunnerResult> {
   });
 }
 
-describe.skipIf(testDatabaseUrl === undefined || testDatabaseUrl === '')(
+describe.skipIf(!migrationBaseUrl || !adminDatabaseUrl || process.env['DATA_MODE'] !== 'test')(
   'PostgreSQL migration runner integration',
   () => {
-    const pool = new pg.Pool({ connectionString: testDatabaseUrl });
+    let pool: pg.Pool;
 
     beforeAll(async () => {
-      if (testDatabaseUrl === undefined) throw new Error('Missing migration test database URL.');
-      const parsed = new URL(testDatabaseUrl);
-      const databaseName = decodeURIComponent(parsed.pathname.replace(/^\//, ''));
-      if (!databaseName.endsWith('_test') || process.env['DATA_MODE'] !== 'test') {
+      if (!migrationBaseUrl || !adminDatabaseUrl) {
+        throw new Error('Migration integration tests require separate migration and administrator test URLs.');
+      }
+      const admin = new pg.Client({ connectionString: adminDatabaseUrl });
+      const migrationBase = new URL(migrationBaseUrl);
+      const sourceDatabase = decodeURIComponent(migrationBase.pathname.replace(/^\//, ''));
+      if (!sourceDatabase.endsWith('_test')) {
         throw new Error('Refusing destructive migration setup: use DATA_MODE=test and a *_test database.');
       }
-      const identity = await pool.query<{ database_name: string; server_version_num: string }>(
-        'SELECT current_database() AS database_name, current_setting(\'server_version_num\') AS server_version_num',
-      );
-      expect(identity.rows[0]?.database_name).toBe(databaseName);
-      expect(Math.floor(Number(identity.rows[0]?.server_version_num) / 10000)).toBe(18);
-      await pool.query('DROP SCHEMA IF EXISTS symphony CASCADE');
+      await admin.connect();
+      try {
+        const identity = await admin.query<{ database_name: string; server_version_num: string; rolsuper: boolean; rolcreatedb: boolean }>(
+          `SELECT current_database() AS database_name,
+                  current_setting('server_version_num') AS server_version_num,
+                  r.rolsuper,r.rolcreatedb
+           FROM pg_roles r WHERE r.rolname=current_user`,
+        );
+        expect(identity.rows[0]?.database_name).toBe(sourceDatabase);
+        expect(Math.floor(Number(identity.rows[0]?.server_version_num) / 10000)).toBe(18);
+        if (!identity.rows[0]?.rolsuper && !identity.rows[0]?.rolcreatedb) {
+          throw new Error('Migration integration isolation requires an administrator that can create/drop a disposable database.');
+        }
+        if (!identity.rows[0]?.rolsuper) {
+          throw new Error('Migration integration isolation requires a PostgreSQL superuser URL to exercise role ownership migrations safely.');
+        }
+        isolatedDatabaseName = `symphony_migration_${randomUUID().replaceAll('-', '').slice(0, 20)}_test`;
+        const quotedDatabase = `"${isolatedDatabaseName.replaceAll('"', '""')}"`;
+        await admin.query(`CREATE DATABASE ${quotedDatabase}`);
+        const isolatedUrl = new URL(adminDatabaseUrl);
+        isolatedUrl.pathname = `/${isolatedDatabaseName}`;
+        testDatabaseUrl = isolatedUrl.toString();
+      } finally {
+        await admin.end();
+      }
+      pool = new pg.Pool({ connectionString: testDatabaseUrl });
     }, 30_000);
 
     afterAll(async () => {
-      await pool.end();
+      await pool?.end();
+      if (!isolatedDatabaseName || !adminDatabaseUrl) return;
+      const admin = new pg.Client({ connectionString: adminDatabaseUrl });
+      await admin.connect();
+      try {
+        if (isolatedDatabaseName) {
+          await admin.query('SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname=$1 AND pid<>pg_backend_pid()', [isolatedDatabaseName]);
+          const quotedDatabase = `"${isolatedDatabaseName.replaceAll('"', '""')}"`;
+          await admin.query(`DROP DATABASE IF EXISTS ${quotedDatabase}`);
+        }
+      } finally {
+        await admin.end();
+      }
     });
 
     it('serializes concurrent clean installs and makes replay a no-op', async () => {
@@ -142,7 +181,7 @@ describe.skipIf(testDatabaseUrl === undefined || testDatabaseUrl === '')(
         const retriedTable = await client.query<{ relation: string | null }>(
           "SELECT to_regclass('symphony.phase0_recovery_fixture') AS relation",
         );
-        expect(retriedTable.rows[0]?.relation).toBe('phase0_recovery_fixture');
+        expect(retriedTable.rows[0]?.relation).toBe('symphony.phase0_recovery_fixture');
         const retriedLedgerRow = await client.query<{ count: string }>(
           'SELECT count(*)::text AS count FROM symphony.schema_migrations WHERE name = $1',
           [filename],
@@ -186,7 +225,7 @@ describe.skipIf(testDatabaseUrl === undefined || testDatabaseUrl === '')(
       if (!tenantId) throw new Error('Could not create tenant for append-only invariant test.');
       const invariantClient = await pool.connect();
       try {
-        await invariantClient.query("SELECT set_config('app.current_tenant_id', $1, false)", [tenantId]);
+        await invariantClient.query("SELECT set_config('app.tenant_id', $1, false)", [tenantId]);
         const event = await invariantClient.query<{ id: string }>(
           `INSERT INTO symphony.domain_events
             (tenant_id, aggregate_id, aggregate_type, event_type, occurred_at, sequence)
@@ -287,7 +326,7 @@ describe.skipIf(testDatabaseUrl === undefined || testDatabaseUrl === '')(
         `SELECT pg_get_constraintdef(oid) AS definition FROM pg_constraint
          WHERE conrelid = 'symphony.security_attempts'::regclass AND contype = 'f'`,
       );
-      expect(foreignKeys.rows.map((row) => row.definition)).toEqual(['FOREIGN KEY (tenant_id) REFERENCES tenants(id)']);
+      expect(foreignKeys.rows.map((row) => row.definition)).toEqual(['FOREIGN KEY (tenant_id) REFERENCES symphony.tenants(id)']);
       expect(definitions).not.toMatch(/UNIQUE \(tenant_id, command_id\)/i);
       expect(columns.rows.map((row) => row.column_name)).not.toContain('semantic_digest');
       expect(columns.rows.map((row) => row.column_name)).not.toContain('payload');
@@ -295,7 +334,51 @@ describe.skipIf(testDatabaseUrl === undefined || testDatabaseUrl === '')(
         `SELECT COALESCE(relacl::text, '') AS acl FROM pg_class
          WHERE oid = 'symphony.security_attempts'::regclass`,
       );
-      expect(tableAcl.rows[0]?.acl).not.toMatch(/symphony_app|(?:^|[,{])=/i);
+      expect(tableAcl.rows[0]?.acl).toMatch(/symphony_app=a/i);
+      expect(await pool.query("SELECT has_table_privilege('symphony_app','symphony.security_attempts','SELECT') AS select, has_table_privilege('symphony_app','symphony.security_attempts','INSERT') AS insert"))
+        .toMatchObject({ rows: [{ select: false, insert: true }] });
+    });
+
+    it('installs only encrypted reconciliation payload and forced tenant RLS', async () => {
+      const columns = await pool.query<{ column_name: string; data_type: string; is_nullable: string }>(
+        `SELECT column_name, data_type, is_nullable FROM information_schema.columns
+         WHERE table_schema = 'symphony' AND table_name = 'reconciliation_inbox' ORDER BY ordinal_position`,
+      );
+      expect(columns.rows.map((row) => row.column_name)).toEqual([
+        'reconciliation_id', 'tenant_id', 'payload_ciphertext', 'encryption_key_ref',
+        'reason_code', 'lifecycle', 'created_at', 'updated_at', 'expires_at', 'tombstoned_at',
+      ]);
+      expect(columns.rows.find((row) => row.column_name === 'payload_ciphertext')).toMatchObject({ data_type: 'bytea', is_nullable: 'YES' });
+      expect(columns.rows.find((row) => row.column_name === 'tenant_id')).toMatchObject({ data_type: 'uuid', is_nullable: 'NO' });
+      expect(columns.rows.map((row) => row.column_name)).not.toContain('command_id');
+      expect(columns.rows.map((row) => row.column_name)).not.toContain('actor_user_id');
+      expect(columns.rows.map((row) => row.column_name)).not.toContain('aggregate_id');
+      const constraints = await pool.query<{ definition: string }>(
+        `SELECT pg_get_constraintdef(oid) AS definition FROM pg_constraint
+         WHERE conrelid = 'symphony.reconciliation_inbox'::regclass`,
+      );
+      const definitions = constraints.rows.map((row) => row.definition).join('\n');
+      expect(definitions).toMatch(/reason_code = 'VERSION_CONFLICT'/i);
+      expect(definitions).toMatch(/lifecycle.*open.*resolved.*superseded.*expired/is);
+      expect(definitions).toMatch(/lifecycle = 'expired'.*payload_ciphertext IS NULL.*encryption_key_ref IS NULL.*tombstoned_at IS NOT NULL/is);
+      expect(definitions).toMatch(/\['resolved'::text, 'superseded'::text\]/i);
+      expect(definitions).toMatch(/payload_ciphertext IS NULL.*encryption_key_ref IS NULL.*tombstoned_at IS NOT NULL/is);
+      const rls = await pool.query<{ relrowsecurity: boolean; relforcerowsecurity: boolean }>(
+        `SELECT relrowsecurity, relforcerowsecurity FROM pg_class WHERE oid = 'symphony.reconciliation_inbox'::regclass`,
+      );
+      expect(rls.rows[0]).toEqual({ relrowsecurity: true, relforcerowsecurity: true });
+      const policy = await pool.query<{ qual: string | null; with_check: string | null }>(
+        `SELECT qual, with_check FROM pg_policies
+         WHERE schemaname = 'symphony' AND tablename = 'reconciliation_inbox' AND policyname = 'reconciliation_inbox_tenant_scope'`,
+      );
+      expect(policy.rows).toHaveLength(1);
+      expect(policy.rows[0]?.qual).toContain("current_setting('app.tenant_id'::text, true)");
+      expect(policy.rows[0]?.with_check).toContain("current_setting('app.tenant_id'::text, true)");
+      const tableAcl = await pool.query<{ acl: string }>(
+        `SELECT COALESCE(relacl::text, '') AS acl FROM pg_class WHERE oid = 'symphony.reconciliation_inbox'::regclass`,
+      );
+      expect(tableAcl.rows[0]?.acl).toMatch(/symphony_app=arw/i);
+      expect(tableAcl.rows[0]?.acl).not.toMatch(/symphony_app=[^/]*d/i);
     });
 
     it('aborts WP1.1 migration on a non-empty legacy receipt table without changing it', async () => {

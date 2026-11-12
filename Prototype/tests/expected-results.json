@@ -1,0 +1,418 @@
+{
+  "note": "Hand-derived from the requirement sets and seed evidence at demo_date 2026-10-06. 'satisfied' counts requirements satisfied by evidence or fit; excludes not_applicable and assessment_time.",
+  "demo_date": "2026-10-06",
+  "expected": {
+    "case-1": {
+      "A": {
+        "ready": false,
+        "unresolved": [
+          "A2",
+          "A6"
+        ],
+        "exceptions": [],
+        "not_applicable": [
+          "A8",
+          "A9"
+        ],
+        "assessment_time": [
+          "A10"
+        ],
+        "satisfied": 6
+      },
+      "B": {
+        "ready": false,
+        "unresolved": [
+          "B3",
+          "B4",
+          "B5",
+          "B7"
+        ],
+        "exceptions": [],
+        "not_applicable": [],
+        "assessment_time": [
+          "B8"
+        ],
+        "satisfied": 3
+      },
+      "N": {
+        "ready": true,
+        "unresolved": [],
+        "exceptions": [],
+        "not_applicable": [],
+        "assessment_time": [],
+        "satisfied": 6
+      }
+    },
+    "case-2": {
+      "A": {
+        "ready": false,
+        "unresolved": [
+          "A7"
+        ],
+        "exceptions": [],
+        "not_applicable": [
+          "A8",
+          "A9"
+        ],
+        "assessment_time": [
+          "A10"
+        ],
+        "satisfied": 7
+      },
+      "B": {
+        "ready": false,
+        "unresolved": [
+          "B3",
+          "B4",
+          "B5",
+          "B7"
+        ],
+        "exceptions": [],
+        "not_applicable": [],
+        "assessment_time": [
+          "B8"
+        ],
+        "satisfied": 3
+      },
+      "N": {
+        "ready": true,
+        "unresolved": [],
+        "exceptions": [],
+        "not_applicable": [],
+        "assessment_time": [],
+        "satisfied": 6
+      }
+    },
+    "case-3": {
+      "A": {
+        "ready": false,
+        "unresolved": [],
+        "exceptions": [
+          "A1"
+        ],
+        "not_applicable": [
+          "A8",
+          "A9"
+        ],
+        "assessment_time": [
+          "A10"
+        ],
+        "satisfied": 7
+      },
+      "B": {
+        "ready": false,
+        "unresolved": [
+          "B3",
+          "B4",
+          "B5",
+          "B7"
+        ],
+        "exceptions": [
+          "B1"
+        ],
+        "not_applicable": [],
+        "assessment_time": [
+          "B8"
+        ],
+        "satisfied": 2
+      },
+      "N": {
+        "ready": false,
+        "unresolved": [],
+        "exceptions": [
+          "N1"
+        ],
+        "not_applicable": [],
+        "assessment_time": [],
+        "satisfied": 5
+      }
+    },
+    "case-4": {
+      "A": {
+        "ready": false,
+        "unresolved": [
+          "A1",
+          "A2",
+          "A3",
+          "A5",
+          "A6",
+          "A7"
+        ],
+        "exceptions": [],
+        "not_applicable": [
+          "A8",
+          "A9"
+        ],
+        "assessment_time": [
+          "A10"
+        ],
+        "satisfied": 2
+      },
+      "B": {
+        "ready": false,
+        "unresolved": [
+          "B1",
+          "B2",
+          "B3",
+          "B4",
+          "B5",
+          "B7"
+        ],
+        "exceptions": [],
+        "not_applicable": [],
+        "assessment_time": [
+          "B8"
+        ],
+        "satisfied": 1
+      },
+      "N": {
+        "ready": false,
+        "unresolved": [
+          "N2",
+          "N3",
+          "N5",
+          "N6"
+        ],
+        "exceptions": [],
+        "not_applicable": [],
+        "assessment_time": [],
+        "satisfied": 2
+      }
+    },
+    "case-5": {
+      "A": {
+        "ready": true,
+        "unresolved": [],
+        "exceptions": [],
+        "not_applicable": [
+          "A9"
+        ],
+        "assessment_time": [
+          "A10"
+        ],
+        "satisfied": 9
+      },
+      "B": {
+        "ready": false,
+        "unresolved": [
+          "B3",
+          "B4",
+          "B5",
+          "B7"
+        ],
+        "exceptions": [],
+        "not_applicable": [],
+        "assessment_time": [
+          "B8"
+        ],
+        "satisfied": 3
+      },
+      "N": {
+        "ready": true,
+        "unresolved": [],
+        "exceptions": [],
+        "not_applicable": [],
+        "assessment_time": [],
+        "satisfied": 6
+      }
+    },
+    "case-6": {
+      "A": {
+        "ready": true,
+        "unresolved": [],
+        "exceptions": [],
+        "not_applicable": [
+          "A8",
+          "A9"
+        ],
+        "assessment_time": [
+          "A10"
+        ],
+        "satisfied": 8
+      },
+      "B": {
+        "ready": false,
+        "unresolved": [
+          "B3",
+          "B4",
+          "B5",
+          "B7"
+        ],
+        "exceptions": [],
+        "not_applicable": [],
+        "assessment_time": [
+          "B8"
+        ],
+        "satisfied": 3
+      },
+      "N": {
+        "ready": true,
+        "unresolved": [],
+        "exceptions": [],
+        "not_applicable": [],
+        "assessment_time": [],
+        "satisfied": 6
+      }
+    },
+    "case-7": {
+      "A": {
+        "ready": true,
+        "unresolved": [],
+        "exceptions": [],
+        "not_applicable": [
+          "A8",
+          "A9"
+        ],
+        "assessment_time": [
+          "A10"
+        ],
+        "satisfied": 8
+      },
+      "B": {
+        "ready": false,
+        "unresolved": [
+          "B3",
+          "B4",
+          "B5",
+          "B7"
+        ],
+        "exceptions": [],
+        "not_applicable": [],
+        "assessment_time": [
+          "B8"
+        ],
+        "satisfied": 3
+      },
+      "N": {
+        "ready": true,
+        "unresolved": [],
+        "exceptions": [],
+        "not_applicable": [],
+        "assessment_time": [],
+        "satisfied": 6
+      }
+    },
+    "case-8": {
+      "A": {
+        "ready": true,
+        "unresolved": [],
+        "exceptions": [],
+        "not_applicable": [
+          "A8",
+          "A9"
+        ],
+        "assessment_time": [
+          "A10"
+        ],
+        "satisfied": 8
+      },
+      "B": {
+        "ready": false,
+        "unresolved": [
+          "B3",
+          "B4",
+          "B5",
+          "B7"
+        ],
+        "exceptions": [],
+        "not_applicable": [],
+        "assessment_time": [
+          "B8"
+        ],
+        "satisfied": 3
+      },
+      "N": {
+        "ready": true,
+        "unresolved": [],
+        "exceptions": [],
+        "not_applicable": [],
+        "assessment_time": [],
+        "satisfied": 6
+      }
+    },
+    "case-9": {
+      "A": {
+        "ready": false,
+        "unresolved": [
+          "A2",
+          "A4",
+          "A5",
+          "A6",
+          "A11"
+        ],
+        "exceptions": [],
+        "not_applicable": [
+          "A8",
+          "A9"
+        ],
+        "assessment_time": [
+          "A10"
+        ],
+        "satisfied": 3
+      },
+      "B": {
+        "ready": true,
+        "unresolved": [],
+        "exceptions": [],
+        "not_applicable": [],
+        "assessment_time": [
+          "B8"
+        ],
+        "satisfied": 7
+      },
+      "N": {
+        "ready": true,
+        "unresolved": [],
+        "exceptions": [],
+        "not_applicable": [],
+        "assessment_time": [],
+        "satisfied": 6
+      }
+    },
+    "case-10": {
+      "A": {
+        "ready": false,
+        "unresolved": [
+          "A1",
+          "A2",
+          "A6"
+        ],
+        "exceptions": [],
+        "not_applicable": [
+          "A8",
+          "A9"
+        ],
+        "assessment_time": [
+          "A10"
+        ],
+        "satisfied": 5
+      },
+      "B": {
+        "ready": false,
+        "unresolved": [
+          "B1",
+          "B3",
+          "B7"
+        ],
+        "exceptions": [],
+        "not_applicable": [],
+        "assessment_time": [
+          "B8"
+        ],
+        "satisfied": 4
+      },
+      "N": {
+        "ready": true,
+        "unresolved": [],
+        "exceptions": [],
+        "not_applicable": [],
+        "assessment_time": [],
+        "satisfied": 6
+      }
+    }
+  },
+  "expected_monitoring": {
+    "case-6": "current",
+    "case-7": "overdue"
+  }
+}

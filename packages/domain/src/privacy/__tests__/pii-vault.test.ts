@@ -47,6 +47,46 @@ describe('KeyProvider — PII vault', () => {
     expect(decrypted.equals(plaintext)).toBe(true);
   });
 
+  it('samePlaintext_sameKeyRef_producesDifferentCiphertext', async () => {
+    const plaintext = Buffer.from('synthetic reconciliation changes');
+    const first = await provider.encrypt(plaintext, 'reconciliation-item-001');
+    const second = await provider.encrypt(plaintext, 'reconciliation-item-001');
+    expect(first.equals(second)).toBe(false);
+    expect(first.subarray(0, 4).toString('ascii')).toBe('SFE1');
+    expect((await provider.decrypt(first, 'reconciliation-item-001')).equals(plaintext)).toBe(true);
+    expect((await provider.decrypt(second, 'reconciliation-item-001')).equals(plaintext)).toBe(true);
+  });
+
+  it('providerMetadata_identifiesCipherVersionAndTestOnlyScope_withoutPlaintext', async () => {
+    const plaintext = Buffer.from('synthetic metadata probe');
+    const metadata = provider.metadata;
+    expect(metadata).toMatchObject({
+      provider: 'LocalDevKeyProvider',
+      key_version: 'local-dev-aes-256-gcm-v1',
+      status: 'not_for_production',
+    });
+    expect(JSON.stringify(metadata)).not.toContain(plaintext.toString('utf8'));
+    const ciphertext = await provider.encrypt(plaintext, 'metadata-probe');
+    expect(ciphertext.toString('utf8')).not.toContain(plaintext.toString('utf8'));
+  });
+
+  it('wrongKey_failsClosed', async () => {
+    const ciphertext = await provider.encrypt(Buffer.from('synthetic sensitive field'), 'expected-key-ref');
+    await expect(provider.decrypt(ciphertext, 'different-key-ref')).rejects.toMatchObject({ code: 'DECRYPT_FAILED' });
+  });
+
+  it('tamperedCiphertext_failsClosed', async () => {
+    const ciphertext = await provider.encrypt(Buffer.from('synthetic sensitive field'), 'tamper-test-key-ref');
+    ciphertext[12] = (ciphertext[12] ?? 0) ^ 0x01;
+    await expect(provider.decrypt(ciphertext, 'tamper-test-key-ref')).rejects.toMatchObject({ code: 'DECRYPT_FAILED' });
+  });
+
+  it('unsupportedCiphertextVersion_failsClosed', async () => {
+    const ciphertext = await provider.encrypt(Buffer.from('synthetic version probe'), 'version-test-key-ref');
+    ciphertext.write('SFE2', 0, 'ascii');
+    await expect(provider.decrypt(ciphertext, 'version-test-key-ref')).rejects.toMatchObject({ code: 'DECRYPT_FAILED' });
+  });
+
   it('differentPersonKeys_producesDifferentCiphertext', async () => {
     const plaintext = Buffer.from('Jane Smith');
     const ct1 = await provider.encrypt(plaintext, 'person-A');

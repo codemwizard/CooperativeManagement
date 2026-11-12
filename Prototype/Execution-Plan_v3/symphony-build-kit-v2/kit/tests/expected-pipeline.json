@@ -1,0 +1,111 @@
+{
+  "note": "Computed at demo_date 2026-10-06 from the seed fixtures. Funnel stages are cumulative case counts. Cohort rows count cases whose requirements in each NABII Programme Pipeline group are all satisfied. Interventions count open requirements (unresolved or exception) across all nine cases, by class from data/interventions.json.",
+  "demo_date": "2026-10-06",
+  "funnel": {
+    "enrolled": {
+      "count": 9,
+      "cases": [
+        "case-1",
+        "case-2",
+        "case-3",
+        "case-4",
+        "case-5",
+        "case-6",
+        "case-7",
+        "case-8",
+        "case-9"
+      ]
+    },
+    "ready_programme": {
+      "count": 7,
+      "cases": [
+        "case-1",
+        "case-2",
+        "case-5",
+        "case-6",
+        "case-7",
+        "case-8",
+        "case-9"
+      ]
+    },
+    "ready_lender": {
+      "count": 5,
+      "cases": [
+        "case-5",
+        "case-6",
+        "case-7",
+        "case-8",
+        "case-9"
+      ]
+    },
+    "presented": {
+      "count": 3,
+      "cases": [
+        "case-6",
+        "case-7",
+        "case-8"
+      ]
+    },
+    "lender_response_recorded": {
+      "count": 3,
+      "cases": [
+        "case-6",
+        "case-7",
+        "case-8"
+      ]
+    },
+    "financed": {
+      "count": 2,
+      "cases": [
+        "case-6",
+        "case-7"
+      ]
+    }
+  },
+  "cohorts": {
+    "Readiness Cohort 1": {
+      "cases": 5,
+      "satisfied_by_group": {
+        "legal": 4,
+        "governance": 4,
+        "membership": 4,
+        "project": 5,
+        "environment": 4,
+        "inclusion": 4
+      },
+      "programme_ready": 3
+    },
+    "Readiness Cohort 2": {
+      "cases": 4,
+      "satisfied_by_group": {
+        "legal": 4,
+        "governance": 4,
+        "membership": 4,
+        "project": 4,
+        "environment": 4,
+        "inclusion": 4
+      },
+      "programme_ready": 4
+    }
+  },
+  "open_interventions_by_destination": {
+    "A": {
+      "standard": 9,
+      "specialist": 4,
+      "restructure": 1,
+      "blocked": 1
+    },
+    "B": {
+      "standard": 18,
+      "specialist": 8,
+      "restructure": 8,
+      "blocked": 1
+    },
+    "N": {
+      "standard": 3,
+      "specialist": 1,
+      "restructure": 0,
+      "blocked": 1
+    }
+  }
+}

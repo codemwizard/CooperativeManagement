@@ -47,7 +47,7 @@ export class PostgresCommandTransactionRunner implements CommandTransactionRunne
           throw new RetryableCommandTransactionError();
         }
 
-        if (recovery && workCompleted && isConnectionFailure(sqlState)) {
+        if (recovery && workCompleted && (isConnectionFailure(sqlState) || isDisconnectedClient(error))) {
           const recoveryDb = this.options.recoveryDb;
           let recovered: T | null;
           try {
@@ -107,4 +107,13 @@ function isConnectionFailure(code: string | undefined): boolean {
     code === 'ETIMEDOUT' || code === 'ERR_STREAM_DESTROYED' || code === '57P01' ||
     code === '57P02' || code === '57P03'
   );
+}
+
+function isDisconnectedClient(error: unknown): boolean {
+  if (!error || typeof error !== 'object') return false;
+  const candidate = error as { readonly message?: unknown; readonly cause?: unknown };
+  if (typeof candidate.message === 'string' && /connection (?:terminated unexpectedly|error and is not queryable)/i.test(candidate.message)) {
+    return true;
+  }
+  return candidate.cause !== undefined && isDisconnectedClient(candidate.cause);
 }

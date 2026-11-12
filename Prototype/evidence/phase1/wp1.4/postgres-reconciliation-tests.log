@@ -1,0 +1,20 @@
+
+> @symphony/db@0.1.0 test:db
+> vitest run --reporter=verbose src/__tests__/command-reconciliation.integration.test.ts
+
+
+ RUN  v2.1.9 C:/Workspace/GitHub/Prototype/packages/db
+
+ ✓ src/__tests__/command-reconciliation.integration.test.ts > WP1.4 terminal conflict receipt and reconciliation persistence > stores one terminal receipt and encrypted inbox item without success effects, and replays safely
+ ✓ src/__tests__/command-reconciliation.integration.test.ts > WP1.4 terminal conflict receipt and reconciliation persistence > rejects changed actor or semantic envelope without disclosing or duplicating the item
+ ✓ src/__tests__/command-reconciliation.integration.test.ts > WP1.4 terminal conflict receipt and reconciliation persistence > rolls back the terminal receipt when inbox insertion fails after the insert
+ ✓ src/__tests__/command-reconciliation.integration.test.ts > WP1.4 terminal conflict receipt and reconciliation persistence > serializes lifecycle transitions and clears expired payload without overwriting a terminal outcome
+ ✓ src/__tests__/command-reconciliation.integration.test.ts > WP1.4 terminal conflict receipt and reconciliation persistence > does not expose the item without matching transaction tenant context and explicit tenant predicate
+ ✓ src/__tests__/command-reconciliation.integration.test.ts > WP1.4 terminal conflict receipt and reconciliation persistence > recovers a real TCP connection loss after the database committed but before the client received COMMIT
+ ✓ src/__tests__/command-reconciliation.integration.test.ts > WP1.4 terminal conflict receipt and reconciliation persistence > recovers a real TCP connection loss before PostgreSQL received COMMIT, so the transaction rolled back
+
+ Test Files  1 passed (1)
+      Tests  7 passed (7)
+   Start at  04:36:08
+   Duration  2.82s (transform 270ms, setup 0ms, collect 1.24s, tests 859ms, environment 0ms, prepare 230ms)
+

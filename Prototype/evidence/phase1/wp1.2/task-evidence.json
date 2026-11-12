@@ -1,0 +1,126 @@
+{
+  "schema_version": 1,
+  "task_id": "WP1.2",
+  "status": {
+    "implementation": "complete",
+    "unit_test": "passed",
+    "integration_test": "passed",
+    "bdd_ui_test": "not_applicable",
+    "gate_verified": "passed"
+  },
+  "commit": "29317ff15dbb8010aa8768bb9ae451b54476875d",
+  "environment": {
+    "node": "v26.7.0",
+    "npm": "12.2.0",
+    "postgres": "PostgreSQL server 18.0-2; isolated database symphony_phase1_test",
+    "database_role": "symphony owner role, isolated *_test database; no app-role/RLS claim",
+    "data_mode": "test",
+    "key_provider": "local-test"
+  },
+  "commands": [
+    {
+      "command": "npm run test:unit --workspace @symphony/domain -- src/kernel/__tests__/command-bus-transaction.test.ts",
+      "result": "passed",
+      "artifact": "evidence/phase1/wp1.2/domain-transaction-tests.log"
+    },
+    {
+      "command": "npm run test:unit --workspace @symphony/domain",
+      "result": "passed",
+      "artifact": "evidence/phase1/wp1.2/domain-full-tests.log"
+    },
+    {
+      "command": "npm run test:db --workspace @symphony/db -- src/__tests__/command-transaction.integration.test.ts (MIGRATION_TEST_DATABASE_URL=symphony_phase1_test, PostgreSQL 18.0)",
+      "result": "passed",
+      "artifact": "evidence/phase1/wp1.2/command-transaction-tests.log"
+    },
+    {
+      "command": "npm run test:db --workspace @symphony/db -- src/__tests__/security-attempt-audit.integration.test.ts (MIGRATION_TEST_DATABASE_URL=symphony_phase1_test, PostgreSQL 18.0)",
+      "result": "passed",
+      "artifact": "evidence/phase1/wp1.2/security-audit-tests.log"
+    },
+    {
+      "command": "npm run test:db:migrations (MIGRATION_TEST_DATABASE_URL=symphony_phase1_test)",
+      "result": "passed",
+      "artifact": "evidence/phase1/wp1.2/migration-tests.log"
+    },
+    {
+      "command": "npm run typecheck:v4",
+      "result": "passed",
+      "artifact": "evidence/phase1/wp1.2/typecheck-v4.log"
+    },
+    {
+      "command": "npm run verify:arch",
+      "result": "passed",
+      "artifact": "evidence/phase1/wp1.2/verify-arch.log"
+    },
+    {
+      "command": "npm run verify:phase1:contracts",
+      "result": "passed",
+      "artifact": "evidence/phase1/wp1.2/phase1-contracts.log"
+    },
+    {
+      "command": "npm run test:toolchain",
+      "result": "passed",
+      "artifact": "evidence/phase1/wp1.2/toolchain-tests.log"
+    },
+    {
+      "command": "npm run verify:toolchain",
+      "result": "passed",
+      "artifact": "evidence/phase1/wp1.2/toolchain-verify.log"
+    }
+  ],
+  "sub_gates": [
+    {
+      "gate_id": "WP1.2-A",
+      "status": "passed",
+      "commands": [
+        {
+          "command": "npm run test:unit --workspace @symphony/domain -- src/kernel/__tests__/command-bus-transaction.test.ts",
+          "result": "passed",
+          "artifact": "evidence/phase1/wp1.2/domain-transaction-tests.log"
+        },
+        {
+          "command": "npm run test:db --workspace @symphony/db -- src/__tests__/command-transaction.integration.test.ts (MIGRATION_TEST_DATABASE_URL=symphony_phase1_test, PostgreSQL 18.0)",
+          "result": "passed",
+          "artifact": "evidence/phase1/wp1.2/command-transaction-tests.log"
+        }
+      ]
+    },
+    {
+      "gate_id": "WP1.2-B",
+      "status": "passed",
+      "commands": [
+        {
+          "command": "npm run test:db --workspace @symphony/db -- src/__tests__/security-attempt-audit.integration.test.ts (MIGRATION_TEST_DATABASE_URL=symphony_phase1_test, PostgreSQL 18.0)",
+          "result": "passed",
+          "artifact": "evidence/phase1/wp1.2/security-audit-tests.log"
+        },
+        {
+          "command": "npm run test:db --workspace @symphony/db -- src/__tests__/command-transaction.integration.test.ts (MIGRATION_TEST_DATABASE_URL=symphony_phase1_test, PostgreSQL 18.0)",
+          "result": "passed",
+          "artifact": "evidence/phase1/wp1.2/command-transaction-tests.log"
+        },
+        {
+          "command": "npm run test:db:migrations (MIGRATION_TEST_DATABASE_URL=symphony_phase1_test)",
+          "result": "passed",
+          "artifact": "evidence/phase1/wp1.2/migration-tests.log"
+        }
+      ]
+    }
+  ],
+  "claims": {
+    "behavior_proved": "PostgreSQL integration proves accepted-command transaction atomicity, denial rollback followed by separate security-audit commit before dispatch returns, and audit failure returning a generic retryable result with no business or audit rows. Missing and mismatched trusted actor/tenant context fails closed. The writer requires a validated server-environment runtime profile. Migration assertions cover all declared fields, PostgreSQL types, defaults, tenant foreign key, exact denial-code allowlist, and no business-command uniqueness.",
+    "path_proved": "All required WP1.2 domain, PostgreSQL command/audit, migration, Phase 1 contract, typecheck, architecture, and toolchain checks passed after commit 29317ff15dbb8010aa8768bb9ae451b54476875d using installed Node 26.7.0/npm 12.2.0 and PostgreSQL 18.0 / package build 18.0-2. WP1.2-A and WP1.2-B both pass. No HTTP, app-role/RLS, inbox, WP1.3 retry, or independent closure claims are made.",
+    "configuration_proved": "Node v26.7.0, npm 12.2.0, PostgreSQL 18.0 (server_version_num=180000; installed package build 18.0-2), and isolated symphony_phase1_test were used. MIGRATION_TEST_DATABASE_URL was derived in-process from the existing Symphony DATABASE_URL credentials and removed after each run. DATA_MODE=test; synthetic fixtures and deterministic local test HMAC keys were used.",
+    "coverage_limitations": [
+      "Database integration was run with the symphony owner role inside an isolated *_test database; app-role/RLS behavior belongs to WP1.5 and is not claimed.",
+      "Application-role grants/RLS belong to WP1.5; terminal-conflict inbox behavior belongs to WP1.4; API composition belongs to WP1.6."
+    ]
+  },
+  "limitations": [
+    "No independent review is claimed; Phase 1 independent closure review belongs to the later closure process.",
+    "WP1.2 does not implement WP1.3 retry/uncertain-commit handling, WP1.4 reconciliation inbox behavior, WP1.5 app-role/RLS, or WP1.6 HTTP mapping and authenticated API composition."
+  ],
+  "unresolved_decisions": [],
+  "reviewer": "Implementation self-review only; independent review is not claimed."
+}

@@ -246,7 +246,9 @@ export function validateTenantTableInventory(inventory, migrationTexts) {
   const created = new Set();
   const enabled = new Set();
   const forced = new Set();
-  for (const source of migrationTexts) {
+  // rls_current records the deployed baseline through 0012. Migration 0013 is
+  // still a WP1.5 candidate until the restricted-role database gate passes.
+  for (const source of migrationTexts.filter((text) => !text.includes('-- WP1.5: complete tenant isolation and least-privilege runtime grants.'))) {
     for (const match of source.matchAll(/CREATE\s+TABLE\s+(?:IF\s+NOT\s+EXISTS\s+)?(?:symphony\.)?([a-z_][a-z0-9_]*)/gi)) created.add(match[1].toLowerCase());
     for (const match of source.matchAll(/ALTER\s+TABLE\s+(?:symphony\.)?([a-z_][a-z0-9_]*)\s+ENABLE\s+ROW\s+LEVEL\s+SECURITY/gi)) enabled.add(match[1].toLowerCase());
     for (const match of source.matchAll(/ALTER\s+TABLE\s+(?:symphony\.)?([a-z_][a-z0-9_]*)\s+FORCE\s+ROW\s+LEVEL\s+SECURITY/gi)) forced.add(match[1].toLowerCase());
@@ -291,6 +293,30 @@ export function validateTenantPolicyMatrix(matrix, inventory) {
   return [...new Set(errors)];
 }
 
+export function validateTenantPolicyManifest(manifest, matrix) {
+  const errors = [];
+  const rows = [...(matrix?.tables ?? []), ...(matrix?.planned_phase1_tables ?? [])];
+  const required = rows.filter((row) => row.classification === 'tenant_scoped').map((row) => row.table).sort();
+  const entries = manifest?.policy_entries ?? [];
+  const names = entries.map((entry) => entry.table).sort();
+  if (manifest?.table_count !== required.length || entries.length !== required.length) {
+    errors.push(`policy manifest must contain exactly ${required.length} tenant-scoped table entries`);
+  }
+  if (JSON.stringify(names) !== JSON.stringify(required)) errors.push('policy manifest table set differs from tenant-scoped matrix rows');
+  if (!['candidate_frozen_pending_restricted_role_integration_and_review', 'accepted'].includes(manifest?.status)) {
+    errors.push('policy manifest must declare candidate or accepted status');
+  }
+  for (const entry of entries) {
+    if (typeof entry.tenant_resolution_sql !== 'string' || entry.tenant_resolution_sql.trim().length < 20) errors.push(`${entry.table} lacks exact tenant-resolution SQL`);
+    if (entry.insert_with_check !== entry.tenant_resolution_sql) errors.push(`${entry.table} INSERT policy differs from its frozen tenant expression`);
+    if (entry.update_using !== entry.tenant_resolution_sql || entry.update_with_check !== entry.tenant_resolution_sql) errors.push(`${entry.table} UPDATE policy does not enforce both old and new tenant scope`);
+    if (typeof entry.missing_parent_behavior !== 'string' || !entry.missing_parent_behavior.includes('false')) errors.push(`${entry.table} does not define fail-closed missing-parent behavior`);
+    if (typeof entry.cross_tenant_parent_behavior !== 'string' || !entry.cross_tenant_parent_behavior.includes('false')) errors.push(`${entry.table} does not define fail-closed cross-tenant behavior`);
+    if (typeof entry.mismatch_fixture !== 'string' || typeof entry.missing_parent_fixture !== 'string') errors.push(`${entry.table} lacks named mismatch fixtures`);
+  }
+  return [...new Set(errors)];
+}
+
 export function validateAuthorityDependencyInventory(inventory, migrationInventory) {
   const required = new Set([
     'tenant-membership', 'platform-role-assignment', 'appointment-and-source-status',
@@ -331,7 +357,7 @@ export function validatePurgeTablePolicyMatrix(matrix, inventory) {
     if (plannedPreserve.has(entry.table) && !inventoryTables.some((table) => table.table === entry.table)) errors.push(`${entry.table} is absent from migration inventory`);
     expectedPreserve.add(entry.table);
   }
-  for (const name of ['legal_sources', 'position_combination_rules', 'retention_policies']) expectedPreserve.add(name);
+  for (const name of ['legal_sources', 'position_combination_rules', 'retention_policies', 'requirement_sources']) expectedPreserve.add(name);
   const deleteRows = matrix?.delete_tables ?? [];
   const order = matrix?.delete_dependency_order ?? [];
   const deletes = deleteRows.map((entry) => entry.table);
@@ -451,6 +477,7 @@ function main() {
   const modeMatrix = readJson('evidence/phase1/runtime-mode-matrix.json');
   const tenantInventory = readJson('evidence/phase1/tenant-table-inventory.json');
   const tenantPolicyMatrix = readJson('evidence/phase1/tenant-table-policy-matrix.json');
+  const tenantPolicyManifest = readJson('evidence/phase1/wp1.5-tenant-policy-manifest.json');
   const authorityInventory = readJson('evidence/phase1/authority-dependency-inventory.json');
   const purgeMatrix = readJson('evidence/phase1/purge-table-policy-matrix.json');
   const bddManifest = readJson('evidence/phase1/bdd-scenarios.json');
@@ -465,6 +492,7 @@ function main() {
     ...validatePhase1Gate(readJson('package.json')).map((error) => `Phase 1 gate: ${error}`),
     ...validateTenantTableInventory(tenantInventory, migrationTexts).map((error) => `tenant inventory: ${error}`),
     ...validateTenantPolicyMatrix(tenantPolicyMatrix, tenantInventory).map((error) => `tenant policy matrix: ${error}`),
+    ...validateTenantPolicyManifest(tenantPolicyManifest, tenantPolicyMatrix).map((error) => `tenant policy manifest: ${error}`),
     ...validateAuthorityDependencyInventory(authorityInventory, tenantInventory).map((error) => `authority inventory: ${error}`),
     ...validatePurgeTablePolicyMatrix(purgeMatrix, tenantInventory).map((error) => `purge matrix: ${error}`),
     ...validateBddOwnerMap(bddOwnerMap, bddManifest, graph).map((error) => `BDD owner map: ${error}`),

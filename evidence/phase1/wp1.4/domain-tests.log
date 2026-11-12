@@ -1,0 +1,111 @@
+Test-Path: C:\Program Files\nodejs\npm.ps1:23
+Line |
+  23 |  if (Test-Path $NPM_PREFIX_NPM_CLI_JS) {
+     |      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     | Access to the path 'C:\Users\User\AppData\Roaming\npm\node_modules\npm\bin\npm-cli.js' is denied.
+
+
+> @symphony/domain@0.1.0 test:unit
+> vitest run --reporter=verbose
+
+
+ RUN  v2.1.9 C:/Workspace/GitHub/Prototype/packages/domain
+
+ ✓ src/identity/__tests__/auth.test.ts > AuthService > temporaryCredential_isHashedArgon2id 467ms
+ ✓ src/identity/__tests__/auth.test.ts > AuthService > temporaryCredential_singleUse 696ms
+ ✓ src/kernel/__tests__/tenant-isolation.test.ts > Tenant isolation (INV-001) > commandForAnotherTenant_isRejected
+ ✓ src/kernel/__tests__/tenant-isolation.test.ts > Tenant isolation (INV-001) > repositoryLoad_neverReturnsAnotherTenantsRecord
+ ✓ src/kernel/__tests__/tenant-isolation.test.ts > Tenant isolation (INV-001) > eventsFromAnotherTenant_notVisible
+ ✓ src/kernel/__tests__/command-bus.test.ts > CommandBus > repeatedCommandId_doesNotApplyTwice
+ ✓ src/kernel/__tests__/command-bus.test.ts > CommandBus > staleExpectedVersion_isRejected
+ ✓ src/kernel/__tests__/command-bus.test.ts > CommandBus > dbFailure_rollsBackAll
+ ✓ src/kernel/__tests__/command-bus.test.ts > CommandBus > concurrentCommands_onlyOneWins
+ ✓ src/kernel/__tests__/command-bus.test.ts > CommandBus > crossTenantCommand_isRejected
+ ✓ src/kernel/__tests__/command-bus.test.ts > CommandBus > unauthorisedCommand_mutatesNothing
+ ✓ src/identity/__tests__/auth.test.ts > AuthService > temporaryCredential_isExpiredAfterDefault72h 565ms
+ ✓ src/privacy/__tests__/pii-vault.test.ts > KeyProvider — PII vault > encrypt_thenDecrypt_returnsSamePlaintext
+ ✓ src/privacy/__tests__/pii-vault.test.ts > KeyProvider — PII vault > samePlaintext_sameKeyRef_producesDifferentCiphertext
+ ✓ src/privacy/__tests__/pii-vault.test.ts > KeyProvider — PII vault > providerMetadata_identifiesCipherVersionAndTestOnlyScope_withoutPlaintext
+ ✓ src/privacy/__tests__/pii-vault.test.ts > KeyProvider — PII vault > wrongKey_failsClosed
+ ✓ src/privacy/__tests__/pii-vault.test.ts > KeyProvider — PII vault > tamperedCiphertext_failsClosed
+ ✓ src/privacy/__tests__/pii-vault.test.ts > KeyProvider — PII vault > unsupportedCiphertextVersion_failsClosed
+ ✓ src/privacy/__tests__/pii-vault.test.ts > KeyProvider — PII vault > differentPersonKeys_producesDifferentCiphertext
+ ✓ src/privacy/__tests__/pii-vault.test.ts > KeyProvider — PII vault > blindIndex_matchesSamePlaintext
+ ✓ src/privacy/__tests__/pii-vault.test.ts > KeyProvider — PII vault > blindIndex_differentPepper_doesNotMatch
+ ✓ src/privacy/__tests__/pii-vault.test.ts > KeyProvider — PII vault > cryptoShred_keyDeleted_ciphertextUnreadable
+ ✓ src/privacy/__tests__/pii-vault.test.ts > KeyProvider — PII vault > nrcPattern_neverInEventPayload
+ ✓ src/privacy/__tests__/pii-vault.test.ts > KeyProvider — PII vault > nrcPattern_neverInLog
+ ✓ src/authz/__tests__/policy.test.ts > PolicyEngine > grantCapacity_IFV_allowedByChairperson
+ ✓ src/authz/__tests__/policy.test.ts > PolicyEngine > grantCapacity_IFV_deniedToSecretary
+ ✓ src/authz/__tests__/policy.test.ts > PolicyEngine > IFV_cannotVerifyOwnSuppliedVersion
+ ✓ src/authz/__tests__/policy.test.ts > PolicyEngine > IFV_boundToOrganisation_cannotActOnAnother
+ ✓ src/authz/__tests__/policy.test.ts > PolicyEngine > institutionalRole_cannotWriteEvidence
+ ✓ src/authz/__tests__/policy.test.ts > PolicyEngine > revokedCapacity_isNoLongerEffective
+ ✓ src/authz/__tests__/policy.test.ts > PolicyEngine > delegation_extendsCapacity
+ ✓ src/identity/__tests__/auth.test.ts > AuthService > temporaryCredential_expiresAtExact72HourBoundary 2042ms
+ ✓ src/identity/__tests__/auth.test.ts > AuthService > firstLogin_requiresPasswordChange 1307ms
+ ✓ src/kernel/__tests__/command-bus-transaction.test.ts > WP1.2-A transaction context and WP1.2-B denial audit boundary > passes one context identity through receipt, aggregate, policy, and writes
+ ✓ src/kernel/__tests__/command-bus-transaction.test.ts > WP1.2-A transaction context and WP1.2-B denial audit boundary > rolls back the command transaction before recording a denial without policy detail
+ ✓ src/kernel/__tests__/command-bus-transaction.test.ts > WP1.2-A transaction context and WP1.2-B denial audit boundary > returns a retryable classification when the required audit write fails
+ ✓ src/kernel/__tests__/command-bus-transaction.test.ts > WP1.2-A transaction context and WP1.2-B denial audit boundary > fails closed without trusted actor and tenant context and audits mismatched context as the trusted actor
+ ✓ src/authz/__tests__/capacity-service.test.ts > CapacityService > grantCapacity_allowed_byChairperson
+ ✓ src/authz/__tests__/capacity-service.test.ts > CapacityService > grantCapacity_denied_toSecretary
+ ✓ src/authz/__tests__/capacity-service.test.ts > CapacityService > revokeCapacity_allowed_byChairperson
+ ✓ src/authz/__tests__/capacity-service.test.ts > CapacityService > revokeCapacity_annotatesExistingFindings
+ ✓ src/identity/__tests__/auth.test.ts > AuthService > authenticationEvent_containsNoPII 723ms
+ ✓ src/identity/__tests__/auth.test.ts > AuthService > credential_neverAppearsInEventPayload
+ ✓ src/kernel/__tests__/command-digest.test.ts > WP1.1 command semantic digest > keeps the digest implementation and persisted receipt version labels aligned
+ ✓ src/kernel/__tests__/command-digest.test.ts > WP1.1 command semantic digest > matches the approved RFC 8785 canonical semantic-envelope vector
+ ✓ src/kernel/__tests__/command-digest.test.ts > WP1.1 command semantic digest > excludes lookup and transport metadata while retaining semantic changes
+ ✓ src/kernel/__tests__/command-digest.test.ts > WP1.1 command semantic digest > uses the active key version and returns a 32-byte HMAC digest
+ ✓ src/kernel/__tests__/command-digest.test.ts > WP1.1 command semantic digest > replays with the stored historical key version and fails closed when it is unavailable
+ ✓ src/kernel/__tests__/command-digest.test.ts > WP1.1 command semantic digest > rejects invalid JSON values and unavailable canonicalization versions
+ ✓ src/kernel/__tests__/command-receipt-contract.test.ts > WP1.1 durable command receipt contract > accepts a tenant-scoped receipt with a versioned safe result
+ ✓ src/kernel/__tests__/command-receipt-contract.test.ts > WP1.1 durable command receipt contract > uses a strict success variant with non-negative version and UUID event ids
+ ✓ src/kernel/__tests__/command-receipt-contract.test.ts > WP1.1 durable command receipt contract > accepts only the terminal VERSION_CONFLICT result shape
+ ✓ src/kernel/__tests__/command-receipt-contract.test.ts > WP1.1 durable command receipt contract > rejects unkeyed or wrong-length digests and unsupported contract versions
+ ✓ src/kernel/__tests__/command-receipt-contract.test.ts > WP1.1 durable command receipt contract > rejects payload and unapproved receipt fields rather than persisting request material
+ ✓ src/kernel/__tests__/command-receipt-contract.test.ts > WP1.1 durable command receipt contract > exposes stable snake-case types without widening the result union
+ ✓ src/privacy/__tests__/test-data-mode.test.ts > DataModeGuard > testMode_rejectsRealNRC
+ ✓ src/privacy/__tests__/test-data-mode.test.ts > DataModeGuard > testMode_acceptsSyntheticNRC
+ ✓ src/privacy/__tests__/test-data-mode.test.ts > DataModeGuard > testMode_rejectsRealCoopRegNumber
+ ✓ src/privacy/__tests__/test-data-mode.test.ts > DataModeGuard > testMode_acceptsSyntheticCoopRegNumber
+ ✓ src/privacy/__tests__/test-data-mode.test.ts > DataModeGuard > realMode_outsideApprovedRegion_refusesToStart
+ ✓ src/privacy/__tests__/test-data-mode.test.ts > DataModeGuard > realMode_approvedRegion_starts
+ ✓ src/privacy/__tests__/test-data-mode.test.ts > PurgeSeedService > purgeToSeed_removesAllTenantData
+ ✓ src/privacy/__tests__/consent.test.ts > ConsentService > recordConsent_before_PII_entry
+ ✓ src/privacy/__tests__/consent.test.ts > ConsentService > withdrawConsent_triggersRetentionEvaluation
+ ✓ src/privacy/__tests__/consent.test.ts > ConsentService > publicRegisterFields_useLegalObligation_notConsent
+ ✓ src/authz/__tests__/policy-table.test.ts > PolicyEngine — policy table > 'Chairperson may grant IFV'
+ ✓ src/authz/__tests__/policy-table.test.ts > PolicyEngine — policy table > 'Vice-Chairperson may grant IFV'
+ ✓ src/authz/__tests__/policy-table.test.ts > PolicyEngine — policy table > 'Secretary may NOT grant IFV'
+ ✓ src/authz/__tests__/policy-table.test.ts > PolicyEngine — policy table > 'Treasurer may NOT grant IFV'
+ ✓ src/authz/__tests__/policy-table.test.ts > PolicyEngine — policy table > 'Platform enroller may grant IFV'
+ ✓ src/authz/__tests__/policy-table.test.ts > PolicyEngine — policy table > 'IFV holder alone may NOT grant IFV'
+ ✓ src/authz/__tests__/policy-table.test.ts > PolicyEngine — policy table > 'IFV cannot verify own supplied versio…'
+ ✓ src/authz/__tests__/policy-table.test.ts > PolicyEngine — policy table > 'IFV may verify version supplied by an…'
+ ✓ src/authz/__tests__/policy-table.test.ts > PolicyEngine — policy table > 'IFV cannot act on another org\'s vers…'
+ ✓ src/authz/__tests__/policy-table.test.ts > PolicyEngine — policy table > 'No IFV capacity → deny RecordFinding'
+ ✓ src/authz/__tests__/policy-table.test.ts > PolicyEngine — policy table > 'Expired IFV capacity → deny'
+ ✓ src/authz/__tests__/policy-table.test.ts > PolicyEngine — policy table > 'pfi_analyst cannot AddEvidence'
+ ✓ src/authz/__tests__/policy-table.test.ts > PolicyEngine — policy table > 'pfi_analyst cannot AmendClaim'
+ ✓ src/authz/__tests__/policy-table.test.ts > PolicyEngine — policy table > 'union_ta cannot AdmitEvidence'
+ ✓ src/authz/__tests__/policy-table.test.ts > PolicyEngine — policy table > 'fund_manager cannot ApproveMinutes'
+ ✓ src/authz/__tests__/policy-table.test.ts > PolicyEngine — policy table > 'ta cannot RecordTaCompletion (write)'
+ ✓ src/authz/__tests__/policy-table.test.ts > PolicyEngine — policy table > 'external_verifier cannot RecordFindin…'
+ ✓ src/authz/__tests__/policy-table.test.ts > PolicyEngine — policy table > 'pfi_credit cannot GrantCapacity'
+ ✓ src/authz/__tests__/policy-table.test.ts > PolicyEngine — policy table > 'Chairperson may ApproveMinutes'
+ ✓ src/authz/__tests__/policy-table.test.ts > PolicyEngine — policy table > 'Vice-Chairperson may ApproveMinutes'
+ ✓ src/authz/__tests__/policy-table.test.ts > PolicyEngine — policy table > 'Secretary may ApproveMinutes'
+ ✓ src/authz/__tests__/policy-table.test.ts > PolicyEngine — policy table > 'Plain member cannot ApproveMinutes'
+ ✓ src/authz/__tests__/policy-table.test.ts > PolicyEngine — policy table > 'acting_officer delegation allows Appr…'
+ ✓ src/authz/__tests__/policy-table.test.ts > PolicyEngine — policy table > 'Chairperson cannot act on another org…'
+ ✓ src/authz/__tests__/policy-table.test.ts > PolicyEngine — policy table > 'Secretary cannot add evidence to anot…'
+ ✓ src/privacy/__tests__/retention.test.ts > RetentionPolicy > memberDataRetention_twoYearFloor
+ ✓ src/privacy/__tests__/retention.test.ts > RetentionPolicy > cryptoShred_keepsTransactionFacts
+
+ Test Files  13 passed (13)
+      Tests  92 passed (92)
+   Start at  04:11:18
+   Duration  9.56s (transform 2.66s, setup 0ms, collect 5.62s, tests 6.07s, environment 10ms, prepare 5.94s)
+

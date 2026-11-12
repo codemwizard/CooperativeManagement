@@ -1,0 +1,39 @@
+{
+  "methodology_name": "Symphony ESG Index (Illustrative Proprietary Methodology)",
+  "disclaimer": "Symphony Proprietary ESG Rating Methodology \u2014 Internal Prototype Metric for Illustrative Purposes (IRIS+ Aligned Metric Taxonomy)",
+  "pillars": {
+    "environmental": {
+      "weight": 0.35,
+      "title": "Environmental Stewardship",
+      "indicators": [
+        "sustainable_practices",
+        "water_security",
+        "land_use"
+      ]
+    },
+    "social": {
+      "weight": 0.35,
+      "title": "Social & Community Inclusion",
+      "indicators": [
+        "smallholder_reach",
+        "gender_inclusion",
+        "youth_led_households"
+      ]
+    },
+    "governance": {
+      "weight": 0.3,
+      "title": "Governance & Transparency",
+      "indicators": [
+        "member_roster_integrity",
+        "agm_minutes_recorded",
+        "discrepancy_transparency"
+      ]
+    }
+  },
+  "tier_thresholds": {
+    "Tier A": 80,
+    "Tier B": 60,
+    "Tier C": 40,
+    "Tier D": 0
+  }
+}

@@ -24,16 +24,15 @@ import type { SymphonyDatabase } from '../types/database.js';
 
 // ─── Shared setup ─────────────────────────────────────────────────────────────
 
-const DATABASE_URL =
-  process.env['DATABASE_URL'] ??
-  'postgresql://symphony:symphony_dev@127.0.0.1:5432/symphony';
+// This suite exercises privileged outbox worker and trigger maintenance paths.
+const DATABASE_URL = process.env['PHASE1_TEST_ADMIN_DATABASE_URL'];
 
 let db: Kysely<SymphonyDatabase>;
 let tenantId: string;
 
 /** Insert a tenant row and seed an RLS context for the connection. */
 async function insertTenant(id: string): Promise<void> {
-  await sql`SELECT set_config('app.current_tenant_id', ${sql.lit(id)}, false)`.execute(db);
+  await sql`SELECT set_config('app.tenant_id', ${sql.lit(id)}, false)`.execute(db);
   await db.insertInto('symphony.tenants').values({ id, name: `test-tenant-${id}` }).execute();
 }
 
@@ -55,8 +54,9 @@ async function insertEvent(eventId: string, aggId: string, tid: string): Promise
   return eventId;
 }
 
+describe.skipIf(!DATABASE_URL)('Event store immutability (INV-018)', () => {
 beforeEach(async () => {
-  db = createDb(DATABASE_URL, { max: 1 });
+  db = createDb(DATABASE_URL ?? '', { max: 1 });
   tenantId = randomUUID();
   await insertTenant(tenantId);
 });
@@ -93,7 +93,6 @@ afterEach(async () => {
 
 // ─── Tests ────────────────────────────────────────────────────────────────────
 
-describe('Event store immutability (INV-018)', () => {
   it('appendedEvent_cannotBeUpdated', async () => {
     /**
      * AUD-010: domain_events rows are append-only.
@@ -185,4 +184,3 @@ describe('Event store immutability (INV-018)', () => {
     expect(row2.delivered_at).toEqual(firstDelivery);
   });
 });
-

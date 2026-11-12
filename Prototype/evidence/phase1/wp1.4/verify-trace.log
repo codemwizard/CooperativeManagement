@@ -1,0 +1,20 @@
+Test-Path: C:\Program Files\nodejs\npm.ps1:23
+Line |
+  23 |  if (Test-Path $NPM_PREFIX_NPM_CLI_JS) {
+     |      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     | Access to the path 'C:\Users\User\AppData\Roaming\npm\node_modules\npm\bin\npm-cli.js' is denied.
+
+
+> symphony-prototype@1.0.0 verify:trace
+> tsx tools/verify-trace.ts
+
+Running traceability gate...
+
+  Found 205 scenarios in features/.
+  174 are @wip (pending step definitions).
+  26 are @hard non-@wip (must have step definitions).
+  ✅ All @REQ-xxx tags match known codes.
+  ✅ 26 @hard non-@wip scenario(s) covered by 7 step-definition file(s): auth-steps.ts, authz-steps.ts, data-mode-steps.ts, kernel-steps.ts, privacy-steps.ts, workspace-path.ts, workspace-steps.ts.
+     (Authoritative coverage check: npm run test:bdd)
+
+✅ Traceability gate passed.

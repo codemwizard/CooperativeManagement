@@ -1,0 +1,119 @@
+
+> @symphony/db@0.1.0 test:db
+> vitest run --reporter=verbose src/__tests__/command-bus-concurrency.integration.test.ts
+
+
+ RUN  v2.1.9 C:/Workspace/GitHub/Prototype/packages/db
+
+ ✓ src/__tests__/command-bus-concurrency.integration.test.ts > WP1.3 PostgreSQL command concurrency and recovery > serializes identical concurrent submissions and returns the one committed result
+ ✓ src/__tests__/command-bus-concurrency.integration.test.ts > WP1.3 PostgreSQL command concurrency and recovery > allows the waiting identical command to execute once when the original owner rolls back
+ ✓ src/__tests__/command-bus-concurrency.integration.test.ts > WP1.3 PostgreSQL command concurrency and recovery > rejects actor, type, and semantic-envelope reuse without adding side effects
+ ✓ src/__tests__/command-bus-concurrency.integration.test.ts > WP1.3 PostgreSQL command concurrency and recovery > prevents two different commands with the same expected version from overwriting one another
+ × src/__tests__/command-bus-concurrency.integration.test.ts > WP1.3 PostgreSQL command concurrency and recovery > retries only serialization and deadlock failures within three total attempts
+   → expected +0 to be 3 // Object.is equality
+ ✓ src/__tests__/command-bus-concurrency.integration.test.ts > WP1.3 PostgreSQL command concurrency and recovery > resolves a committed response loss on a fresh connection without rerunning the handler
+ × src/__tests__/command-bus-concurrency.integration.test.ts > WP1.3 PostgreSQL command concurrency and recovery > re-enters once after a healthy fresh lookup proves an uncertain commit did not persist
+   → expected 1 to be 2 // Object.is equality
+ × src/__tests__/command-bus-concurrency.integration.test.ts > WP1.3 PostgreSQL command concurrency and recovery > returns outcome-neutral retryable unavailable when the fresh receipt lookup fails
+   → expected { ok: true, aggregateVersion: 1, …(2) } to deeply equal { ok: false, …(2) }
+
+⎯⎯⎯⎯⎯⎯ Failed Suites 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/__tests__/command-bus-concurrency.integration.test.ts > WP1.3 PostgreSQL command concurrency and recovery
+Error: Called end on pool more than once
+ ❯ BoundPool.end ../../node_modules/pg-pool/index.js:491:19
+ ❯ PostgresDriver.destroy ../../node_modules/kysely/dist/esm/dialect/postgres/postgres-driver.js:59:24
+ ❯ RuntimeDriver.destroy ../../node_modules/kysely/dist/esm/driver/runtime-driver.js:71:49
+ ❯ Kysely.destroy ../../node_modules/kysely/dist/esm/kysely.js:319:9
+ ❯ src/__tests__/command-bus-concurrency.integration.test.ts:73:5
+     71|       client.release();
+     72|     }
+     73|     await Promise.all([db.destroy(), recoveryDb.destroy(), pool.end(),…
+       |     ^
+     74|   });
+     75| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/__tests__/command-bus-concurrency.integration.test.ts > WP1.3 PostgreSQL command concurrency and recovery > retries only serialization and deadlock failures within three total attempts
+AssertionError: expected +0 to be 3 // Object.is equality
+
+- Expected
++ Received
+
+- 3
++ 0
+
+ ❯ src/__tests__/command-bus-concurrency.integration.test.ts:258:20
+    256|     const result = await dispatch(bus, command);
+    257|     expect(result.ok).toBe(true);
+    258|     expect(faults).toBe(3);
+       |                    ^
+    259|     expect(delays).toEqual([25, 50]);
+    260|     expect(await counts(command.commandId, aggregateId)).toMatchObject…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+
+ FAIL  src/__tests__/command-bus-concurrency.integration.test.ts > WP1.3 PostgreSQL command concurrency and recovery > re-enters once after a healthy fresh lookup proves an uncertain commit did not persist
+AssertionError: expected 1 to be 2 // Object.is equality
+
+- Expected
++ Received
+
+- 2
++ 1
+
+ ❯ src/__tests__/command-bus-concurrency.integration.test.ts:289:25
+    287|     const result = await dispatch(bus, command, async () => { invocati…
+    288|     expect(result.ok).toBe(true);
+    289|     expect(invocations).toBe(2);
+       |                         ^
+    290|     expect(await counts(command.commandId, aggregateId)).toMatchObject…
+    291|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯
+
+ FAIL  src/__tests__/command-bus-concurrency.integration.test.ts > WP1.3 PostgreSQL command concurrency and recovery > returns outcome-neutral retryable unavailable when the fresh receipt lookup fails
+AssertionError: expected { ok: true, aggregateVersion: 1, …(2) } to deeply equal { ok: false, …(2) }
+
+- Expected
++ Received
+
+  Object {
+-   "code": "COMMAND_TEMPORARILY_UNAVAILABLE",
+-   "detail": "Command temporarily unavailable",
+-   "ok": false,
++   "aggregateVersion": 1,
++   "data": Object {
++     "value": "one",
++   },
++   "eventIds": Array [
++     "33539ad4-7197-4ce3-af80-fa7aaf66ac38",
++   ],
++   "ok": true,
+  }
+
+ ❯ src/__tests__/command-bus-concurrency.integration.test.ts:302:20
+    300|     const command = envelope(aggregateId);
+    301|     const result = await dispatch(bus, command);
+    302|     expect(result).toEqual({ ok: false, code: 'COMMAND_TEMPORARILY_UNA…
+       |                    ^
+    303|     expect(await counts(command.commandId, aggregateId)).toMatchObject…
+    304|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/4]⎯
+
+ Test Files  1 failed (1)
+      Tests  3 failed | 5 passed (8)
+   Start at  17:18:02
+   Duration  2.32s (transform 260ms, setup 0ms, collect 1.11s, tests 455ms, environment 0ms, prepare 237ms)
+
+npm error Lifecycle script `test:db` failed with error:
+npm error code 1
+npm error path C:\Workspace\GitHub\Prototype\packages\db
+npm error workspace @symphony/db@0.1.0
+npm error location C:\Workspace\GitHub\Prototype\packages\db
+npm error command failed
+npm error command C:\Windows\system32\cmd.exe /d /s /c vitest run --reporter=verbose src/__tests__/command-bus-concurrency.integration.test.ts

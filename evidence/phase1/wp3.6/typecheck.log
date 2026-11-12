@@ -1,0 +1,2 @@
+Command: npm run typecheck:v4
+Result: passed (all workspace typecheck targets: domain, contracts, db, testkit, api, workspace)

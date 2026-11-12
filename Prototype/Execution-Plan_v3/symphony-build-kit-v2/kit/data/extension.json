@@ -1,0 +1,64 @@
+{
+  "label": "Same state, extended: illustrative. Not built.",
+  "hero_post_financing": {
+    "case_id": "case-1",
+    "facility": {
+      "destination": "A",
+      "amount": 300000,
+      "term_months": 24,
+      "outcome": "approved"
+    },
+    "baseline_vs_current": [
+      {
+        "metric": "Cultivated area (ha)",
+        "baseline": 180,
+        "current": 190,
+        "evidence": "Field boundary capture, geo-tagged",
+        "established_by": "fa.banda",
+        "date": "2027-03-10"
+      },
+      {
+        "metric": "Field condition",
+        "baseline": "Bare, previous maize stover",
+        "current": "Maize at tasselling, ground cover present",
+        "evidence": "Geo-tagged photographs",
+        "established_by": "fa.banda",
+        "date": "2027-03-10"
+      },
+      {
+        "metric": "Water source use",
+        "baseline": "Rain-fed",
+        "current": "Rain-fed",
+        "evidence": "Field observation",
+        "established_by": "fa.banda",
+        "date": "2027-03-10"
+      }
+    ]
+  },
+  "static_verification": {
+    "claim": "Cultivated area increased from 180 ha to 190 ha during the 2026/27 monitoring period.",
+    "baseline_ref": "Field boundary capture 2026-10-20",
+    "current_ref": "Field boundary capture 2027-03-10",
+    "evidence_items": [
+      "Boundary capture (baseline)",
+      "Boundary capture (current)",
+      "Geo-tagged photographs (6)",
+      "Calculation sheet"
+    ],
+    "finding": {
+      "result": "verified",
+      "scope": "Area only. Does not establish yield or financial performance.",
+      "limitation": "Boundary captured by field agent with handheld GPS. Accuracy +/- 5 m.",
+      "verifier": "vvb.reviewer1",
+      "date": "2027-03-24"
+    },
+    "assurance_chain": [
+      "Claim",
+      "Evidence",
+      "Verification (verified within scope)",
+      "Reliance (Lender A)",
+      "Portfolio reporting"
+    ]
+  },
+  "portfolio_seed_note": "Portfolio screens compute from cases.json: financed = cases with financing.status == 'financed'; monitoring state per case from covenants; exposure sums facility.amount."
+}

@@ -1,0 +1,59 @@
+{
+  "schema_version": 1,
+  "task_id": "WP1.4",
+  "status": {
+    "implementation": "passed",
+    "unit_test": "passed",
+    "integration_test": "passed",
+    "bdd_ui_test": "not_applicable",
+    "gate_verified": "passed"
+  },
+  "commit": "working-tree",
+  "environment": {
+    "node": "v26.7.0",
+    "npm": "12.2.0",
+    "postgres": "PostgreSQL 18.0-2; server_version_num=180000",
+    "database_role": "symphony_app for command/recovery paths; symphony schema owner for isolated fixture setup",
+    "data_mode": "test",
+    "key_provider": "local-test"
+  },
+  "commands": [
+    { "command": "npm run test:unit --workspace @symphony/domain", "result": "passed", "artifact": "evidence/phase1/wp1.4/domain-tests.log" },
+    { "command": "npm run test:db --workspace @symphony/db -- src/__tests__/command-reconciliation.integration.test.ts", "result": "passed (9 tests; app role symphony_app)", "artifact": "evidence/phase1/wp1.4/app-role-reconciliation-tests.log" },
+    { "command": "npm run test:db --workspace @symphony/db -- src/__tests__/command-bus-concurrency.integration.test.ts src/__tests__/command-transaction.integration.test.ts src/__tests__/security-attempt-audit.integration.test.ts", "result": "passed", "artifact": "evidence/phase1/wp1.4/wp13-wp12-regression-tests.log" },
+    { "command": "npm run test:migrations --workspace @symphony/db", "result": "passed", "artifact": "evidence/phase1/wp1.4/migration-tests.log" },
+    { "command": "npm run db:migrate:test", "result": "passed", "artifact": "evidence/phase1/wp1.4/migration-apply.log" },
+    { "command": "npm run typecheck:v4", "result": "passed", "artifact": "evidence/phase1/wp1.4/typecheck-v4.log" },
+    { "command": "npm run verify:arch", "result": "passed", "artifact": "evidence/phase1/wp1.4/verify-arch.log" },
+    { "command": "npm run verify:trace", "result": "passed", "artifact": "evidence/phase1/wp1.4/verify-trace.log" },
+    { "command": "npm run verify:phase1:contracts", "result": "passed", "artifact": "evidence/phase1/wp1.4/phase1-contracts.log" }
+  ],
+  "claims": {
+    "behavior_proved": "A stale accepted command stores one terminal VERSION_CONFLICT receipt and one encrypted reconciliation item atomically, replays without rerunning the handler, and leaves aggregate state, events and outbox unchanged. Changed actor/envelope reuse is rejected. Lifecycle compare-and-set permits one terminal transition; expiry clears ciphertext and key reference while retaining a tombstone without replacing resolved/superseded status. Live TCP fault tests prove fresh-connection recovery after both a committed COMMIT whose response is lost and a COMMIT dropped before PostgreSQL receives it, with one logical command ID and no duplicate effects. Provider tests prove randomized ciphertext, a versioned SFE1 envelope marker, explicit not_for_production metadata, and fail-closed wrong-key/tamper/unsupported-version handling without plaintext in metadata or ciphertext.",
+    "path_proved": "Focused domain, PostgreSQL, migration, WP1.2/WP1.3 regression, full workspace typecheck, architecture, traceability and Phase 1 contract gates passed on the current working tree. WP1.4 command/recovery integration ran against isolated symphony_phase1_test as restricted role symphony_app; fixture setup used symphony. The app-role test verified role attributes, actual least-privilege grants, forced RLS, denied DELETE, tenant isolation, pooled tenant-context reset, and both real TCP COMMIT-loss outcomes.",
+    "configuration_proved": "Node v26.7.0, npm 12.2.0, PostgreSQL 18.0-2 (server_version_num=180000), DATA_MODE=test, isolated symphony_phase1_test reached through the symphony credentials, and deterministic LocalDevKeyProvider test keys. The URL is stored only in ignored local .env.local; no credential is retained in evidence.",
+    "coverage_limitations": [
+      "WP3.6 standalone task evidence is now recorded at evidence/phase1/wp3.6/task-evidence.json; its local/test-only provider status is verified and no production-provider claim is made.",
+      "The initial red assertion was observed before production changes, but its raw command output was not retained; see red-test-record.md.",
+      "Replica, backup, snapshot and restore deletion are not proved locally and remain with WP3.4."
+    ]
+  },
+  "limitations": [
+    "WP1.5 still owns the full application-wide runtime role rollout and its clean-install migration ordering; WP1.4's isolated reconciliation grant boundary was provisioned and exercised directly on the test database.",
+    "No independent review is claimed."
+  ],
+  "unresolved_decisions": [],
+  "deferred_followups": [
+    {
+      "task_id": "WP1.5",
+      "scope": "Roll out the full application-wide runtime role grant matrix and clean-install migration ordering.",
+      "acceptance_evidence": "WP1.5 migration and role-matrix evidence, including compatibility with the already verified WP1.4 reconciliation grants."
+    },
+    {
+      "task_id": "WP3.4",
+      "scope": "Document deployment-specific replica, backup, snapshot and restore deletion behavior for expired reconciliation payloads.",
+      "acceptance_evidence": "WP3.4 operational evidence proving active, replica, backup and restore handling under the deployment retention policy."
+    }
+  ],
+  "reviewer": "Implementation self-review only; independent review is not claimed."
+}

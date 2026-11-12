@@ -1,0 +1,188 @@
+{
+  "session_id": "",
+  "audience": "bank|nabii|other",
+  "date": "YYYY-MM-DD",
+  "duration_minutes": null,
+  "attendee_roles": [
+    "role only, no names"
+  ],
+  "tour_run": "bank|nabii|both|none",
+  "commitment_level": {
+    "level": null,
+    "justification_quote": ""
+  },
+  "answers": [
+    {
+      "question_id": "C1",
+      "answer_summary": "",
+      "quote": "",
+      "structured": null,
+      "asked": true
+    },
+    {
+      "question_id": "C2",
+      "answer_summary": "",
+      "quote": "",
+      "structured": null,
+      "asked": true
+    },
+    {
+      "question_id": "C3",
+      "answer_summary": "",
+      "quote": "",
+      "structured": null,
+      "asked": true
+    },
+    {
+      "question_id": "C4",
+      "answer_summary": "",
+      "quote": "",
+      "structured": null,
+      "asked": true
+    },
+    {
+      "question_id": "C5",
+      "answer_summary": "",
+      "quote": "",
+      "structured": null,
+      "asked": true
+    },
+    {
+      "question_id": "B1",
+      "answer_summary": "",
+      "quote": "",
+      "structured": null,
+      "asked": true
+    },
+    {
+      "question_id": "B2",
+      "answer_summary": "",
+      "quote": "",
+      "structured": null,
+      "asked": true
+    },
+    {
+      "question_id": "B3",
+      "answer_summary": "",
+      "quote": "",
+      "structured": null,
+      "asked": true
+    },
+    {
+      "question_id": "B4",
+      "answer_summary": "",
+      "quote": "",
+      "structured": null,
+      "asked": true
+    },
+    {
+      "question_id": "B5",
+      "answer_summary": "",
+      "quote": "",
+      "structured": null,
+      "asked": true
+    },
+    {
+      "question_id": "B6",
+      "answer_summary": "",
+      "quote": "",
+      "structured": null,
+      "asked": true
+    },
+    {
+      "question_id": "B7",
+      "answer_summary": "",
+      "quote": "",
+      "structured": null,
+      "asked": true
+    },
+    {
+      "question_id": "B8",
+      "answer_summary": "",
+      "quote": "",
+      "structured": null,
+      "asked": true
+    },
+    {
+      "question_id": "B9",
+      "answer_summary": "",
+      "quote": "",
+      "structured": null,
+      "asked": true
+    },
+    {
+      "question_id": "B10",
+      "answer_summary": "",
+      "quote": "",
+      "structured": null,
+      "asked": true
+    },
+    {
+      "question_id": "N1",
+      "answer_summary": "",
+      "quote": "",
+      "structured": null,
+      "asked": true
+    },
+    {
+      "question_id": "N2",
+      "answer_summary": "",
+      "quote": "",
+      "structured": null,
+      "asked": true
+    },
+    {
+      "question_id": "N3",
+      "answer_summary": "",
+      "quote": "",
+      "structured": null,
+      "asked": true
+    },
+    {
+      "question_id": "N4",
+      "answer_summary": "",
+      "quote": "",
+      "structured": null,
+      "asked": true
+    },
+    {
+      "question_id": "N5",
+      "answer_summary": "",
+      "quote": "",
+      "structured": null,
+      "asked": true
+    },
+    {
+      "question_id": "N6",
+      "answer_summary": "",
+      "quote": "",
+      "structured": null,
+      "asked": true
+    },
+    {
+      "question_id": "N7",
+      "answer_summary": "",
+      "quote": "",
+      "structured": null,
+      "asked": true
+    },
+    {
+      "question_id": "N8",
+      "answer_summary": "",
+      "quote": "",
+      "structured": null,
+      "asked": true
+    }
+  ],
+  "red_flags": [],
+  "requests_for_change": [],
+  "follow_ups": [
+    {
+      "action": "",
+      "owner": "",
+      "due": ""
+    }
+  ],
+  "observations": "Anything noticed that automatic capture cannot record (for example who spoke, who disengaged). Roles only.",
+  "filled_in_within_15_min": false
+}

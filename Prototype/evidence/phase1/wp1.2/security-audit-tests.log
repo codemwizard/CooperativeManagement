@@ -1,0 +1,16 @@
+npm notice run @symphony/db@0.1.0 test:db
+npm notice run vitest run --reporter=verbose src/__tests__/security-attempt-audit.integration.test.ts
+
+ RUN  v2.1.9 C:/Workspace/GitHub/Prototype/packages/db
+
+ ✓ src/__tests__/security-attempt-audit.integration.test.ts > WP1.2-B security-attempt audit mode guard > refuses missing mode before opening a database transaction
+ ✓ src/__tests__/security-attempt-audit.integration.test.ts > WP1.2-B security-attempt audit mode guard > refuses unknown mode before opening a database transaction
+ ✓ src/__tests__/security-attempt-audit.integration.test.ts > WP1.2-B security-attempt audit mode guard > refuses real-data mode before opening a database transaction
+ ✓ src/__tests__/security-attempt-audit.integration.test.ts > WP1.2-B security-attempt audit mode guard > refuses non-synthetic test data before opening a database transaction
+ ✓ src/__tests__/security-attempt-audit.integration.test.ts > WP1.2-B PostgreSQL security-attempt persistence > commits the minimized denial record in a separate transaction
+
+ Test Files  1 passed (1)
+      Tests  5 passed (5)
+   Start at  13:00:53
+   Duration  1.46s (transform 67ms, setup 0ms, collect 732ms, tests 202ms, environment 0ms, prepare 147ms)
+

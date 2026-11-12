@@ -1,0 +1,550 @@
+{
+  "version": 1,
+  "status": "candidate_frozen_pending_restricted_role_integration_and_review",
+  "source": "migrations/0013_tenant_rls_app_role.sql, root migrations 0001-0012, and live PostgreSQL 18.0 catalog for symphony_phase1_test",
+  "table_count": 37,
+  "required_tenant_scoped_count": 37,
+  "policy_entries": [
+    {
+      "table": "command_receipts",
+      "parent_tables": [],
+      "tenant_resolution_sql": "tenant_id::text = NULLIF(current_setting('app.tenant_id', true), '')",
+      "missing_parent_behavior": "An absent required parent makes an EXISTS predicate false. A direct tenant predicate evaluates false when app.tenant_id is missing or empty.",
+      "cross_tenant_parent_behavior": "Every tenant-bearing parent path must match transaction-local app.tenant_id; a missing or different-tenant parent makes the policy expression false.",
+      "insert_with_check": "tenant_id::text = NULLIF(current_setting('app.tenant_id', true), '')",
+      "update_using": "tenant_id::text = NULLIF(current_setting('app.tenant_id', true), '')",
+      "update_with_check": "tenant_id::text = NULLIF(current_setting('app.tenant_id', true), '')",
+      "mismatch_fixture": "wp15-command_receipts-cross-tenant-parent",
+      "missing_parent_fixture": "wp15-command_receipts-missing-parent"
+    },
+    {
+      "table": "reconciliation_inbox",
+      "parent_tables": [],
+      "tenant_resolution_sql": "tenant_id::text = NULLIF(current_setting('app.tenant_id', true), '')",
+      "missing_parent_behavior": "An absent required parent makes an EXISTS predicate false. A direct tenant predicate evaluates false when app.tenant_id is missing or empty.",
+      "cross_tenant_parent_behavior": "Every tenant-bearing parent path must match transaction-local app.tenant_id; a missing or different-tenant parent makes the policy expression false.",
+      "insert_with_check": "tenant_id::text = NULLIF(current_setting('app.tenant_id', true), '')",
+      "update_using": "tenant_id::text = NULLIF(current_setting('app.tenant_id', true), '')",
+      "update_with_check": "tenant_id::text = NULLIF(current_setting('app.tenant_id', true), '')",
+      "mismatch_fixture": "wp15-reconciliation_inbox-cross-tenant-parent",
+      "missing_parent_fixture": "wp15-reconciliation_inbox-missing-parent"
+    },
+    {
+      "table": "domain_events",
+      "parent_tables": [],
+      "tenant_resolution_sql": "tenant_id::text = NULLIF(current_setting('app.tenant_id', true), '')",
+      "missing_parent_behavior": "An absent required parent makes an EXISTS predicate false. A direct tenant predicate evaluates false when app.tenant_id is missing or empty.",
+      "cross_tenant_parent_behavior": "Every tenant-bearing parent path must match transaction-local app.tenant_id; a missing or different-tenant parent makes the policy expression false.",
+      "insert_with_check": "tenant_id::text = NULLIF(current_setting('app.tenant_id', true), '')",
+      "update_using": "tenant_id::text = NULLIF(current_setting('app.tenant_id', true), '')",
+      "update_with_check": "tenant_id::text = NULLIF(current_setting('app.tenant_id', true), '')",
+      "mismatch_fixture": "wp15-domain_events-cross-tenant-parent",
+      "missing_parent_fixture": "wp15-domain_events-missing-parent"
+    },
+    {
+      "table": "users",
+      "parent_tables": [],
+      "tenant_resolution_sql": "tenant_id::text = NULLIF(current_setting('app.tenant_id', true), '')",
+      "missing_parent_behavior": "An absent required parent makes an EXISTS predicate false. A direct tenant predicate evaluates false when app.tenant_id is missing or empty.",
+      "cross_tenant_parent_behavior": "Every tenant-bearing parent path must match transaction-local app.tenant_id; a missing or different-tenant parent makes the policy expression false.",
+      "insert_with_check": "tenant_id::text = NULLIF(current_setting('app.tenant_id', true), '')",
+      "update_using": "tenant_id::text = NULLIF(current_setting('app.tenant_id', true), '')",
+      "update_with_check": "tenant_id::text = NULLIF(current_setting('app.tenant_id', true), '')",
+      "mismatch_fixture": "wp15-users-cross-tenant-parent",
+      "missing_parent_fixture": "wp15-users-missing-parent"
+    },
+    {
+      "table": "persons",
+      "parent_tables": [],
+      "tenant_resolution_sql": "tenant_id::text = NULLIF(current_setting('app.tenant_id', true), '')",
+      "missing_parent_behavior": "An absent required parent makes an EXISTS predicate false. A direct tenant predicate evaluates false when app.tenant_id is missing or empty.",
+      "cross_tenant_parent_behavior": "Every tenant-bearing parent path must match transaction-local app.tenant_id; a missing or different-tenant parent makes the policy expression false.",
+      "insert_with_check": "tenant_id::text = NULLIF(current_setting('app.tenant_id', true), '')",
+      "update_using": "tenant_id::text = NULLIF(current_setting('app.tenant_id', true), '')",
+      "update_with_check": "tenant_id::text = NULLIF(current_setting('app.tenant_id', true), '')",
+      "mismatch_fixture": "wp15-persons-cross-tenant-parent",
+      "missing_parent_fixture": "wp15-persons-missing-parent"
+    },
+    {
+      "table": "person_identifiers",
+      "parent_tables": [
+        "persons"
+      ],
+      "tenant_resolution_sql": "EXISTS (SELECT 1 FROM symphony.persons p WHERE p.id = person_id AND p.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), ''))",
+      "missing_parent_behavior": "An absent required parent makes an EXISTS predicate false. A direct tenant predicate evaluates false when app.tenant_id is missing or empty.",
+      "cross_tenant_parent_behavior": "Every tenant-bearing parent path must match transaction-local app.tenant_id; a missing or different-tenant parent makes the policy expression false.",
+      "insert_with_check": "EXISTS (SELECT 1 FROM symphony.persons p WHERE p.id = person_id AND p.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), ''))",
+      "update_using": "EXISTS (SELECT 1 FROM symphony.persons p WHERE p.id = person_id AND p.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), ''))",
+      "update_with_check": "EXISTS (SELECT 1 FROM symphony.persons p WHERE p.id = person_id AND p.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), ''))",
+      "mismatch_fixture": "wp15-person_identifiers-cross-tenant-parent",
+      "missing_parent_fixture": "wp15-person_identifiers-missing-parent"
+    },
+    {
+      "table": "person_pii_vault",
+      "parent_tables": [
+        "persons"
+      ],
+      "tenant_resolution_sql": "EXISTS (SELECT 1 FROM symphony.persons p WHERE p.id = person_id AND p.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), ''))",
+      "missing_parent_behavior": "An absent required parent makes an EXISTS predicate false. A direct tenant predicate evaluates false when app.tenant_id is missing or empty.",
+      "cross_tenant_parent_behavior": "Every tenant-bearing parent path must match transaction-local app.tenant_id; a missing or different-tenant parent makes the policy expression false.",
+      "insert_with_check": "EXISTS (SELECT 1 FROM symphony.persons p WHERE p.id = person_id AND p.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), ''))",
+      "update_using": "EXISTS (SELECT 1 FROM symphony.persons p WHERE p.id = person_id AND p.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), ''))",
+      "update_with_check": "EXISTS (SELECT 1 FROM symphony.persons p WHERE p.id = person_id AND p.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), ''))",
+      "mismatch_fixture": "wp15-person_pii_vault-cross-tenant-parent",
+      "missing_parent_fixture": "wp15-person_pii_vault-missing-parent"
+    },
+    {
+      "table": "consent_records",
+      "parent_tables": [
+        "persons"
+      ],
+      "tenant_resolution_sql": "EXISTS (SELECT 1 FROM symphony.persons p WHERE p.id = person_id AND p.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), ''))",
+      "missing_parent_behavior": "An absent required parent makes an EXISTS predicate false. A direct tenant predicate evaluates false when app.tenant_id is missing or empty.",
+      "cross_tenant_parent_behavior": "Every tenant-bearing parent path must match transaction-local app.tenant_id; a missing or different-tenant parent makes the policy expression false.",
+      "insert_with_check": "EXISTS (SELECT 1 FROM symphony.persons p WHERE p.id = person_id AND p.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), ''))",
+      "update_using": "EXISTS (SELECT 1 FROM symphony.persons p WHERE p.id = person_id AND p.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), ''))",
+      "update_with_check": "EXISTS (SELECT 1 FROM symphony.persons p WHERE p.id = person_id AND p.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), ''))",
+      "mismatch_fixture": "wp15-consent_records-cross-tenant-parent",
+      "missing_parent_fixture": "wp15-consent_records-missing-parent"
+    },
+    {
+      "table": "user_role_assignments",
+      "parent_tables": [
+        "users"
+      ],
+      "tenant_resolution_sql": "tenant_id::text = NULLIF(current_setting('app.tenant_id', true), '') AND EXISTS (SELECT 1 FROM symphony.users u WHERE u.id = user_id AND u.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), ''))",
+      "missing_parent_behavior": "An absent required parent makes an EXISTS predicate false. A direct tenant predicate evaluates false when app.tenant_id is missing or empty.",
+      "cross_tenant_parent_behavior": "Every tenant-bearing parent path must match transaction-local app.tenant_id; a missing or different-tenant parent makes the policy expression false.",
+      "insert_with_check": "tenant_id::text = NULLIF(current_setting('app.tenant_id', true), '') AND EXISTS (SELECT 1 FROM symphony.users u WHERE u.id = user_id AND u.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), ''))",
+      "update_using": "tenant_id::text = NULLIF(current_setting('app.tenant_id', true), '') AND EXISTS (SELECT 1 FROM symphony.users u WHERE u.id = user_id AND u.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), ''))",
+      "update_with_check": "tenant_id::text = NULLIF(current_setting('app.tenant_id', true), '') AND EXISTS (SELECT 1 FROM symphony.users u WHERE u.id = user_id AND u.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), ''))",
+      "mismatch_fixture": "wp15-user_role_assignments-cross-tenant-parent",
+      "missing_parent_fixture": "wp15-user_role_assignments-missing-parent"
+    },
+    {
+      "table": "capacity_grants",
+      "parent_tables": [
+        "organizations",
+        "users",
+        "domain_events"
+      ],
+      "tenant_resolution_sql": "EXISTS (SELECT 1 FROM symphony.organizations o WHERE o.id = organization_id AND o.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), '')) AND EXISTS (SELECT 1 FROM symphony.users u WHERE u.id = user_id AND u.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), '')) AND EXISTS (SELECT 1 FROM symphony.users g WHERE g.id = granted_by_user_id AND g.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), '')) AND (source_event_id IS NULL OR EXISTS (SELECT 1 FROM symphony.domain_events e WHERE e.id = source_event_id AND e.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), '')))",
+      "missing_parent_behavior": "An absent required parent makes an EXISTS predicate false. A direct tenant predicate evaluates false when app.tenant_id is missing or empty.",
+      "cross_tenant_parent_behavior": "Every tenant-bearing parent path must match transaction-local app.tenant_id; a missing or different-tenant parent makes the policy expression false.",
+      "insert_with_check": "EXISTS (SELECT 1 FROM symphony.organizations o WHERE o.id = organization_id AND o.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), '')) AND EXISTS (SELECT 1 FROM symphony.users u WHERE u.id = user_id AND u.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), '')) AND EXISTS (SELECT 1 FROM symphony.users g WHERE g.id = granted_by_user_id AND g.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), '')) AND (source_event_id IS NULL OR EXISTS (SELECT 1 FROM symphony.domain_events e WHERE e.id = source_event_id AND e.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), '')))",
+      "update_using": "EXISTS (SELECT 1 FROM symphony.organizations o WHERE o.id = organization_id AND o.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), '')) AND EXISTS (SELECT 1 FROM symphony.users u WHERE u.id = user_id AND u.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), '')) AND EXISTS (SELECT 1 FROM symphony.users g WHERE g.id = granted_by_user_id AND g.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), '')) AND (source_event_id IS NULL OR EXISTS (SELECT 1 FROM symphony.domain_events e WHERE e.id = source_event_id AND e.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), '')))",
+      "update_with_check": "EXISTS (SELECT 1 FROM symphony.organizations o WHERE o.id = organization_id AND o.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), '')) AND EXISTS (SELECT 1 FROM symphony.users u WHERE u.id = user_id AND u.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), '')) AND EXISTS (SELECT 1 FROM symphony.users g WHERE g.id = granted_by_user_id AND g.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), '')) AND (source_event_id IS NULL OR EXISTS (SELECT 1 FROM symphony.domain_events e WHERE e.id = source_event_id AND e.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), '')))",
+      "mismatch_fixture": "wp15-capacity_grants-cross-tenant-parent",
+      "missing_parent_fixture": "wp15-capacity_grants-missing-parent"
+    },
+    {
+      "table": "delegations",
+      "parent_tables": [
+        "organizations",
+        "users"
+      ],
+      "tenant_resolution_sql": "EXISTS (SELECT 1 FROM symphony.organizations o WHERE o.id = organization_id AND o.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), '')) AND EXISTS (SELECT 1 FROM symphony.users u WHERE u.id = delegator_user_id AND u.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), '')) AND EXISTS (SELECT 1 FROM symphony.users u WHERE u.id = delegatee_user_id AND u.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), ''))",
+      "missing_parent_behavior": "An absent required parent makes an EXISTS predicate false. A direct tenant predicate evaluates false when app.tenant_id is missing or empty.",
+      "cross_tenant_parent_behavior": "Every tenant-bearing parent path must match transaction-local app.tenant_id; a missing or different-tenant parent makes the policy expression false.",
+      "insert_with_check": "EXISTS (SELECT 1 FROM symphony.organizations o WHERE o.id = organization_id AND o.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), '')) AND EXISTS (SELECT 1 FROM symphony.users u WHERE u.id = delegator_user_id AND u.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), '')) AND EXISTS (SELECT 1 FROM symphony.users u WHERE u.id = delegatee_user_id AND u.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), ''))",
+      "update_using": "EXISTS (SELECT 1 FROM symphony.organizations o WHERE o.id = organization_id AND o.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), '')) AND EXISTS (SELECT 1 FROM symphony.users u WHERE u.id = delegator_user_id AND u.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), '')) AND EXISTS (SELECT 1 FROM symphony.users u WHERE u.id = delegatee_user_id AND u.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), ''))",
+      "update_with_check": "EXISTS (SELECT 1 FROM symphony.organizations o WHERE o.id = organization_id AND o.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), '')) AND EXISTS (SELECT 1 FROM symphony.users u WHERE u.id = delegator_user_id AND u.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), '')) AND EXISTS (SELECT 1 FROM symphony.users u WHERE u.id = delegatee_user_id AND u.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), ''))",
+      "mismatch_fixture": "wp15-delegations-cross-tenant-parent",
+      "missing_parent_fixture": "wp15-delegations-missing-parent"
+    },
+    {
+      "table": "authentication_events",
+      "parent_tables": [
+        "users"
+      ],
+      "tenant_resolution_sql": "EXISTS (SELECT 1 FROM symphony.users u WHERE u.id = user_id AND u.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), ''))",
+      "missing_parent_behavior": "An absent required parent makes an EXISTS predicate false. A direct tenant predicate evaluates false when app.tenant_id is missing or empty.",
+      "cross_tenant_parent_behavior": "Every tenant-bearing parent path must match transaction-local app.tenant_id; a missing or different-tenant parent makes the policy expression false.",
+      "insert_with_check": "EXISTS (SELECT 1 FROM symphony.users u WHERE u.id = user_id AND u.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), ''))",
+      "update_using": "EXISTS (SELECT 1 FROM symphony.users u WHERE u.id = user_id AND u.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), ''))",
+      "update_with_check": "EXISTS (SELECT 1 FROM symphony.users u WHERE u.id = user_id AND u.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), ''))",
+      "mismatch_fixture": "wp15-authentication_events-cross-tenant-parent",
+      "missing_parent_fixture": "wp15-authentication_events-missing-parent"
+    },
+    {
+      "table": "enrolment_sessions",
+      "parent_tables": [
+        "organizations",
+        "users",
+        "persons"
+      ],
+      "tenant_resolution_sql": "tenant_id::text = NULLIF(current_setting('app.tenant_id', true), '') AND EXISTS (SELECT 1 FROM symphony.organizations o WHERE o.id = organization_id AND o.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), '')) AND EXISTS (SELECT 1 FROM symphony.users u WHERE u.id = enroller_user_id AND u.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), '')) AND (representative_person_id IS NULL OR EXISTS (SELECT 1 FROM symphony.persons p WHERE p.id = representative_person_id AND p.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), '')))",
+      "missing_parent_behavior": "An absent required parent makes an EXISTS predicate false. A direct tenant predicate evaluates false when app.tenant_id is missing or empty.",
+      "cross_tenant_parent_behavior": "Every tenant-bearing parent path must match transaction-local app.tenant_id; a missing or different-tenant parent makes the policy expression false.",
+      "insert_with_check": "tenant_id::text = NULLIF(current_setting('app.tenant_id', true), '') AND EXISTS (SELECT 1 FROM symphony.organizations o WHERE o.id = organization_id AND o.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), '')) AND EXISTS (SELECT 1 FROM symphony.users u WHERE u.id = enroller_user_id AND u.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), '')) AND (representative_person_id IS NULL OR EXISTS (SELECT 1 FROM symphony.persons p WHERE p.id = representative_person_id AND p.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), '')))",
+      "update_using": "tenant_id::text = NULLIF(current_setting('app.tenant_id', true), '') AND EXISTS (SELECT 1 FROM symphony.organizations o WHERE o.id = organization_id AND o.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), '')) AND EXISTS (SELECT 1 FROM symphony.users u WHERE u.id = enroller_user_id AND u.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), '')) AND (representative_person_id IS NULL OR EXISTS (SELECT 1 FROM symphony.persons p WHERE p.id = representative_person_id AND p.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), '')))",
+      "update_with_check": "tenant_id::text = NULLIF(current_setting('app.tenant_id', true), '') AND EXISTS (SELECT 1 FROM symphony.organizations o WHERE o.id = organization_id AND o.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), '')) AND EXISTS (SELECT 1 FROM symphony.users u WHERE u.id = enroller_user_id AND u.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), '')) AND (representative_person_id IS NULL OR EXISTS (SELECT 1 FROM symphony.persons p WHERE p.id = representative_person_id AND p.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), '')))",
+      "mismatch_fixture": "wp15-enrolment_sessions-cross-tenant-parent",
+      "missing_parent_fixture": "wp15-enrolment_sessions-missing-parent"
+    },
+    {
+      "table": "approval_policies",
+      "parent_tables": [
+        "organizations"
+      ],
+      "tenant_resolution_sql": "EXISTS (SELECT 1 FROM symphony.organizations o WHERE o.id = organization_id AND o.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), ''))",
+      "missing_parent_behavior": "An absent required parent makes an EXISTS predicate false. A direct tenant predicate evaluates false when app.tenant_id is missing or empty.",
+      "cross_tenant_parent_behavior": "Every tenant-bearing parent path must match transaction-local app.tenant_id; a missing or different-tenant parent makes the policy expression false.",
+      "insert_with_check": "EXISTS (SELECT 1 FROM symphony.organizations o WHERE o.id = organization_id AND o.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), ''))",
+      "update_using": "EXISTS (SELECT 1 FROM symphony.organizations o WHERE o.id = organization_id AND o.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), ''))",
+      "update_with_check": "EXISTS (SELECT 1 FROM symphony.organizations o WHERE o.id = organization_id AND o.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), ''))",
+      "mismatch_fixture": "wp15-approval_policies-cross-tenant-parent",
+      "missing_parent_fixture": "wp15-approval_policies-missing-parent"
+    },
+    {
+      "table": "organizations",
+      "parent_tables": [],
+      "tenant_resolution_sql": "tenant_id::text = NULLIF(current_setting('app.tenant_id', true), '')",
+      "missing_parent_behavior": "An absent required parent makes an EXISTS predicate false. A direct tenant predicate evaluates false when app.tenant_id is missing or empty.",
+      "cross_tenant_parent_behavior": "Every tenant-bearing parent path must match transaction-local app.tenant_id; a missing or different-tenant parent makes the policy expression false.",
+      "insert_with_check": "tenant_id::text = NULLIF(current_setting('app.tenant_id', true), '')",
+      "update_using": "tenant_id::text = NULLIF(current_setting('app.tenant_id', true), '')",
+      "update_with_check": "tenant_id::text = NULLIF(current_setting('app.tenant_id', true), '')",
+      "mismatch_fixture": "wp15-organizations-cross-tenant-parent",
+      "missing_parent_fixture": "wp15-organizations-missing-parent"
+    },
+    {
+      "table": "organization_identifiers",
+      "parent_tables": [
+        "organizations"
+      ],
+      "tenant_resolution_sql": "EXISTS (SELECT 1 FROM symphony.organizations o WHERE o.id = organization_id AND o.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), ''))",
+      "missing_parent_behavior": "An absent required parent makes an EXISTS predicate false. A direct tenant predicate evaluates false when app.tenant_id is missing or empty.",
+      "cross_tenant_parent_behavior": "Every tenant-bearing parent path must match transaction-local app.tenant_id; a missing or different-tenant parent makes the policy expression false.",
+      "insert_with_check": "EXISTS (SELECT 1 FROM symphony.organizations o WHERE o.id = organization_id AND o.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), ''))",
+      "update_using": "EXISTS (SELECT 1 FROM symphony.organizations o WHERE o.id = organization_id AND o.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), ''))",
+      "update_with_check": "EXISTS (SELECT 1 FROM symphony.organizations o WHERE o.id = organization_id AND o.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), ''))",
+      "mismatch_fixture": "wp15-organization_identifiers-cross-tenant-parent",
+      "missing_parent_fixture": "wp15-organization_identifiers-missing-parent"
+    },
+    {
+      "table": "organization_enrollment",
+      "parent_tables": [
+        "organizations",
+        "users"
+      ],
+      "tenant_resolution_sql": "EXISTS (SELECT 1 FROM symphony.organizations o WHERE o.id = organization_id AND o.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), '')) AND EXISTS (SELECT 1 FROM symphony.users u WHERE u.id = initiator_user_id AND u.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), ''))",
+      "missing_parent_behavior": "An absent required parent makes an EXISTS predicate false. A direct tenant predicate evaluates false when app.tenant_id is missing or empty.",
+      "cross_tenant_parent_behavior": "Every tenant-bearing parent path must match transaction-local app.tenant_id; a missing or different-tenant parent makes the policy expression false.",
+      "insert_with_check": "EXISTS (SELECT 1 FROM symphony.organizations o WHERE o.id = organization_id AND o.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), '')) AND EXISTS (SELECT 1 FROM symphony.users u WHERE u.id = initiator_user_id AND u.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), ''))",
+      "update_using": "EXISTS (SELECT 1 FROM symphony.organizations o WHERE o.id = organization_id AND o.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), '')) AND EXISTS (SELECT 1 FROM symphony.users u WHERE u.id = initiator_user_id AND u.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), ''))",
+      "update_with_check": "EXISTS (SELECT 1 FROM symphony.organizations o WHERE o.id = organization_id AND o.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), '')) AND EXISTS (SELECT 1 FROM symphony.users u WHERE u.id = initiator_user_id AND u.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), ''))",
+      "mismatch_fixture": "wp15-organization_enrollment-cross-tenant-parent",
+      "missing_parent_fixture": "wp15-organization_enrollment-missing-parent"
+    },
+    {
+      "table": "enrolment_handovers",
+      "parent_tables": [
+        "organizations",
+        "users"
+      ],
+      "tenant_resolution_sql": "EXISTS (SELECT 1 FROM symphony.organizations o WHERE o.id = organization_id AND o.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), '')) AND EXISTS (SELECT 1 FROM symphony.users u WHERE u.id = outgoing_user_id AND u.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), '')) AND EXISTS (SELECT 1 FROM symphony.users u WHERE u.id = incoming_user_id AND u.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), ''))",
+      "missing_parent_behavior": "An absent required parent makes an EXISTS predicate false. A direct tenant predicate evaluates false when app.tenant_id is missing or empty.",
+      "cross_tenant_parent_behavior": "Every tenant-bearing parent path must match transaction-local app.tenant_id; a missing or different-tenant parent makes the policy expression false.",
+      "insert_with_check": "EXISTS (SELECT 1 FROM symphony.organizations o WHERE o.id = organization_id AND o.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), '')) AND EXISTS (SELECT 1 FROM symphony.users u WHERE u.id = outgoing_user_id AND u.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), '')) AND EXISTS (SELECT 1 FROM symphony.users u WHERE u.id = incoming_user_id AND u.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), ''))",
+      "update_using": "EXISTS (SELECT 1 FROM symphony.organizations o WHERE o.id = organization_id AND o.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), '')) AND EXISTS (SELECT 1 FROM symphony.users u WHERE u.id = outgoing_user_id AND u.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), '')) AND EXISTS (SELECT 1 FROM symphony.users u WHERE u.id = incoming_user_id AND u.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), ''))",
+      "update_with_check": "EXISTS (SELECT 1 FROM symphony.organizations o WHERE o.id = organization_id AND o.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), '')) AND EXISTS (SELECT 1 FROM symphony.users u WHERE u.id = outgoing_user_id AND u.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), '')) AND EXISTS (SELECT 1 FROM symphony.users u WHERE u.id = incoming_user_id AND u.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), ''))",
+      "mismatch_fixture": "wp15-enrolment_handovers-cross-tenant-parent",
+      "missing_parent_fixture": "wp15-enrolment_handovers-missing-parent"
+    },
+    {
+      "table": "evidence_items",
+      "parent_tables": [
+        "organizations"
+      ],
+      "tenant_resolution_sql": "EXISTS (SELECT 1 FROM symphony.organizations o WHERE o.id = organization_id AND o.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), ''))",
+      "missing_parent_behavior": "An absent required parent makes an EXISTS predicate false. A direct tenant predicate evaluates false when app.tenant_id is missing or empty.",
+      "cross_tenant_parent_behavior": "Every tenant-bearing parent path must match transaction-local app.tenant_id; a missing or different-tenant parent makes the policy expression false.",
+      "insert_with_check": "EXISTS (SELECT 1 FROM symphony.organizations o WHERE o.id = organization_id AND o.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), ''))",
+      "update_using": "EXISTS (SELECT 1 FROM symphony.organizations o WHERE o.id = organization_id AND o.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), ''))",
+      "update_with_check": "EXISTS (SELECT 1 FROM symphony.organizations o WHERE o.id = organization_id AND o.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), ''))",
+      "mismatch_fixture": "wp15-evidence_items-cross-tenant-parent",
+      "missing_parent_fixture": "wp15-evidence_items-missing-parent"
+    },
+    {
+      "table": "evidence_versions",
+      "parent_tables": [
+        "evidence_items",
+        "organizations",
+        "users"
+      ],
+      "tenant_resolution_sql": "EXISTS (SELECT 1 FROM symphony.evidence_items i JOIN symphony.organizations o ON o.id = i.organization_id WHERE i.id = evidence_item_id AND o.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), '')) AND EXISTS (SELECT 1 FROM symphony.users u WHERE u.id = supplier_user_id AND u.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), '')) AND (collector_user_id IS NULL OR EXISTS (SELECT 1 FROM symphony.users u WHERE u.id = collector_user_id AND u.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), '')))",
+      "missing_parent_behavior": "An absent required parent makes an EXISTS predicate false. A direct tenant predicate evaluates false when app.tenant_id is missing or empty.",
+      "cross_tenant_parent_behavior": "Every tenant-bearing parent path must match transaction-local app.tenant_id; a missing or different-tenant parent makes the policy expression false.",
+      "insert_with_check": "EXISTS (SELECT 1 FROM symphony.evidence_items i JOIN symphony.organizations o ON o.id = i.organization_id WHERE i.id = evidence_item_id AND o.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), '')) AND EXISTS (SELECT 1 FROM symphony.users u WHERE u.id = supplier_user_id AND u.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), '')) AND (collector_user_id IS NULL OR EXISTS (SELECT 1 FROM symphony.users u WHERE u.id = collector_user_id AND u.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), '')))",
+      "update_using": "EXISTS (SELECT 1 FROM symphony.evidence_items i JOIN symphony.organizations o ON o.id = i.organization_id WHERE i.id = evidence_item_id AND o.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), '')) AND EXISTS (SELECT 1 FROM symphony.users u WHERE u.id = supplier_user_id AND u.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), '')) AND (collector_user_id IS NULL OR EXISTS (SELECT 1 FROM symphony.users u WHERE u.id = collector_user_id AND u.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), '')))",
+      "update_with_check": "EXISTS (SELECT 1 FROM symphony.evidence_items i JOIN symphony.organizations o ON o.id = i.organization_id WHERE i.id = evidence_item_id AND o.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), '')) AND EXISTS (SELECT 1 FROM symphony.users u WHERE u.id = supplier_user_id AND u.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), '')) AND (collector_user_id IS NULL OR EXISTS (SELECT 1 FROM symphony.users u WHERE u.id = collector_user_id AND u.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), '')))",
+      "mismatch_fixture": "wp15-evidence_versions-cross-tenant-parent",
+      "missing_parent_fixture": "wp15-evidence_versions-missing-parent"
+    },
+    {
+      "table": "evidence_support_items",
+      "parent_tables": [
+        "evidence_versions",
+        "evidence_items",
+        "organizations"
+      ],
+      "tenant_resolution_sql": "EXISTS (SELECT 1 FROM symphony.evidence_versions v JOIN symphony.evidence_items i ON i.id = v.evidence_item_id JOIN symphony.organizations o ON o.id = i.organization_id WHERE v.id = evidence_version_id AND o.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), ''))",
+      "missing_parent_behavior": "An absent required parent makes an EXISTS predicate false. A direct tenant predicate evaluates false when app.tenant_id is missing or empty.",
+      "cross_tenant_parent_behavior": "Every tenant-bearing parent path must match transaction-local app.tenant_id; a missing or different-tenant parent makes the policy expression false.",
+      "insert_with_check": "EXISTS (SELECT 1 FROM symphony.evidence_versions v JOIN symphony.evidence_items i ON i.id = v.evidence_item_id JOIN symphony.organizations o ON o.id = i.organization_id WHERE v.id = evidence_version_id AND o.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), ''))",
+      "update_using": "EXISTS (SELECT 1 FROM symphony.evidence_versions v JOIN symphony.evidence_items i ON i.id = v.evidence_item_id JOIN symphony.organizations o ON o.id = i.organization_id WHERE v.id = evidence_version_id AND o.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), ''))",
+      "update_with_check": "EXISTS (SELECT 1 FROM symphony.evidence_versions v JOIN symphony.evidence_items i ON i.id = v.evidence_item_id JOIN symphony.organizations o ON o.id = i.organization_id WHERE v.id = evidence_version_id AND o.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), ''))",
+      "mismatch_fixture": "wp15-evidence_support_items-cross-tenant-parent",
+      "missing_parent_fixture": "wp15-evidence_support_items-missing-parent"
+    },
+    {
+      "table": "evidence_admissions",
+      "parent_tables": [
+        "evidence_versions",
+        "evidence_items",
+        "organizations",
+        "users"
+      ],
+      "tenant_resolution_sql": "EXISTS (SELECT 1 FROM symphony.evidence_versions v JOIN symphony.evidence_items i ON i.id = v.evidence_item_id JOIN symphony.organizations o ON o.id = i.organization_id WHERE v.id = evidence_version_id AND o.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), '')) AND EXISTS (SELECT 1 FROM symphony.users u WHERE u.id = admitted_by_user_id AND u.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), ''))",
+      "missing_parent_behavior": "An absent required parent makes an EXISTS predicate false. A direct tenant predicate evaluates false when app.tenant_id is missing or empty.",
+      "cross_tenant_parent_behavior": "Every tenant-bearing parent path must match transaction-local app.tenant_id; a missing or different-tenant parent makes the policy expression false.",
+      "insert_with_check": "EXISTS (SELECT 1 FROM symphony.evidence_versions v JOIN symphony.evidence_items i ON i.id = v.evidence_item_id JOIN symphony.organizations o ON o.id = i.organization_id WHERE v.id = evidence_version_id AND o.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), '')) AND EXISTS (SELECT 1 FROM symphony.users u WHERE u.id = admitted_by_user_id AND u.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), ''))",
+      "update_using": "EXISTS (SELECT 1 FROM symphony.evidence_versions v JOIN symphony.evidence_items i ON i.id = v.evidence_item_id JOIN symphony.organizations o ON o.id = i.organization_id WHERE v.id = evidence_version_id AND o.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), '')) AND EXISTS (SELECT 1 FROM symphony.users u WHERE u.id = admitted_by_user_id AND u.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), ''))",
+      "update_with_check": "EXISTS (SELECT 1 FROM symphony.evidence_versions v JOIN symphony.evidence_items i ON i.id = v.evidence_item_id JOIN symphony.organizations o ON o.id = i.organization_id WHERE v.id = evidence_version_id AND o.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), '')) AND EXISTS (SELECT 1 FROM symphony.users u WHERE u.id = admitted_by_user_id AND u.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), ''))",
+      "mismatch_fixture": "wp15-evidence_admissions-cross-tenant-parent",
+      "missing_parent_fixture": "wp15-evidence_admissions-missing-parent"
+    },
+    {
+      "table": "record_approvals",
+      "parent_tables": [
+        "evidence_versions",
+        "evidence_items",
+        "organizations",
+        "users"
+      ],
+      "tenant_resolution_sql": "EXISTS (SELECT 1 FROM symphony.evidence_versions v JOIN symphony.evidence_items i ON i.id = v.evidence_item_id JOIN symphony.organizations o ON o.id = i.organization_id WHERE v.id = evidence_version_id AND o.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), '')) AND EXISTS (SELECT 1 FROM symphony.users u WHERE u.id = approved_by_user_id AND u.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), ''))",
+      "missing_parent_behavior": "An absent required parent makes an EXISTS predicate false. A direct tenant predicate evaluates false when app.tenant_id is missing or empty.",
+      "cross_tenant_parent_behavior": "Every tenant-bearing parent path must match transaction-local app.tenant_id; a missing or different-tenant parent makes the policy expression false.",
+      "insert_with_check": "EXISTS (SELECT 1 FROM symphony.evidence_versions v JOIN symphony.evidence_items i ON i.id = v.evidence_item_id JOIN symphony.organizations o ON o.id = i.organization_id WHERE v.id = evidence_version_id AND o.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), '')) AND EXISTS (SELECT 1 FROM symphony.users u WHERE u.id = approved_by_user_id AND u.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), ''))",
+      "update_using": "EXISTS (SELECT 1 FROM symphony.evidence_versions v JOIN symphony.evidence_items i ON i.id = v.evidence_item_id JOIN symphony.organizations o ON o.id = i.organization_id WHERE v.id = evidence_version_id AND o.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), '')) AND EXISTS (SELECT 1 FROM symphony.users u WHERE u.id = approved_by_user_id AND u.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), ''))",
+      "update_with_check": "EXISTS (SELECT 1 FROM symphony.evidence_versions v JOIN symphony.evidence_items i ON i.id = v.evidence_item_id JOIN symphony.organizations o ON o.id = i.organization_id WHERE v.id = evidence_version_id AND o.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), '')) AND EXISTS (SELECT 1 FROM symphony.users u WHERE u.id = approved_by_user_id AND u.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), ''))",
+      "mismatch_fixture": "wp15-record_approvals-cross-tenant-parent",
+      "missing_parent_fixture": "wp15-record_approvals-missing-parent"
+    },
+    {
+      "table": "verification_assignments",
+      "parent_tables": [
+        "evidence_items",
+        "organizations",
+        "evidence_versions",
+        "users"
+      ],
+      "tenant_resolution_sql": "EXISTS (SELECT 1 FROM symphony.evidence_items i JOIN symphony.organizations o ON o.id = i.organization_id WHERE i.id = evidence_item_id AND o.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), '')) AND EXISTS (SELECT 1 FROM symphony.evidence_versions v JOIN symphony.evidence_items vi ON vi.id = v.evidence_item_id JOIN symphony.organizations vo ON vo.id = vi.organization_id WHERE v.id = evidence_version_id AND vo.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), '')) AND EXISTS (SELECT 1 FROM symphony.users u WHERE u.id = assigned_to_user_id AND u.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), ''))",
+      "missing_parent_behavior": "An absent required parent makes an EXISTS predicate false. A direct tenant predicate evaluates false when app.tenant_id is missing or empty.",
+      "cross_tenant_parent_behavior": "Every tenant-bearing parent path must match transaction-local app.tenant_id; a missing or different-tenant parent makes the policy expression false.",
+      "insert_with_check": "EXISTS (SELECT 1 FROM symphony.evidence_items i JOIN symphony.organizations o ON o.id = i.organization_id WHERE i.id = evidence_item_id AND o.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), '')) AND EXISTS (SELECT 1 FROM symphony.evidence_versions v JOIN symphony.evidence_items vi ON vi.id = v.evidence_item_id JOIN symphony.organizations vo ON vo.id = vi.organization_id WHERE v.id = evidence_version_id AND vo.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), '')) AND EXISTS (SELECT 1 FROM symphony.users u WHERE u.id = assigned_to_user_id AND u.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), ''))",
+      "update_using": "EXISTS (SELECT 1 FROM symphony.evidence_items i JOIN symphony.organizations o ON o.id = i.organization_id WHERE i.id = evidence_item_id AND o.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), '')) AND EXISTS (SELECT 1 FROM symphony.evidence_versions v JOIN symphony.evidence_items vi ON vi.id = v.evidence_item_id JOIN symphony.organizations vo ON vo.id = vi.organization_id WHERE v.id = evidence_version_id AND vo.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), '')) AND EXISTS (SELECT 1 FROM symphony.users u WHERE u.id = assigned_to_user_id AND u.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), ''))",
+      "update_with_check": "EXISTS (SELECT 1 FROM symphony.evidence_items i JOIN symphony.organizations o ON o.id = i.organization_id WHERE i.id = evidence_item_id AND o.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), '')) AND EXISTS (SELECT 1 FROM symphony.evidence_versions v JOIN symphony.evidence_items vi ON vi.id = v.evidence_item_id JOIN symphony.organizations vo ON vo.id = vi.organization_id WHERE v.id = evidence_version_id AND vo.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), '')) AND EXISTS (SELECT 1 FROM symphony.users u WHERE u.id = assigned_to_user_id AND u.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), ''))",
+      "mismatch_fixture": "wp15-verification_assignments-cross-tenant-parent",
+      "missing_parent_fixture": "wp15-verification_assignments-missing-parent"
+    },
+    {
+      "table": "verification_findings",
+      "parent_tables": [
+        "verification_assignments",
+        "evidence_items",
+        "organizations"
+      ],
+      "tenant_resolution_sql": "EXISTS (SELECT 1 FROM symphony.verification_assignments a JOIN symphony.evidence_items i ON i.id = a.evidence_item_id JOIN symphony.organizations o ON o.id = i.organization_id WHERE a.id = assignment_id AND a.evidence_version_id = evidence_version_id AND o.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), ''))",
+      "missing_parent_behavior": "An absent required parent makes an EXISTS predicate false. A direct tenant predicate evaluates false when app.tenant_id is missing or empty.",
+      "cross_tenant_parent_behavior": "Every tenant-bearing parent path must match transaction-local app.tenant_id; a missing or different-tenant parent makes the policy expression false.",
+      "insert_with_check": "EXISTS (SELECT 1 FROM symphony.verification_assignments a JOIN symphony.evidence_items i ON i.id = a.evidence_item_id JOIN symphony.organizations o ON o.id = i.organization_id WHERE a.id = assignment_id AND a.evidence_version_id = evidence_version_id AND o.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), ''))",
+      "update_using": "EXISTS (SELECT 1 FROM symphony.verification_assignments a JOIN symphony.evidence_items i ON i.id = a.evidence_item_id JOIN symphony.organizations o ON o.id = i.organization_id WHERE a.id = assignment_id AND a.evidence_version_id = evidence_version_id AND o.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), ''))",
+      "update_with_check": "EXISTS (SELECT 1 FROM symphony.verification_assignments a JOIN symphony.evidence_items i ON i.id = a.evidence_item_id JOIN symphony.organizations o ON o.id = i.organization_id WHERE a.id = assignment_id AND a.evidence_version_id = evidence_version_id AND o.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), ''))",
+      "mismatch_fixture": "wp15-verification_findings-cross-tenant-parent",
+      "missing_parent_fixture": "wp15-verification_findings-missing-parent"
+    },
+    {
+      "table": "platform_checks",
+      "parent_tables": [
+        "evidence_versions",
+        "evidence_items",
+        "organizations",
+        "users"
+      ],
+      "tenant_resolution_sql": "EXISTS (SELECT 1 FROM symphony.evidence_versions v JOIN symphony.evidence_items i ON i.id = v.evidence_item_id JOIN symphony.organizations o ON o.id = i.organization_id WHERE v.id = evidence_version_id AND o.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), '')) AND EXISTS (SELECT 1 FROM symphony.users u WHERE u.id = checked_by_user_id AND u.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), ''))",
+      "missing_parent_behavior": "An absent required parent makes an EXISTS predicate false. A direct tenant predicate evaluates false when app.tenant_id is missing or empty.",
+      "cross_tenant_parent_behavior": "Every tenant-bearing parent path must match transaction-local app.tenant_id; a missing or different-tenant parent makes the policy expression false.",
+      "insert_with_check": "EXISTS (SELECT 1 FROM symphony.evidence_versions v JOIN symphony.evidence_items i ON i.id = v.evidence_item_id JOIN symphony.organizations o ON o.id = i.organization_id WHERE v.id = evidence_version_id AND o.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), '')) AND EXISTS (SELECT 1 FROM symphony.users u WHERE u.id = checked_by_user_id AND u.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), ''))",
+      "update_using": "EXISTS (SELECT 1 FROM symphony.evidence_versions v JOIN symphony.evidence_items i ON i.id = v.evidence_item_id JOIN symphony.organizations o ON o.id = i.organization_id WHERE v.id = evidence_version_id AND o.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), '')) AND EXISTS (SELECT 1 FROM symphony.users u WHERE u.id = checked_by_user_id AND u.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), ''))",
+      "update_with_check": "EXISTS (SELECT 1 FROM symphony.evidence_versions v JOIN symphony.evidence_items i ON i.id = v.evidence_item_id JOIN symphony.organizations o ON o.id = i.organization_id WHERE v.id = evidence_version_id AND o.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), '')) AND EXISTS (SELECT 1 FROM symphony.users u WHERE u.id = checked_by_user_id AND u.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), ''))",
+      "mismatch_fixture": "wp15-platform_checks-cross-tenant-parent",
+      "missing_parent_fixture": "wp15-platform_checks-missing-parent"
+    },
+    {
+      "table": "observation_attestations",
+      "parent_tables": [
+        "evidence_versions",
+        "evidence_items",
+        "organizations",
+        "users"
+      ],
+      "tenant_resolution_sql": "EXISTS (SELECT 1 FROM symphony.evidence_versions v JOIN symphony.evidence_items i ON i.id = v.evidence_item_id JOIN symphony.organizations o ON o.id = i.organization_id WHERE v.id = evidence_version_id AND o.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), '')) AND EXISTS (SELECT 1 FROM symphony.users u WHERE u.id = attested_by_user_id AND u.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), ''))",
+      "missing_parent_behavior": "An absent required parent makes an EXISTS predicate false. A direct tenant predicate evaluates false when app.tenant_id is missing or empty.",
+      "cross_tenant_parent_behavior": "Every tenant-bearing parent path must match transaction-local app.tenant_id; a missing or different-tenant parent makes the policy expression false.",
+      "insert_with_check": "EXISTS (SELECT 1 FROM symphony.evidence_versions v JOIN symphony.evidence_items i ON i.id = v.evidence_item_id JOIN symphony.organizations o ON o.id = i.organization_id WHERE v.id = evidence_version_id AND o.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), '')) AND EXISTS (SELECT 1 FROM symphony.users u WHERE u.id = attested_by_user_id AND u.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), ''))",
+      "update_using": "EXISTS (SELECT 1 FROM symphony.evidence_versions v JOIN symphony.evidence_items i ON i.id = v.evidence_item_id JOIN symphony.organizations o ON o.id = i.organization_id WHERE v.id = evidence_version_id AND o.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), '')) AND EXISTS (SELECT 1 FROM symphony.users u WHERE u.id = attested_by_user_id AND u.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), ''))",
+      "update_with_check": "EXISTS (SELECT 1 FROM symphony.evidence_versions v JOIN symphony.evidence_items i ON i.id = v.evidence_item_id JOIN symphony.organizations o ON o.id = i.organization_id WHERE v.id = evidence_version_id AND o.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), '')) AND EXISTS (SELECT 1 FROM symphony.users u WHERE u.id = attested_by_user_id AND u.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), ''))",
+      "mismatch_fixture": "wp15-observation_attestations-cross-tenant-parent",
+      "missing_parent_fixture": "wp15-observation_attestations-missing-parent"
+    },
+    {
+      "table": "evidence_disputes",
+      "parent_tables": [
+        "evidence_versions",
+        "evidence_items",
+        "organizations",
+        "users"
+      ],
+      "tenant_resolution_sql": "EXISTS (SELECT 1 FROM symphony.evidence_versions v JOIN symphony.evidence_items i ON i.id = v.evidence_item_id JOIN symphony.organizations o ON o.id = i.organization_id WHERE v.id = evidence_version_id AND o.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), '')) AND EXISTS (SELECT 1 FROM symphony.users u WHERE u.id = raised_by_user_id AND u.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), ''))",
+      "missing_parent_behavior": "An absent required parent makes an EXISTS predicate false. A direct tenant predicate evaluates false when app.tenant_id is missing or empty.",
+      "cross_tenant_parent_behavior": "Every tenant-bearing parent path must match transaction-local app.tenant_id; a missing or different-tenant parent makes the policy expression false.",
+      "insert_with_check": "EXISTS (SELECT 1 FROM symphony.evidence_versions v JOIN symphony.evidence_items i ON i.id = v.evidence_item_id JOIN symphony.organizations o ON o.id = i.organization_id WHERE v.id = evidence_version_id AND o.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), '')) AND EXISTS (SELECT 1 FROM symphony.users u WHERE u.id = raised_by_user_id AND u.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), ''))",
+      "update_using": "EXISTS (SELECT 1 FROM symphony.evidence_versions v JOIN symphony.evidence_items i ON i.id = v.evidence_item_id JOIN symphony.organizations o ON o.id = i.organization_id WHERE v.id = evidence_version_id AND o.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), '')) AND EXISTS (SELECT 1 FROM symphony.users u WHERE u.id = raised_by_user_id AND u.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), ''))",
+      "update_with_check": "EXISTS (SELECT 1 FROM symphony.evidence_versions v JOIN symphony.evidence_items i ON i.id = v.evidence_item_id JOIN symphony.organizations o ON o.id = i.organization_id WHERE v.id = evidence_version_id AND o.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), '')) AND EXISTS (SELECT 1 FROM symphony.users u WHERE u.id = raised_by_user_id AND u.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), ''))",
+      "mismatch_fixture": "wp15-evidence_disputes-cross-tenant-parent",
+      "missing_parent_fixture": "wp15-evidence_disputes-missing-parent"
+    },
+    {
+      "table": "evidence_relationships",
+      "parent_tables": [
+        "evidence_versions",
+        "evidence_items",
+        "organizations"
+      ],
+      "tenant_resolution_sql": "EXISTS (SELECT 1 FROM symphony.evidence_versions v JOIN symphony.evidence_items i ON i.id = v.evidence_item_id JOIN symphony.organizations o ON o.id = i.organization_id WHERE v.id = source_version_id AND o.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), '')) AND EXISTS (SELECT 1 FROM symphony.evidence_versions v JOIN symphony.evidence_items i ON i.id = v.evidence_item_id JOIN symphony.organizations o ON o.id = i.organization_id WHERE v.id = target_version_id AND o.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), ''))",
+      "missing_parent_behavior": "An absent required parent makes an EXISTS predicate false. A direct tenant predicate evaluates false when app.tenant_id is missing or empty.",
+      "cross_tenant_parent_behavior": "Every tenant-bearing parent path must match transaction-local app.tenant_id; a missing or different-tenant parent makes the policy expression false.",
+      "insert_with_check": "EXISTS (SELECT 1 FROM symphony.evidence_versions v JOIN symphony.evidence_items i ON i.id = v.evidence_item_id JOIN symphony.organizations o ON o.id = i.organization_id WHERE v.id = source_version_id AND o.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), '')) AND EXISTS (SELECT 1 FROM symphony.evidence_versions v JOIN symphony.evidence_items i ON i.id = v.evidence_item_id JOIN symphony.organizations o ON o.id = i.organization_id WHERE v.id = target_version_id AND o.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), ''))",
+      "update_using": "EXISTS (SELECT 1 FROM symphony.evidence_versions v JOIN symphony.evidence_items i ON i.id = v.evidence_item_id JOIN symphony.organizations o ON o.id = i.organization_id WHERE v.id = source_version_id AND o.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), '')) AND EXISTS (SELECT 1 FROM symphony.evidence_versions v JOIN symphony.evidence_items i ON i.id = v.evidence_item_id JOIN symphony.organizations o ON o.id = i.organization_id WHERE v.id = target_version_id AND o.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), ''))",
+      "update_with_check": "EXISTS (SELECT 1 FROM symphony.evidence_versions v JOIN symphony.evidence_items i ON i.id = v.evidence_item_id JOIN symphony.organizations o ON o.id = i.organization_id WHERE v.id = source_version_id AND o.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), '')) AND EXISTS (SELECT 1 FROM symphony.evidence_versions v JOIN symphony.evidence_items i ON i.id = v.evidence_item_id JOIN symphony.organizations o ON o.id = i.organization_id WHERE v.id = target_version_id AND o.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), ''))",
+      "mismatch_fixture": "wp15-evidence_relationships-cross-tenant-parent",
+      "missing_parent_fixture": "wp15-evidence_relationships-missing-parent"
+    },
+    {
+      "table": "evidence_requirement_links",
+      "parent_tables": [
+        "evidence_items",
+        "organizations"
+      ],
+      "tenant_resolution_sql": "EXISTS (SELECT 1 FROM symphony.evidence_items i JOIN symphony.organizations o ON o.id = i.organization_id WHERE i.id = evidence_item_id AND o.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), ''))",
+      "missing_parent_behavior": "An absent required parent makes an EXISTS predicate false. A direct tenant predicate evaluates false when app.tenant_id is missing or empty.",
+      "cross_tenant_parent_behavior": "Every tenant-bearing parent path must match transaction-local app.tenant_id; a missing or different-tenant parent makes the policy expression false.",
+      "insert_with_check": "EXISTS (SELECT 1 FROM symphony.evidence_items i JOIN symphony.organizations o ON o.id = i.organization_id WHERE i.id = evidence_item_id AND o.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), ''))",
+      "update_using": "EXISTS (SELECT 1 FROM symphony.evidence_items i JOIN symphony.organizations o ON o.id = i.organization_id WHERE i.id = evidence_item_id AND o.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), ''))",
+      "update_with_check": "EXISTS (SELECT 1 FROM symphony.evidence_items i JOIN symphony.organizations o ON o.id = i.organization_id WHERE i.id = evidence_item_id AND o.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), ''))",
+      "mismatch_fixture": "wp15-evidence_requirement_links-cross-tenant-parent",
+      "missing_parent_fixture": "wp15-evidence_requirement_links-missing-parent"
+    },
+    {
+      "table": "appointments",
+      "parent_tables": [
+        "organizations",
+        "persons"
+      ],
+      "tenant_resolution_sql": "EXISTS (SELECT 1 FROM symphony.organizations o WHERE o.id = organization_id AND o.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), '')) AND EXISTS (SELECT 1 FROM symphony.persons p WHERE p.id = person_id AND p.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), ''))",
+      "missing_parent_behavior": "An absent required parent makes an EXISTS predicate false. A direct tenant predicate evaluates false when app.tenant_id is missing or empty.",
+      "cross_tenant_parent_behavior": "Every tenant-bearing parent path must match transaction-local app.tenant_id; a missing or different-tenant parent makes the policy expression false.",
+      "insert_with_check": "EXISTS (SELECT 1 FROM symphony.organizations o WHERE o.id = organization_id AND o.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), '')) AND EXISTS (SELECT 1 FROM symphony.persons p WHERE p.id = person_id AND p.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), ''))",
+      "update_using": "EXISTS (SELECT 1 FROM symphony.organizations o WHERE o.id = organization_id AND o.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), '')) AND EXISTS (SELECT 1 FROM symphony.persons p WHERE p.id = person_id AND p.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), ''))",
+      "update_with_check": "EXISTS (SELECT 1 FROM symphony.organizations o WHERE o.id = organization_id AND o.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), '')) AND EXISTS (SELECT 1 FROM symphony.persons p WHERE p.id = person_id AND p.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), ''))",
+      "mismatch_fixture": "wp15-appointments-cross-tenant-parent",
+      "missing_parent_fixture": "wp15-appointments-missing-parent"
+    },
+    {
+      "table": "bylaw_documents",
+      "parent_tables": [
+        "organizations"
+      ],
+      "tenant_resolution_sql": "EXISTS (SELECT 1 FROM symphony.organizations o WHERE o.id = organization_id AND o.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), ''))",
+      "missing_parent_behavior": "An absent required parent makes an EXISTS predicate false. A direct tenant predicate evaluates false when app.tenant_id is missing or empty.",
+      "cross_tenant_parent_behavior": "Every tenant-bearing parent path must match transaction-local app.tenant_id; a missing or different-tenant parent makes the policy expression false.",
+      "insert_with_check": "EXISTS (SELECT 1 FROM symphony.organizations o WHERE o.id = organization_id AND o.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), ''))",
+      "update_using": "EXISTS (SELECT 1 FROM symphony.organizations o WHERE o.id = organization_id AND o.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), ''))",
+      "update_with_check": "EXISTS (SELECT 1 FROM symphony.organizations o WHERE o.id = organization_id AND o.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), ''))",
+      "mismatch_fixture": "wp15-bylaw_documents-cross-tenant-parent",
+      "missing_parent_fixture": "wp15-bylaw_documents-missing-parent"
+    },
+    {
+      "table": "bylaw_versions",
+      "parent_tables": [
+        "bylaw_documents",
+        "organizations"
+      ],
+      "tenant_resolution_sql": "EXISTS (SELECT 1 FROM symphony.bylaw_documents d JOIN symphony.organizations o ON o.id = d.organization_id WHERE d.id = bylaw_document_id AND o.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), ''))",
+      "missing_parent_behavior": "An absent required parent makes an EXISTS predicate false. A direct tenant predicate evaluates false when app.tenant_id is missing or empty.",
+      "cross_tenant_parent_behavior": "Every tenant-bearing parent path must match transaction-local app.tenant_id; a missing or different-tenant parent makes the policy expression false.",
+      "insert_with_check": "EXISTS (SELECT 1 FROM symphony.bylaw_documents d JOIN symphony.organizations o ON o.id = d.organization_id WHERE d.id = bylaw_document_id AND o.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), ''))",
+      "update_using": "EXISTS (SELECT 1 FROM symphony.bylaw_documents d JOIN symphony.organizations o ON o.id = d.organization_id WHERE d.id = bylaw_document_id AND o.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), ''))",
+      "update_with_check": "EXISTS (SELECT 1 FROM symphony.bylaw_documents d JOIN symphony.organizations o ON o.id = d.organization_id WHERE d.id = bylaw_document_id AND o.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), ''))",
+      "mismatch_fixture": "wp15-bylaw_versions-cross-tenant-parent",
+      "missing_parent_fixture": "wp15-bylaw_versions-missing-parent"
+    },
+    {
+      "table": "bylaw_provisions",
+      "parent_tables": [
+        "bylaw_versions",
+        "bylaw_documents",
+        "organizations",
+        "users"
+      ],
+      "tenant_resolution_sql": "EXISTS (SELECT 1 FROM symphony.bylaw_versions v JOIN symphony.bylaw_documents d ON d.id = v.bylaw_document_id JOIN symphony.organizations o ON o.id = d.organization_id WHERE v.id = bylaw_version_id AND o.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), '')) AND (confirmed_by_user_id IS NULL OR EXISTS (SELECT 1 FROM symphony.users u WHERE u.id = confirmed_by_user_id AND u.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), '')))",
+      "missing_parent_behavior": "An absent required parent makes an EXISTS predicate false. A direct tenant predicate evaluates false when app.tenant_id is missing or empty.",
+      "cross_tenant_parent_behavior": "Every tenant-bearing parent path must match transaction-local app.tenant_id; a missing or different-tenant parent makes the policy expression false.",
+      "insert_with_check": "EXISTS (SELECT 1 FROM symphony.bylaw_versions v JOIN symphony.bylaw_documents d ON d.id = v.bylaw_document_id JOIN symphony.organizations o ON o.id = d.organization_id WHERE v.id = bylaw_version_id AND o.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), '')) AND (confirmed_by_user_id IS NULL OR EXISTS (SELECT 1 FROM symphony.users u WHERE u.id = confirmed_by_user_id AND u.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), '')))",
+      "update_using": "EXISTS (SELECT 1 FROM symphony.bylaw_versions v JOIN symphony.bylaw_documents d ON d.id = v.bylaw_document_id JOIN symphony.organizations o ON o.id = d.organization_id WHERE v.id = bylaw_version_id AND o.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), '')) AND (confirmed_by_user_id IS NULL OR EXISTS (SELECT 1 FROM symphony.users u WHERE u.id = confirmed_by_user_id AND u.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), '')))",
+      "update_with_check": "EXISTS (SELECT 1 FROM symphony.bylaw_versions v JOIN symphony.bylaw_documents d ON d.id = v.bylaw_document_id JOIN symphony.organizations o ON o.id = d.organization_id WHERE v.id = bylaw_version_id AND o.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), '')) AND (confirmed_by_user_id IS NULL OR EXISTS (SELECT 1 FROM symphony.users u WHERE u.id = confirmed_by_user_id AND u.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), '')))",
+      "mismatch_fixture": "wp15-bylaw_provisions-cross-tenant-parent",
+      "missing_parent_fixture": "wp15-bylaw_provisions-missing-parent"
+    },
+    {
+      "table": "organization_requirements",
+      "parent_tables": [
+        "organizations"
+      ],
+      "tenant_resolution_sql": "EXISTS (SELECT 1 FROM symphony.organizations o WHERE o.id = organization_id AND o.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), ''))",
+      "missing_parent_behavior": "An absent required parent makes an EXISTS predicate false. A direct tenant predicate evaluates false when app.tenant_id is missing or empty.",
+      "cross_tenant_parent_behavior": "Every tenant-bearing parent path must match transaction-local app.tenant_id; a missing or different-tenant parent makes the policy expression false.",
+      "insert_with_check": "EXISTS (SELECT 1 FROM symphony.organizations o WHERE o.id = organization_id AND o.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), ''))",
+      "update_using": "EXISTS (SELECT 1 FROM symphony.organizations o WHERE o.id = organization_id AND o.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), ''))",
+      "update_with_check": "EXISTS (SELECT 1 FROM symphony.organizations o WHERE o.id = organization_id AND o.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), ''))",
+      "mismatch_fixture": "wp15-organization_requirements-cross-tenant-parent",
+      "missing_parent_fixture": "wp15-organization_requirements-missing-parent"
+    },
+    {
+      "table": "aggregate_states",
+      "parent_tables": [],
+      "tenant_resolution_sql": "tenant_id::text = NULLIF(current_setting('app.tenant_id', true), '')",
+      "missing_parent_behavior": "An absent required parent makes an EXISTS predicate false. A direct tenant predicate evaluates false when app.tenant_id is missing or empty.",
+      "cross_tenant_parent_behavior": "Every tenant-bearing parent path must match transaction-local app.tenant_id; a missing or different-tenant parent makes the policy expression false.",
+      "insert_with_check": "tenant_id::text = NULLIF(current_setting('app.tenant_id', true), '')",
+      "update_using": "tenant_id::text = NULLIF(current_setting('app.tenant_id', true), '')",
+      "update_with_check": "tenant_id::text = NULLIF(current_setting('app.tenant_id', true), '')",
+      "mismatch_fixture": "wp15-aggregate_states-cross-tenant-parent",
+      "missing_parent_fixture": "wp15-aggregate_states-missing-parent"
+    },
+    {
+      "table": "security_attempts",
+      "parent_tables": [],
+      "tenant_resolution_sql": "tenant_id::text = NULLIF(current_setting('app.tenant_id', true), '')",
+      "missing_parent_behavior": "An absent required parent makes an EXISTS predicate false. A direct tenant predicate evaluates false when app.tenant_id is missing or empty.",
+      "cross_tenant_parent_behavior": "Every tenant-bearing parent path must match transaction-local app.tenant_id; a missing or different-tenant parent makes the policy expression false.",
+      "insert_with_check": "tenant_id::text = NULLIF(current_setting('app.tenant_id', true), '')",
+      "update_using": "tenant_id::text = NULLIF(current_setting('app.tenant_id', true), '')",
+      "update_with_check": "tenant_id::text = NULLIF(current_setting('app.tenant_id', true), '')",
+      "mismatch_fixture": "wp15-security_attempts-cross-tenant-parent",
+      "missing_parent_fixture": "wp15-security_attempts-missing-parent"
+    }
+  ]
+}

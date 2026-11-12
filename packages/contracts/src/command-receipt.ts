@@ -49,6 +49,8 @@ const commandReceiptBaseSchema = z.object({
 
 export type CommandReceipt = z.infer<typeof commandReceiptBaseSchema>;
 export type CommandResultDataSchemas = Readonly<Record<string, z.ZodTypeAny>>;
+/** Per-command allowlists of only the fields needed to resolve a stale command. */
+export type CommandReconciliationDataSchemas = Readonly<Record<string, z.ZodTypeAny>>;
 
 /** Builds a strict receipt validator that requires a result schema for every command type. */
 export function createCommandReceiptSchema(dataSchemas: CommandResultDataSchemas) {

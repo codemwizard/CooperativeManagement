@@ -12,6 +12,7 @@ import {
   validateRuntimeMode,
   validateTenantTableInventory,
   validateTenantPolicyMatrix,
+  validateTenantPolicyManifest,
   validateAuthorityDependencyInventory,
   validatePurgeTablePolicyMatrix,
 } from '../../tools/phase1-contracts.js';
@@ -632,15 +633,23 @@ describe('WP0.3 migrated table inventory', () => {
       .map((name) => readFileSync(path.join(migrationDirectory, name), 'utf8'));
     expect(validateTenantTableInventory(inventory, migrations)).toEqual([]);
     expect(inventory.tables.length).toBeGreaterThan(40);
-    expect(inventory.tables.filter((table: { rls_current: boolean }) => table.rls_current).map((table: { table: string }) => table.table).sort()).toEqual(['command_receipts', 'domain_events']);
+    expect(inventory.tables.filter((table: { rls_current: boolean }) => table.rls_current).map((table: { table: string }) => table.table).sort()).toEqual(['command_receipts', 'domain_events', 'reconciliation_inbox']);
   });
 
   it('defines a least-privilege RLS/grant policy for every migrated table without pretending it is deployed', () => {
     const inventory = readJson('evidence/phase1/tenant-table-inventory.json');
     const matrix = readJson('evidence/phase1/tenant-table-policy-matrix.json');
     expect(validateTenantPolicyMatrix(matrix, inventory)).toEqual([]);
-    expect(matrix.tables).toHaveLength(53);
-    expect(matrix.roles.application).toContain('not provisioned');
+    expect(matrix.tables).toHaveLength(54);
+    expect(matrix.roles.application).toContain('provisioned on local');
+    expect(matrix.policy_specification.tenant_scoped_table_count).toBe(37);
+  });
+
+  it('freezes executable policy expressions and named mismatch cases for all tenant tables', () => {
+    const matrix = readJson('evidence/phase1/tenant-table-policy-matrix.json');
+    const manifest = readJson('evidence/phase1/wp1.5-tenant-policy-manifest.json');
+    expect(validateTenantPolicyManifest(manifest, matrix)).toEqual([]);
+    expect(manifest.status).toBe('candidate_frozen_pending_restricted_role_integration_and_review');
   });
 });
 

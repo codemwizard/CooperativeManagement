@@ -1,0 +1,79 @@
+{
+  "note": "Fictional. Replaces the pre-seeded finding in data/extension.json static_verification. Dates marked scenario belong to the labelled extended scenario and must not be compared with meta.demo_date.",
+  "verifier_users": [
+    {
+      "user_id": "vrf.mulenga",
+      "name": "Chola Mulenga",
+      "organisation": "Lender A verification staff",
+      "kind": "institution_staff",
+      "scope": "Rural field verification"
+    },
+    {
+      "user_id": "vrf.sakala",
+      "name": "Tendai Sakala",
+      "organisation": "Independent verifier",
+      "kind": "independent",
+      "scope": "Area and land-use claims"
+    }
+  ],
+  "claims": [
+    {
+      "id": "claim-1",
+      "case_id": "case-1",
+      "scenario": "extended",
+      "statement": "Cultivated area increased from 180 ha to 190 ha during the 2026/27 monitoring period.",
+      "baseline": {
+        "ref": "Field boundary capture",
+        "value": "180 ha",
+        "scenario_date": "2026-10-20"
+      },
+      "current": {
+        "ref": "Field boundary capture",
+        "value": "190 ha",
+        "scenario_date": "2027-03-10"
+      },
+      "evidence_items": [
+        "Boundary capture (baseline)",
+        "Boundary capture (current)",
+        "Geo-tagged photographs (6)",
+        "Calculation sheet"
+      ],
+      "limitation": "Boundary captured by field agent with handheld GPS. Accuracy +/- 5 m."
+    }
+  ],
+  "assignments": [
+    {
+      "id": "asg-1",
+      "case_id": "case-8",
+      "target": {
+        "kind": "evidence",
+        "ref": "income_records"
+      },
+      "scope": "Re-verify the income records the lender asked about",
+      "assigned_to": "vrf.mulenga",
+      "assigned_by": "pfi.credit1",
+      "assigned_on": "2026-09-29",
+      "status": "assigned"
+    },
+    {
+      "id": "asg-2",
+      "case_id": "case-1",
+      "scenario": "extended",
+      "target": {
+        "kind": "claim",
+        "ref": "claim-1"
+      },
+      "scope": "Area only. Does not establish yield or financial performance.",
+      "assigned_to": "vrf.sakala",
+      "assigned_by": "pfi.credit1",
+      "scenario_date": "2027-03-15",
+      "status": "assigned"
+    }
+  ],
+  "suggested_demo_finding": {
+    "assignment": "asg-2",
+    "result": "verified",
+    "scope": "Area only. Does not establish yield or financial performance.",
+    "limitation": "Boundary captured by field agent with handheld GPS. Accuracy +/- 5 m."
+  }
+}

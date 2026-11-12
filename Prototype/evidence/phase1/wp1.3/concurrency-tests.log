@@ -1,0 +1,26 @@
+npm notice run @symphony/db@0.1.0 test:db
+npm notice run vitest run --reporter=verbose src/__tests__/command-bus-concurrency.integration.test.ts
+
+ RUN  v2.1.9 C:/Workspace/GitHub/Prototype/packages/db
+
+stdout | src/__tests__/command-bus-concurrency.integration.test.ts > WP1.3 PostgreSQL command concurrency and recovery
+WP1.3 test target: symphony_phase1_test; PostgreSQL server_version_num=180000; database_role=symphony; DATA_MODE=test
+
+ ✓ src/__tests__/command-bus-concurrency.integration.test.ts > WP1.3 PostgreSQL command concurrency and recovery > serializes identical concurrent submissions and returns the one committed result 604ms
+ ✓ src/__tests__/command-bus-concurrency.integration.test.ts > WP1.3 PostgreSQL command concurrency and recovery > allows the waiting identical command to execute once when the original owner rolls back
+ ✓ src/__tests__/command-bus-concurrency.integration.test.ts > WP1.3 PostgreSQL command concurrency and recovery > rejects actor, type, and semantic-envelope reuse without adding side effects
+ ✓ src/__tests__/command-bus-concurrency.integration.test.ts > WP1.3 PostgreSQL command concurrency and recovery > resolves unique receipt-key contention without committing the losing aggregate effects
+ ✓ src/__tests__/command-bus-concurrency.integration.test.ts > WP1.3 PostgreSQL command concurrency and recovery > prevents two different commands with the same expected version from overwriting one another
+ ✓ src/__tests__/command-bus-concurrency.integration.test.ts > WP1.3 PostgreSQL command concurrency and recovery > retries only serialization and deadlock failures within three total attempts
+ ✓ src/__tests__/command-bus-concurrency.integration.test.ts > WP1.3 PostgreSQL command concurrency and recovery > stops after three retryable transaction failures and returns a generic retryable result
+ ✓ src/__tests__/command-bus-concurrency.integration.test.ts > WP1.3 PostgreSQL command concurrency and recovery > does not retry non-serialization integrity failures
+ ✓ src/__tests__/command-bus-concurrency.integration.test.ts > WP1.3 PostgreSQL command concurrency and recovery > resolves a committed response loss on a fresh connection without rerunning the handler 549ms
+ ✓ src/__tests__/command-bus-concurrency.integration.test.ts > WP1.3 PostgreSQL command concurrency and recovery > re-enters once after a healthy fresh lookup proves an uncertain commit did not persist
+ ✓ src/__tests__/command-bus-concurrency.integration.test.ts > WP1.3 PostgreSQL command concurrency and recovery > counts uncertain-commit re-entry within the three-attempt transaction limit
+ ✓ src/__tests__/command-bus-concurrency.integration.test.ts > WP1.3 PostgreSQL command concurrency and recovery > returns outcome-neutral retryable unavailable when the fresh receipt lookup fails
+
+ Test Files  1 passed (1)
+      Tests  12 passed (12)
+   Start at  18:23:47
+   Duration  8.73s (transform 649ms, setup 0ms, collect 3.35s, tests 2.37s, environment 1ms, prepare 935ms)
+

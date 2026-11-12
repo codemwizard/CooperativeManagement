@@ -1,0 +1,1038 @@
+{
+  "version": "1.0",
+  "note": "Help text for tooltips, popovers and helper text. Text may use {{meta.*}}, {{destinations.<id>.*}} and {{interventions.*}} tokens resolved from the data files, with optional |num filter, and {{value.<name>}} tokens supplied by the component and declared in value_tokens. See UI_HELP_SPEC_V1.md.",
+  "limits": {
+    "tooltip_max_words": 30,
+    "popover_max_words": 60,
+    "helper_max_words": 25,
+    "tour_max_words": 45
+  },
+  "banned_words": [
+    "approved",
+    "bankable",
+    "creditworthy",
+    "score",
+    "rating",
+    "guaranteed",
+    "immutable",
+    "impossible"
+  ],
+  "entries": [
+    {
+      "id": "state.none",
+      "pattern": "tooltip",
+      "screens": [
+        "sme_dashboard",
+        "org_state",
+        "project_state",
+        "requirements",
+        "gap_remediation",
+        "readiness_basis",
+        "destination_projection",
+        "lender_assessment"
+      ],
+      "text": "No evidence is on record for this item."
+    },
+    {
+      "id": "state.asserted",
+      "pattern": "tooltip",
+      "screens": [
+        "sme_dashboard",
+        "org_state",
+        "project_state",
+        "requirements",
+        "gap_remediation",
+        "readiness_basis",
+        "destination_projection",
+        "lender_assessment"
+      ],
+      "text": "Stated by the cooperative, with no record attached."
+    },
+    {
+      "id": "state.supported",
+      "pattern": "tooltip",
+      "screens": [
+        "sme_dashboard",
+        "org_state",
+        "project_state",
+        "requirements",
+        "gap_remediation",
+        "readiness_basis",
+        "destination_projection",
+        "lender_assessment"
+      ],
+      "text": "A record is attached. It has not been independently checked."
+    },
+    {
+      "id": "state.verified",
+      "pattern": "tooltip",
+      "screens": [
+        "sme_dashboard",
+        "org_state",
+        "project_state",
+        "requirements",
+        "gap_remediation",
+        "readiness_basis",
+        "destination_projection",
+        "lender_assessment"
+      ],
+      "text": "Checked independently by an authorised field agent. The limitation line says what the check did not cover."
+    },
+    {
+      "id": "state.disputed",
+      "pattern": "tooltip",
+      "screens": [
+        "sme_dashboard",
+        "org_state",
+        "project_state",
+        "requirements",
+        "gap_remediation",
+        "readiness_basis",
+        "destination_projection",
+        "lender_assessment"
+      ],
+      "text": "Someone has recorded an objection. The requirement stays in exception until an independent field agent re-verifies the evidence or the objection is withdrawn."
+    },
+    {
+      "id": "state.stale",
+      "pattern": "tooltip",
+      "screens": [
+        "sme_dashboard",
+        "org_state",
+        "project_state",
+        "requirements",
+        "gap_remediation",
+        "readiness_basis",
+        "destination_projection",
+        "lender_assessment"
+      ],
+      "text": "The evidence is past its validity date and must be renewed."
+    },
+    {
+      "id": "req.satisfied",
+      "pattern": "tooltip",
+      "screens": [
+        "requirements",
+        "readiness_basis",
+        "lender_assessment"
+      ],
+      "text": "The evidence meets the level this destination asks for."
+    },
+    {
+      "id": "req.unresolved",
+      "pattern": "tooltip",
+      "screens": [
+        "requirements",
+        "readiness_basis",
+        "lender_assessment"
+      ],
+      "text": "Applicable, but the evidence is missing or below the level required."
+    },
+    {
+      "id": "req.exception",
+      "pattern": "tooltip",
+      "screens": [
+        "requirements",
+        "readiness_basis",
+        "lender_assessment"
+      ],
+      "text": "This was on record, but the evidence is now stale or disputed."
+    },
+    {
+      "id": "req.not_applicable",
+      "pattern": "tooltip",
+      "screens": [
+        "requirements",
+        "readiness_basis",
+        "lender_assessment"
+      ],
+      "text": "This requirement does not apply to this project. The reason is shown on the card."
+    },
+    {
+      "id": "req.assessment_time",
+      "pattern": "popover",
+      "screens": [
+        "requirements",
+        "readiness_basis",
+        "lender_assessment"
+      ],
+      "text": "The lender decides this at assessment, for example an off-take arrangement. It does not block readiness. Evidence may be added early and is then shown as provided early."
+    },
+    {
+      "id": "chain.requirement",
+      "pattern": "tooltip",
+      "screens": [
+        "readiness_basis"
+      ],
+      "text": "What the destination asks for, and where the requirement comes from."
+    },
+    {
+      "id": "chain.applicability",
+      "pattern": "tooltip",
+      "screens": [
+        "readiness_basis"
+      ],
+      "text": "Whether the requirement applies to this project, and why."
+    },
+    {
+      "id": "chain.evidence",
+      "pattern": "tooltip",
+      "screens": [
+        "readiness_basis"
+      ],
+      "text": "The records that support the requirement, with who supplied them and when."
+    },
+    {
+      "id": "chain.verification",
+      "pattern": "tooltip",
+      "screens": [
+        "readiness_basis"
+      ],
+      "text": "Who independently checked the evidence, and when."
+    },
+    {
+      "id": "chain.finding",
+      "pattern": "tooltip",
+      "screens": [
+        "readiness_basis"
+      ],
+      "text": "The result of comparing the evidence with the requirement."
+    },
+    {
+      "id": "chain.state",
+      "pattern": "tooltip",
+      "screens": [
+        "readiness_basis"
+      ],
+      "text": "The resulting state. It is computed from the evidence and never typed in."
+    },
+    {
+      "id": "rule.min_level",
+      "pattern": "tooltip",
+      "screens": [
+        "requirements",
+        "readiness_basis"
+      ],
+      "text": "The lowest evidence level this destination accepts for this requirement."
+    },
+    {
+      "id": "rule.evidence_count",
+      "pattern": "tooltip",
+      "screens": [
+        "requirements",
+        "readiness_basis"
+      ],
+      "text": "Needs a minimum count, such as seasons of farming, as well as a minimum evidence level."
+    },
+    {
+      "id": "rule.provided_early",
+      "pattern": "tooltip",
+      "screens": [
+        "requirements",
+        "lender_assessment"
+      ],
+      "text": "Evidence was added before the lender's assessment. It is shown but does not change readiness."
+    },
+    {
+      "id": "rule.fit",
+      "pattern": "popover",
+      "screens": [
+        "requirements",
+        "gap_remediation",
+        "destination_projection"
+      ],
+      "text": "A fit check compares the request with the lender's product range. It cannot be closed with evidence. It closes only by restructuring the request, which can change another lender's fit check."
+    },
+    {
+      "id": "readiness.ready",
+      "pattern": "popover",
+      "screens": [
+        "sme_dashboard",
+        "readiness_basis",
+        "destination_projection"
+      ],
+      "text": "Every applicable requirement for this destination is met, or is decided by the lender at assessment. The lender still performs its own assessment and makes its own decision.",
+      "see_more": {
+        "label": "See the full basis",
+        "target_screen": "readiness_basis"
+      }
+    },
+    {
+      "id": "readiness.not_ready",
+      "pattern": "popover",
+      "screens": [
+        "sme_dashboard",
+        "readiness_basis",
+        "destination_projection"
+      ],
+      "text": "Some applicable requirements are unresolved or in exception. Open the basis to see which, who owns each, and what evidence is needed.",
+      "see_more": {
+        "label": "See the full basis",
+        "target_screen": "readiness_basis"
+      }
+    },
+    {
+      "id": "readiness.preview",
+      "pattern": "popover",
+      "screens": [
+        "sme_dashboard",
+        "destination_projection"
+      ],
+      "text": "{{value.unresolved_count}} unresolved and {{value.exception_count}} in exception for {{value.destination}}.",
+      "see_more": {
+        "label": "See the full basis",
+        "target_screen": "readiness_basis"
+      },
+      "value_tokens": [
+        "unresolved_count",
+        "exception_count",
+        "destination"
+      ]
+    },
+    {
+      "id": "step.upload_minutes",
+      "pattern": "popover",
+      "screens": [
+        "gap_remediation"
+      ],
+      "text": "The secretary uploads the minutes of the meeting. They record who holds office and what was resolved. The evidence is then Supported."
+    },
+    {
+      "id": "step.signoff_minutes",
+      "pattern": "popover",
+      "screens": [
+        "gap_remediation"
+      ],
+      "text": "The chairman signs off the minutes. Sign-off is required before a field agent can verify governance."
+    },
+    {
+      "id": "step.field_verification",
+      "pattern": "popover",
+      "screens": [
+        "gap_remediation"
+      ],
+      "text": "An authorised field agent, who did not supply the evidence, checks it. The check is recorded together with a limitation."
+    },
+    {
+      "id": "step.add_evidence",
+      "pattern": "popover",
+      "screens": [
+        "gap_remediation"
+      ],
+      "text": "A cooperative officer adds a record. It supersedes the earlier one, and the earlier record stays in the history."
+    },
+    {
+      "id": "step.restructure_request",
+      "pattern": "popover",
+      "screens": [
+        "gap_remediation",
+        "destination_projection"
+      ],
+      "text": "Changes how the request is structured, for example from one facility to per-group requests. Evidence is not changed, but different lenders' fit checks can change."
+    },
+    {
+      "id": "step.present",
+      "pattern": "popover",
+      "screens": [
+        "gap_remediation",
+        "destination_projection",
+        "present_modal"
+      ],
+      "text": "The chairman presents the readiness record to a destination. It is frozen as a snapshot, and the destination then does its own assessment."
+    },
+    {
+      "id": "role.secretary",
+      "pattern": "tooltip",
+      "screens": [
+        "login",
+        "sme_dashboard",
+        "org_state",
+        "project_state",
+        "requirements",
+        "gap_remediation",
+        "readiness_basis",
+        "destination_projection",
+        "lender_assessment"
+      ],
+      "text": "Keeps the minutes and the member register. Cannot verify evidence."
+    },
+    {
+      "id": "role.treasurer",
+      "pattern": "tooltip",
+      "screens": [
+        "login",
+        "sme_dashboard",
+        "org_state",
+        "project_state",
+        "requirements",
+        "gap_remediation",
+        "readiness_basis",
+        "destination_projection",
+        "lender_assessment"
+      ],
+      "text": "Records and confirms payments and adds financial records. Cannot confirm own entries."
+    },
+    {
+      "id": "role.chairman",
+      "pattern": "tooltip",
+      "screens": [
+        "login",
+        "sme_dashboard",
+        "org_state",
+        "project_state",
+        "requirements",
+        "gap_remediation",
+        "readiness_basis",
+        "destination_projection",
+        "lender_assessment"
+      ],
+      "text": "Signs off minutes and presents the readiness record."
+    },
+    {
+      "id": "role.member",
+      "pattern": "tooltip",
+      "screens": [
+        "login",
+        "sme_dashboard",
+        "org_state",
+        "project_state",
+        "requirements",
+        "gap_remediation",
+        "readiness_basis",
+        "destination_projection",
+        "lender_assessment"
+      ],
+      "text": "Records own payments. Read-only elsewhere."
+    },
+    {
+      "id": "role.field_agent",
+      "pattern": "tooltip",
+      "screens": [
+        "login",
+        "sme_dashboard",
+        "org_state",
+        "project_state",
+        "requirements",
+        "gap_remediation",
+        "readiness_basis",
+        "destination_projection",
+        "lender_assessment"
+      ],
+      "text": "Independently verifies evidence. Cannot verify evidence they supplied."
+    },
+    {
+      "id": "role.pfi_analyst",
+      "pattern": "tooltip",
+      "screens": [
+        "login",
+        "sme_dashboard",
+        "org_state",
+        "project_state",
+        "requirements",
+        "gap_remediation",
+        "readiness_basis",
+        "destination_projection",
+        "lender_assessment"
+      ],
+      "text": "Lender staff. Reads the case, raises findings and disputes, and requests evidence. Cannot change cooperative evidence."
+    },
+    {
+      "id": "role.pfi_credit",
+      "pattern": "tooltip",
+      "screens": [
+        "login",
+        "sme_dashboard",
+        "org_state",
+        "project_state",
+        "requirements",
+        "gap_remediation",
+        "readiness_basis",
+        "destination_projection",
+        "lender_assessment"
+      ],
+      "text": "Lender decision maker. Records outcomes and reliance. Cannot change cooperative evidence."
+    },
+    {
+      "id": "role.ta",
+      "pattern": "tooltip",
+      "screens": [
+        "login",
+        "sme_dashboard",
+        "org_state",
+        "project_state",
+        "requirements",
+        "gap_remediation",
+        "readiness_basis",
+        "destination_projection",
+        "lender_assessment"
+      ],
+      "text": "Programme technical assistance. Read-only on evidence. Sees only assigned cohorts."
+    },
+    {
+      "id": "role.fund_manager",
+      "pattern": "tooltip",
+      "screens": [
+        "login",
+        "sme_dashboard",
+        "org_state",
+        "project_state",
+        "requirements",
+        "gap_remediation",
+        "readiness_basis",
+        "destination_projection",
+        "lender_assessment"
+      ],
+      "text": "Programme oversight. Read-only on evidence. Sees all cohorts."
+    },
+    {
+      "id": "role.verifier",
+      "pattern": "tooltip",
+      "screens": [
+        "login",
+        "sme_dashboard",
+        "org_state",
+        "project_state",
+        "requirements",
+        "gap_remediation",
+        "readiness_basis",
+        "destination_projection",
+        "lender_assessment"
+      ],
+      "text": "Records findings on assigned claims or evidence. Cannot change evidence."
+    },
+    {
+      "id": "boundary.beachhead",
+      "pattern": "tooltip",
+      "screens": [
+        "sme_dashboard",
+        "org_state",
+        "project_state",
+        "requirements",
+        "gap_remediation",
+        "readiness_basis",
+        "destination_projection",
+        "lender_assessment"
+      ],
+      "text": "The part of the journey the prototype is built to prove: from an active but poorly evidenced cooperative to one a lender can assess."
+    },
+    {
+      "id": "boundary.extended",
+      "pattern": "tooltip",
+      "screens": [
+        "lender_assessment",
+        "facility_monitoring",
+        "portfolio"
+      ],
+      "text": "Shows the same governed state carrying forward after presentation. It extends the beachhead and is not part of it."
+    },
+    {
+      "id": "boundary.extended_demonstrated",
+      "pattern": "tooltip",
+      "screens": [
+        "verifier_queue",
+        "verifier_workbench",
+        "claim_view"
+      ],
+      "text": "Illustrative data in an extended scenario. It shows the function, not live operations."
+    },
+    {
+      "id": "destination.A",
+      "pattern": "popover",
+      "screens": [
+        "requirements",
+        "destination_projection"
+      ],
+      "text": "Cooperative Production Facility. A single facility to the cooperative, ZMW {{destinations.A.parameters.request_range_zmw.0|num}} to {{destinations.A.parameters.request_range_zmw.1|num}}, up to {{destinations.A.parameters.max_term_months}} months. Illustrative product."
+    },
+    {
+      "id": "destination.B",
+      "pattern": "popover",
+      "screens": [
+        "requirements",
+        "destination_projection"
+      ],
+      "text": "Group Seasonal Facility. Each group makes its own request of ZMW {{destinations.B.parameters.request_range_zmw_per_group.0|num}} to {{destinations.B.parameters.request_range_zmw_per_group.1|num}} for {{destinations.B.parameters.term_months.0}} to {{destinations.B.parameters.term_months.1}} months. Illustrative product."
+    },
+    {
+      "id": "destination.N",
+      "pattern": "popover",
+      "screens": [
+        "requirements",
+        "destination_projection",
+        "nabii_pipeline"
+      ],
+      "text": "A readiness register for the programme pipeline. It is not a loan product."
+    },
+    {
+      "id": "intervention.standard",
+      "pattern": "tooltip",
+      "screens": [
+        "nabii_pipeline",
+        "nabii_cohort",
+        "nabii_directory"
+      ],
+      "text_ref": "interventions.classes.standard"
+    },
+    {
+      "id": "intervention.specialist",
+      "pattern": "tooltip",
+      "screens": [
+        "nabii_pipeline",
+        "nabii_cohort",
+        "nabii_directory"
+      ],
+      "text_ref": "interventions.classes.specialist"
+    },
+    {
+      "id": "intervention.restructure",
+      "pattern": "tooltip",
+      "screens": [
+        "nabii_pipeline",
+        "nabii_cohort",
+        "nabii_directory"
+      ],
+      "text_ref": "interventions.classes.restructure"
+    },
+    {
+      "id": "intervention.blocked",
+      "pattern": "tooltip",
+      "screens": [
+        "nabii_pipeline",
+        "nabii_cohort",
+        "nabii_directory"
+      ],
+      "text_ref": "interventions.classes.blocked"
+    },
+    {
+      "id": "funnel.enrolled",
+      "pattern": "tooltip",
+      "screens": [
+        "nabii_pipeline"
+      ],
+      "text": "Every cooperative that has a project on the platform."
+    },
+    {
+      "id": "funnel.ready_programme",
+      "pattern": "tooltip",
+      "screens": [
+        "nabii_pipeline"
+      ],
+      "text": "Ready against the NABII Programme Pipeline requirements."
+    },
+    {
+      "id": "funnel.ready_lender",
+      "pattern": "tooltip",
+      "screens": [
+        "nabii_pipeline"
+      ],
+      "text": "Ready against Lender A or Lender B."
+    },
+    {
+      "id": "funnel.presented",
+      "pattern": "tooltip",
+      "screens": [
+        "nabii_pipeline"
+      ],
+      "text": "Presented to a destination, or already financed."
+    },
+    {
+      "id": "funnel.lender_response",
+      "pattern": "tooltip",
+      "screens": [
+        "nabii_pipeline"
+      ],
+      "text": "The lender has recorded a response, or the case is already financed."
+    },
+    {
+      "id": "funnel.financed",
+      "pattern": "tooltip",
+      "screens": [
+        "nabii_pipeline"
+      ],
+      "text": "Financing is in place."
+    },
+    {
+      "id": "cohort.baseline",
+      "pattern": "tooltip",
+      "screens": [
+        "nabii_cohort"
+      ],
+      "text": "The state when the demo was loaded or last reset."
+    },
+    {
+      "id": "cohort.current",
+      "pattern": "tooltip",
+      "screens": [
+        "nabii_cohort"
+      ],
+      "text": "The state now, after any actions in this session."
+    },
+    {
+      "id": "cohort.gaps_closed",
+      "pattern": "tooltip",
+      "screens": [
+        "nabii_cohort",
+        "nabii_pipeline"
+      ],
+      "text": "Requirements that were unresolved or in exception at baseline and are satisfied now."
+    },
+    {
+      "id": "monitoring.current",
+      "pattern": "tooltip",
+      "screens": [
+        "facility_monitoring",
+        "portfolio"
+      ],
+      "text": "No covenant is due within {{meta.monitoring_due_window_days}} days."
+    },
+    {
+      "id": "monitoring.due",
+      "pattern": "tooltip",
+      "screens": [
+        "facility_monitoring",
+        "portfolio"
+      ],
+      "text": "A covenant is due within {{meta.monitoring_due_window_days}} days and has not been received."
+    },
+    {
+      "id": "monitoring.overdue",
+      "pattern": "tooltip",
+      "screens": [
+        "facility_monitoring",
+        "portfolio"
+      ],
+      "text": "A covenant is past its due date and has not been received."
+    },
+    {
+      "id": "monitoring.exception",
+      "pattern": "tooltip",
+      "screens": [
+        "facility_monitoring",
+        "portfolio"
+      ],
+      "text": "Evidence behind a monitored requirement has become stale or disputed."
+    },
+    {
+      "id": "covenant.quarterly_cash_statement",
+      "pattern": "tooltip",
+      "screens": [
+        "facility_monitoring"
+      ],
+      "text": "A statement of cash received and spent during the quarter."
+    },
+    {
+      "id": "covenant.season_end_production_report",
+      "pattern": "tooltip",
+      "screens": [
+        "facility_monitoring"
+      ],
+      "text": "A report of production at the end of the season."
+    },
+    {
+      "id": "covenant.registration_renewal_evidence",
+      "pattern": "tooltip",
+      "screens": [
+        "facility_monitoring"
+      ],
+      "text": "Evidence that the cooperative's registration has been renewed."
+    },
+    {
+      "id": "covenant.group_harvest_delivery",
+      "pattern": "tooltip",
+      "screens": [
+        "facility_monitoring"
+      ],
+      "text": "A record of what each group delivered at harvest."
+    },
+    {
+      "id": "covenant.group_repayment_status",
+      "pattern": "tooltip",
+      "screens": [
+        "facility_monitoring"
+      ],
+      "text": "Attendance and repayment status for each group."
+    },
+    {
+      "id": "covenant.asset_inventory_refresh",
+      "pattern": "tooltip",
+      "screens": [
+        "facility_monitoring"
+      ],
+      "text": "An updated inventory of the assets listed for the group guarantee."
+    },
+    {
+      "id": "portfolio.exposure",
+      "pattern": "tooltip",
+      "screens": [
+        "portfolio"
+      ],
+      "text": "The sum of the facility amounts of financed cooperatives. Illustrative figures.",
+      "see_more": {
+        "label": "See the financed cooperatives",
+        "target_screen": "portfolio"
+      }
+    },
+    {
+      "id": "portfolio.monitoring",
+      "pattern": "tooltip",
+      "screens": [
+        "portfolio"
+      ],
+      "text": "Financed cooperatives counted by monitoring state."
+    },
+    {
+      "id": "lender.admission.accepted",
+      "pattern": "helper",
+      "screens": [
+        "lender_assessment"
+      ],
+      "text": "The lender accepts this evidence for its own assessment."
+    },
+    {
+      "id": "lender.admission.requires_independent_query",
+      "pattern": "helper",
+      "screens": [
+        "lender_assessment"
+      ],
+      "text": "The lender will check this with the issuing body itself."
+    },
+    {
+      "id": "lender.admission.rejected",
+      "pattern": "helper",
+      "screens": [
+        "lender_assessment"
+      ],
+      "text": "The lender does not accept this evidence."
+    },
+    {
+      "id": "reliance.help",
+      "pattern": "popover",
+      "screens": [
+        "lender_assessment",
+        "verifier_workbench"
+      ],
+      "text": "Reliance is the lender's own recorded decision about whether to rely on a finding. It is not an approval."
+    },
+    {
+      "id": "dispute.reason.contradicted_by_other_evidence",
+      "pattern": "helper",
+      "screens": [
+        "lender_assessment",
+        "verifier_workbench",
+        "requirements"
+      ],
+      "text": "Another record on file says something different."
+    },
+    {
+      "id": "dispute.reason.verifier_concern",
+      "pattern": "helper",
+      "screens": [
+        "lender_assessment",
+        "verifier_workbench",
+        "requirements"
+      ],
+      "text": "A verifier has a concern about the evidence."
+    },
+    {
+      "id": "dispute.reason.document_not_authentic",
+      "pattern": "helper",
+      "screens": [
+        "lender_assessment",
+        "verifier_workbench",
+        "requirements"
+      ],
+      "text": "The document does not appear to be genuine."
+    },
+    {
+      "id": "dispute.reason.out_of_date",
+      "pattern": "helper",
+      "screens": [
+        "lender_assessment",
+        "verifier_workbench",
+        "requirements"
+      ],
+      "text": "The evidence is no longer current."
+    },
+    {
+      "id": "dispute.reason.other",
+      "pattern": "helper",
+      "screens": [
+        "lender_assessment",
+        "verifier_workbench",
+        "requirements"
+      ],
+      "text": "Another reason. Explain it in the note."
+    },
+    {
+      "id": "finding.result.verified",
+      "pattern": "helper",
+      "screens": [
+        "verifier_workbench"
+      ],
+      "text": "The evidence supports the claim within the stated scope."
+    },
+    {
+      "id": "finding.result.partially_verified",
+      "pattern": "helper",
+      "screens": [
+        "verifier_workbench"
+      ],
+      "text": "Part of the claim is supported. State which part in the scope."
+    },
+    {
+      "id": "finding.result.not_verified",
+      "pattern": "helper",
+      "screens": [
+        "verifier_workbench"
+      ],
+      "text": "The evidence does not support the claim."
+    },
+    {
+      "id": "finding.result.unable_to_determine",
+      "pattern": "helper",
+      "screens": [
+        "verifier_workbench"
+      ],
+      "text": "There is not enough information to decide."
+    },
+    {
+      "id": "verification.not_requested",
+      "pattern": "tooltip",
+      "screens": [
+        "verifier_queue",
+        "verifier_workbench",
+        "lender_assessment"
+      ],
+      "text": "No verification has been requested."
+    },
+    {
+      "id": "verification.pending",
+      "pattern": "tooltip",
+      "screens": [
+        "verifier_queue",
+        "verifier_workbench",
+        "lender_assessment"
+      ],
+      "text": "Assigned to a verifier. No finding has been recorded yet."
+    },
+    {
+      "id": "verification.verified",
+      "pattern": "tooltip",
+      "screens": [
+        "verifier_queue",
+        "verifier_workbench",
+        "lender_assessment"
+      ],
+      "text": "A verifier found the claim supported within scope."
+    },
+    {
+      "id": "verification.partially_verified",
+      "pattern": "tooltip",
+      "screens": [
+        "verifier_queue",
+        "verifier_workbench",
+        "lender_assessment"
+      ],
+      "text": "A verifier found part of the claim supported."
+    },
+    {
+      "id": "verification.not_verified",
+      "pattern": "tooltip",
+      "screens": [
+        "verifier_queue",
+        "verifier_workbench",
+        "lender_assessment"
+      ],
+      "text": "A verifier found the claim not supported."
+    },
+    {
+      "id": "verification.unable_to_determine",
+      "pattern": "tooltip",
+      "screens": [
+        "verifier_queue",
+        "verifier_workbench",
+        "lender_assessment"
+      ],
+      "text": "A verifier could not decide on the information available."
+    },
+    {
+      "id": "export.formats",
+      "pattern": "popover",
+      "screens": [
+        "lender_assessment",
+        "present_modal"
+      ],
+      "text": "JSON and CSV carry the readiness record for the selected destination: requirements, evidence, limitations, disputes and findings. The print view is the same content formatted for paper."
+    }
+  ],
+  "required_visible_text": [
+    {
+      "id": "boundary.sentence",
+      "text": "Symphony establishes and governs readiness evidence; the financing institution establishes creditworthiness and makes the financing decision.",
+      "must_appear_on": [
+        "readiness_basis",
+        "lender_assessment",
+        "present_modal"
+      ],
+      "also_in": [
+        "exports"
+      ]
+    },
+    {
+      "id": "readiness.not_approval",
+      "text": "Assessment Ready does not constitute financing approval.",
+      "must_appear_on": [
+        "readiness_basis",
+        "present_modal",
+        "destination_projection"
+      ]
+    },
+    {
+      "id": "enrollment.no_prerequisites",
+      "text": "No bank. No programme. No loan required.",
+      "must_appear_on": [
+        "enrollment"
+      ]
+    },
+    {
+      "id": "projection.line",
+      "text": "Same enterprise. Same project. Different requirement context.",
+      "must_appear_on": [
+        "destination_projection"
+      ]
+    },
+    {
+      "id": "lender.decides",
+      "text": "Symphony established the state. The lender makes the decision.",
+      "must_appear_on": [
+        "lender_assessment"
+      ]
+    },
+    {
+      "id": "requirements.illustrative",
+      "text": "Illustrative products.",
+      "must_appear_on": [
+        "requirements"
+      ]
+    },
+    {
+      "id": "reliance.caption",
+      "text": "Reliance is your own decision. It is not an approval.",
+      "must_appear_on": [
+        "lender_assessment",
+        "verifier_workbench"
+      ],
+      "adjacent_to": "relied-btn"
+    },
+    {
+      "id": "export.note",
+      "text": "Export of the readiness record. Not mapped to any institution's system.",
+      "must_appear_on": [
+        "lender_assessment",
+        "present_modal"
+      ],
+      "where": "export dialog"
+    }
+  ],
+  "blocked_message_format": "Blocked ({code}): {rule}"
+}
