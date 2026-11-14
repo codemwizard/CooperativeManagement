@@ -79,9 +79,12 @@ describe('Phase 0 script contracts', () => {
   });
 
   it('uses the installed Node/npm toolchain and retains raw output for each CI gate', () => {
-    expect(workflow).toContain('node --version && npm --version');
+    expect(workflow).toContain('node --version');
+    expect(workflow).toContain('npm --version');
+    expect(workflow).toContain('test "$(command -v npm)" = "$NPM_BIN"');
     expect(workflow).not.toMatch(/npm\s+install\s+--global\s+npm@/i);
     expect(workflow).toContain('bash tools/prepare_ci_npm.sh');
+    expect([...workflow.matchAll(/run: bash tools\/prepare_ci_npm\.sh/g)]).toHaveLength(3);
     expect(workflow).toContain('tools/prepare_ci_npm.sh');
     expect(workflow).toContain('artifacts/phase0-gate.raw.log');
     expect(workflow).toContain('artifacts/role-bootstrap.raw.log');

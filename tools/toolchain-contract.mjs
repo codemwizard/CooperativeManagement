@@ -31,13 +31,21 @@ export function validateToolchain({
     failures.push('CI Node versions');
   }
   if (!workflow.includes('bash tools/prepare_ci_npm.sh')) failures.push('CI must prepare the pinned local npm CLI');
+  const ciNpmSetupCount = [...workflow.matchAll(/run:\s*bash tools\/prepare_ci_npm\.sh/g)].length;
+  if (ciNpmSetupCount !== ciNodeVersions.length) failures.push('Every CI Node job must prepare its pinned local npm CLI');
   if (!workflow.includes('npm --version')) failures.push('CI must verify the installed npm runtime');
   if (/npm\s+install\s+(?:--global|-g)\s+npm@/i.test(workflow)) failures.push('CI must use the installed npm runtime, not install npm globally');
   if (!ciNpmSetup?.includes('npm install --prefix "$npm_root" --no-save --no-package-lock "npm@$expected_npm"')) {
     failures.push('CI npm must be installed under RUNNER_TEMP, not globally');
   }
-  if (!ciNpmSetup?.includes('node "$npm_cli" --version') || !ciNpmSetup?.includes('>> "$GITHUB_PATH"')) {
-    failures.push('CI npm setup must verify and add the exact local npm CLI to PATH');
+  if (!ciNpmSetup?.includes('node "$npm_cli" --version') || !ciNpmSetup?.includes('>> "$GITHUB_PATH"')
+      || !ciNpmSetup?.includes('NPM_BIN=%s/npm')
+      || !ciNpmSetup?.includes('exec node "%s" "$@"')
+      || !ciNpmSetup?.includes('npm_bin="$RUNNER_TEMP/symphony-npm/bin"')) {
+    failures.push('CI npm setup must verify, wrap, and expose the exact local npm CLI');
+  }
+  if (!workflow.includes('test "$(command -v npm)" = "$NPM_BIN"')) {
+    failures.push('CI must assert the npm executable path before running npm commands');
   }
   if (/npm\s+install\s+(?:--global|-g)\s+npm@/i.test(ciNpmSetup ?? '')) {
     failures.push('CI npm setup must never install npm globally');

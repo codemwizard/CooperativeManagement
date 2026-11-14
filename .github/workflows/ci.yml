@@ -26,7 +26,10 @@ jobs:
       - name: Prepare the pinned npm CLI in the runner temp directory
         run: bash tools/prepare_ci_npm.sh
       - name: Verify installed Node and npm
-        run: node --version && npm --version
+        run: |
+          node --version
+          test "$(command -v npm)" = "$NPM_BIN"
+          npm --version
       - run: npm ci
       - name: Verify the local PostgreSQL lifecycle commands
         run: npm run db:start && npm run db:stop
@@ -97,7 +100,10 @@ jobs:
       - name: Prepare the pinned npm CLI in the runner temp directory
         run: bash tools/prepare_ci_npm.sh
       - name: Verify installed Node and npm
-        run: node --version && npm --version
+        run: |
+          node --version
+          test "$(command -v npm)" = "$NPM_BIN"
+          npm --version
       - run: npm ci
       - name: Prepare WP1.5 raw evidence
         run: mkdir -p artifacts
@@ -133,7 +139,10 @@ jobs:
       - name: Prepare the pinned npm CLI in the runner temp directory
         run: bash tools/prepare_ci_npm.sh
       - name: Verify installed Node and npm
-        run: node --version && npm --version
+        run: |
+          node --version
+          test "$(command -v npm)" = "$NPM_BIN"
+          npm --version
       - run: npm ci
       - name: Prepare legacy verification evidence
         run: mkdir -p artifacts

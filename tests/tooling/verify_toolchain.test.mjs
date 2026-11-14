@@ -14,9 +14,9 @@ const validSources = {
   lockfile,
   nvmrc: '26.7.0\n',
   readme: 'Node.js 26.7.0, npm 12.2.0, PostgreSQL 18.0, package build 18.0-2',
-  workflow: "defaults:\n  run:\n    shell: bash\nnode-version: '26.7.0'; bash tools/prepare_ci_npm.sh; npm --version; image: postgres:18.0-alpine",
+  workflow: "defaults:\n  run:\n    shell: bash\nnode-version: '26.7.0'; run: bash tools/prepare_ci_npm.sh; test \"$(command -v npm)\" = \"$NPM_BIN\"; npm --version; image: postgres:18.0-alpine",
   compose: 'image: postgres:18.0-alpine',
-  ciNpmSetup: 'npm install --prefix "$npm_root" --no-save --no-package-lock "npm@$expected_npm"; node "$npm_cli" --version; printf "%s\\n" "$npm_bin" >> "$GITHUB_PATH"',
+  ciNpmSetup: 'npm install --prefix "$npm_root" --no-save --no-package-lock "npm@$expected_npm"; node "$npm_cli" --version; npm_bin="$RUNNER_TEMP/symphony-npm/bin"; printf #!/usr/bin/env bash; exec node "%s" "$@"; printf "%s\\n" "$npm_bin" >> "$GITHUB_PATH"; printf NPM_BIN=%s/npm >> "$GITHUB_ENV"',
   actualNode: '26.7.0',
   actualNpm: '12.2.0',
 };
@@ -45,8 +45,10 @@ test('reports mismatched declarations and actual runtime versions', () => {
   });
   assert.deepEqual(failures, [
     '.nvmrc', 'CI Node versions', 'CI must prepare the pinned local npm CLI',
+    'Every CI Node job must prepare its pinned local npm CLI',
     'CI must verify the installed npm runtime', 'CI npm must be installed under RUNNER_TEMP, not globally',
-    'CI npm setup must verify and add the exact local npm CLI to PATH', 'CI run steps must default to Bash with pipefail',
+    'CI npm setup must verify, wrap, and expose the exact local npm CLI',
+    'CI must assert the npm executable path before running npm commands', 'CI run steps must default to Bash with pipefail',
     'CI PostgreSQL versions', 'Docker Compose PostgreSQL versions',
     'running Node (22.16.0)', 'running npm (10.9.2)',
   ]);
@@ -56,13 +58,13 @@ test('rejects floating major-only and mismatched minor PostgreSQL image tags', (
   for (const version of ['18-alpine', '18.6-alpine', '17.6-alpine']) {
     assert.ok(validateToolchain({
       ...validSources,
-      workflow: `defaults:\n  run:\n    shell: bash\nnode-version: '26.7.0'; bash tools/prepare_ci_npm.sh; npm --version; image: postgres:${version}`,
+      workflow: `defaults:\n  run:\n    shell: bash\nnode-version: '26.7.0'; run: bash tools/prepare_ci_npm.sh; test \"$(command -v npm)\" = \"$NPM_BIN\"; npm --version; image: postgres:${version}`,
       compose: `image: postgres:${version}`,
     }).includes('CI PostgreSQL versions'));
   }
   assert.ok(validateToolchain({
     ...validSources,
-    workflow: "defaults:\n  run:\n    shell: bash\nnode-version: '26.7.0'; bash tools/prepare_ci_npm.sh; npm --version; image: postgres:18.0-alpine",
+    workflow: "defaults:\n  run:\n    shell: bash\nnode-version: '26.7.0'; run: bash tools/prepare_ci_npm.sh; test \"$(command -v npm)\" = \"$NPM_BIN\"; npm --version; image: postgres:18.0-alpine",
     compose: 'image: postgres:18.0-alpine',
   }).length === 0);
 });

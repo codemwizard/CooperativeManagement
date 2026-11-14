@@ -15,12 +15,18 @@ fi
 npm_root="$RUNNER_TEMP/symphony-npm"
 npm install --prefix "$npm_root" --no-save --no-package-lock "npm@$expected_npm"
 npm_cli="$npm_root/node_modules/npm/bin/npm-cli.js"
-npm_bin="$npm_root/node_modules/.bin"
+npx_cli="$npm_root/node_modules/npm/bin/npx-cli.js"
 actual_npm="$(node "$npm_cli" --version)"
 if [[ "$actual_npm" != "$expected_npm" ]]; then
   echo "npm toolchain mismatch: expected $expected_npm, found $actual_npm" >&2
   exit 1
 fi
 
+npm_bin="$RUNNER_TEMP/symphony-npm/bin"
+mkdir -p "$npm_bin"
+printf '#!/usr/bin/env bash\nexec node "%s" "$@"\n' "$npm_cli" > "$npm_bin/npm"
+printf '#!/usr/bin/env bash\nexec node "%s" "$@"\n' "$npx_cli" > "$npm_bin/npx"
+chmod +x "$npm_bin/npm" "$npm_bin/npx"
 printf '%s\n' "$npm_bin" >> "$GITHUB_PATH"
-echo "Prepared Node $expected_node and local npm $actual_npm; no global npm installation was performed."
+printf 'NPM_BIN=%s/npm\n' "$npm_bin" >> "$GITHUB_ENV"
+echo "Prepared Node $expected_node and local npm $actual_npm at $npm_bin/npm; no global npm installation was performed."

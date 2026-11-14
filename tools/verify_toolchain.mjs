@@ -18,12 +18,15 @@ try {
     readText('docker-compose.yml'),
     readText('tools/prepare_ci_npm.sh'),
   ]);
-  const npmVersion = process.env.npm_config_user_agent?.match(/(?:^|\s)npm\/([0-9.]+)/)?.[1]
-    ?? execFileSync(process.platform === 'win32' ? 'npm.cmd' : 'npm', ['--version'], {
+  const npmVersion = execFileSync(
+    process.env.npm_execpath ? process.execPath : process.platform === 'win32' ? 'npm.cmd' : 'npm',
+    process.env.npm_execpath ? [process.env.npm_execpath, '--version'] : ['--version'],
+    {
       cwd: root,
       encoding: 'utf8',
-      shell: process.platform === 'win32',
-    }).trim();
+      shell: !process.env.npm_execpath && process.platform === 'win32',
+    },
+  ).trim();
   const failures = validateToolchain({
     expected: JSON.parse(expectedText),
     packageJson: JSON.parse(packageText),

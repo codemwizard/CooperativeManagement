@@ -14,7 +14,9 @@ The pasted run reports:
 ### CI-6: deterministic npm version without a global install
 
 - Added `tools/prepare_ci_npm.sh`.
-- It reads the required Node/npm versions from `toolchain.json`, rejects a Node mismatch, installs npm `12.2.0` only under `$RUNNER_TEMP/symphony-npm`, invokes that exact CLI to verify its version, then adds its local `.bin` directory to `$GITHUB_PATH` for subsequent steps.
+- It reads the required Node/npm versions from `toolchain.json`, rejects a Node mismatch, and installs npm `12.2.0` only under `$RUNNER_TEMP/symphony-npm`.
+- It creates explicit `npm` and `npx` wrappers that call the exact installed CLI, adds that wrapper directory through `$GITHUB_PATH`, and records its full expected path in `$GITHUB_ENV`.
+- Each job asserts `command -v npm` equals `NPM_BIN` and checks `npm --version` before `npm ci`. `verify:toolchain` now executes the resolved npm command directly instead of trusting a possibly inherited `npm_config_user_agent` value.
 - Added the preparation step to all three workflow jobs before npm version verification and `npm ci`.
 - Extended `tools/verify_toolchain.mjs` and `tools/toolchain-contract.mjs` to validate the helper's local-prefix install, direct version check, workflow invocation, and the absence of global npm installation.
 
