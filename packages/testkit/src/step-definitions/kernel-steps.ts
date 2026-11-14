@@ -11,9 +11,12 @@
  */
 
 import assert from 'node:assert/strict';
-import { createHmac } from 'node:crypto';
+import { createHmac, randomUUID } from 'node:crypto';
 import { z } from 'zod';
-import { Given, When, Then } from '@cucumber/cucumber';
+import { After, Given, When, Then } from '@cucumber/cucumber';
+import pg from 'pg';
+import { sql, type Kysely } from 'kysely';
+import { createDb, PostgresSecurityAttemptWriter, validateSecurityAttemptRuntimeProfile, type SymphonyDatabase } from '@symphony/db';
 import type { SymphonyWorld } from './world.js';
 import {
   CommandBus,
@@ -158,6 +161,66 @@ function makeBus(repo: BddRepository, receiptStore: BddReceiptStore, clock: Fake
     resultDataSchemas: { AtomicTestCommand: z.record(z.unknown()), IdempotentTestCommand: z.record(z.unknown()), AmendClaim: z.record(z.unknown()) },
   });
 }
+
+interface Wp15CrossOrganisationState {
+  readonly admin: pg.Pool;
+  readonly appDb: Kysely<SymphonyDatabase>;
+  readonly tenantA: string;
+  readonly tenantB: string;
+  readonly organizationA: string;
+  readonly organizationB: string;
+  readonly actorUserId: string;
+  readonly commandId: string;
+  readonly evidenceItemId: string;
+  result: CommandResult<unknown>;
+  beforeSnapshot: { readonly evidence: readonly unknown[]; readonly versionCount: string };
+  handlerCalled: boolean;
+}
+
+async function wp15EvidenceSnapshot(state: Pick<Wp15CrossOrganisationState, 'admin' | 'evidenceItemId'>) {
+  const evidence = await state.admin.query(
+    `SELECT id, organization_id, track, evidence_type, created_at
+     FROM symphony.evidence_items WHERE id = $1`,
+    [state.evidenceItemId],
+  );
+  const versions = await state.admin.query<{ count: string }>(
+    'SELECT count(*)::text AS count FROM symphony.evidence_versions WHERE evidence_item_id = $1',
+    [state.evidenceItemId],
+  );
+  return { evidence: evidence.rows, versionCount: versions.rows[0]?.count ?? '0' };
+}
+
+async function cleanupWp15CrossOrganisationState(state: Wp15CrossOrganisationState): Promise<void> {
+  const client = await state.admin.connect();
+  try {
+    await client.query('BEGIN');
+    await client.query('ALTER TABLE symphony.security_attempts DISABLE TRIGGER security_attempts_append_only');
+    await client.query('DELETE FROM symphony.security_attempts WHERE tenant_id = $1 AND observed_command_id = $2', [state.tenantA, state.commandId]);
+    await client.query('ALTER TABLE symphony.security_attempts ENABLE TRIGGER security_attempts_append_only');
+    await client.query('DELETE FROM symphony.evidence_items WHERE id = $1', [state.evidenceItemId]);
+    await client.query('DELETE FROM symphony.users WHERE id = $1 AND tenant_id = $2', [state.actorUserId, state.tenantA]);
+    await client.query('DELETE FROM symphony.organizations WHERE id = ANY($1::uuid[])', [[state.organizationA, state.organizationB]]);
+    await client.query('DELETE FROM symphony.tenants WHERE id = ANY($1::uuid[])', [[state.tenantA, state.tenantB]]);
+    await client.query('COMMIT');
+  } catch (error: unknown) {
+    await client.query('ROLLBACK').catch(() => undefined);
+    throw error;
+  } finally {
+    client.release();
+  }
+}
+
+After(async function (this: SymphonyWorld) {
+  const world = this as unknown as Record<string, unknown>;
+  const state = world['_wp15CrossOrganisationState'] as Wp15CrossOrganisationState | undefined;
+  if (!state) return;
+  delete world['_wp15CrossOrganisationState'];
+  try {
+    await cleanupWp15CrossOrganisationState(state);
+  } finally {
+    await Promise.all([state.appDb.destroy(), state.admin.end()]);
+  }
+});
 
 // ─── Background steps ──────────────────────────────────────────────────────────
 
@@ -422,21 +485,77 @@ Then(
 When(
   'the Secretary in {string} sends a command targeting an evidence item in {string}',
   async function (this: SymphonyWorld, actorOrgName: string, targetOrgName: string) {
-    const actorOrg = this.organisations[actorOrgName];
-    const targetOrg = this.organisations[targetOrgName];
-    if (!actorOrg) throw new Error(`Organisation "${actorOrgName}" not registered`);
-    if (!targetOrg) throw new Error(`Organisation "${targetOrgName}" not registered`);
+    if (!this.organisations[actorOrgName] || !this.organisations[targetOrgName]) {
+      throw new Error('BDD-AUD-005 requires the Org A and Org B background fixtures');
+    }
+    if (!process.env['PHASE1_TEST_ADMIN_DATABASE_URL'] || !process.env['PHASE1_TEST_APP_DATABASE_URL']) {
+      throw new Error('BDD-AUD-005 requires PHASE1_TEST_ADMIN_DATABASE_URL and PHASE1_TEST_APP_DATABASE_URL; in-memory fallback is forbidden.');
+    }
+    const tenantA = randomUUID();
+    const tenantB = randomUUID();
+    const organizationA = randomUUID();
+    const organizationB = randomUUID();
+    const actorUserId = randomUUID();
+    const evidenceItemId = randomUUID();
+    const commandId = randomUUID();
+    const admin = new pg.Pool({ connectionString: process.env['PHASE1_TEST_ADMIN_DATABASE_URL'], max: 2 });
+    const appDb = createDb(process.env['PHASE1_TEST_APP_DATABASE_URL'], { max: 1 });
+    const state: Wp15CrossOrganisationState = {
+      admin, appDb, tenantA, tenantB, organizationA, organizationB, actorUserId,
+      commandId, evidenceItemId, result: { ok: false, code: 'UNAUTHORIZED', detail: 'Not authorized' } as CommandResult<unknown>,
+      beforeSnapshot: { evidence: [], versionCount: '0' }, handlerCalled: false,
+    } satisfies Wp15CrossOrganisationState;
+    const world = this as unknown as Record<string, unknown>;
+    world['_wp15CrossOrganisationState'] = state;
 
+    const adminIdentity = await admin.query<{ database_name: string; server_version_num: string; can_clean_append_only: boolean }>(
+      `SELECT current_database() AS database_name, current_setting('server_version_num') AS server_version_num,
+              r.rolsuper OR c.relowner = r.oid AS can_clean_append_only
+       FROM pg_roles r JOIN pg_class c ON c.oid = 'symphony.security_attempts'::regclass
+       WHERE r.rolname = current_user`,
+    );
+    if (!adminIdentity.rows[0]?.database_name.endsWith('_test') || Number(adminIdentity.rows[0]?.server_version_num) !== 180000) {
+      throw new Error('BDD-AUD-005 must use the isolated PostgreSQL 18 *_test database.');
+    }
+    if (!adminIdentity.rows[0]?.can_clean_append_only) {
+      throw new Error('BDD-AUD-005 admin identity must own the security-attempt table or be PostgreSQL superuser for deterministic fixture cleanup.');
+    }
+    const appIdentity = await sql<{ role_name: string }>`SELECT current_user AS role_name`.execute(appDb);
+    assert.equal(appIdentity.rows[0]?.role_name, 'symphony_app', 'BDD-AUD-005 must execute RLS probes using symphony_app');
+
+    await admin.query('INSERT INTO symphony.tenants (id, name) VALUES ($1, $2), ($3, $4)', [tenantA, 'BDD-AUD-005 Org A', tenantB, 'BDD-AUD-005 Org B']);
+    await admin.query(
+      `INSERT INTO symphony.organizations (id, tenant_id, name) VALUES ($1, $2, $3), ($4, $5, $6)`,
+      [organizationA, tenantA, 'BDD-AUD-005 Org A', organizationB, tenantB, 'BDD-AUD-005 Org B'],
+    );
+    await admin.query(
+      `INSERT INTO symphony.users (id, tenant_id, email, email_normalized, status)
+       VALUES ($1, $2, $3, $3, 'active')`,
+      [actorUserId, tenantA, `bdd-aud-005-${actorUserId}@example.test`],
+    );
+    await admin.query(
+      `INSERT INTO symphony.evidence_items (id, organization_id, track, evidence_type)
+       VALUES ($1, $2, 'C', 'synthetic-bdd-isolation-probe')`,
+      [evidenceItemId, organizationB],
+    );
+    state.beforeSnapshot = await wp15EvidenceSnapshot(state);
+    assert.equal(state.beforeSnapshot.evidence.length, 1, 'Org B evidence fixture must exist before the attempted command');
+
+    this.organisations[actorOrgName] = { id: organizationA, tenantId: tenantA };
+    this.organisations[targetOrgName] = { id: organizationB, tenantId: tenantB };
+    this.actors[`Secretary in ${actorOrgName}`] = { userId: actorUserId, tenantId: tenantA, role: 'Secretary' };
     const actor = this.actors[`Secretary in ${actorOrgName}`];
-    if (!actor) throw new Error(`Actor "Secretary in ${actorOrgName}" not set up`);
-
+    if (!actor) throw new Error(`Actor "Secretary in ${actorOrgName}" was not available after fixture setup`);
     const clock = new FakeClock('2026-01-01T12:00:00.000Z');
     const ids = new SequentialIds();
     const clockPort: Clock = { now: () => clock.nowIso() };
     const idGenPort: IdGen = { generate: () => ids.next() };
     const repo = new BddRepository();
     const receiptStore = new BddReceiptStore();
-
+    const auditWriter = new PostgresSecurityAttemptWriter(
+      appDb,
+      validateSecurityAttemptRuntimeProfile(process.env),
+    );
     const bus = new CommandBus<BddTestAggregate>({
       repository: repo,
       receiptStore,
@@ -444,65 +563,83 @@ When(
       clock: clockPort,
       idGen: idGenPort,
       transactionRunner: { run: async <T>(_tenant: string, work: (ctx: import('@symphony/domain').CommandTransactionContext) => Promise<T>) => work({ transactionId: Symbol() }) },
-      securityAttemptWriter: { record: async () => undefined },
+      securityAttemptWriter: auditWriter,
       digestKeyProvider: { activeVersion: () => 'test-v1', hmac: async (version: string, bytes: Uint8Array) => createHmac('sha256', version).update(bytes).digest() },
       resultDataSchemas: { AmendClaim: z.record(z.unknown()) },
     });
 
-    // Command targets Org B's tenant, but actor session is Org A's tenant
-    const now = clock.nowIso();
+    // Org A's authenticated session attempts a command whose target tenant is Org B.
     const envelope: CommandEnvelope<{ targetEvidenceId: string }> = {
-      commandId: ids.next('cmd'),
-      tenantId: targetOrg.tenantId,       // ← targets Org B
+      commandId,
+      tenantId: tenantB,
       actorUserId: actor.userId,
-      occurredAt: now,
-      recordedAt: now,
+      occurredAt: clock.nowIso(),
+      recordedAt: clock.nowIso(),
       deviceId: 'test-device',
       expectedVersion: 0,
       correlationId: 'corr-cross-org',
       type: 'AmendClaim',
       schemaVersion: 1,
-      payload: { targetEvidenceId: ids.next('evd') },
+      payload: { targetEvidenceId: evidenceItemId },
     };
-
     const result = await bus.dispatch(
       envelope,
-      async (_env, _ctx) => ({
-        newState: { id: ids.next(), tenantId: targetOrg.tenantId, version: 1, label: 'cross-org' },
-        events: [],
-        data: {},
-      }),
-      { trustedPrincipal: { actorUserId: envelope.actorUserId, tenantId: actorOrg.tenantId } }, // trusted session belongs to Org A
+      async () => {
+        state.handlerCalled = true;
+        return { newState: { id: randomUUID(), tenantId: tenantB, version: 1, label: 'cross-org' }, events: [], data: {} };
+      },
+      { trustedPrincipal: { actorUserId: actorUserId, tenantId: tenantA } },
     );
-
+    state.result = result;
     if (!result.ok) {
       this.lastRejectionReason = result.code;
     }
-
-    // Store repo for "nothing in Org B changes" assertion
-    const world = this as unknown as Record<string, unknown>;
-    world['_crossOrgRepo'] = repo;
-    world['_crossOrgTargetTenantId'] = targetOrg.tenantId;
-    world['_crossOrgResult'] = result;
   },
 );
 
-Then('nothing in {string} changes', function (this: SymphonyWorld, orgName: string) {
-  const world = this as unknown as Record<string, unknown>;
-  const repo = world['_crossOrgRepo'] as BddRepository;
-  const targetTenantId = world['_crossOrgTargetTenantId'] as string;
-  // No state should have been saved for the target org
-  assert.strictEqual(repo.stateCount, 0, `Expected no state changes in "${orgName}" (tenantId: ${targetTenantId})`);
+Then('nothing in {string} changes', async function (this: SymphonyWorld, orgName: string) {
+  assert.equal(orgName, 'Org B');
+  const state = (this as unknown as Record<string, unknown>)['_wp15CrossOrganisationState'] as Wp15CrossOrganisationState;
+  const afterSnapshot = await wp15EvidenceSnapshot(state);
+  assert.deepEqual(afterSnapshot, state.beforeSnapshot, 'The Org B evidence row and version history must be unchanged');
+  assert.equal(state.handlerCalled, false, 'The command handler must not run for a trusted-tenant mismatch');
+  const visibleToOrgA = await appDbEvidenceVisibleToTenant(state.appDb, state.tenantA, state.evidenceItemId);
+  assert.equal(visibleToOrgA, false, 'The restricted app identity under Org A context must not read Org B evidence');
 });
 
-Then('the attempt is audited', function (this: SymphonyWorld) {
-  // In Phase 1, the audit trail is the rejection result itself — the command receipt
-  // is NOT stored (rejected commands are not receipted). The bus returns a typed error.
-  // A full audit trail (append to audit log) is a Phase 2 feature.
-  // For now: verify the rejection result is non-null and contains the reason.
-  const world = this as unknown as Record<string, unknown>;
-  const result = world['_crossOrgResult'] as { ok: boolean };
-  assert.strictEqual(result.ok, false, 'Expected the cross-org command to be rejected (auditable)');
+async function appDbEvidenceVisibleToTenant(appDb: Kysely<SymphonyDatabase>, tenantId: string, evidenceItemId: string): Promise<boolean> {
+  const result = await appDb.transaction().execute(async (trx) => {
+    await sql`SELECT set_config('app.tenant_id', ${tenantId}, true)`.execute(trx);
+    return sql<{ id: string }>`
+      SELECT evidence.id
+      FROM symphony.evidence_items AS evidence
+      JOIN symphony.organizations AS organization ON organization.id = evidence.organization_id
+      WHERE evidence.id = ${evidenceItemId}::uuid
+        AND organization.tenant_id = ${tenantId}::uuid
+    `.execute(trx);
+  });
+  return result.rows.length > 0;
+}
+
+Then('the tenant mismatch is recorded in the security-attempt audit', async function (this: SymphonyWorld) {
+  const state = (this as unknown as Record<string, unknown>)['_wp15CrossOrganisationState'] as Wp15CrossOrganisationState;
+  const rows = await state.admin.query<{
+    tenant_id: string; actor_user_id: string; observed_command_id: string;
+    observed_command_type: string; denial_code: string;
+  }>(
+    `SELECT tenant_id, actor_user_id, observed_command_id, observed_command_type, denial_code
+     FROM symphony.security_attempts WHERE observed_command_id = $1`,
+    [state.commandId],
+  );
+  assert.equal(rows.rowCount, 1, 'Exactly one persisted audit record must exist for the attempted command');
+  assert.deepEqual(rows.rows[0], {
+    tenant_id: state.tenantA,
+    actor_user_id: state.actorUserId,
+    observed_command_id: state.commandId,
+    observed_command_type: 'AmendClaim',
+    denial_code: 'TENANT_MISMATCH',
+  }, 'The persisted audit must be scoped to the authenticated tenant and retain the specific internal denial');
+  assert.deepEqual(state.result, { ok: false, code: 'UNAUTHORIZED', detail: 'Not authorized' });
 });
 
 // ─── BDD-AUD-006: Cross-organisation read returns nothing ──────────────────────

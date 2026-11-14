@@ -39,7 +39,7 @@ describe('Phase 0 script contracts', () => {
       ['db:migrate', 'packages/db/src/migrate.ts'],
       ['db:migrate:test', 'packages/db/src/migrate.ts'],
       ['test:unit', 'vitest run --reporter=verbose'],
-      ['test:bdd', 'cucumber-js --config cucumber.cjs'],
+      ['test:bdd:phase0', 'cucumber-js --config cucumber.cjs'],
       ['verify:trace', 'tools/verify-trace.ts'],
       ['verify:arch', '--config .dependency-cruiser.cjs'],
     ]);
@@ -57,6 +57,21 @@ describe('Phase 0 script contracts', () => {
     const gateStep = workflow.split(/\n\s*- name: Run the mandatory Phase 0 gate\n/)[1]?.split(/\n\s*- name:/, 1)[0] ?? '';
     expect(gateStep).toContain('shell: bash');
     expect(gateStep).toMatch(/run:\s*npm run verify:phase0\s+2>&1\s+\|\s+tee\s+/);
+  });
+
+  it('uses the installed Node/npm toolchain and retains raw output for each CI gate', () => {
+    expect(workflow).toContain('node --version && npm --version');
+    expect(workflow).not.toMatch(/npm\s+install\s+--global\s+npm@/i);
+    expect(workflow).toContain('artifacts/phase0-gate.raw.log');
+    expect(workflow).toContain('artifacts/role-bootstrap.raw.log');
+    expect(workflow).toContain('artifacts/db-migrate.raw.log');
+    expect(workflow).toContain('artifacts/db-integration.raw.log');
+    expect(workflow).toContain('artifacts/bdd-wp1.5.raw.log');
+    expect(workflow).toContain('artifacts/role-finalizer.raw.log');
+    expect(workflow).toContain('wp1.5-db-evidence-${{ github.sha }}');
+    expect(workflow).toContain('artifacts/verify-all.raw.log');
+    expect(workflow).toContain("SYNTHETIC_ONLY: 'true'");
+    expect(workflow).toContain('NODE_ENV: test');
   });
 
   it('leaves schema changes to the ordered migration runner, not PostgreSQL init hooks', () => {
@@ -84,7 +99,7 @@ describe('Phase 0 script contracts', () => {
     const aggregate = scripts['verify:phase0'];
     const required = [
       'test:toolchain', 'verify:toolchain', 'verify:archive-hygiene', 'typecheck:v4',
-      'verify:arch', 'test:unit', 'test:db:migrations', 'test:bdd', 'verify:trace',
+      'verify:arch', 'test:unit', 'test:db:migrations', 'test:bdd:phase0', 'verify:trace',
       'test:a11y', 'verify:legacy-floor',
     ];
     let previousIndex = -1;
@@ -96,6 +111,8 @@ describe('Phase 0 script contracts', () => {
     }
     expect(aggregate).toContain('&&');
     expect(aggregate).not.toMatch(/--if-present|test:e2e|test:api|purge:seed|test:command/);
+    expect(aggregate).not.toMatch(/npm run test:bdd(?=\s|$)/);
+    expect(scripts['test:bdd:phase0']).toContain('@phase0 and not @wip');
   });
 
   it('proves failure in a mandatory command stops later commands', () => {

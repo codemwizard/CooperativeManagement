@@ -1,0 +1,20 @@
+npm notice run symphony-prototype@1.0.0 db:migrate:test
+npm notice run node --import tsx packages/db/src/migrate.ts
+Running migrations from: C:\Workspace\GitHub\Prototype\migrations
+Schema: symphony
+
+  ✅ 0001_kernel.sql — applied
+  ✅ 0002_identity.sql — applied
+  ✅ 0003_policy.sql — applied
+  ✅ 0004_enrolment.sql — applied
+  ✅ 0005_evidence.sql — applied
+  ✅ 0006_legal.sql — applied
+  ✅ 0006b_governance_stub.sql — applied
+  ✅ 0007_aggregate_states.sql — applied
+  ✅ 0008_rls_tenant_isolation.sql — applied
+  ✅ 0009_command_receipts_v2.sql — applied
+  ✅ 0010_security_attempts.sql — applied
+  ✅ 0012_reconciliation_inbox.sql — applied
+  ✅ 0013_tenant_rls_app_role.sql — applied
+
+✅ 13 migration(s) applied successfully.

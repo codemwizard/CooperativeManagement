@@ -15,6 +15,7 @@ export function validateBddOwnerMap(mapping: unknown, manifest: unknown, graph: 
 export function validateRuntimeMode(matrix: unknown, config: unknown): string[];
 export function validateTenantTableInventory(inventory: unknown, migrationTexts: string[]): string[];
 export function validateTenantPolicyMatrix(matrix: unknown, inventory: unknown): string[];
+export function validateTenantPolicyManifest(manifest: unknown, matrix: unknown): string[];
 export function validateAuthorityDependencyInventory(inventory: unknown, migrationInventory: unknown): string[];
 export function validatePurgeTablePolicyMatrix(matrix: unknown, inventory: unknown): string[];
 export {};

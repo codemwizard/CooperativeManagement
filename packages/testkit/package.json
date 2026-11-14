@@ -15,7 +15,9 @@
   },
   "dependencies": {
     "@symphony/domain": "*",
-    "@symphony/contracts": "*"
+    "@symphony/contracts": "*",
+    "@symphony/db": "*",
+    "pg": "^8.13.0"
   },
   "devDependencies": {
     "typescript": "^5.5.3",

@@ -38,9 +38,9 @@ Feature: Commands, audit trail and integrity
   @REQ-AUD-004 @BDD-AUD-005 @hard @SC-015
   Scenario: A command cannot touch another organisation
     When the Secretary in "Org A" sends a command targeting an evidence item in "Org B"
-    Then it is rejected with reason "NOT_AUTHORISED_FOR_ORGANISATION"
+    Then it is rejected with reason "UNAUTHORIZED"
     And nothing in "Org B" changes
-    And the attempt is audited
+    And the tenant mismatch is recorded in the security-attempt audit
 
   @REQ-AUD-004 @BDD-AUD-006 @hard
   Scenario: Cross-organisation reads return nothing

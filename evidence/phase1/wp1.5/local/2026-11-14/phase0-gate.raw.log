@@ -1,0 +1,264 @@
+npm notice run symphony-prototype@1.0.0 verify:phase0
+npm notice run npm run test:phase0-contract && npm run test:toolchain && npm run verify:toolchain && npm run verify:archive-hygiene && npm run typecheck:v4 && npm run verify:arch && npm run test:unit && npm run test:db:migrations && npm run test:bdd && npm run verify:trace && npm run test:a11y && npm run verify:legacy-floor
+npm notice run symphony-prototype@1.0.0 test:phase0-contract
+npm notice run npx vitest run tests/tooling/phase0_scripts.test.ts
+npm notice run symphony-prototype@1.0.0 npx
+npm notice run vitest run tests/tooling/phase0_scripts.test.ts
+
+ RUN  v2.1.9 C:/Workspace/GitHub/Prototype
+
+ ✓ tests/tooling/phase0_scripts.test.ts (8 tests) 2013ms
+   ✓ Phase 0 script contracts > proves failure in a mandatory command stops later commands 1994ms
+
+ Test Files  1 passed (1)
+      Tests  8 passed (8)
+   Start at  21:45:32
+   Duration  2.75s (transform 83ms, setup 0ms, collect 99ms, tests 2.01s, environment 0ms, prepare 197ms)
+
+npm notice run symphony-prototype@1.0.0 test:toolchain
+npm notice run node --test tests/tooling/verify_toolchain.test.mjs
+✔ accepts a fully aligned local and CI matrix (10.9464ms)
+✔ reports mismatched declarations and actual runtime versions (0.3168ms)
+✔ rejects floating major-only and mismatched minor PostgreSQL image tags (1.2435ms)
+ℹ tests 3
+ℹ suites 0
+ℹ pass 3
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 226.8961
+npm notice run symphony-prototype@1.0.0 verify:toolchain
+npm notice run node tools/verify_toolchain.mjs
+PASS: Node 26.7.0, npm 12.2.0, PostgreSQL 18.0 (package build 18.0-2).
+npm notice run symphony-prototype@1.0.0 verify:archive-hygiene
+npm notice run node tools/run_python_tool.js -m unittest tests/tooling/test_archive_hygiene.py && node tools/run_python_tool.js tools/verify_archive_hygiene.py
+.....
+----------------------------------------------------------------------
+Ran 5 tests in 0.053s
+
+OK
+PASS: Git index and .env.example contain no prohibited environment or private-key paths.
+npm notice run symphony-prototype@1.0.0 typecheck:v4
+npm notice run npx tsc --build --force packages/domain packages/contracts packages/db packages/testkit && npm run typecheck --workspace @symphony/domain && npm run typecheck --workspace @symphony/contracts && npm run typecheck --workspace @symphony/db && npm run typecheck --workspace @symphony/testkit && npm run typecheck --workspace @symphony/api && npm run typecheck --workspace @symphony/workspace
+npm notice run symphony-prototype@1.0.0 npx
+npm notice run tsc --build --force packages/domain packages/contracts packages/db packages/testkit
+npm notice run @symphony/domain@0.1.0 typecheck
+npm notice run tsc --noEmit
+npm notice run @symphony/contracts@0.1.0 typecheck
+npm notice run tsc --noEmit
+npm notice run @symphony/db@0.1.0 typecheck
+npm notice run tsc --noEmit
+npm notice run @symphony/testkit@0.1.0 typecheck
+npm notice run tsc --noEmit
+npm notice run @symphony/api@0.1.0 typecheck
+npm notice run tsc --noEmit
+npm notice run @symphony/workspace@0.1.0 typecheck
+npm notice run tsc --noEmit
+npm notice run symphony-prototype@1.0.0 verify:arch
+npm notice run npx depcruise packages/domain/src packages/contracts/src packages/db/src packages/testkit/src apps/api/src apps/workspace/src --config .dependency-cruiser.cjs
+npm notice run symphony-prototype@1.0.0 npx
+npm notice run depcruise packages/domain/src packages/contracts/src packages/db/src packages/testkit/src apps/api/src apps/workspace/src --config .dependency-cruiser.cjs
+
+✔ no dependency violations found (132 modules, 260 dependencies cruised)
+
+npm notice run symphony-prototype@1.0.0 test:unit
+npm notice run cd packages/domain && npx vitest run --reporter=verbose
+npm notice run symphony-prototype@1.0.0 npx
+npm notice run vitest run --reporter=verbose
+
+ RUN  v2.1.9 C:/Workspace/GitHub/Prototype/packages/domain
+
+ ✓ src/identity/__tests__/auth.test.ts > AuthService > temporaryCredential_isHashedArgon2id 311ms
+ ✓ src/kernel/__tests__/tenant-isolation.test.ts > Tenant isolation (INV-001) > commandForAnotherTenant_isRejected
+ ✓ src/kernel/__tests__/tenant-isolation.test.ts > Tenant isolation (INV-001) > repositoryLoad_neverReturnsAnotherTenantsRecord
+ ✓ src/kernel/__tests__/tenant-isolation.test.ts > Tenant isolation (INV-001) > eventsFromAnotherTenant_notVisible
+ ✓ src/kernel/__tests__/command-bus.test.ts > CommandBus > repeatedCommandId_doesNotApplyTwice
+ ✓ src/kernel/__tests__/command-bus.test.ts > CommandBus > staleExpectedVersion_isRejected
+ ✓ src/kernel/__tests__/command-bus.test.ts > CommandBus > dbFailure_rollsBackAll
+ ✓ src/kernel/__tests__/command-bus.test.ts > CommandBus > concurrentCommands_onlyOneWins
+ ✓ src/kernel/__tests__/command-bus.test.ts > CommandBus > crossTenantCommand_isRejected
+ ✓ src/kernel/__tests__/command-bus.test.ts > CommandBus > unauthorisedCommand_mutatesNothing
+ ✓ src/identity/__tests__/auth.test.ts > AuthService > temporaryCredential_singleUse 504ms
+ ✓ src/identity/__tests__/auth.test.ts > AuthService > temporaryCredential_isExpiredAfterDefault72h 391ms
+ ✓ src/identity/__tests__/auth.test.ts > AuthService > temporaryCredential_expiresAtExact72HourBoundary 777ms
+ ✓ src/privacy/__tests__/pii-vault.test.ts > KeyProvider — PII vault > encrypt_thenDecrypt_returnsSamePlaintext
+ ✓ src/privacy/__tests__/pii-vault.test.ts > KeyProvider — PII vault > samePlaintext_sameKeyRef_producesDifferentCiphertext
+ ✓ src/privacy/__tests__/pii-vault.test.ts > KeyProvider — PII vault > providerMetadata_identifiesCipherVersionAndTestOnlyScope_withoutPlaintext
+ ✓ src/privacy/__tests__/pii-vault.test.ts > KeyProvider — PII vault > wrongKey_failsClosed
+ ✓ src/privacy/__tests__/pii-vault.test.ts > KeyProvider — PII vault > tamperedCiphertext_failsClosed
+ ✓ src/privacy/__tests__/pii-vault.test.ts > KeyProvider — PII vault > unsupportedCiphertextVersion_failsClosed
+ ✓ src/privacy/__tests__/pii-vault.test.ts > KeyProvider — PII vault > differentPersonKeys_producesDifferentCiphertext
+ ✓ src/privacy/__tests__/pii-vault.test.ts > KeyProvider — PII vault > blindIndex_matchesSamePlaintext
+ ✓ src/privacy/__tests__/pii-vault.test.ts > KeyProvider — PII vault > blindIndex_differentPepper_doesNotMatch
+ ✓ src/privacy/__tests__/pii-vault.test.ts > KeyProvider — PII vault > cryptoShred_keyDeleted_ciphertextUnreadable
+ ✓ src/privacy/__tests__/pii-vault.test.ts > KeyProvider — PII vault > nrcPattern_neverInEventPayload
+ ✓ src/privacy/__tests__/pii-vault.test.ts > KeyProvider — PII vault > nrcPattern_neverInLog
+ ✓ src/authz/__tests__/policy.test.ts > PolicyEngine > grantCapacity_IFV_allowedByChairperson
+ ✓ src/authz/__tests__/policy.test.ts > PolicyEngine > grantCapacity_IFV_deniedToSecretary
+ ✓ src/authz/__tests__/policy.test.ts > PolicyEngine > IFV_cannotVerifyOwnSuppliedVersion
+ ✓ src/authz/__tests__/policy.test.ts > PolicyEngine > IFV_boundToOrganisation_cannotActOnAnother
+ ✓ src/authz/__tests__/policy.test.ts > PolicyEngine > institutionalRole_cannotWriteEvidence
+ ✓ src/authz/__tests__/policy.test.ts > PolicyEngine > revokedCapacity_isNoLongerEffective
+ ✓ src/authz/__tests__/policy.test.ts > PolicyEngine > delegation_extendsCapacity
+ ✓ src/identity/__tests__/auth.test.ts > AuthService > firstLogin_requiresPasswordChange 438ms
+ ✓ src/identity/__tests__/auth.test.ts > AuthService > authenticationEvent_containsNoPII 342ms
+ ✓ src/identity/__tests__/auth.test.ts > AuthService > credential_neverAppearsInEventPayload
+ ✓ src/kernel/__tests__/command-bus-transaction.test.ts > WP1.2-A transaction context and WP1.2-B denial audit boundary > passes one context identity through receipt, aggregate, policy, and writes
+ ✓ src/kernel/__tests__/command-bus-transaction.test.ts > WP1.2-A transaction context and WP1.2-B denial audit boundary > rolls back the command transaction before recording a denial without policy detail
+ ✓ src/kernel/__tests__/command-bus-transaction.test.ts > WP1.2-A transaction context and WP1.2-B denial audit boundary > returns a retryable classification when the required audit write fails
+ ✓ src/kernel/__tests__/command-bus-transaction.test.ts > WP1.2-A transaction context and WP1.2-B denial audit boundary > fails closed without trusted actor and tenant context and audits mismatched context as the trusted actor
+ ✓ src/authz/__tests__/capacity-service.test.ts > CapacityService > grantCapacity_allowed_byChairperson
+ ✓ src/authz/__tests__/capacity-service.test.ts > CapacityService > grantCapacity_denied_toSecretary
+ ✓ src/authz/__tests__/capacity-service.test.ts > CapacityService > revokeCapacity_allowed_byChairperson
+ ✓ src/authz/__tests__/capacity-service.test.ts > CapacityService > revokeCapacity_annotatesExistingFindings
+ ✓ src/kernel/__tests__/command-digest.test.ts > WP1.1 command semantic digest > keeps the digest implementation and persisted receipt version labels aligned
+ ✓ src/kernel/__tests__/command-digest.test.ts > WP1.1 command semantic digest > matches the approved RFC 8785 canonical semantic-envelope vector
+ ✓ src/kernel/__tests__/command-digest.test.ts > WP1.1 command semantic digest > excludes lookup and transport metadata while retaining semantic changes
+ ✓ src/kernel/__tests__/command-digest.test.ts > WP1.1 command semantic digest > uses the active key version and returns a 32-byte HMAC digest
+ ✓ src/kernel/__tests__/command-digest.test.ts > WP1.1 command semantic digest > replays with the stored historical key version and fails closed when it is unavailable
+ ✓ src/kernel/__tests__/command-digest.test.ts > WP1.1 command semantic digest > rejects invalid JSON values and unavailable canonicalization versions
+ ✓ src/kernel/__tests__/command-receipt-contract.test.ts > WP1.1 durable command receipt contract > accepts a tenant-scoped receipt with a versioned safe result
+ ✓ src/kernel/__tests__/command-receipt-contract.test.ts > WP1.1 durable command receipt contract > uses a strict success variant with non-negative version and UUID event ids
+ ✓ src/kernel/__tests__/command-receipt-contract.test.ts > WP1.1 durable command receipt contract > accepts only the terminal VERSION_CONFLICT result shape
+ ✓ src/kernel/__tests__/command-receipt-contract.test.ts > WP1.1 durable command receipt contract > rejects unkeyed or wrong-length digests and unsupported contract versions
+ ✓ src/kernel/__tests__/command-receipt-contract.test.ts > WP1.1 durable command receipt contract > rejects payload and unapproved receipt fields rather than persisting request material
+ ✓ src/kernel/__tests__/command-receipt-contract.test.ts > WP1.1 durable command receipt contract > exposes stable snake-case types without widening the result union
+ ✓ src/privacy/__tests__/test-data-mode.test.ts > DataModeGuard > testMode_rejectsRealNRC
+ ✓ src/privacy/__tests__/test-data-mode.test.ts > DataModeGuard > testMode_acceptsSyntheticNRC
+ ✓ src/privacy/__tests__/test-data-mode.test.ts > DataModeGuard > testMode_rejectsRealCoopRegNumber
+ ✓ src/privacy/__tests__/test-data-mode.test.ts > DataModeGuard > testMode_acceptsSyntheticCoopRegNumber
+ ✓ src/privacy/__tests__/test-data-mode.test.ts > DataModeGuard > realMode_outsideApprovedRegion_refusesToStart
+ ✓ src/privacy/__tests__/test-data-mode.test.ts > DataModeGuard > realMode_approvedRegion_starts
+ ✓ src/privacy/__tests__/test-data-mode.test.ts > PurgeSeedService > purgeToSeed_removesAllTenantData
+ ✓ src/privacy/__tests__/consent.test.ts > ConsentService > recordConsent_before_PII_entry
+ ✓ src/privacy/__tests__/consent.test.ts > ConsentService > withdrawConsent_triggersRetentionEvaluation
+ ✓ src/privacy/__tests__/consent.test.ts > ConsentService > publicRegisterFields_useLegalObligation_notConsent
+ ✓ src/authz/__tests__/policy-table.test.ts > PolicyEngine — policy table > 'Chairperson may grant IFV'
+ ✓ src/authz/__tests__/policy-table.test.ts > PolicyEngine — policy table > 'Vice-Chairperson may grant IFV'
+ ✓ src/authz/__tests__/policy-table.test.ts > PolicyEngine — policy table > 'Secretary may NOT grant IFV'
+ ✓ src/authz/__tests__/policy-table.test.ts > PolicyEngine — policy table > 'Treasurer may NOT grant IFV'
+ ✓ src/authz/__tests__/policy-table.test.ts > PolicyEngine — policy table > 'Platform enroller may grant IFV'
+ ✓ src/authz/__tests__/policy-table.test.ts > PolicyEngine — policy table > 'IFV holder alone may NOT grant IFV'
+ ✓ src/authz/__tests__/policy-table.test.ts > PolicyEngine — policy table > 'IFV cannot verify own supplied versio…'
+ ✓ src/authz/__tests__/policy-table.test.ts > PolicyEngine — policy table > 'IFV may verify version supplied by an…'
+ ✓ src/authz/__tests__/policy-table.test.ts > PolicyEngine — policy table > 'IFV cannot act on another org\'s vers…'
+ ✓ src/authz/__tests__/policy-table.test.ts > PolicyEngine — policy table > 'No IFV capacity → deny RecordFinding'
+ ✓ src/authz/__tests__/policy-table.test.ts > PolicyEngine — policy table > 'Expired IFV capacity → deny'
+ ✓ src/authz/__tests__/policy-table.test.ts > PolicyEngine — policy table > 'pfi_analyst cannot AddEvidence'
+ ✓ src/authz/__tests__/policy-table.test.ts > PolicyEngine — policy table > 'pfi_analyst cannot AmendClaim'
+ ✓ src/authz/__tests__/policy-table.test.ts > PolicyEngine — policy table > 'union_ta cannot AdmitEvidence'
+ ✓ src/authz/__tests__/policy-table.test.ts > PolicyEngine — policy table > 'fund_manager cannot ApproveMinutes'
+ ✓ src/authz/__tests__/policy-table.test.ts > PolicyEngine — policy table > 'ta cannot RecordTaCompletion (write)'
+ ✓ src/authz/__tests__/policy-table.test.ts > PolicyEngine — policy table > 'external_verifier cannot RecordFindin…'
+ ✓ src/authz/__tests__/policy-table.test.ts > PolicyEngine — policy table > 'pfi_credit cannot GrantCapacity'
+ ✓ src/authz/__tests__/policy-table.test.ts > PolicyEngine — policy table > 'Chairperson may ApproveMinutes'
+ ✓ src/authz/__tests__/policy-table.test.ts > PolicyEngine — policy table > 'Vice-Chairperson may ApproveMinutes'
+ ✓ src/authz/__tests__/policy-table.test.ts > PolicyEngine — policy table > 'Secretary may ApproveMinutes'
+ ✓ src/authz/__tests__/policy-table.test.ts > PolicyEngine — policy table > 'Plain member cannot ApproveMinutes'
+ ✓ src/authz/__tests__/policy-table.test.ts > PolicyEngine — policy table > 'acting_officer delegation allows Appr…'
+ ✓ src/authz/__tests__/policy-table.test.ts > PolicyEngine — policy table > 'Chairperson cannot act on another org…'
+ ✓ src/authz/__tests__/policy-table.test.ts > PolicyEngine — policy table > 'Secretary cannot add evidence to anot…'
+ ✓ src/privacy/__tests__/retention.test.ts > RetentionPolicy > memberDataRetention_twoYearFloor
+ ✓ src/privacy/__tests__/retention.test.ts > RetentionPolicy > cryptoShred_keepsTransactionFacts
+
+ Test Files  13 passed (13)
+      Tests  92 passed (92)
+   Start at  21:46:50
+   Duration  6.47s (transform 1.32s, setup 0ms, collect 3.15s, tests 3.03s, environment 5ms, prepare 4.86s)
+
+npm notice run symphony-prototype@1.0.0 test:db:migrations
+npm notice run node tools/require_migration_test_db.mjs && npm run test:migrations --workspace @symphony/db
+Migration test database configured: symphony_candidate_test
+npm notice run @symphony/db@0.1.0 test:migrations
+npm notice run vitest run --reporter=verbose src/__tests__/migration-runner-config.test.ts src/__tests__/migration-executor.test.ts src/__tests__/migration-runner.integration.test.ts
+
+ RUN  v2.1.9 C:/Workspace/GitHub/Prototype/packages/db
+
+ ✓ src/__tests__/migration-runner.integration.test.ts > PostgreSQL migration runner integration > serializes concurrent clean installs and makes replay a no-op 2693ms
+ ✓ src/__tests__/migration-runner.integration.test.ts > PostgreSQL migration runner integration > rolls back a failed PostgreSQL migration without a ledger row and safely retries it
+ ✓ src/__tests__/migration-runner.integration.test.ts > PostgreSQL migration runner integration > retains required schema invariants and applies the Phase 0 global seeds 794ms
+ ✓ src/__tests__/migration-runner.integration.test.ts > PostgreSQL migration runner integration > installs the WP1.1 receipt schema constraints
+ ✓ src/__tests__/migration-runner.integration.test.ts > PostgreSQL migration runner integration > installs the minimized WP1.2 security-attempt table without business-command binding
+ ✓ src/__tests__/migration-runner.integration.test.ts > PostgreSQL migration runner integration > installs only encrypted reconciliation payload and forced tenant RLS
+ ✓ src/__tests__/migration-runner.integration.test.ts > PostgreSQL migration runner integration > aborts WP1.1 migration on a non-empty legacy receipt table without changing it
+ ✓ src/__tests__/migration-executor.test.ts > executeSqlMigration > commits the SQL and migration ledger row in one transaction
+ ✓ src/__tests__/migration-executor.test.ts > executeSqlMigration > rolls back a failed migration and never records it as applied
+ ✓ src/__tests__/migration-runner-config.test.ts > migration runner configuration safety > accepts and safely quotes only the canonical schema
+ ✓ src/__tests__/migration-runner-config.test.ts > migration runner configuration safety > rejects schema "public" before opening a database connection 302ms
+ ✓ src/__tests__/migration-runner-config.test.ts > migration runner configuration safety > rejects schema "symphony; DROP SCHEMA public CASCADE" before opening a database connection
+ ✓ src/__tests__/migration-runner-config.test.ts > migration runner configuration safety > rejects schema "\"symphony\"" before opening a database connection 311ms
+
+ Test Files  3 passed (3)
+      Tests  13 passed (13)
+   Start at  21:46:59
+   Duration  8.17s (transform 183ms, setup 0ms, collect 444ms, tests 6.43s, environment 1ms, prepare 529ms)
+
+npm notice run symphony-prototype@1.0.0 test:bdd
+npm notice run cross-env NODE_OPTIONS=--import=tsx npx cucumber-js --config cucumber.cjs --profile default
+npm notice run symphony-prototype@1.0.0 npx
+npm notice run cucumber-js --config cucumber.cjs --profile default
+...................................................................................................................................F--....F-....F...F--.............................................[UXW-001] Phase 2 nav items (persona "internal verifier"): Verification queue — not yet in Phase 1 shell, pending Phase 2.
+....[UXW-001] Phase 2 nav items (persona "programme manager"): Pipeline, Cohort, Directory, Legal catalogue review, Delegations — not yet in Phase 1 shell, pending Phase 2.
+....[UXW-001] Phase 2 nav items (persona "union ta"): Cohort, Capability gaps — not yet in Phase 1 shell, pending Phase 2.
+....[UXW-001] Phase 2 nav items (persona "self-enroller"): Certificate details, Create officer accounts, Hand over — not yet in Phase 1 shell, pending Phase 2.
+...............[UXW-015] Phase 1: presenter contract verified ("Cooperative-verified (internal)"). Full disclaimer "Cooperative-verified, not independent; your own due diligence applies" is wired in Phase 2 (lender session context).
+.
+
+Failed scenarios:
+  1) State, event and outbox commit together or not at all # features\09_commands_audit_and_integrity.feature:11
+       Then no state change persists # packages\testkit\src\step-definitions\kernel-steps.ts:255
+           AssertionError [ERR_ASSERTION]: Expected command to throw
+           
+           false !== true
+           
+               + expected - actual
+           
+               -false
+               +true
+           
+               at SymphonyWorld.<anonymous> (C:\Workspace\GitHub\Prototype\packages\testkit\src\step-definitions\kernel-steps.ts:257:10)
+  2) The same command id with the same payload returns the original result # features\09_commands_audit_and_integrity.feature:18
+       Then the result equals the first result # packages\testkit\src\step-definitions\kernel-steps.ts:356
+           AssertionError [ERR_ASSERTION]: Expected first result to be ok
+           
+           false !== true
+           
+               + expected - actual
+           
+               -false
+               +true
+           
+               at SymphonyWorld.<anonymous> (C:\Workspace\GitHub\Prototype\packages\testkit\src\step-definitions\kernel-steps.ts:362:10)
+  3) The same command id with a different payload is rejected # features\09_commands_audit_and_integrity.feature:25
+       Then it is rejected with reason "IDEMPOTENCY_KEY_REUSED" # packages\testkit\src\step-definitions\kernel-steps.ts:412
+           AssertionError [ERR_ASSERTION]: Expected rejection reason "IDEMPOTENCY_KEY_REUSED"
+           + actual - expected
+           
+           + 'UNAUTHORIZED'
+           - 'IDEMPOTENCY_KEY_REUSED'
+           
+               + expected - actual
+           
+               -UNAUTHORIZED
+               +IDEMPOTENCY_KEY_REUSED
+           
+               at SymphonyWorld.<anonymous> (C:\Workspace\GitHub\Prototype\packages\testkit\src\step-definitions\kernel-steps.ts:415:12)
+  4) A command cannot touch another organisation # features\09_commands_audit_and_integrity.feature:39
+       Then it is rejected with reason "NOT_AUTHORISED_FOR_ORGANISATION" # packages\testkit\src\step-definitions\kernel-steps.ts:412
+           AssertionError [ERR_ASSERTION]: Expected rejection reason "NOT_AUTHORISED_FOR_ORGANISATION"
+           + actual - expected
+           
+           + 'UNAUTHORIZED'
+           - 'NOT_AUTHORISED_FOR_ORGANISATION'
+           
+               + expected - actual
+           
+               -UNAUTHORIZED
+               +NOT_AUTHORISED_FOR_ORGANISATION
+           
+               at SymphonyWorld.<anonymous> (C:\Workspace\GitHub\Prototype\packages\testkit\src\step-definitions\kernel-steps.ts:415:12)
+
+49 scenarios (45 passed, 4 failed)
+224 steps (215 passed, 5 skipped, 4 failed)
+0m 0.833s (0m 0.656s executing your code)

@@ -30,6 +30,8 @@ export function validateToolchain({
     failures.push('CI Node versions');
   }
   if (!workflow.includes(`npm@${expected.npm}`)) failures.push('CI npm version pin');
+  if (!workflow.includes('npm --version')) failures.push('CI must verify the installed npm runtime');
+  if (/npm\s+install\s+--global\s+npm@/i.test(workflow)) failures.push('CI must use the installed npm runtime, not install npm globally');
   const ciPostgresVersions = [...workflow.matchAll(/image:\s*postgres:(\d+\.\d+(?:\.\d+)?)(?:-[^\s]+)?/g)].map((match) => match[1]);
   if (ciPostgresVersions.length === 0 || ciPostgresVersions.some((version) => version !== expected.postgresqlVersion)) {
     failures.push('CI PostgreSQL versions');

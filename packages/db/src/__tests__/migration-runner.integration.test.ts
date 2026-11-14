@@ -151,6 +151,173 @@ describe.skipIf(!migrationBaseUrl || !adminDatabaseUrl || process.env['DATA_MODE
         'SELECT current_setting(\'server_version_num\') AS server_version_num',
       );
       expect(Math.floor(Number(version.rows[0]?.server_version_num) / 10000)).toBe(18);
+
+      const outboxFunction = await pool.query<{
+        owner: string;
+        security_definer: boolean;
+        configuration: string[] | null;
+        app_execute: boolean;
+        public_execute: boolean;
+      }>(
+        `SELECT pg_catalog.pg_get_userbyid(function_row.proowner) AS owner,
+                function_row.prosecdef AS security_definer,
+                function_row.proconfig AS configuration,
+                EXISTS (
+                  SELECT 1 FROM pg_catalog.aclexplode(
+                    COALESCE(function_row.proacl, pg_catalog.acldefault('f', function_row.proowner))
+                  ) AS privilege
+                  WHERE privilege.grantee = (SELECT oid FROM pg_catalog.pg_roles WHERE rolname = 'symphony_app')
+                    AND privilege.privilege_type = 'EXECUTE'
+                ) AS app_execute,
+                EXISTS (
+                  SELECT 1 FROM pg_catalog.aclexplode(
+                    COALESCE(function_row.proacl, pg_catalog.acldefault('f', function_row.proowner))
+                  ) AS privilege
+                  WHERE privilege.grantee = 0 AND privilege.privilege_type = 'EXECUTE'
+                ) AS public_execute
+         FROM pg_catalog.pg_proc AS function_row
+         JOIN pg_catalog.pg_namespace AS namespace ON namespace.oid = function_row.pronamespace
+         WHERE function_row.oid = 'symphony.enqueue_command_outbox_message(uuid, uuid)'::regprocedure
+           AND namespace.nspname = 'symphony'`,
+      );
+      expect(outboxFunction.rows).toHaveLength(1);
+      expect(outboxFunction.rows[0]).toMatchObject({
+        owner: 'symphony_outbox_writer',
+        security_definer: true,
+        configuration: ['search_path=pg_catalog, symphony'],
+        app_execute: true,
+        public_execute: false,
+      });
+
+      const roleCapabilities = await pool.query<{ migrator_can_set_writer: boolean; app_can_set_writer: boolean }>(
+        `SELECT pg_catalog.pg_has_role('symphony_migrator', 'symphony_outbox_writer', 'SET') AS migrator_can_set_writer,
+                pg_catalog.pg_has_role('symphony_app', 'symphony_outbox_writer', 'SET') AS app_can_set_writer`,
+      );
+      expect(roleCapabilities.rows).toEqual([{ migrator_can_set_writer: true, app_can_set_writer: false }]);
+    }, 90_000);
+
+    it('upgrades from migration 0012 and rolls every migration 0013 effect back before a successful retry', async () => {
+      const upgradeDatabaseName = `symphony_wp15_upgrade_${randomUUID().replaceAll('-', '').slice(0, 16)}_test`;
+      const quotedDatabase = `"${upgradeDatabaseName.replaceAll('"', '""')}"`;
+      const admin = new pg.Client({ connectionString: adminDatabaseUrl });
+      await admin.connect();
+      let client: pg.Client | undefined;
+      try {
+        await admin.query(`CREATE DATABASE ${quotedDatabase}`);
+        await admin.query(`GRANT CONNECT, CREATE ON DATABASE ${quotedDatabase} TO symphony_migrator`);
+
+        const upgradeUrl = new URL(migrationBaseUrl!);
+        upgradeUrl.pathname = `/${upgradeDatabaseName}`;
+        client = new pg.Client({ connectionString: upgradeUrl.toString() });
+        await client.connect();
+        await client.query('CREATE SCHEMA symphony');
+        await client.query(`
+          CREATE TABLE symphony.schema_migrations (
+            name TEXT PRIMARY KEY,
+            applied_at TIMESTAMPTZ NOT NULL DEFAULT now()
+          )
+        `);
+
+        const migrationFiles = (await fs.readdir(migrationDirectory))
+          .filter((name) => name.endsWith('.sql'))
+          .sort();
+        const migrationsThrough0012 = migrationFiles.filter((name) => name < '0013_tenant_rls_app_role.sql');
+        expect(migrationsThrough0012.at(-1)).toBe('0012_reconciliation_inbox.sql');
+        for (const filename of migrationsThrough0012) {
+          await executeSqlMigration(client as pg.PoolClient, filename, await fs.readFile(path.join(migrationDirectory, filename), 'utf8'));
+        }
+
+        const migration0013 = await fs.readFile(path.join(migrationDirectory, '0013_tenant_rls_app_role.sql'), 'utf8');
+        const beforePolicies = await client.query(
+          `SELECT schemaname, tablename, policyname, permissive, roles, cmd, qual, with_check
+           FROM pg_catalog.pg_policies WHERE schemaname = 'symphony'
+           ORDER BY tablename, policyname`,
+        );
+        const beforeGrants = await client.query(
+          `SELECT grantee, table_name, privilege_type, is_grantable
+           FROM information_schema.role_table_grants
+           WHERE table_schema = 'symphony' AND grantee IN ('symphony_app', 'symphony_outbox_writer')
+           ORDER BY grantee, table_name, privilege_type`,
+        );
+        const beforeTriggers = await client.query(
+          `SELECT relation.relname AS table_name, trigger_row.tgname AS trigger_name,
+                  trigger_row.tgenabled AS enabled, trigger_row.tgfoid::regprocedure::text AS function_name
+           FROM pg_catalog.pg_trigger AS trigger_row
+           JOIN pg_catalog.pg_class AS relation ON relation.oid = trigger_row.tgrelid
+           JOIN pg_catalog.pg_namespace AS namespace ON namespace.oid = relation.relnamespace
+           WHERE namespace.nspname = 'symphony' AND NOT trigger_row.tgisinternal
+           ORDER BY relation.relname, trigger_row.tgname`,
+        );
+        const beforeRls = await client.query(
+          `SELECT relation.relname AS table_name, relation.relrowsecurity, relation.relforcerowsecurity
+           FROM pg_catalog.pg_class AS relation
+           JOIN pg_catalog.pg_namespace AS namespace ON namespace.oid = relation.relnamespace
+           WHERE namespace.nspname = 'symphony' AND relation.relkind IN ('r', 'p')
+           ORDER BY relation.relname`,
+        );
+        await expect(executeSqlMigration(
+          client as pg.PoolClient,
+          '0013_tenant_rls_app_role.sql',
+          `${migration0013}\nSELECT 1 / 0;`,
+        )).rejects.toThrow('transaction rolled back');
+
+        const ledger = await client.query<{ count: string }>(
+          `SELECT count(*)::text AS count FROM symphony.schema_migrations
+           WHERE name = '0013_tenant_rls_app_role.sql'`,
+        );
+        expect(ledger.rows[0]?.count).toBe('0');
+        expect((await client.query("SELECT to_regprocedure('symphony.enqueue_command_outbox_message(uuid,uuid)') AS function_oid")).rows[0]?.function_oid).toBeNull();
+        expect((await client.query(
+          `SELECT schemaname, tablename, policyname, permissive, roles, cmd, qual, with_check
+           FROM pg_catalog.pg_policies WHERE schemaname = 'symphony'
+           ORDER BY tablename, policyname`,
+        )).rows).toEqual(beforePolicies.rows);
+        expect((await client.query(
+          `SELECT grantee, table_name, privilege_type, is_grantable
+           FROM information_schema.role_table_grants
+           WHERE table_schema = 'symphony' AND grantee IN ('symphony_app', 'symphony_outbox_writer')
+           ORDER BY grantee, table_name, privilege_type`,
+        )).rows).toEqual(beforeGrants.rows);
+        expect((await client.query(
+          `SELECT relation.relname AS table_name, trigger_row.tgname AS trigger_name,
+                  trigger_row.tgenabled AS enabled, trigger_row.tgfoid::regprocedure::text AS function_name
+           FROM pg_catalog.pg_trigger AS trigger_row
+           JOIN pg_catalog.pg_class AS relation ON relation.oid = trigger_row.tgrelid
+           JOIN pg_catalog.pg_namespace AS namespace ON namespace.oid = relation.relnamespace
+           WHERE namespace.nspname = 'symphony' AND NOT trigger_row.tgisinternal
+           ORDER BY relation.relname, trigger_row.tgname`,
+        )).rows).toEqual(beforeTriggers.rows);
+        expect((await client.query(
+          `SELECT relation.relname AS table_name, relation.relrowsecurity, relation.relforcerowsecurity
+           FROM pg_catalog.pg_class AS relation
+           JOIN pg_catalog.pg_namespace AS namespace ON namespace.oid = relation.relnamespace
+           WHERE namespace.nspname = 'symphony' AND relation.relkind IN ('r', 'p')
+           ORDER BY relation.relname`,
+        )).rows).toEqual(beforeRls.rows);
+
+        await executeSqlMigration(client as pg.PoolClient, '0013_tenant_rls_app_role.sql', migration0013);
+        const installed = await client.query<{ owner: string; security_definer: boolean; app_execute: boolean; public_execute: boolean }>(
+          `SELECT pg_catalog.pg_get_userbyid(function_row.proowner) AS owner,
+                  function_row.prosecdef AS security_definer,
+                  EXISTS (SELECT 1 FROM pg_catalog.aclexplode(COALESCE(function_row.proacl, pg_catalog.acldefault('f', function_row.proowner))) AS acl
+                          WHERE acl.grantee = (SELECT oid FROM pg_catalog.pg_roles WHERE rolname = 'symphony_app') AND acl.privilege_type = 'EXECUTE') AS app_execute,
+                  EXISTS (SELECT 1 FROM pg_catalog.aclexplode(COALESCE(function_row.proacl, pg_catalog.acldefault('f', function_row.proowner))) AS acl
+                          WHERE acl.grantee = 0 AND acl.privilege_type = 'EXECUTE') AS public_execute
+           FROM pg_catalog.pg_proc AS function_row
+           WHERE function_row.oid = 'symphony.enqueue_command_outbox_message(uuid, uuid)'::regprocedure`,
+        );
+        expect(installed.rows).toEqual([{
+          owner: 'symphony_outbox_writer', security_definer: true, app_execute: true, public_execute: false,
+        }]);
+      } finally {
+        await client?.end().catch(() => undefined);
+        await admin.query(
+          'SELECT pg_catalog.pg_terminate_backend(pid) FROM pg_catalog.pg_stat_activity WHERE datname = $1 AND pid <> pg_catalog.pg_backend_pid()',
+          [upgradeDatabaseName],
+        ).catch(() => undefined);
+        await admin.query(`DROP DATABASE IF EXISTS ${quotedDatabase}`).catch(() => undefined);
+        await admin.end();
+      }
     }, 90_000);
 
     it('rolls back a failed PostgreSQL migration without a ledger row and safely retries it', async () => {
@@ -178,10 +345,13 @@ describe.skipIf(!migrationBaseUrl || !adminDatabaseUrl || process.env['DATA_MODE
           filename,
           'CREATE TABLE "symphony".phase0_recovery_fixture (id INTEGER PRIMARY KEY);',
         );
-        const retriedTable = await client.query<{ relation: string | null }>(
-          "SELECT to_regclass('symphony.phase0_recovery_fixture') AS relation",
+        const retriedTable = await client.query<{ schema_name: string; relation_name: string }>(
+          `SELECT namespace.nspname AS schema_name, relation.relname AS relation_name
+           FROM pg_catalog.pg_class AS relation
+           JOIN pg_catalog.pg_namespace AS namespace ON namespace.oid = relation.relnamespace
+           WHERE relation.oid = pg_catalog.to_regclass('symphony.phase0_recovery_fixture')`,
         );
-        expect(retriedTable.rows[0]?.relation).toBe('symphony.phase0_recovery_fixture');
+        expect(retriedTable.rows).toEqual([{ schema_name: 'symphony', relation_name: 'phase0_recovery_fixture' }]);
         const retriedLedgerRow = await client.query<{ count: string }>(
           'SELECT count(*)::text AS count FROM symphony.schema_migrations WHERE name = $1',
           [filename],
@@ -322,11 +492,33 @@ describe.skipIf(!migrationBaseUrl || !adminDatabaseUrl || process.env['DATA_MODE
       expect(definitions).toMatch(/NOT_AUTHORISED_FOR_ORGANISATION/);
       expect(definitions).toMatch(/TENANT_MISMATCH/);
       expect(definitions).toMatch(/READ_ONLY_ROLE/);
-      const foreignKeys = await pool.query<{ definition: string }>(
-        `SELECT pg_get_constraintdef(oid) AS definition FROM pg_constraint
-         WHERE conrelid = 'symphony.security_attempts'::regclass AND contype = 'f'`,
+      const foreignKeys = await pool.query<{ source_schema: string; source_table: string; target_schema: string; target_table: string; source_columns: string[]; target_columns: string[] }>(
+        `SELECT source_namespace.nspname AS source_schema,
+                source_relation.relname AS source_table,
+                target_namespace.nspname AS target_schema,
+                target_relation.relname AS target_table,
+                pg_catalog.to_json(array_agg(source_attribute.attname ORDER BY key_columns.ordinality)) AS source_columns,
+                pg_catalog.to_json(array_agg(target_attribute.attname ORDER BY key_columns.ordinality)) AS target_columns
+         FROM pg_catalog.pg_constraint AS constraint_row
+         JOIN pg_catalog.pg_class AS source_relation ON source_relation.oid = constraint_row.conrelid
+         JOIN pg_catalog.pg_namespace AS source_namespace ON source_namespace.oid = source_relation.relnamespace
+         JOIN pg_catalog.pg_class AS target_relation ON target_relation.oid = constraint_row.confrelid
+         JOIN pg_catalog.pg_namespace AS target_namespace ON target_namespace.oid = target_relation.relnamespace
+         CROSS JOIN LATERAL unnest(constraint_row.conkey, constraint_row.confkey)
+           WITH ORDINALITY AS key_columns(source_number, target_number, ordinality)
+         JOIN pg_catalog.pg_attribute AS source_attribute
+           ON source_attribute.attrelid = source_relation.oid AND source_attribute.attnum = key_columns.source_number
+         JOIN pg_catalog.pg_attribute AS target_attribute
+           ON target_attribute.attrelid = target_relation.oid AND target_attribute.attnum = key_columns.target_number
+         WHERE constraint_row.conrelid = 'symphony.security_attempts'::regclass
+           AND constraint_row.contype = 'f'
+         GROUP BY source_namespace.nspname, source_relation.relname, target_namespace.nspname, target_relation.relname`,
       );
-      expect(foreignKeys.rows.map((row) => row.definition)).toEqual(['FOREIGN KEY (tenant_id) REFERENCES symphony.tenants(id)']);
+      expect(foreignKeys.rows).toEqual([{
+        source_schema: 'symphony', source_table: 'security_attempts',
+        target_schema: 'symphony', target_table: 'tenants',
+        source_columns: ['tenant_id'], target_columns: ['id'],
+      }]);
       expect(definitions).not.toMatch(/UNIQUE \(tenant_id, command_id\)/i);
       expect(columns.rows.map((row) => row.column_name)).not.toContain('semantic_digest');
       expect(columns.rows.map((row) => row.column_name)).not.toContain('payload');

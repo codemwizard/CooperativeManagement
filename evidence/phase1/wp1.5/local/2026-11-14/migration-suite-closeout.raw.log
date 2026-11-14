@@ -1,0 +1,193 @@
+npm notice run @symphony/db@0.1.0 test:migrations
+npm notice run vitest run --reporter=verbose src/__tests__/migration-runner-config.test.ts src/__tests__/migration-executor.test.ts src/__tests__/migration-runner.integration.test.ts
+
+ RUN  v2.1.9 C:/Workspace/GitHub/Prototype/packages/db
+
+ × src/__tests__/migration-runner.integration.test.ts > PostgreSQL migration runner integration > serializes concurrent clean installs and makes replay a no-op 786ms
+   → expected 'Running migrations from: C:\Workspace…' not to contain 'Migration runner failed:'
+ × src/__tests__/migration-runner.integration.test.ts > PostgreSQL migration runner integration > upgrades from migration 0012 and rolls every migration 0013 effect back before a successful retry 4732ms
+   → Migration 0001_kernel.sql failed; transaction rolled back.
+ ✓ src/__tests__/migration-runner.integration.test.ts > PostgreSQL migration runner integration > rolls back a failed PostgreSQL migration without a ledger row and safely retries it
+ × src/__tests__/migration-runner.integration.test.ts > PostgreSQL migration runner integration > retains required schema invariants and applies the Phase 0 global seeds
+   → expected [] to have a length of 2 but got +0
+ × src/__tests__/migration-runner.integration.test.ts > PostgreSQL migration runner integration > installs the WP1.1 receipt schema constraints
+   → expected [] to deeply equal [ 'command_id', 'tenant_id', …(10) ]
+ × src/__tests__/migration-runner.integration.test.ts > PostgreSQL migration runner integration > installs the minimized WP1.2 security-attempt table without business-command binding
+   → expected [] to deeply equal [ 'security_attempt_id', …(6) ]
+ × src/__tests__/migration-runner.integration.test.ts > PostgreSQL migration runner integration > installs only encrypted reconciliation payload and forced tenant RLS
+   → expected [] to deeply equal [ 'reconciliation_id', …(9) ]
+ ✓ src/__tests__/migration-runner.integration.test.ts > PostgreSQL migration runner integration > aborts WP1.1 migration on a non-empty legacy receipt table without changing it
+ ✓ src/__tests__/migration-executor.test.ts > executeSqlMigration > commits the SQL and migration ledger row in one transaction
+ ✓ src/__tests__/migration-executor.test.ts > executeSqlMigration > rolls back a failed migration and never records it as applied
+ ✓ src/__tests__/migration-runner-config.test.ts > migration runner configuration safety > accepts and safely quotes only the canonical schema
+ ✓ src/__tests__/migration-runner-config.test.ts > migration runner configuration safety > rejects schema "public" before opening a database connection
+ ✓ src/__tests__/migration-runner-config.test.ts > migration runner configuration safety > rejects schema "symphony; DROP SCHEMA public CASCADE" before opening a database connection
+ ✓ src/__tests__/migration-runner-config.test.ts > migration runner configuration safety > rejects schema "\"symphony\"" before opening a database connection
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 6 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/__tests__/migration-runner.integration.test.ts > PostgreSQL migration runner integration > serializes concurrent clean installs and makes replay a no-op
+AssertionError: expected 'Running migrations from: C:\Workspace…' not to contain 'Migration runner failed:'
+
+- Expected
++ Received
+
+- Migration runner failed:
++ Running migrations from: C:\Workspace\GitHub\Prototype\migrations
++ Schema: symphony
++
++
++ Migration runner failed: Migration 0001_kernel.sql failed; transaction rolled back.
++ Cause: character with byte sequence 0xe2 0x94 0x80 in encoding "UTF8" has no equivalent in encoding "WIN1252"
++
+
+ ❯ src/__tests__/migration-runner.integration.test.ts:129:58
+    127|       const firstRun = await Promise.all([runMigrationProcess(), runMi…
+    128|       for (const result of firstRun) {
+    129|         expect(`${result.stdout}\n${result.stderr}`).not.toContain('Mi…
+       |                                                          ^
+    130|         expect(result.status).toBe(0);
+    131|       }
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/6]⎯
+
+ FAIL  src/__tests__/migration-runner.integration.test.ts > PostgreSQL migration runner integration > upgrades from migration 0012 and rolls every migration 0013 effect back before a successful retry
+Error: Migration 0001_kernel.sql failed; transaction rolled back.
+ ❯ Module.executeSqlMigration src/migration-executor.ts:20:11
+     18|       // Preserve the original migration failure for diagnosis.
+     19|     }
+     20|     throw new Error(`Migration ${filename} failed; transaction rolled …
+       |           ^
+     21|   }
+     22| }
+ ❯ src/__tests__/migration-runner.integration.test.ts:227:11
+
+Caused by: error: character with byte sequence 0xe2 0x94 0x80 in encoding "UTF8" has no equivalent in encoding "WIN1252"
+ ❯ ../../node_modules/pg/lib/client.js:694:17
+ ❯ Module.executeSqlMigration src/migration-executor.ts:11:5
+ ❯ src/__tests__/migration-runner.integration.test.ts:227:11
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Serialized Error: { length: 175, severity: 'ERROR', code: '22P05', detail: undefined, hint: undefined, position: undefined, internalPosition: undefined, internalQuery: undefined, where: undefined, schema: undefined, table: undefined, column: undefined, dataType: undefined, constraint: undefined, file: 'mbutils.c', line: '1763', routine: 'report_untranslatable_char' }
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/6]⎯
+
+ FAIL  src/__tests__/migration-runner.integration.test.ts > PostgreSQL migration runner integration > retains required schema invariants and applies the Phase 0 global seeds
+AssertionError: expected [] to have a length of 2 but got +0
+
+- Expected
++ Received
+
+- 2
++ 0
+
+ ❯ src/__tests__/migration-runner.integration.test.ts:371:28
+    369|         "SELECT indexname, indexdef FROM pg_indexes WHERE schemaname =…
+    370|       );
+    371|       expect(indexes.rows).toHaveLength(2);
+       |                            ^
+    372|       expect(indexes.rows.find((row) => row.indexname === 'appointment…
+    373|         .toMatch(/WHERE.*ended_at IS NULL.*enforce_exclusive = true/i);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/6]⎯
+
+ FAIL  src/__tests__/migration-runner.integration.test.ts > PostgreSQL migration runner integration > installs the WP1.1 receipt schema constraints
+AssertionError: expected [] to deeply equal [ 'command_id', 'tenant_id', …(10) ]
+
+- Expected
++ Received
+
+- Array [
+-   "command_id",
+-   "tenant_id",
+-   "actor_user_id",
+-   "command_type",
+-   "recorded_at",
+-   "command_schema_version",
+-   "canonicalization_version",
+-   "digest_key_version",
+-   "semantic_digest",
+-   "result_classification",
+-   "result_schema_version",
+-   "safe_result",
+- ]
++ Array []
+
+ ❯ src/__tests__/migration-runner.integration.test.ts:437:28
+    435|       );
+    436|       const receiptNames = receiptColumns.rows.map((row) => row.column…
+    437|       expect(receiptNames).toEqual([
+       |                            ^
+    438|         'command_id', 'tenant_id', 'actor_user_id', 'command_type', 'r…
+    439|         'command_schema_version', 'canonicalization_version', 'digest_…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/6]⎯
+
+ FAIL  src/__tests__/migration-runner.integration.test.ts > PostgreSQL migration runner integration > installs the minimized WP1.2 security-attempt table without business-command binding
+AssertionError: expected [] to deeply equal [ 'security_attempt_id', …(6) ]
+
+- Expected
++ Received
+
+- Array [
+-   "security_attempt_id",
+-   "tenant_id",
+-   "actor_user_id",
+-   "observed_command_id",
+-   "observed_command_type",
+-   "denial_code",
+-   "recorded_at",
+- ]
++ Array []
+
+ ❯ src/__tests__/migration-runner.integration.test.ts:469:58
+    467|          ORDER BY ordinal_position`,
+    468|       );
+    469|       expect(columns.rows.map((row) => row.column_name)).toEqual([
+       |                                                          ^
+    470|         'security_attempt_id', 'tenant_id', 'actor_user_id', 'observed…
+    471|         'observed_command_type', 'denial_code', 'recorded_at',
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/6]⎯
+
+ FAIL  src/__tests__/migration-runner.integration.test.ts > PostgreSQL migration runner integration > installs only encrypted reconciliation payload and forced tenant RLS
+AssertionError: expected [] to deeply equal [ 'reconciliation_id', …(9) ]
+
+- Expected
++ Received
+
+- Array [
+-   "reconciliation_id",
+-   "tenant_id",
+-   "payload_ciphertext",
+-   "encryption_key_ref",
+-   "reason_code",
+-   "lifecycle",
+-   "created_at",
+-   "updated_at",
+-   "expires_at",
+-   "tombstoned_at",
+- ]
++ Array []
+
+ ❯ src/__tests__/migration-runner.integration.test.ts:539:58
+    537|          WHERE table_schema = 'symphony' AND table_name = 'reconciliat…
+    538|       );
+    539|       expect(columns.rows.map((row) => row.column_name)).toEqual([
+       |                                                          ^
+    540|         'reconciliation_id', 'tenant_id', 'payload_ciphertext', 'encry…
+    541|         'reason_code', 'lifecycle', 'created_at', 'updated_at', 'expir…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/6]⎯
+
+ Test Files  1 failed | 2 passed (3)
+      Tests  6 failed | 8 passed (14)
+   Start at  23:15:08
+   Duration  9.76s (transform 177ms, setup 0ms, collect 276ms, tests 8.02s, environment 1ms, prepare 674ms)
+
+npm error Lifecycle script `test:migrations` failed with error:
+npm error code 1
+npm error path C:\Workspace\GitHub\Prototype\packages\db
+npm error workspace @symphony/db@0.1.0
+npm error location C:\Workspace\GitHub\Prototype\packages\db
+npm error command failed
+npm error command C:\Windows\system32\cmd.exe /d /s /c vitest run --reporter=verbose src/__tests__/migration-runner-config.test.ts src/__tests__/migration-executor.test.ts src/__tests__/migration-runner.integration.test.ts

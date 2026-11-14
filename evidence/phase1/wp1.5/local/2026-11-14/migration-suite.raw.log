@@ -1,0 +1,74 @@
+npm notice run @symphony/db@0.1.0 test:migrations
+npm notice run vitest run --reporter=verbose src/__tests__/migration-runner-config.test.ts src/__tests__/migration-executor.test.ts src/__tests__/migration-runner.integration.test.ts
+
+ RUN  v2.1.9 C:/Workspace/GitHub/Prototype/packages/db
+
+ ✓ src/__tests__/migration-runner.integration.test.ts > PostgreSQL migration runner integration > serializes concurrent clean installs and makes replay a no-op 2168ms
+ ✓ src/__tests__/migration-runner.integration.test.ts > PostgreSQL migration runner integration > rolls back a failed PostgreSQL migration without a ledger row and safely retries it
+ ✓ src/__tests__/migration-runner.integration.test.ts > PostgreSQL migration runner integration > retains required schema invariants and applies the Phase 0 global seeds 1017ms
+ ✓ src/__tests__/migration-runner.integration.test.ts > PostgreSQL migration runner integration > installs the WP1.1 receipt schema constraints
+ × src/__tests__/migration-runner.integration.test.ts > PostgreSQL migration runner integration > installs the minimized WP1.2 security-attempt table without business-command binding
+   → expected [ { source_schema: 'symphony', …(5) } ] to deeply equal [ { source_schema: 'symphony', …(5) } ]
+ ✓ src/__tests__/migration-runner.integration.test.ts > PostgreSQL migration runner integration > installs only encrypted reconciliation payload and forced tenant RLS
+ ✓ src/__tests__/migration-runner.integration.test.ts > PostgreSQL migration runner integration > aborts WP1.1 migration on a non-empty legacy receipt table without changing it
+ ✓ src/__tests__/migration-executor.test.ts > executeSqlMigration > commits the SQL and migration ledger row in one transaction
+ ✓ src/__tests__/migration-executor.test.ts > executeSqlMigration > rolls back a failed migration and never records it as applied
+ ✓ src/__tests__/migration-runner-config.test.ts > migration runner configuration safety > accepts and safely quotes only the canonical schema
+ ✓ src/__tests__/migration-runner-config.test.ts > migration runner configuration safety > rejects schema "public" before opening a database connection 359ms
+ ✓ src/__tests__/migration-runner-config.test.ts > migration runner configuration safety > rejects schema "symphony; DROP SCHEMA public CASCADE" before opening a database connection
+ ✓ src/__tests__/migration-runner-config.test.ts > migration runner configuration safety > rejects schema "\"symphony\"" before opening a database connection 437ms
+
+⎯⎯⎯⎯⎯⎯ Failed Suites 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/__tests__/migration-runner.integration.test.ts > PostgreSQL migration runner integration
+Error: Hook timed out in 10000ms.
+If this is a long-running hook, pass a timeout value as the last argument or configure it globally with "hookTimeout".
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/__tests__/migration-runner.integration.test.ts > PostgreSQL migration runner integration > installs the minimized WP1.2 security-attempt table without business-command binding
+AssertionError: expected [ { source_schema: 'symphony', …(5) } ] to deeply equal [ { source_schema: 'symphony', …(5) } ]
+
+- Expected
++ Received
+
+  Array [
+    Object {
+-     "source_columns": Array [
+-       "tenant_id",
+-     ],
++     "source_columns": "{tenant_id}",
+      "source_schema": "symphony",
+      "source_table": "security_attempts",
+-     "target_columns": Array [
+-       "id",
+-     ],
++     "target_columns": "{id}",
+      "target_schema": "symphony",
+      "target_table": "tenants",
+    },
+  ]
+
+ ❯ src/__tests__/migration-runner.integration.test.ts:393:32
+    391|          GROUP BY source_namespace.nspname, source_relation.relname, t…
+    392|       );
+    393|       expect(foreignKeys.rows).toEqual([{
+       |                                ^
+    394|         source_schema: 'symphony', source_table: 'security_attempts',
+    395|         target_schema: 'symphony', target_table: 'tenants',
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+ Test Files  1 failed | 2 passed (3)
+      Tests  1 failed | 12 passed (13)
+   Start at  21:36:42
+   Duration  17.96s (transform 310ms, setup 0ms, collect 450ms, tests 15.18s, environment 1ms, prepare 992ms)
+
+npm error Lifecycle script `test:migrations` failed with error:
+npm error code 1
+npm error path C:\Workspace\GitHub\Prototype\packages\db
+npm error workspace @symphony/db@0.1.0
+npm error location C:\Workspace\GitHub\Prototype\packages\db
+npm error command failed
+npm error command C:\Windows\system32\cmd.exe /d /s /c vitest run --reporter=verbose src/__tests__/migration-runner-config.test.ts src/__tests__/migration-executor.test.ts src/__tests__/migration-runner.integration.test.ts
