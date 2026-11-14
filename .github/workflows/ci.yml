@@ -6,6 +6,10 @@ on:
   pull_request:
     branches: [main, master]
 
+defaults:
+  run:
+    shell: bash
+
 jobs:
   phase0-gate:
     name: Reproducible Phase 0 foundation
@@ -19,7 +23,8 @@ jobs:
         with:
           node-version: '26.7.0'
           cache: npm
-      # Node 26.7.0 supplies the declared npm@12.2.0 runtime. Verify and use it in place.
+      - name: Prepare the pinned npm CLI in the runner temp directory
+        run: bash tools/prepare_ci_npm.sh
       - name: Verify installed Node and npm
         run: node --version && npm --version
       - run: npm ci
@@ -89,6 +94,8 @@ jobs:
         with:
           node-version: '26.7.0'
           cache: npm
+      - name: Prepare the pinned npm CLI in the runner temp directory
+        run: bash tools/prepare_ci_npm.sh
       - name: Verify installed Node and npm
         run: node --version && npm --version
       - run: npm ci
@@ -123,6 +130,8 @@ jobs:
         with:
           node-version: '26.7.0'
           cache: npm
+      - name: Prepare the pinned npm CLI in the runner temp directory
+        run: bash tools/prepare_ci_npm.sh
       - name: Verify installed Node and npm
         run: node --version && npm --version
       - run: npm ci

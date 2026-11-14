@@ -6,6 +6,7 @@ export function validateToolchain({
   readme,
   workflow,
   compose,
+  ciNpmSetup,
   actualNode,
   actualNpm,
 }) {
@@ -29,9 +30,21 @@ export function validateToolchain({
   if (ciNodeVersions.length === 0 || ciNodeVersions.some((version) => version !== expected.node)) {
     failures.push('CI Node versions');
   }
-  if (!workflow.includes(`npm@${expected.npm}`)) failures.push('CI npm version pin');
+  if (!workflow.includes('bash tools/prepare_ci_npm.sh')) failures.push('CI must prepare the pinned local npm CLI');
   if (!workflow.includes('npm --version')) failures.push('CI must verify the installed npm runtime');
-  if (/npm\s+install\s+--global\s+npm@/i.test(workflow)) failures.push('CI must use the installed npm runtime, not install npm globally');
+  if (/npm\s+install\s+(?:--global|-g)\s+npm@/i.test(workflow)) failures.push('CI must use the installed npm runtime, not install npm globally');
+  if (!ciNpmSetup?.includes('npm install --prefix "$npm_root" --no-save --no-package-lock "npm@$expected_npm"')) {
+    failures.push('CI npm must be installed under RUNNER_TEMP, not globally');
+  }
+  if (!ciNpmSetup?.includes('node "$npm_cli" --version') || !ciNpmSetup?.includes('>> "$GITHUB_PATH"')) {
+    failures.push('CI npm setup must verify and add the exact local npm CLI to PATH');
+  }
+  if (/npm\s+install\s+(?:--global|-g)\s+npm@/i.test(ciNpmSetup ?? '')) {
+    failures.push('CI npm setup must never install npm globally');
+  }
+  if (!/^defaults:\s*\r?\n\s+run:\s*\r?\n\s+shell:\s*bash\s*$/m.test(workflow)) {
+    failures.push('CI run steps must default to Bash with pipefail');
+  }
   const ciPostgresVersions = [...workflow.matchAll(/image:\s*postgres:(\d+\.\d+(?:\.\d+)?)(?:-[^\s]+)?/g)].map((match) => match[1]);
   if (ciPostgresVersions.length === 0 || ciPostgresVersions.some((version) => version !== expected.postgresqlVersion)) {
     failures.push('CI PostgreSQL versions');

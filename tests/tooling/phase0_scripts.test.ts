@@ -59,9 +59,30 @@ describe('Phase 0 script contracts', () => {
     expect(gateStep).toMatch(/run:\s*npm run verify:phase0\s+2>&1\s+\|\s+tee\s+/);
   });
 
+  it('uses GitHub Bash pipefail defaults for every verification log pipeline', () => {
+    expect(workflow).toMatch(/^defaults:\s*\r?\n  run:\s*\r?\n    shell:\s*bash\s*$/m);
+    expect([...workflow.matchAll(/\|\s*tee\s+artifacts\//g)]).toHaveLength(7);
+  });
+
+  it.skipIf(process.platform === 'win32')('does not let tee mask a failing verification command', () => {
+    const directory = mkdtempSync(path.join(os.tmpdir(), 'phase0-pipefail-contract-'));
+    tempDirectories.push(directory);
+    const logPath = path.join(directory, 'captured.log');
+    const pipeline = `node -e "process.exit(23)" 2>&1 | tee "${logPath.replace(/\\/g, '/')}"`;
+    const result = spawnSync('bash', ['--noprofile', '--norc', '-e', '-o', 'pipefail', '-c', pipeline], {
+      cwd: root,
+      encoding: 'utf8',
+    });
+    expect(result.error).toBeUndefined();
+    expect(result.status).toBe(23);
+    expect(existsSync(logPath)).toBe(true);
+  });
+
   it('uses the installed Node/npm toolchain and retains raw output for each CI gate', () => {
     expect(workflow).toContain('node --version && npm --version');
     expect(workflow).not.toMatch(/npm\s+install\s+--global\s+npm@/i);
+    expect(workflow).toContain('bash tools/prepare_ci_npm.sh');
+    expect(workflow).toContain('tools/prepare_ci_npm.sh');
     expect(workflow).toContain('artifacts/phase0-gate.raw.log');
     expect(workflow).toContain('artifacts/role-bootstrap.raw.log');
     expect(workflow).toContain('artifacts/db-migrate.raw.log');

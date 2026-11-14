@@ -8,7 +8,7 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const readText = (relative) => readFile(path.join(root, relative), 'utf8');
 
 try {
-  const [expectedText, packageText, lockText, nvmrc, readme, workflow, compose] = await Promise.all([
+  const [expectedText, packageText, lockText, nvmrc, readme, workflow, compose, ciNpmSetup] = await Promise.all([
     readText('toolchain.json'),
     readText('package.json'),
     readText('package-lock.json'),
@@ -16,6 +16,7 @@ try {
     readText('README.md'),
     readText('.github/workflows/ci.yml'),
     readText('docker-compose.yml'),
+    readText('tools/prepare_ci_npm.sh'),
   ]);
   const npmVersion = process.env.npm_config_user_agent?.match(/(?:^|\s)npm\/([0-9.]+)/)?.[1]
     ?? execFileSync(process.platform === 'win32' ? 'npm.cmd' : 'npm', ['--version'], {
@@ -31,6 +32,7 @@ try {
     readme,
     workflow,
     compose,
+    ciNpmSetup,
     actualNode: process.versions.node,
     actualNpm: npmVersion,
   });

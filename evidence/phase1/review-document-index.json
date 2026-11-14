@@ -55,6 +55,7 @@
     {"id":"evidence_and_results","path":"evidence/phase1/wp1.5/local/2026-11-14/implementation-verification.md","role":"Local execution results, raw artifact checksums, distinct Phase 1/Phase 2 failures, and exact remaining WP1.5 closure gates; not a candidate-bound CI pass"},
     {"id":"evidence_and_results","path":"evidence/phase1/wp1.5/local/2026-11-14/BDD-AUD-005-contract-and-path.md","role":"BDD-AUD-005 public denial contract rationale and the real PostgreSQL app-role, RLS, audit and cleanup assertions"},
     {"id":"evidence_and_results","path":"evidence/phase1/wp1.5/local/2026-11-14/raw-log-sha256.txt","role":"Complete SHA-256 manifest for all retained local WP1.5 raw logs"},
+    {"id":"evidence_and_results","path":"evidence/phase1/wp1.5/local/2026-11-15/ci-follow-up-review.md","role":"Review and remediation record for the runner npm 11.19 mismatch and tee pipeline exit masking; local tests only, no GitHub query or CI pass claimed"},
     {"id":"plan_and_contracts","path":"Implementation-Plan-V4/implementation/PHASE-1-CLOSURE-DECISIONS-AND-ACTIONS.md","role":"Historical decision/action register; superseded only where explicitly stated by current baseline"},
     {"id":"plan_and_contracts","path":"Implementation-Plan-V4/implementation/README.md","role":"Implementation plan directory navigation"},
     {"id":"plan_and_contracts","path":"docs/phase1/PHASE1_CONTRACT_BASELINE.md","role":"WP0 closure boundary, decision baseline, sources and carry-forward"},
