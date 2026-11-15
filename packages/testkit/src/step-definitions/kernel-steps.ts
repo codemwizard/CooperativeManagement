@@ -603,19 +603,17 @@ Then('nothing in {string} changes', async function (this: SymphonyWorld, orgName
   const afterSnapshot = await wp15EvidenceSnapshot(state);
   assert.deepEqual(afterSnapshot, state.beforeSnapshot, 'The Org B evidence row and version history must be unchanged');
   assert.equal(state.handlerCalled, false, 'The command handler must not run for a trusted-tenant mismatch');
-  const visibleToOrgA = await appDbEvidenceVisibleToTenant(state.appDb, state.tenantA, state.evidenceItemId);
-  assert.equal(visibleToOrgA, false, 'The restricted app identity under Org A context must not read Org B evidence');
+  const orgACanReadOrgBEvidence = await appDbCanReadEvidenceById(state.appDb, state.tenantA, state.evidenceItemId);
+  assert.equal(orgACanReadOrgBEvidence, false, 'The restricted app identity under Org A context must not read Org B evidence by its known ID');
 });
 
-async function appDbEvidenceVisibleToTenant(appDb: Kysely<SymphonyDatabase>, tenantId: string, evidenceItemId: string): Promise<boolean> {
+async function appDbCanReadEvidenceById(appDb: Kysely<SymphonyDatabase>, tenantId: string, evidenceItemId: string): Promise<boolean> {
   const result = await appDb.transaction().execute(async (trx) => {
     await sql`SELECT set_config('app.tenant_id', ${tenantId}, true)`.execute(trx);
     return sql<{ id: string }>`
-      SELECT evidence.id
-      FROM symphony.evidence_items AS evidence
-      JOIN symphony.organizations AS organization ON organization.id = evidence.organization_id
-      WHERE evidence.id = ${evidenceItemId}::uuid
-        AND organization.tenant_id = ${tenantId}::uuid
+      SELECT id
+      FROM symphony.evidence_items
+      WHERE id = ${evidenceItemId}::uuid
     `.execute(trx);
   });
   return result.rows.length > 0;
