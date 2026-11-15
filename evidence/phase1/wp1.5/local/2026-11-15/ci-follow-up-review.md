@@ -60,6 +60,8 @@ The test-only inspection policy added to the WP1.5 integration fixture targets o
 
 ## Final isolated-cluster verification on 2026-11-15
 
+**Implementation candidate:** `ee2b1486280abfd0194c8af372d7689bf9d82a76` (code, tests, plan correction and local raw evidence commit). The task-record evidence update is a follow-up commit and continues to reference this tested candidate SHA.
+
 After the connection retry, the administrator URL loaded from `.env.local` connected successfully as PostgreSQL superuser `postgres`. To avoid collisions with project roles already present in the workstation cluster, verification used a fresh temporary PostgreSQL 18 cluster bound to `127.0.0.1:55439` and a fresh UTF-8 database `symphony_wp1_5_test`. The cluster and generated role credentials are local-only; no application/real data was used. Raw outputs and checksums are retained beside this report.
 
 - `node tools/bootstrap_wp1_5_database.mjs`: passed; created disposable `symphony_migrator`, `symphony_app`, and `symphony_outbox_writer` identities.
