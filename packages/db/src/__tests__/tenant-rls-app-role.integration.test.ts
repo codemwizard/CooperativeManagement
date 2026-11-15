@@ -351,7 +351,7 @@ describe('WP1.5 actual restricted-role tenant isolation', () => {
       signature: string; is_enqueue: boolean; app_execute: boolean; public_execute: boolean;
       owner: string; oid: string; security_definer: boolean; function_settings: string[] | null;
     }>(
-      `SELECT p.oid::regprocedure::text AS signature,
+      `SELECT format('%I.%I(%s)', n.nspname, p.proname, pg_catalog.oidvectortypes(p.proargtypes)) AS signature,
               p.oid = 'symphony.enqueue_command_outbox_message(uuid, uuid)'::regprocedure AS is_enqueue,
               p.oid::text AS oid,
               has_function_privilege('symphony_app', p.oid, 'EXECUTE') AS app_execute,
