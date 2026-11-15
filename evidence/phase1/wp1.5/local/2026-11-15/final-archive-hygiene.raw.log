@@ -1,0 +1,13 @@
+test_accepts_placeholder_only_secret_settings (tests.tooling.test_archive_hygiene.ArchiveHygieneTests.test_accepts_placeholder_only_secret_settings) ... ok
+test_allows_placeholder_template_and_unrelated_dotfiles (tests.tooling.test_archive_hygiene.ArchiveHygieneTests.test_allows_placeholder_template_and_unrelated_dotfiles) ... ok
+test_inspects_generated_zip_members (tests.tooling.test_archive_hygiene.ArchiveHygieneTests.test_inspects_generated_zip_members) ... ok
+test_rejects_concrete_secret_setting_without_echoing_value (tests.tooling.test_archive_hygiene.ArchiveHygieneTests.test_rejects_concrete_secret_setting_without_echoing_value) ... ok
+test_rejects_environment_and_private_key_paths (tests.tooling.test_archive_hygiene.ArchiveHygieneTests.test_rejects_environment_and_private_key_paths) ... ok
+test_rejects_unsafe_and_duplicate_archive_member_paths (tests.tooling.test_archive_hygiene.ArchiveHygieneTests.test_rejects_unsafe_and_duplicate_archive_member_paths) ... ok
+test_source_archive_builder_excludes_environment_files_and_opaque_nested_archives (tests.tooling.test_archive_hygiene.ArchiveHygieneTests.test_source_archive_builder_excludes_environment_files_and_opaque_nested_archives) ... ok
+test_verifier_rejects_contaminated_archive_with_unsafe_members (tests.tooling.test_archive_hygiene.ArchiveHygieneTests.test_verifier_rejects_contaminated_archive_with_unsafe_members) ... ok
+
+----------------------------------------------------------------------
+Ran 8 tests in 1.300s
+
+OK

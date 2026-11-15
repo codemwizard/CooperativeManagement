@@ -1,0 +1,25 @@
+test_source_archive_builder_excludes_environment_files_and_opaque_nested_archives (tests.tooling.test_archive_hygiene.ArchiveHygieneTests.test_source_archive_builder_excludes_environment_files_and_opaque_nested_archives) ... FAIL
+
+======================================================================
+FAIL: test_source_archive_builder_excludes_environment_files_and_opaque_nested_archives (tests.tooling.test_archive_hygiene.ArchiveHygieneTests.test_source_archive_builder_excludes_environment_files_and_opaque_nested_archives)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Workspace\GitHub\Prototype\tests\tooling\test_archive_hygiene.py", line 100, in test_source_archive_builder_excludes_environment_files_and_opaque_nested_archives
+    self.assertEqual(members, ["src/app.ts"])
+AssertionError: Lists differ: ['docs/phase1.zip', 'src/app.ts'] != ['src/app.ts']
+
+First differing element 0:
+'docs/phase1.zip'
+'src/app.ts'
+
+First list contains 1 additional elements.
+First extra element 1:
+'src/app.ts'
+
+- ['docs/phase1.zip', 'src/app.ts']
++ ['src/app.ts']
+
+----------------------------------------------------------------------
+Ran 1 test in 1.989s
+
+FAILED (failures=1)

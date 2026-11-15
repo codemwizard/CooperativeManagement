@@ -314,6 +314,29 @@ export function validateTenantPolicyManifest(manifest, matrix) {
     if (typeof entry.cross_tenant_parent_behavior !== 'string' || !entry.cross_tenant_parent_behavior.includes('false')) errors.push(`${entry.table} does not define fail-closed cross-tenant behavior`);
     if (typeof entry.mismatch_fixture !== 'string' || typeof entry.missing_parent_fixture !== 'string') errors.push(`${entry.table} lacks named mismatch fixtures`);
   }
+  const outbox = manifest?.outbox_policy;
+  if (!outbox || outbox.table !== 'event_outbox') errors.push('outbox policy specification must cover event_outbox');
+  if (outbox?.rls_enabled !== true || outbox?.rls_forced !== true) errors.push('outbox policy must require ENABLE and FORCE RLS');
+  if (outbox?.name !== 'event_outbox_pending_writer_insert' || outbox?.permissive !== true || outbox?.command !== 'INSERT') {
+    errors.push('outbox policy must be the named pending-writer INSERT policy');
+  }
+  if (JSON.stringify(outbox?.roles) !== '["symphony_outbox_writer"]' || outbox?.using !== null) {
+    errors.push('outbox policy must grant only the writer role and have no USING predicate');
+  }
+  if (outbox?.with_check !== "status = 'pending' AND EXISTS (SELECT 1 FROM symphony.domain_events e WHERE e.id = event_id AND e.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), ''))") {
+    errors.push('outbox policy must enforce pending status and active-tenant event membership');
+  }
+  const outboxFunction = outbox?.function;
+  if (
+    outboxFunction?.signature !== 'symphony.enqueue_command_outbox_message(uuid, uuid)'
+    || outboxFunction?.owner !== 'symphony_outbox_writer'
+    || outboxFunction?.security_definer !== true
+    || outboxFunction?.search_path !== 'pg_catalog, symphony'
+    || outboxFunction?.public_execute !== false
+    || outboxFunction?.app_execute !== true
+  ) {
+    errors.push('outbox function must retain its restricted owner, fixed search_path, and exact EXECUTE boundary');
+  }
   return [...new Set(errors)];
 }
 

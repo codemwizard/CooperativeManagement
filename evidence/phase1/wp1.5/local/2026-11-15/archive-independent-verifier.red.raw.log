@@ -1,0 +1,14 @@
+test_source_archive_builder_excludes_environment_files_and_opaque_nested_archives (tests.tooling.test_archive_hygiene.ArchiveHygieneTests.test_source_archive_builder_excludes_environment_files_and_opaque_nested_archives) ... FAIL
+
+======================================================================
+FAIL: test_source_archive_builder_excludes_environment_files_and_opaque_nested_archives (tests.tooling.test_archive_hygiene.ArchiveHygieneTests.test_source_archive_builder_excludes_environment_files_and_opaque_nested_archives)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Workspace\GitHub\Prototype\tests\tooling\test_archive_hygiene.py", line 98, in test_source_archive_builder_excludes_environment_files_and_opaque_nested_archives
+    self.assertIn("PASS: Git index and .env.example", result.stdout)
+AssertionError: 'PASS: Git index and .env.example' not found in 'Created source.zip from commit 36ca820e225f1318836105f269bff185716cb7ee: 1 safe tracked files; 3 member(s) excluded.\nExcluded prohibited member name: .env\nExcluded prohibited member name: Prototype/.env\nExcluded opaque packaged archive: docs/phase1.zip\n'
+
+----------------------------------------------------------------------
+Ran 1 test in 0.764s
+
+FAILED (failures=1)

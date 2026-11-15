@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+from collections import defaultdict
 import re
 import subprocess
 import sys
@@ -16,22 +17,54 @@ SECRET_ASSIGNMENT = re.compile(r"(?:PASSWORD|PASSWD|TOKEN|SECRET|CREDENTIAL|PRIV
 PLACEHOLDER = re.compile(r"(?:REPLACE_WITH|CHANGE_ME|YOUR_[A-Z0-9_]+|<[^>]+>|\$\{[A-Z0-9_]+\})", re.I)
 PRIVATE_KEY_NAMES = {"id_rsa", "id_dsa", "id_ecdsa", "id_ed25519"}
 PRIVATE_KEY_SUFFIXES = {".pem", ".p12", ".pfx", ".key"}
+SECRET_FILE_NAMES = {".npmrc", ".pypirc", ".netrc", "credentials", "secrets"}
+DATABASE_DUMP_SUFFIXES = {".dump", ".backup", ".bak", ".sqlite", ".sqlite3", ".db"}
+
+
+def _is_forbidden_name(name: str) -> bool:
+    lower_name = name.lower()
+    suffix = Path(lower_name).suffix
+    return (
+        lower_name == ".env"
+        or (lower_name.startswith(".env.") and lower_name != ENV_EXAMPLE)
+        or lower_name in PRIVATE_KEY_NAMES
+        or lower_name in SECRET_FILE_NAMES
+        or "credential" in lower_name
+        or "secret" in lower_name
+        or suffix in PRIVATE_KEY_SUFFIXES
+        or suffix in DATABASE_DUMP_SUFFIXES
+        or lower_name.endswith(".sql.gz")
+    )
 
 
 def forbidden_archive_paths(paths: Iterable[str]) -> list[str]:
-    """Return prohibited member names without reading or reporting file contents."""
-    rejected: list[str] = []
-    for raw_path in paths:
-        normalized = raw_path.replace("\\", "/").rstrip("/")
-        if not normalized:
+    """Return unsafe archive member names without reading or reporting contents."""
+    members = list(paths)
+    rejected: set[str] = set()
+    normalized_members: dict[str, list[str]] = defaultdict(list)
+
+    for raw_path in members:
+        if not raw_path or "\x00" in raw_path:
+            rejected.add(raw_path)
             continue
-        name = PurePosixPath(normalized).name
-        lower_name = name.lower()
-        if lower_name == ".env" or (lower_name.startswith(".env.") and lower_name != ENV_EXAMPLE):
-            rejected.append(raw_path)
-        elif lower_name in PRIVATE_KEY_NAMES or Path(lower_name).suffix in PRIVATE_KEY_SUFFIXES:
-            rejected.append(raw_path)
-    return rejected
+        slash_path = raw_path.replace("\\", "/")
+        if slash_path.startswith("/") or re.match(r"^[a-zA-Z]:", slash_path):
+            rejected.add(raw_path)
+            continue
+        member_path = slash_path[:-1] if slash_path.endswith("/") else slash_path
+        segments = member_path.split("/")
+        if any(segment in {"", ".", ".."} for segment in segments):
+            rejected.add(raw_path)
+            continue
+        normalized = "/".join(segments).casefold()
+        normalized_members[normalized].append(raw_path)
+        if any(_is_forbidden_name(segment) for segment in segments):
+            rejected.add(raw_path)
+
+    for aliases in normalized_members.values():
+        if len(aliases) > 1:
+            rejected.update(aliases)
+    return [member for member in members if member in rejected]
 
 
 def placeholder_errors(contents: str) -> list[str]:
