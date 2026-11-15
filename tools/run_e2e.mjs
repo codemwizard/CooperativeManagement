@@ -1,14 +1,26 @@
 import { spawn } from 'node:child_process';
+import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createServer } from 'vite';
 
+const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const host = '127.0.0.1';
-const port = 5173;
+const legacyPort = 5173;
+const workspacePort = 5174;
 
-const server = await createServer({
+const legacyServer = await createServer({
   server: {
     host,
-    port,
+    port: legacyPort,
+    strictPort: true,
+  },
+});
+const workspaceServer = await createServer({
+  configFile: path.join(repoRoot, 'apps/workspace/vite.config.ts'),
+  root: path.join(repoRoot, 'apps/workspace'),
+  server: {
+    host,
+    port: workspacePort,
     strictPort: true,
   },
 });
@@ -31,10 +43,12 @@ function runPlaywright() {
 
 let exitCode = 1;
 try {
-  await server.listen(port);
+  await legacyServer.listen();
+  await workspaceServer.listen();
   exitCode = await runPlaywright();
 } finally {
-  await server.close();
+  await workspaceServer.close();
+  await legacyServer.close();
 }
 
 process.exit(exitCode);

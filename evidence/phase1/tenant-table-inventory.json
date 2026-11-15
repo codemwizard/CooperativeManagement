@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "source": "Root migrations 0001-0012 define the 55-table catalog; WP1.5 migration 0013 implements the full policy/grant rollout, pending actual restricted-role database verification.",
+  "source": "Root migrations 0001-0012 define the 55-table catalog and pre-WP1.5 RLS baseline. WP1.5 migration 0013 applies the full policy/grant rollout; actual-role verification passed in CI run 43683206104 on candidate d7fbf5851b11b07b65bde36f062db7b21f487947. The rls_current values below intentionally preserve the through-0012 baseline.",
   "tables": [
     {
       "table": "tenants",
@@ -335,6 +335,6 @@
       "rls_current": false
     }
   ],
-  "known_gap": "Migration 0013 and the runtime role/tenant-context implementation are present. The local database has not applied migration 0013 because the available local role cannot provision the required ephemeral migration/app roles and symphony_outbox_writer. The authoritative restricted-role PostgreSQL and CI run remains pending. The manifest and matrix classify 37 tenant-scoped, 3 read-only catalogue, and 15 control-plane tables, including the WP1.4 reconciliation_inbox SELECT/INSERT/UPDATE/no-DELETE boundary.",
-  "status": "WP1.5 source implementation present; restricted-role database verification pending"
+  "known_gap": "WP1.5 has no remaining implementation or CI acceptance gap: candidate-pinned PostgreSQL 18 CI run 43683206104 passed clean migration install, the full restricted-role suite, WP1.5 BDD, bootstrap and role finalizer. This inventory retains the pre-WP1.5 RLS baseline through migration 0012; post-0013 effective RLS/grants are proved in evidence/phase1/wp1.5/ci/d7fbf5851b11b07b65bde36f062db7b21f487947/. The inventory and matrix classify 37 tenant-scoped, 3 read-only catalogue, and 15 control-plane tables, including the preserved WP1.4 reconciliation_inbox SELECT/INSERT/UPDATE/no-DELETE boundary.",
+  "status": "WP1.5 implementation and restricted-role database verification passed on candidate d7fbf5851b11b07b65bde36f062db7b21f487947, CI run 43683206104"
 }

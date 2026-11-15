@@ -1,0 +1,66 @@
+npm notice run symphony-prototype@1.0.0 test:bdd:phase1
+npm notice run node tools/run_phase1_bdd.mjs
+..........................................................................................F--....F-....F...F--.............................................[UXW-001] Phase 2 nav items (persona "internal verifier"): Verification queue — not yet in Phase 1 shell, pending Phase 2.
+....[UXW-001] Phase 2 nav items (persona "programme manager"): Pipeline, Cohort, Directory, Legal catalogue review, Delegations — not yet in Phase 1 shell, pending Phase 2.
+....[UXW-001] Phase 2 nav items (persona "union ta"): Cohort, Capability gaps — not yet in Phase 1 shell, pending Phase 2.
+....[UXW-001] Phase 2 nav items (persona "self-enroller"): Certificate details, Create officer accounts, Hand over — not yet in Phase 1 shell, pending Phase 2.
+...............[UXW-015] Phase 1: presenter contract verified ("Cooperative-verified (internal)"). Full disclaimer "Cooperative-verified, not independent; your own due diligence applies" is wired in Phase 2 (lender session context).
+.
+
+Failed scenarios:
+  1) State, event and outbox commit together or not at all # features\09_commands_audit_and_integrity.feature:11
+       Then no state change persists # packages\testkit\src\step-definitions\kernel-steps.ts:255
+           AssertionError [ERR_ASSERTION]: Expected command to throw
+           
+           false !== true
+           
+               + expected - actual
+           
+               -false
+               +true
+           
+               at SymphonyWorld.<anonymous> (C:\Workspace\GitHub\Prototype\packages\testkit\src\step-definitions\kernel-steps.ts:257:10)
+  2) The same command id with the same payload returns the original result # features\09_commands_audit_and_integrity.feature:18
+       Then the result equals the first result # packages\testkit\src\step-definitions\kernel-steps.ts:356
+           AssertionError [ERR_ASSERTION]: Expected first result to be ok
+           
+           false !== true
+           
+               + expected - actual
+           
+               -false
+               +true
+           
+               at SymphonyWorld.<anonymous> (C:\Workspace\GitHub\Prototype\packages\testkit\src\step-definitions\kernel-steps.ts:362:10)
+  3) The same command id with a different payload is rejected # features\09_commands_audit_and_integrity.feature:25
+       Then it is rejected with reason "IDEMPOTENCY_KEY_REUSED" # packages\testkit\src\step-definitions\kernel-steps.ts:412
+           AssertionError [ERR_ASSERTION]: Expected rejection reason "IDEMPOTENCY_KEY_REUSED"
+           + actual - expected
+           
+           + 'UNAUTHORIZED'
+           - 'IDEMPOTENCY_KEY_REUSED'
+           
+               + expected - actual
+           
+               -UNAUTHORIZED
+               +IDEMPOTENCY_KEY_REUSED
+           
+               at SymphonyWorld.<anonymous> (C:\Workspace\GitHub\Prototype\packages\testkit\src\step-definitions\kernel-steps.ts:415:12)
+  4) A command cannot touch another organisation # features\09_commands_audit_and_integrity.feature:39
+       Then it is rejected with reason "NOT_AUTHORISED_FOR_ORGANISATION" # packages\testkit\src\step-definitions\kernel-steps.ts:412
+           AssertionError [ERR_ASSERTION]: Expected rejection reason "NOT_AUTHORISED_FOR_ORGANISATION"
+           + actual - expected
+           
+           + 'UNAUTHORIZED'
+           - 'NOT_AUTHORISED_FOR_ORGANISATION'
+           
+               + expected - actual
+           
+               -UNAUTHORIZED
+               +NOT_AUTHORISED_FOR_ORGANISATION
+           
+               at SymphonyWorld.<anonymous> (C:\Workspace\GitHub\Prototype\packages\testkit\src\step-definitions\kernel-steps.ts:415:12)
+
+39 scenarios (35 passed, 4 failed)
+183 steps (174 passed, 5 skipped, 4 failed)
+0m 0.575s (0m 0.414s executing your code)

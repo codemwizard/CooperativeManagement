@@ -1,0 +1,5 @@
+PASS: Git index and .env.example and ZIP source-review-fb3d4f2.zip contain no prohibited environment or private-key paths.
+Created source-review-fb3d4f2.zip from commit fb3d4f2cf6b1023cca5e90f2768783c892c96d13: 1081 safe tracked files; 3 member(s) excluded.
+Excluded opaque packaged archive: Prototype.zip
+Excluded opaque packaged archive: Prototype/docs/phase1.zip
+Excluded opaque packaged archive: docs/phase1.zip

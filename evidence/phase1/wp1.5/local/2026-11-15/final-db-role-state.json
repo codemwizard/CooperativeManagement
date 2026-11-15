@@ -1,0 +1,9 @@
+{
+  "database_name": "symphony_phase1_test",
+  "admin_role": "postgres",
+  "server_version_num": "180000",
+  "migrator_outbox_writer_membership_after_run": false,
+  "app_is_superuser": false,
+  "app_inherits_roles": false,
+  "connection_strings_or_credentials_recorded": false
+}

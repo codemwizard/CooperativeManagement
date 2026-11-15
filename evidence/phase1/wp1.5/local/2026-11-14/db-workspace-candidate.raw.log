@@ -1,0 +1,83 @@
+npm notice run @symphony/db@0.1.0 test:db
+npm notice run vitest run --reporter=verbose
+
+ RUN  v2.1.9 C:/Workspace/GitHub/Prototype/packages/db
+
+ ✓ src/__tests__/migration-runner.integration.test.ts > PostgreSQL migration runner integration > serializes concurrent clean installs and makes replay a no-op 2547ms
+ ✓ src/__tests__/migration-runner.integration.test.ts > PostgreSQL migration runner integration > rolls back a failed PostgreSQL migration without a ledger row and safely retries it
+ ✓ src/__tests__/migration-runner.integration.test.ts > PostgreSQL migration runner integration > retains required schema invariants and applies the Phase 0 global seeds 757ms
+ ✓ src/__tests__/migration-runner.integration.test.ts > PostgreSQL migration runner integration > installs the WP1.1 receipt schema constraints
+ ✓ src/__tests__/migration-runner.integration.test.ts > PostgreSQL migration runner integration > installs the minimized WP1.2 security-attempt table without business-command binding
+ ✓ src/__tests__/migration-runner.integration.test.ts > PostgreSQL migration runner integration > installs only encrypted reconciliation payload and forced tenant RLS
+ ✓ src/__tests__/migration-runner.integration.test.ts > PostgreSQL migration runner integration > aborts WP1.1 migration on a non-empty legacy receipt table without changing it
+stdout | src/__tests__/command-reconciliation.integration.test.ts > WP1.4 terminal conflict receipt and reconciliation persistence
+WP1.4 command target: symphony_candidate_test; database_role=symphony_app; fixture_role=postgres; DATA_MODE=test
+
+ ✓ src/__tests__/command-reconciliation.integration.test.ts > WP1.4 terminal conflict receipt and reconciliation persistence > stores one terminal receipt and encrypted inbox item without success effects, and replays safely
+ ✓ src/__tests__/command-reconciliation.integration.test.ts > WP1.4 terminal conflict receipt and reconciliation persistence > rejects changed actor or semantic envelope without disclosing or duplicating the item
+ ✓ src/__tests__/command-reconciliation.integration.test.ts > WP1.4 terminal conflict receipt and reconciliation persistence > rolls back the terminal receipt when inbox insertion fails after the insert
+ ✓ src/__tests__/command-reconciliation.integration.test.ts > WP1.4 terminal conflict receipt and reconciliation persistence > serializes lifecycle transitions and clears expired payload without overwriting a terminal outcome
+ ✓ src/__tests__/command-reconciliation.integration.test.ts > WP1.4 terminal conflict receipt and reconciliation persistence > does not expose the item without matching transaction tenant context and explicit tenant predicate
+ ✓ src/__tests__/command-reconciliation.integration.test.ts > WP1.4 terminal conflict receipt and reconciliation persistence > proves the restricted role attributes and reconciliation inbox privilege boundary
+ ✓ src/__tests__/command-reconciliation.integration.test.ts > WP1.4 terminal conflict receipt and reconciliation persistence > does not leak transaction-local tenant context when an app connection is reused
+ ✓ src/__tests__/command-reconciliation.integration.test.ts > WP1.4 terminal conflict receipt and reconciliation persistence > recovers a real TCP connection loss after the database committed but before the client received COMMIT
+ ✓ src/__tests__/command-reconciliation.integration.test.ts > WP1.4 terminal conflict receipt and reconciliation persistence > recovers a real TCP connection loss before PostgreSQL received COMMIT, so the transaction rolled back
+stdout | src/__tests__/command-bus-concurrency.integration.test.ts > WP1.3 PostgreSQL command concurrency and recovery
+WP1.3 test target: symphony_candidate_test; PostgreSQL server_version_num=180000; database_role=postgres; DATA_MODE=test
+
+ ✓ src/__tests__/command-bus-concurrency.integration.test.ts > WP1.3 PostgreSQL command concurrency and recovery > serializes identical concurrent submissions and returns the one committed result
+ ✓ src/__tests__/command-bus-concurrency.integration.test.ts > WP1.3 PostgreSQL command concurrency and recovery > allows the waiting identical command to execute once when the original owner rolls back
+ ✓ src/__tests__/command-bus-concurrency.integration.test.ts > WP1.3 PostgreSQL command concurrency and recovery > rejects actor, type, and semantic-envelope reuse without adding side effects
+ ✓ src/__tests__/command-bus-concurrency.integration.test.ts > WP1.3 PostgreSQL command concurrency and recovery > resolves unique receipt-key contention without committing the losing aggregate effects
+ ✓ src/__tests__/command-bus-concurrency.integration.test.ts > WP1.3 PostgreSQL command concurrency and recovery > prevents two different commands with the same expected version from overwriting one another
+ ✓ src/__tests__/command-bus-concurrency.integration.test.ts > WP1.3 PostgreSQL command concurrency and recovery > retries only serialization and deadlock failures within three total attempts
+ ✓ src/__tests__/command-bus-concurrency.integration.test.ts > WP1.3 PostgreSQL command concurrency and recovery > stops after three retryable transaction failures and returns a generic retryable result
+ ✓ src/__tests__/command-bus-concurrency.integration.test.ts > WP1.3 PostgreSQL command concurrency and recovery > does not retry non-serialization integrity failures
+ ✓ src/__tests__/command-bus-concurrency.integration.test.ts > WP1.3 PostgreSQL command concurrency and recovery > resolves a committed response loss on a fresh connection without rerunning the handler
+ ✓ src/__tests__/command-bus-concurrency.integration.test.ts > WP1.3 PostgreSQL command concurrency and recovery > re-enters once after a healthy fresh lookup proves an uncertain commit did not persist
+ ✓ src/__tests__/command-bus-concurrency.integration.test.ts > WP1.3 PostgreSQL command concurrency and recovery > counts uncertain-commit re-entry within the three-attempt transaction limit
+ ✓ src/__tests__/command-bus-concurrency.integration.test.ts > WP1.3 PostgreSQL command concurrency and recovery > returns outcome-neutral retryable unavailable when the fresh receipt lookup fails
+ ✓ src/__tests__/tenant-rls-app-role.integration.test.ts > WP1.5 actual restricted-role tenant isolation > matches the 55-table migration catalog, frozen policy manifest, and effective application grants 321ms
+ ✓ src/__tests__/tenant-rls-app-role.integration.test.ts > WP1.5 actual restricted-role tenant isolation > fails closed for missing, empty, mismatched, and cross-tenant inherited scopes
+ ✓ src/__tests__/tenant-rls-app-role.integration.test.ts > WP1.5 actual restricted-role tenant isolation > keeps app.tenant_id transaction-local across pool reuse and rollback
+ ✓ src/__tests__/tenant-rls-app-role.integration.test.ts > WP1.5 actual restricted-role tenant isolation > denies direct outbox access and keeps command event/outbox writes atomic through the real repository adapter
+(node:25628) DeprecationWarning: Calling client.query() when the client is already executing a query is deprecated and will be removed in pg@9.0. Use async/await or an external async flow control mechanism instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+ ✓ src/__tests__/command-transaction.integration.test.ts > WP1.2-A PostgreSQL transaction boundary > runs the actual CommandBus persistence ports on one PostgreSQL transaction
+ ✓ src/__tests__/command-transaction.integration.test.ts > WP1.2-A PostgreSQL transaction boundary > rolls receipt, state, event, and outbox writes back at each failing write boundary
+ ✓ src/__tests__/command-transaction.integration.test.ts > WP1.2-A PostgreSQL transaction boundary > clears transaction-local tenant context after both commit and rollback
+stderr | src/__tests__/command-transaction.integration.test.ts > WP1.2-A PostgreSQL transaction boundary > commits a PostgreSQL denial audit only after rollback, and fails closed when audit insert fails
+security_audit_write_failed
+
+ ✓ src/__tests__/command-transaction.integration.test.ts > WP1.2-A PostgreSQL transaction boundary > commits a PostgreSQL denial audit only after rollback, and fails closed when audit insert fails
+ ✓ src/__tests__/postgres-repository.test.ts > PostgresRepository > concurrentVersions_onlyOneCommits
+ ✓ src/__tests__/postgres-repository.test.ts > PostgresRepository > concurrentVersions_onlyOneCommits
+ ✓ src/__tests__/postgres-repository.test.ts > PostgresRepository > rollbackOnEventInsertFailure
+ ✓ src/__tests__/event-store.test.ts > Event store immutability (INV-018) > appendedEvent_cannotBeUpdated
+ ✓ src/__tests__/event-store.test.ts > Event store immutability (INV-018) > appendedEvent_cannotBeUpdated
+ ✓ src/__tests__/event-store.test.ts > Event store immutability (INV-018) > appendedEvent_cannotBeDeleted
+ ✓ src/__tests__/event-store.test.ts > Event store immutability (INV-018) > appendedEvent_cannotBeDeleted
+ ✓ src/__tests__/event-store.test.ts > Event store immutability (INV-018) > outboxRecord_deliveredAtSetOnce
+ ✓ src/__tests__/event-store.test.ts > Event store immutability (INV-018) > outboxRecord_deliveredAtSetOnce
+ ✓ src/__tests__/postgres-repository-contract.test.ts > PostgresRepository contract > PostgresRepository > Repository contract > save_thenLoad_returnsSameData
+ ✓ src/__tests__/postgres-repository-contract.test.ts > PostgresRepository contract > PostgresRepository > Repository contract > save_withWrongVersion_throws
+ ✓ src/__tests__/postgres-repository-contract.test.ts > PostgresRepository contract > PostgresRepository > Repository contract > save_thenLoad_forDifferentTenant_returnsNull
+ ✓ src/__tests__/postgres-repository-contract.test.ts > PostgresRepository contract > PostgresRepository > Repository contract > save_eventAndOutbox_inSameTransaction
+ ✓ src/__tests__/postgres-repository-contract.test.ts > PostgresRepository contract > PostgresRepository > Repository contract > load_nonExistent_returnsNull
+ ✓ src/__tests__/security-attempt-audit.integration.test.ts > WP1.2-B security-attempt audit mode guard > refuses missing mode before opening a database transaction
+ ✓ src/__tests__/security-attempt-audit.integration.test.ts > WP1.2-B security-attempt audit mode guard > refuses unknown mode before opening a database transaction
+ ✓ src/__tests__/security-attempt-audit.integration.test.ts > WP1.2-B security-attempt audit mode guard > refuses real-data mode before opening a database transaction
+ ✓ src/__tests__/security-attempt-audit.integration.test.ts > WP1.2-B security-attempt audit mode guard > refuses non-synthetic test data before opening a database transaction
+ ✓ src/__tests__/security-attempt-audit.integration.test.ts > WP1.2-B PostgreSQL security-attempt persistence > commits the minimized denial record in a separate transaction
+ ✓ src/__tests__/migration-executor.test.ts > executeSqlMigration > commits the SQL and migration ledger row in one transaction
+ ✓ src/__tests__/migration-executor.test.ts > executeSqlMigration > rolls back a failed migration and never records it as applied
+ ✓ src/__tests__/migration-runner-config.test.ts > migration runner configuration safety > accepts and safely quotes only the canonical schema
+ ✓ src/__tests__/migration-runner-config.test.ts > migration runner configuration safety > rejects schema "public" before opening a database connection
+ ✓ src/__tests__/migration-runner-config.test.ts > migration runner configuration safety > rejects schema "symphony; DROP SCHEMA public CASCADE" before opening a database connection 302ms
+ ✓ src/__tests__/migration-runner-config.test.ts > migration runner configuration safety > rejects schema "\"symphony\"" before opening a database connection
+
+ Test Files  11 passed (11)
+      Tests  57 passed (57)
+   Start at  21:44:29
+   Duration  25.26s (transform 504ms, setup 0ms, collect 7.21s, tests 12.26s, environment 3ms, prepare 2.13s)
+

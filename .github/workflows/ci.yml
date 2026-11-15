@@ -6,6 +6,10 @@ on:
   pull_request:
     branches: [main, master]
 
+defaults:
+  run:
+    shell: bash
+
 jobs:
   phase0-gate:
     name: Reproducible Phase 0 foundation
@@ -19,8 +23,13 @@ jobs:
         with:
           node-version: '26.7.0'
           cache: npm
-      - name: Pin npm version
-        run: npm install --global npm@12.2.0
+      - name: Prepare the pinned npm CLI in the runner temp directory
+        run: bash tools/prepare_ci_npm.sh
+      - name: Verify installed Node and npm
+        run: |
+          node --version
+          test "$(command -v npm)" = "$NPM_BIN"
+          npm --version
       - run: npm ci
       - name: Verify the local PostgreSQL lifecycle commands
         run: npm run db:start && npm run db:stop
@@ -52,6 +61,7 @@ jobs:
           path: |
             artifacts/phase0-ci-evidence.json
             artifacts/phase0-gate.sanitized.log
+            artifacts/phase0-gate.raw.log
           if-no-files-found: error
           retention-days: 90
       - name: Stop the isolated PostgreSQL service
@@ -78,6 +88,8 @@ jobs:
     env:
       DATABASE_SCHEMA: symphony
       DATA_MODE: test
+      NODE_ENV: test
+      SYNTHETIC_ONLY: 'true'
       PHASE1_TEST_ADMIN_DATABASE_URL: postgresql://symphony:symphony_test@localhost:5432/symphony_test
     steps:
       - uses: actions/checkout@v4
@@ -85,16 +97,35 @@ jobs:
         with:
           node-version: '26.7.0'
           cache: npm
-      - name: Pin npm version
-        run: npm install --global npm@12.2.0
+      - name: Prepare the pinned npm CLI in the runner temp directory
+        run: bash tools/prepare_ci_npm.sh
+      - name: Verify installed Node and npm
+        run: |
+          node --version
+          test "$(command -v npm)" = "$NPM_BIN"
+          npm --version
       - run: npm ci
+      - name: Prepare WP1.5 raw evidence
+        run: mkdir -p artifacts
       - name: Provision disposable migration, application and outbox-writer roles
-        run: node tools/bootstrap_wp1_5_database.mjs
-      - run: npm run db:migrate:test
-      - run: npm run test:db --workspace @symphony/db
+        run: node tools/bootstrap_wp1_5_database.mjs 2>&1 | tee artifacts/role-bootstrap.raw.log
+      - name: Apply migrations from an empty database
+        run: npm run db:migrate:test 2>&1 | tee artifacts/db-migrate.raw.log
+      - name: Run actual-role DB integration checks
+        run: npm run test:db --workspace @symphony/db 2>&1 | tee artifacts/db-integration.raw.log
+      - name: Run WP1.5 cross-organisation PostgreSQL BDD
+        run: npm run test:bdd:wp1.5 2>&1 | tee artifacts/bdd-wp1.5.raw.log
       - name: Revoke temporary migration membership and verify final role attributes
         if: always()
-        run: node tools/finalize_wp1_5_database.mjs
+        run: node tools/finalize_wp1_5_database.mjs 2>&1 | tee artifacts/role-finalizer.raw.log
+      - name: Retain WP1.5 raw database evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: wp1.5-db-evidence-${{ github.sha }}
+          path: artifacts/*.raw.log
+          if-no-files-found: warn
+          retention-days: 90
 
   legacy-e2e:
     name: Existing full legacy E2E suite
@@ -105,10 +136,25 @@ jobs:
         with:
           node-version: '26.7.0'
           cache: npm
-      - name: Pin npm version
-        run: npm install --global npm@12.2.0
+      - name: Prepare the pinned npm CLI in the runner temp directory
+        run: bash tools/prepare_ci_npm.sh
+      - name: Verify installed Node and npm
+        run: |
+          node --version
+          test "$(command -v npm)" = "$NPM_BIN"
+          npm --version
       - run: npm ci
+      - name: Prepare legacy verification evidence
+        run: mkdir -p artifacts
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
       - name: Run the full legacy suite, including Phase 1 E2E
-        run: npm run verify:all
+        run: npm run verify:all 2>&1 | tee artifacts/verify-all.raw.log
+      - name: Retain legacy verification output
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: verify-all-evidence-${{ github.sha }}
+          path: artifacts/verify-all.raw.log
+          if-no-files-found: warn
+          retention-days: 90

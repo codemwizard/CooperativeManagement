@@ -201,6 +201,23 @@ CREATE POLICY event_outbox_pending_writer_insert
     )
   );
 
+-- Create and grant the SECURITY DEFINER function while acting as its final
+-- owner. This avoids a post-creation ALTER OWNER that depends on migration
+-- session ownership state and guarantees the definer is the restricted writer.
+GRANT CREATE ON SCHEMA symphony TO symphony_outbox_writer;
+
+CREATE OR REPLACE FUNCTION symphony.reject_append_only_mutation()
+RETURNS trigger
+LANGUAGE plpgsql
+SET search_path = pg_catalog, symphony
+AS $function$
+BEGIN
+  RAISE EXCEPTION '% is append-only; % is forbidden', TG_TABLE_NAME, TG_OP
+    USING ERRCODE = '55000';
+END
+$function$;
+
+SET LOCAL ROLE symphony_outbox_writer;
 CREATE OR REPLACE FUNCTION symphony.enqueue_command_outbox_message(
   p_outbox_id uuid,
   p_event_id uuid
@@ -227,27 +244,18 @@ BEGIN
 END
 $function$;
 
-CREATE OR REPLACE FUNCTION symphony.reject_append_only_mutation()
-RETURNS trigger
-LANGUAGE plpgsql
-SET search_path = pg_catalog, symphony
-AS $function$
-BEGIN
-  RAISE EXCEPTION '% is append-only; % is forbidden', TG_TABLE_NAME, TG_OP
-    USING ERRCODE = '55000';
-END
-$function$;
+REVOKE ALL ON FUNCTION symphony.enqueue_command_outbox_message(uuid, uuid) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION symphony.enqueue_command_outbox_message(uuid, uuid) TO symphony_app;
+COMMENT ON FUNCTION symphony.enqueue_command_outbox_message(uuid, uuid) IS
+  'WP1.5 restricted same-transaction command outbox insertion; tenant checked and pending-only.';
+RESET ROLE;
 
 DROP TRIGGER IF EXISTS security_attempts_append_only ON symphony.security_attempts;
 CREATE TRIGGER security_attempts_append_only
   BEFORE UPDATE OR DELETE ON symphony.security_attempts
   FOR EACH ROW EXECUTE FUNCTION symphony.reject_append_only_mutation();
 
-GRANT CREATE ON SCHEMA symphony TO symphony_outbox_writer;
-ALTER FUNCTION symphony.enqueue_command_outbox_message(uuid, uuid) OWNER TO symphony_outbox_writer;
 REVOKE CREATE ON SCHEMA symphony FROM symphony_outbox_writer;
-REVOKE ALL ON FUNCTION symphony.enqueue_command_outbox_message(uuid, uuid) FROM PUBLIC;
-GRANT EXECUTE ON FUNCTION symphony.enqueue_command_outbox_message(uuid, uuid) TO symphony_app;
 REVOKE ALL ON FUNCTION symphony.reject_append_only_mutation() FROM PUBLIC, symphony_app, symphony_outbox_writer;
 GRANT SELECT ON TABLE symphony.domain_events TO symphony_outbox_writer;
 GRANT INSERT ON TABLE symphony.event_outbox TO symphony_outbox_writer;
@@ -294,6 +302,3 @@ GRANT SELECT, INSERT, UPDATE ON TABLE symphony.organization_requirements TO symp
 GRANT SELECT ON TABLE symphony.capability_registry TO symphony_app;
 GRANT SELECT ON TABLE symphony.platform_roles TO symphony_app;
 GRANT SELECT ON TABLE symphony.identity_check_methods TO symphony_app;
-
-COMMENT ON FUNCTION symphony.enqueue_command_outbox_message(uuid, uuid) IS
-  'WP1.5 restricted same-transaction command outbox insertion; tenant checked and pending-only.';

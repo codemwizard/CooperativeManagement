@@ -369,6 +369,15 @@ describe('WP0.12 evidence contract', () => {
 });
 
 describe('WP1.2 evidence sub-gates', () => {
+  it('runs the security-attempt persistence proof through the restricted application role', () => {
+    const source = readFileSync(path.join(root, 'packages/db/src/__tests__/security-attempt-audit.integration.test.ts'), 'utf8');
+    expect(source).toContain("process.env['PHASE1_TEST_APP_DATABASE_URL']");
+    expect(source).toContain('createDb(appDatabaseUrl ??');
+    expect(source).toContain('SELECT current_user AS role');
+    expect(source).toContain("role: 'symphony_app'");
+    expect(source).not.toContain("const databaseUrl = process.env['MIGRATION_TEST_DATABASE_URL']");
+  });
+
   it('accepts the completed WP1.2 gate with both sub-gates and pinned-toolchain evidence', () => {
     const schema = readJson('evidence/phase1/task-evidence.schema.json');
     const envelope = readJson('evidence/phase1/wp1.2/task-evidence.json');
@@ -486,6 +495,22 @@ describe('WP1.2 evidence sub-gates', () => {
     const unsafe = passingWp1Record();
     unsafe.sub_gates[0].commands[0].artifact = 'evidence/../../../outside.log';
     expect(validateEvidence(unsafe, schema).join(' ')).toMatch(/repository-relative path/);
+  });
+});
+
+describe('WP1.3 immutable evidence pin', () => {
+  it('rejects working-tree and malformed commits for passed evidence and accepts a full source SHA', () => {
+    const schema = readJson('evidence/phase1/task-evidence.schema.json');
+    const record = structuredClone(readJson('evidence/phase1/wp1.3/task-evidence.json')) as Record<string, any>;
+    record.status.gate_verified = 'passed';
+    record.commit = 'working-tree';
+    expect(validateEvidence(record, schema).join(' ')).toMatch(/commit/);
+
+    record.commit = '0123456789abcdef';
+    expect(validateEvidence(record, schema).join(' ')).toMatch(/commit/);
+
+    record.commit = '0123456789abcdef0123456789abcdef01234567';
+    expect(validateEvidence(record, schema)).toEqual([]);
   });
 });
 
@@ -636,7 +661,7 @@ describe('WP0.3 migrated table inventory', () => {
     expect(inventory.tables.filter((table: { rls_current: boolean }) => table.rls_current).map((table: { table: string }) => table.table).sort()).toEqual(['command_receipts', 'domain_events', 'reconciliation_inbox']);
   });
 
-  it('defines a least-privilege RLS/grant policy for every migrated table without pretending it is deployed', () => {
+  it('defines a least-privilege RLS/grant policy for every migrated table and keeps baseline inventory distinct from WP1.5 deployment proof', () => {
     const inventory = readJson('evidence/phase1/tenant-table-inventory.json');
     const matrix = readJson('evidence/phase1/tenant-table-policy-matrix.json');
     expect(validateTenantPolicyMatrix(matrix, inventory)).toEqual([]);
@@ -649,7 +674,34 @@ describe('WP0.3 migrated table inventory', () => {
     const matrix = readJson('evidence/phase1/tenant-table-policy-matrix.json');
     const manifest = readJson('evidence/phase1/wp1.5-tenant-policy-manifest.json');
     expect(validateTenantPolicyManifest(manifest, matrix)).toEqual([]);
-    expect(manifest.status).toBe('candidate_frozen_pending_restricted_role_integration_and_review');
+    expect(manifest.status).toBe('candidate_verified_pending_independent_review');
+  });
+
+  it('freezes the event_outbox RLS writer capability separately from tenant-table policies', () => {
+    const matrix = readJson('evidence/phase1/tenant-table-policy-matrix.json');
+    const manifest = readJson('evidence/phase1/wp1.5-tenant-policy-manifest.json') as Record<string, any>;
+    expect(manifest.outbox_policy).toMatchObject({
+      table: 'event_outbox',
+      name: 'event_outbox_pending_writer_insert',
+      permissive: true,
+      command: 'INSERT',
+      roles: ['symphony_outbox_writer'],
+      using: null,
+      with_check: expect.stringContaining("status = 'pending'"),
+      function: {
+        signature: 'symphony.enqueue_command_outbox_message(uuid, uuid)',
+        owner: 'symphony_outbox_writer',
+        security_definer: true,
+        search_path: 'pg_catalog, symphony',
+        public_execute: false,
+        app_execute: true,
+      },
+    });
+    expect(validateTenantPolicyManifest(manifest, matrix)).toEqual([]);
+
+    const wrongOwner = structuredClone(manifest);
+    wrongOwner.outbox_policy.function.owner = 'symphony_app';
+    expect(validateTenantPolicyManifest(wrongOwner, matrix).join(' ')).toMatch(/outbox/);
   });
 });
 
@@ -744,5 +796,17 @@ describe('WP0.9 Phase 1 gate contract', () => {
     } finally {
       rmSync(directory, { recursive: true, force: true });
     }
+  });
+
+  it('keeps the WP5.3 API-backed login test out of legacy E2E while retaining its dedicated Phase 1 gate', () => {
+    const pkg = readJson('package.json');
+    const legacyConfig = readFileSync(path.join(root, 'playwright.config.ts'), 'utf8');
+    const dedicatedConfig = readFileSync(path.join(root, 'playwright.phase1.config.ts'), 'utf8');
+    expect(pkg.scripts['test:e2e']).toContain('tools/run_e2e.mjs');
+    expect(pkg.scripts['test:login:api']).toContain('playwright.phase1.config.ts');
+    expect(pkg.scripts['test:login:api']).toContain('tests/workspace/login-api.spec.ts');
+    expect(pkg.scripts['verify:phase1']).toContain('npm run test:login:api');
+    expect(legacyConfig).toMatch(/testIgnore\s*:\s*\[[^\]]*tests\/workspace\/login-api\.spec\.ts/s);
+    expect(dedicatedConfig).toContain("testMatch: /login-api\\.spec\\.ts/");
   });
 });

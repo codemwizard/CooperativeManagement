@@ -161,6 +161,20 @@
           "sub_gates": { "items": { "properties": { "status": { "const": "passed" } } } }
         }
       }
+    },
+    {
+      "if": {
+        "properties": {
+          "task_id": { "const": "WP1.3" },
+          "status": { "properties": { "gate_verified": { "const": "passed" } }, "required": ["gate_verified"] }
+        },
+        "required": ["task_id", "status"]
+      },
+      "then": {
+        "properties": {
+          "commit": { "pattern": "^[0-9a-f]{40}$" }
+        }
+      }
     }
   ]
 }

@@ -1,0 +1,5 @@
+Command: Git Bash with --noprofile --norc -e -o pipefail.
+Script: node exits 23 and its output is piped through tee /dev/null.
+Expected exit code: 23.
+Observed exit code: 23.
+Executable: C:\Program Files\Git\bin\bash.exe

@@ -1,0 +1,8 @@
+Phase 1 WP0 contract artifacts are structurally valid.
+Dependency graph: 45 task nodes; all edges are known, justified and acyclic.
+Phase 1 gate manifest: all mandatory commands and BDD scenario source IDs resolve.
+Runtime mode contract: 4 allowed profiles; every other pair is rejected.
+Tenant inventory: 54 baseline + 1 planned table(s) (55 migration tables); 3 baseline tables currently have ENABLE+FORCE RLS.
+WP0.13 is CLOSED (owner approval and candidate pass recorded).
+Project owner: signed; independent reviewer: identified; Phase 1 task authorization and sequencing are governed by the decision register and dependency graph.
+This validates the gate structure only; it does not claim WP0 acceptance or Phase 1 product behavior.

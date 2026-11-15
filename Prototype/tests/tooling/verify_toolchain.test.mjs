@@ -5,7 +5,7 @@ import { validateToolchain } from '../../tools/toolchain-contract.mjs';
 const expected = { node: '26.7.0', npm: '12.2.0', postgresqlVersion: '18.0', postgresqlPackageVersion: '18.0-2' };
 const packageJson = {
   packageManager: 'npm@12.2.0',
-  engines: { node: '>=26.7.0 <27', npm: '>=12.2.0 <13' },
+  engines: { node: '>=26.7.0 <27', npm: '12.2.0' },
 };
 const lockfile = { packages: { '': { engines: packageJson.engines } } };
 const validSources = {
@@ -37,6 +37,15 @@ test('reports mismatched declarations and actual runtime versions', () => {
     '.nvmrc', 'CI Node versions', 'CI npm version pin', 'CI PostgreSQL versions', 'Docker Compose PostgreSQL versions',
     'running Node (22.16.0)', 'running npm (10.9.2)',
   ]);
+});
+
+test('rejects an npm compatibility range instead of the exact installed version', () => {
+  const failures = validateToolchain({
+    ...validSources,
+    packageJson: { ...packageJson, engines: { ...packageJson.engines, npm: '>=12.2.0 <13' } },
+    lockfile: { packages: { '': { engines: { ...packageJson.engines, npm: '>=12.2.0 <13' } } } },
+  });
+  assert.ok(failures.includes('package.json npm engine'));
 });
 
 test('rejects floating major-only and mismatched minor PostgreSQL image tags', () => {

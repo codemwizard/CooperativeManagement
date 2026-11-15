@@ -1,0 +1,49 @@
+npm notice run @symphony/db@0.1.0 test:migrations
+npm notice run vitest run --reporter=verbose src/__tests__/migration-runner-config.test.ts src/__tests__/migration-executor.test.ts src/__tests__/migration-runner.integration.test.ts
+
+ RUN  v2.1.9 C:/Workspace/GitHub/Prototype/packages/db
+
+ ↓ src/__tests__/migration-runner.integration.test.ts > PostgreSQL migration runner integration > serializes concurrent clean installs and makes replay a no-op
+ ↓ src/__tests__/migration-runner.integration.test.ts > PostgreSQL migration runner integration > upgrades from migration 0012 and rolls every migration 0013 effect back before a successful retry
+ ↓ src/__tests__/migration-runner.integration.test.ts > PostgreSQL migration runner integration > rolls back a failed PostgreSQL migration without a ledger row and safely retries it
+ ↓ src/__tests__/migration-runner.integration.test.ts > PostgreSQL migration runner integration > retains required schema invariants and applies the Phase 0 global seeds
+ ↓ src/__tests__/migration-runner.integration.test.ts > PostgreSQL migration runner integration > installs the WP1.1 receipt schema constraints
+ ↓ src/__tests__/migration-runner.integration.test.ts > PostgreSQL migration runner integration > installs the minimized WP1.2 security-attempt table without business-command binding
+ ↓ src/__tests__/migration-runner.integration.test.ts > PostgreSQL migration runner integration > installs only encrypted reconciliation payload and forced tenant RLS
+ ↓ src/__tests__/migration-runner.integration.test.ts > PostgreSQL migration runner integration > aborts WP1.1 migration on a non-empty legacy receipt table without changing it
+ ✓ src/__tests__/migration-executor.test.ts > executeSqlMigration > commits the SQL and migration ledger row in one transaction
+ ✓ src/__tests__/migration-executor.test.ts > executeSqlMigration > rolls back a failed migration and never records it as applied
+ ✓ src/__tests__/migration-runner-config.test.ts > migration runner configuration safety > accepts and safely quotes only the canonical schema
+ ✓ src/__tests__/migration-runner-config.test.ts > migration runner configuration safety > rejects schema "public" before opening a database connection 508ms
+ ✓ src/__tests__/migration-runner-config.test.ts > migration runner configuration safety > rejects schema "symphony; DROP SCHEMA public CASCADE" before opening a database connection 319ms
+ ✓ src/__tests__/migration-runner-config.test.ts > migration runner configuration safety > rejects schema "\"symphony\"" before opening a database connection 319ms
+
+⎯⎯⎯⎯⎯⎯ Failed Suites 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/__tests__/migration-runner.integration.test.ts > PostgreSQL migration runner integration
+error: could not extend file "base/27568/1255": No space left on device
+ ❯ ../../node_modules/pg/lib/client.js:694:17
+ ❯ src/__tests__/migration-runner.integration.test.ts:100:9
+     98|         isolatedDatabaseName = `symphony_migration_${randomUUID().repl…
+     99|         const quotedDatabase = `"${isolatedDatabaseName.replaceAll('"'…
+    100|         await admin.query(`CREATE DATABASE ${quotedDatabase}`);
+       |         ^
+    101|         const isolatedUrl = new URL(adminDatabaseUrl);
+    102|         isolatedUrl.pathname = `/${isolatedDatabaseName}`;
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Serialized Error: { length: 137, severity: 'ERROR', code: '53100', detail: undefined, hint: 'Check free disk space.', position: undefined, internalPosition: undefined, internalQuery: undefined, where: undefined, schema: undefined, table: undefined, column: undefined, dataType: undefined, constraint: undefined, file: 'md.c', line: '519', routine: 'mdextend' }
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed | 2 passed (3)
+      Tests  6 passed | 8 skipped (14)
+   Start at  21:57:30
+   Duration  5.33s (transform 319ms, setup 0ms, collect 643ms, tests 1.88s, environment 2ms, prepare 889ms)
+
+npm error Lifecycle script `test:migrations` failed with error:
+npm error code 1
+npm error path C:\Workspace\GitHub\Prototype\packages\db
+npm error workspace @symphony/db@0.1.0
+npm error location C:\Workspace\GitHub\Prototype\packages\db
+npm error command failed
+npm error command C:\Windows\system32\cmd.exe /d /s /c vitest run --reporter=verbose src/__tests__/migration-runner-config.test.ts src/__tests__/migration-executor.test.ts src/__tests__/migration-runner.integration.test.ts

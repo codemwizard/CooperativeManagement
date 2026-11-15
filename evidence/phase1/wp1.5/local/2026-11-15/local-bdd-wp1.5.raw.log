@@ -1,0 +1,9 @@
+
+> symphony-prototype@1.0.0 test:bdd:wp1.5
+> cross-env NODE_OPTIONS=--import=tsx npx cucumber-js --config cucumber.cjs --profile default --tags "@BDD-AUD-005 and not @wip"
+
+.......
+
+1 scenario (1 passed)
+7 steps (7 passed)
+0m 0.273s (0m 0.242s executing your code)

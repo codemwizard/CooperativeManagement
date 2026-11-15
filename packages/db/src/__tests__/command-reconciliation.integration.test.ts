@@ -22,6 +22,9 @@ interface TestPayload { readonly aggregateId: string; readonly value: string }
 
 const adminDatabaseUrl = process.env['PHASE1_TEST_ADMIN_DATABASE_URL'];
 const appDatabaseUrl = process.env['PHASE1_TEST_APP_DATABASE_URL'];
+const expectedAppDatabase = appDatabaseUrl
+  ? decodeURIComponent(new URL(appDatabaseUrl).pathname.replace(/^\//, ''))
+  : '';
 
 class CommitAckDropProxy {
   private readonly server: Server;
@@ -112,7 +115,8 @@ describe.skipIf(!adminDatabaseUrl || !appDatabaseUrl)('WP1.4 terminal conflict r
     const appIdentity = await commandPool.query<{ database_name: string; database_role: string }>(
       'SELECT current_database() AS database_name, current_user AS database_role',
     );
-    expect(appIdentity.rows[0]).toEqual({ database_name: 'symphony_phase1_test', database_role: 'symphony_app' });
+    expect(appIdentity.rows[0]).toEqual({ database_name: expectedAppDatabase, database_role: 'symphony_app' });
+    expect(expectedAppDatabase.endsWith('_test')).toBe(true);
     console.info(`WP1.4 command target: ${appIdentity.rows[0]?.database_name}; database_role=${appIdentity.rows[0]?.database_role}; fixture_role=${identity.rows[0]?.database_role}; DATA_MODE=test`);
     await fixturePool.query('INSERT INTO symphony.tenants (id, name) VALUES ($1, $2)', [tenantId, 'wp1.4-synthetic-fixture']);
     await fixturePool.query(

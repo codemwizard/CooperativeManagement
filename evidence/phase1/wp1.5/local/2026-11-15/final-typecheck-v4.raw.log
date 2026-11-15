@@ -1,0 +1,7 @@
+Project-reference build:
+Typecheck packages/domain
+Typecheck packages/contracts
+Typecheck packages/db
+Typecheck packages/testkit
+Typecheck apps/api
+Typecheck apps/workspace

@@ -20,7 +20,7 @@ The central issue is evidence quality: a unit test or BDD scenario passing again
 
 The ZIP contains source, configuration, plan documents and a `.git` directory, but it does not contain Git object data. Consequently, the stated Phase 0 commit `218e22c` and the historical repository state at the Phase 0 checkpoint could not be independently reconstructed. The archive also does not contain a CI run record or a database execution transcript.
 
-The available runtime for this review is Node 22.16.0 / npm 10.9.2, while the root `package.json` declares Node `>=25 <27` and npm `>=11.6.2`. PostgreSQL tooling was not available for a fresh migration run. I therefore did not claim that the project’s Node, PostgreSQL, browser or CI suites passed during this review. Findings below are based on direct source/configuration inspection and cross-checking the implementation against the plans.
+The available runtime for this review was Node 22.16.0 / npm 10.9.2. At that time, the root package declared a broad Node/npm compatibility range; that declaration has since been superseded by the exact active project pins, Node 26.7.0 and npm 12.2.0. PostgreSQL tooling was not available for a fresh migration run. I therefore did not claim that the project’s Node, PostgreSQL, browser or CI suites passed during this review. Findings below are based on direct source/configuration inspection and cross-checking the implementation against the plans.
 
 Classification:
 - **Implemented and evidenced:** source and tests support the stated behaviour.
@@ -38,7 +38,7 @@ Classification:
 
 Evidence:
 - `.nvmrc` contains `22`.
-- Root `package.json` declares Node `>=25 <27` and npm `>=11.6.2`.
+- The review found the then-current package version range was broader than the installed runtime; the authoritative requirement is now Node `26.7.0` and npm `12.2.0` exactly.
 - `.github/workflows/ci.yml` configures Node `22` in its jobs.
 - `docker-compose.yml` uses `postgres:17-alpine`, while the Phase 0 record says PostgreSQL 18 and CI uses PostgreSQL 18.
 

@@ -22,11 +22,11 @@ describe('WP1.2-B security-attempt audit mode guard', () => {
   });
 });
 
-const databaseUrl = process.env['MIGRATION_TEST_DATABASE_URL'];
+const appDatabaseUrl = process.env['PHASE1_TEST_APP_DATABASE_URL'];
 const adminDatabaseUrl = process.env['PHASE1_TEST_ADMIN_DATABASE_URL'];
-describe.skipIf(!databaseUrl || !adminDatabaseUrl)('WP1.2-B PostgreSQL security-attempt persistence', () => {
+describe.skipIf(!appDatabaseUrl || !adminDatabaseUrl)('WP1.2-B PostgreSQL security-attempt persistence', () => {
   const pool = new pg.Pool({ connectionString: adminDatabaseUrl ?? '' });
-  const db = createDb(databaseUrl ?? '', { max: 1 });
+  const db = createDb(appDatabaseUrl ?? '', { max: 1 });
   afterAll(async () => { await Promise.all([pool.end(), db.destroy()]); });
 
   it('commits the minimized denial record in a separate transaction', async () => {
@@ -36,6 +36,20 @@ describe.skipIf(!databaseUrl || !adminDatabaseUrl)('WP1.2-B PostgreSQL security-
     expect(identity.rows[0]?.database_name.endsWith('_test')).toBe(true);
     expect(process.env['DATA_MODE']).toBe('test');
     expect(Number(identity.rows[0]?.server_version_num)).toBe(180000);
+    const appClient = new pg.Client({ connectionString: appDatabaseUrl ?? '' });
+    await appClient.connect();
+    try {
+      const appIdentity = await appClient.query<{ role: string; database_name: string; server_version_num: string }>(
+        "SELECT current_user AS role, current_database() AS database_name, current_setting('server_version_num') AS server_version_num",
+      );
+      expect(appIdentity.rows).toEqual([{
+        role: 'symphony_app',
+        database_name: identity.rows[0]?.database_name,
+        server_version_num: identity.rows[0]?.server_version_num,
+      }]);
+    } finally {
+      await appClient.end();
+    }
     const tenantId = randomUUID();
     const actorUserId = randomUUID();
     await pool.query('INSERT INTO symphony.tenants (id, name) VALUES ($1, $2)', [tenantId, 'synthetic-audit-test']);

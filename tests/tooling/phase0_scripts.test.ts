@@ -39,7 +39,7 @@ describe('Phase 0 script contracts', () => {
       ['db:migrate', 'packages/db/src/migrate.ts'],
       ['db:migrate:test', 'packages/db/src/migrate.ts'],
       ['test:unit', 'vitest run --reporter=verbose'],
-      ['test:bdd', 'cucumber-js --config cucumber.cjs'],
+      ['test:bdd:phase0', 'cucumber-js --config cucumber.cjs'],
       ['verify:trace', 'tools/verify-trace.ts'],
       ['verify:arch', '--config .dependency-cruiser.cjs'],
     ]);
@@ -48,7 +48,8 @@ describe('Phase 0 script contracts', () => {
       expect(scripts[name], `${name} must be defined`).toContain(target);
       if (target.endsWith('.ts')) expect(existsSync(path.join(root, target))).toBe(true);
     }
-    expect(scripts['test:db:migrations']).toContain('tools/require_migration_test_db.mjs');
+    expect(scripts['test:db:migrations']).toContain('tools/run_migration_test_gate.mjs');
+    expect(scripts['test:db:migrations']).toContain('--env-file-if-exists=.env.local');
     expect(scripts['verify:legacy-floor']).toContain('npm run test');
     expect(scripts['verify:all']).toContain('npm run test:e2e');
   });
@@ -57,6 +58,45 @@ describe('Phase 0 script contracts', () => {
     const gateStep = workflow.split(/\n\s*- name: Run the mandatory Phase 0 gate\n/)[1]?.split(/\n\s*- name:/, 1)[0] ?? '';
     expect(gateStep).toContain('shell: bash');
     expect(gateStep).toMatch(/run:\s*npm run verify:phase0\s+2>&1\s+\|\s+tee\s+/);
+  });
+
+  it('uses GitHub Bash pipefail defaults for every verification log pipeline', () => {
+    expect(workflow).toMatch(/^defaults:\s*\r?\n  run:\s*\r?\n    shell:\s*bash\s*$/m);
+    expect([...workflow.matchAll(/\|\s*tee\s+artifacts\//g)]).toHaveLength(7);
+  });
+
+  it.skipIf(process.platform === 'win32')('does not let tee mask a failing verification command', () => {
+    const directory = mkdtempSync(path.join(os.tmpdir(), 'phase0-pipefail-contract-'));
+    tempDirectories.push(directory);
+    const logPath = path.join(directory, 'captured.log');
+    const pipeline = `node -e "process.exit(23)" 2>&1 | tee "${logPath.replace(/\\/g, '/')}"`;
+    const result = spawnSync('bash', ['--noprofile', '--norc', '-e', '-o', 'pipefail', '-c', pipeline], {
+      cwd: root,
+      encoding: 'utf8',
+    });
+    expect(result.error).toBeUndefined();
+    expect(result.status).toBe(23);
+    expect(existsSync(logPath)).toBe(true);
+  });
+
+  it('uses the installed Node/npm toolchain and retains raw output for each CI gate', () => {
+    expect(workflow).toContain('node --version');
+    expect(workflow).toContain('npm --version');
+    expect(workflow).toContain('test "$(command -v npm)" = "$NPM_BIN"');
+    expect(workflow).not.toMatch(/npm\s+install\s+--global\s+npm@/i);
+    expect(workflow).toContain('bash tools/prepare_ci_npm.sh');
+    expect([...workflow.matchAll(/run: bash tools\/prepare_ci_npm\.sh/g)]).toHaveLength(3);
+    expect(workflow).toContain('tools/prepare_ci_npm.sh');
+    expect(workflow).toContain('artifacts/phase0-gate.raw.log');
+    expect(workflow).toContain('artifacts/role-bootstrap.raw.log');
+    expect(workflow).toContain('artifacts/db-migrate.raw.log');
+    expect(workflow).toContain('artifacts/db-integration.raw.log');
+    expect(workflow).toContain('artifacts/bdd-wp1.5.raw.log');
+    expect(workflow).toContain('artifacts/role-finalizer.raw.log');
+    expect(workflow).toContain('wp1.5-db-evidence-${{ github.sha }}');
+    expect(workflow).toContain('artifacts/verify-all.raw.log');
+    expect(workflow).toContain("SYNTHETIC_ONLY: 'true'");
+    expect(workflow).toContain('NODE_ENV: test');
   });
 
   it('leaves schema changes to the ordered migration runner, not PostgreSQL init hooks', () => {
@@ -84,7 +124,7 @@ describe('Phase 0 script contracts', () => {
     const aggregate = scripts['verify:phase0'];
     const required = [
       'test:toolchain', 'verify:toolchain', 'verify:archive-hygiene', 'typecheck:v4',
-      'verify:arch', 'test:unit', 'test:db:migrations', 'test:bdd', 'verify:trace',
+      'verify:arch', 'test:unit', 'test:db:migrations', 'test:bdd:phase0', 'verify:trace',
       'test:a11y', 'verify:legacy-floor',
     ];
     let previousIndex = -1;
@@ -96,6 +136,18 @@ describe('Phase 0 script contracts', () => {
     }
     expect(aggregate).toContain('&&');
     expect(aggregate).not.toMatch(/--if-present|test:e2e|test:api|purge:seed|test:command/);
+    expect(aggregate).not.toMatch(/npm run test:bdd(?=\s|$)/);
+    expect(scripts['test:bdd:phase0']).toContain('@phase0 and not @wip');
+  });
+
+  it('routes migration checks through the isolated least-privilege role bootstrap contract', () => {
+    const gate = readFileSync(path.join(root, 'tools/run_migration_test_gate.mjs'), 'utf8');
+    expect(gate).toContain("from './phase0-migration-role.mjs'");
+    expect(gate).toContain('MIGRATION_TEST_DATABASE_URL: migrationUrl');
+    expect(gate).toContain("'REVOKE symphony_outbox_writer FROM symphony_migrator'");
+    expect(gate).toContain('DROP ROLE IF EXISTS');
+    expect(gate).toContain("spawnSync(command, args");
+    expect(gate).not.toMatch(/console\.(log|error)\([^\n]*(adminUrl|migrationUrl|temporaryPassword)/);
   });
 
   it('proves failure in a mandatory command stops later commands', () => {

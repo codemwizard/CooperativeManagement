@@ -25,7 +25,7 @@
     { "id": "BDD-AUD-002", "feature": "features/09_commands_audit_and_integrity.feature", "proves": "Same logical command ID and payload replays the original result once." },
     { "id": "BDD-AUD-003", "feature": "features/09_commands_audit_and_integrity.feature", "proves": "Same command ID with changed semantic content is rejected." },
     { "id": "BDD-AUD-004", "feature": "features/09_commands_audit_and_integrity.feature", "proves": "Stale writes preserve both inputs in the reconciliation path." },
-    { "id": "BDD-AUD-005", "feature": "features/09_commands_audit_and_integrity.feature", "proves": "Cross-tenant command access is denied and audited without mutation." },
+    { "id": "BDD-AUD-005", "feature": "features/09_commands_audit_and_integrity.feature", "proves": "A foreign-tenant command receives non-disclosing UNAUTHORIZED; the restricted PostgreSQL app identity cannot read or mutate the target evidence, and TENANT_MISMATCH is persisted for the authenticated tenant." },
     { "id": "BDD-AUD-006", "feature": "features/09_commands_audit_and_integrity.feature", "proves": "Cross-tenant reads reveal no other organization's record." },
     { "id": "BDD-AUD-007", "feature": "features/09_commands_audit_and_integrity.feature", "proves": "UI telemetry is separate from the append-only business audit trail." },
     { "id": "BDD-AUD-008", "feature": "features/09_commands_audit_and_integrity.feature", "proves": "Institutional read-only roles cannot mutate cooperative source records." },

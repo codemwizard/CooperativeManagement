@@ -303,7 +303,7 @@ export function validateTenantPolicyManifest(manifest, matrix) {
     errors.push(`policy manifest must contain exactly ${required.length} tenant-scoped table entries`);
   }
   if (JSON.stringify(names) !== JSON.stringify(required)) errors.push('policy manifest table set differs from tenant-scoped matrix rows');
-  if (!['candidate_frozen_pending_restricted_role_integration_and_review', 'accepted'].includes(manifest?.status)) {
+  if (!['candidate_frozen_pending_restricted_role_integration_and_review', 'candidate_verified_pending_independent_review', 'accepted'].includes(manifest?.status)) {
     errors.push('policy manifest must declare candidate or accepted status');
   }
   for (const entry of entries) {
@@ -313,6 +313,29 @@ export function validateTenantPolicyManifest(manifest, matrix) {
     if (typeof entry.missing_parent_behavior !== 'string' || !entry.missing_parent_behavior.includes('false')) errors.push(`${entry.table} does not define fail-closed missing-parent behavior`);
     if (typeof entry.cross_tenant_parent_behavior !== 'string' || !entry.cross_tenant_parent_behavior.includes('false')) errors.push(`${entry.table} does not define fail-closed cross-tenant behavior`);
     if (typeof entry.mismatch_fixture !== 'string' || typeof entry.missing_parent_fixture !== 'string') errors.push(`${entry.table} lacks named mismatch fixtures`);
+  }
+  const outbox = manifest?.outbox_policy;
+  if (!outbox || outbox.table !== 'event_outbox') errors.push('outbox policy specification must cover event_outbox');
+  if (outbox?.rls_enabled !== true || outbox?.rls_forced !== true) errors.push('outbox policy must require ENABLE and FORCE RLS');
+  if (outbox?.name !== 'event_outbox_pending_writer_insert' || outbox?.permissive !== true || outbox?.command !== 'INSERT') {
+    errors.push('outbox policy must be the named pending-writer INSERT policy');
+  }
+  if (JSON.stringify(outbox?.roles) !== '["symphony_outbox_writer"]' || outbox?.using !== null) {
+    errors.push('outbox policy must grant only the writer role and have no USING predicate');
+  }
+  if (outbox?.with_check !== "status = 'pending' AND EXISTS (SELECT 1 FROM symphony.domain_events e WHERE e.id = event_id AND e.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), ''))") {
+    errors.push('outbox policy must enforce pending status and active-tenant event membership');
+  }
+  const outboxFunction = outbox?.function;
+  if (
+    outboxFunction?.signature !== 'symphony.enqueue_command_outbox_message(uuid, uuid)'
+    || outboxFunction?.owner !== 'symphony_outbox_writer'
+    || outboxFunction?.security_definer !== true
+    || outboxFunction?.search_path !== 'pg_catalog, symphony'
+    || outboxFunction?.public_execute !== false
+    || outboxFunction?.app_execute !== true
+  ) {
+    errors.push('outbox function must retain its restricted owner, fixed search_path, and exact EXECUTE boundary');
   }
   return [...new Set(errors)];
 }
@@ -403,6 +426,7 @@ export function validatePhase1Gate(packageJson, repoRoot = ROOT) {
   for (const name of mustHaveScripts) if (!scripts[name]) errors.push(`mandatory npm script ${name} is missing`);
   const targetFiles = [
     'tools/phase1-contracts.js', 'tools/run_phase1_bdd.mjs', 'tools/phase1-command-contract-oracle.js',
+    'tools/run_migration_test_gate.mjs',
     'tests/tooling/phase1_contracts.test.ts', 'evidence/phase1/command-contract-vectors.json',
     'tests/workspace/login.spec.ts', 'tests/workspace/login-api.spec.ts', 'playwright.phase1.config.ts',
     'tests/workspace/a11y.spec.ts', 'features/09_commands_audit_and_integrity.feature',
@@ -428,7 +452,7 @@ export function validatePhase1Gate(packageJson, repoRoot = ROOT) {
     [scripts['typecheck:v4'], 'tsc --build --force'],
     [scripts['verify:arch'], 'depcruise'],
     [scripts['test:unit'], 'vitest run'],
-    [scripts['test:db:migrations'], 'tools/require_migration_test_db.mjs'],
+    [scripts['test:db:migrations'], 'tools/run_migration_test_gate.mjs'],
     [scripts['test:db'], 'vitest run'],
     [scripts['test:api'], '@symphony/api'],
     [workspaceApiScripts['test:api'], 'vitest run'],

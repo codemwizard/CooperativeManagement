@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "status": "candidate_frozen_pending_restricted_role_integration_and_review",
+  "status": "candidate_verified_pending_independent_review",
   "source": "migrations/0013_tenant_rls_app_role.sql, root migrations 0001-0012, and live PostgreSQL 18.0 catalog for symphony_phase1_test",
   "table_count": 37,
   "required_tenant_scoped_count": 37,
@@ -546,5 +546,24 @@
       "mismatch_fixture": "wp15-security_attempts-cross-tenant-parent",
       "missing_parent_fixture": "wp15-security_attempts-missing-parent"
     }
-  ]
+  ],
+  "outbox_policy": {
+    "table": "event_outbox",
+    "rls_enabled": true,
+    "rls_forced": true,
+    "name": "event_outbox_pending_writer_insert",
+    "permissive": true,
+    "command": "INSERT",
+    "roles": ["symphony_outbox_writer"],
+    "using": null,
+    "with_check": "status = 'pending' AND EXISTS (SELECT 1 FROM symphony.domain_events e WHERE e.id = event_id AND e.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), ''))",
+    "function": {
+      "signature": "symphony.enqueue_command_outbox_message(uuid, uuid)",
+      "owner": "symphony_outbox_writer",
+      "security_definer": true,
+      "search_path": "pg_catalog, symphony",
+      "public_execute": false,
+      "app_execute": true
+    }
+  }
 }

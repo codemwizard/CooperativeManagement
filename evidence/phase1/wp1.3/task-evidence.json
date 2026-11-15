@@ -8,7 +8,7 @@
     "bdd_ui_test": "not_applicable",
     "gate_verified": "passed"
   },
-  "commit": "working-tree",
+  "commit": "fb3d4f2cf6b1023cca5e90f2768783c892c96d13",
   "environment": {
     "node": "v26.7.0",
     "npm": "12.2.0",
@@ -24,49 +24,49 @@
       "artifact": "evidence/phase1/wp1.3/red-concurrency-tests.log"
     },
     {
-      "command": "npm run test:db --workspace @symphony/db -- src/__tests__/command-bus-concurrency.integration.test.ts",
+      "command": "node ../../node_modules/vitest/vitest.mjs run --reporter=verbose (packages/db; full 12-file regression suite includes WP1.3 concurrency)",
       "result": "passed",
-      "artifact": "evidence/phase1/wp1.3/concurrency-tests.log"
+      "artifact": "evidence/phase1/wp1.5/local/2026-11-15/final-db-suite-bootstrapped.raw.log"
     },
     {
-      "command": "npm run test:db --workspace @symphony/db -- src/__tests__/command-transaction.integration.test.ts src/__tests__/security-attempt-audit.integration.test.ts",
+      "command": "node ../../node_modules/vitest/vitest.mjs run --reporter=verbose (packages/domain)",
       "result": "passed",
-      "artifact": "evidence/phase1/wp1.3/predecessor-regression-tests.log"
+      "artifact": "evidence/phase1/wp1.5/local/2026-11-15/final-domain-unit.raw.log"
     },
     {
-      "command": "npm run test:unit --workspace @symphony/domain",
+      "command": "node node_modules/typescript/bin/tsc --build --force and six workspace typechecks",
       "result": "passed",
-      "artifact": "evidence/phase1/wp1.3/domain-tests.log"
+      "artifact": "evidence/phase1/wp1.5/local/2026-11-15/final-typecheck-v4.raw.log"
     },
     {
-      "command": "npm run typecheck:v4",
+      "command": "node node_modules/dependency-cruiser/bin/dependency-cruiser.mjs (all six workspaces)",
       "result": "passed",
-      "artifact": "evidence/phase1/wp1.3/typecheck-v4.log"
+      "artifact": "evidence/phase1/wp1.5/local/2026-11-15/final-verify-arch.raw.log"
     },
     {
-      "command": "npm run verify:arch",
+      "command": "node node_modules/vitest/vitest.mjs run tests/tooling/phase1_contracts.test.ts",
       "result": "passed",
-      "artifact": "evidence/phase1/wp1.3/verify-arch.log"
+      "artifact": "evidence/phase1/wp1.5/local/2026-11-15/final-phase1-contract-tests.raw.log"
     },
     {
-      "command": "npm run verify:phase1:contracts",
+      "command": "node tools/phase1-contracts.js",
       "result": "passed",
-      "artifact": "evidence/phase1/wp1.3/phase1-contracts.log"
+      "artifact": "evidence/phase1/wp1.5/local/2026-11-15/final-phase1-structural-validator.raw.log"
     }
   ],
   "claims": {
     "behavior_proved": "PostgreSQL tests prove identical concurrent command replay has one committed effect; a rolled-back owner permits one contender; concurrent reuse of a receipt key with changed actor, command type, or semantic envelope is denied without disclosing the stored result or committing losing aggregate effects; competing expected-version writes do not overwrite newer state; retries apply only to SQLSTATE 40001 and 40P01 for at most three total transaction attempts, including an uncertain-commit re-entry, with the same command identity; commit-boundary uncertainty resolves from a separately pooled fresh connection, re-enters only after a healthy lookup confirms no receipt, and returns an outcome-neutral retryable result when lookup fails.",
-    "path_proved": "The PostgreSQL command bus, receipt store, aggregate repository, events and outbox were exercised against isolated symphony_phase1_test. WP1.3 concurrency integration passed 12 tests; WP1.2 command/audit regression passed 9 tests; domain unit tests passed 87 tests; workspace typecheck, architecture verification, and the Phase 1 contract gate passed. All green gates ran with Node 26.7.0/npm 12.2.0 and PostgreSQL 18.0 (package build 18.0-2).",
-    "configuration_proved": "Node v26.7.0, npm 12.2.0 for all green gates, PostgreSQL server_version_num=180000, database symphony_phase1_test, role symphony, DATA_MODE=test, deterministic local HMAC test keys, and a separately pooled Kysely recovery client were used. MIGRATION_TEST_DATABASE_URL was derived in-process from the existing local DATABASE_URL credentials by changing only the database path; no credential or connection string was logged or persisted. The retained pre-implementation red run used the npm.cmd 11.19.0 fallback after the sandbox denied the user-scoped npm launcher; it is chronology evidence, not a green gate.",
+    "path_proved": "The tested source is pinned to commit fb3d4f2cf6b1023cca5e90f2768783c892c96d13. The retained full PostgreSQL suite passed all 62 tests across 12 files, including WP1.3 concurrency and WP1.2 transaction/audit regressions; WP1.3 domain unit tests passed all 92 tests across 13 files. Workspace typecheck, architecture, Phase 1 contract tests (110), and the structural task/dependency validator passed. Raw outputs are linked in the command list.",
+    "configuration_proved": "Node v26.7.0 and PostgreSQL server_version_num=180000 were used. The full DB suite used the isolated symphony_phase1_test database with separate postgres test administrator, symphony_migrator and symphony_app identities. The app identity assertions remained restricted; temporary migrator membership and password changes were restored. Current npm 12.2.0 is the installed project toolchain, but the final DB/domain reruns invoked Vitest directly through Node; no npm-driven full gate or hosted CI pass is claimed here. No credential or connection string is retained.",
     "coverage_limitations": [
-      "Commit loss is exercised with narrow pre-commit and post-commit fault hooks at the transaction boundary; the test does not sever a live network socket during PostgreSQL's COMMIT exchange.",
-      "The current test database still uses its legacy session app.current_tenant_id RLS policy. The isolated fixture initializes that legacy setting on test connections while the command runner sets app.tenant_id transaction-locally. No least-privilege app-role or WP1.5 RLS claim is made.",
+      "Commit loss is exercised with narrow pre-commit and post-commit fault hooks at the transaction boundary; the test does not sever a live network socket during PostgreSQL COMMIT exchange.",
+      "The WP1.3 tests use the isolated owner/migrator context required by their database fixtures. No WP1.5 tenant-RLS claim is derived from WP1.3 tests; that claim is covered by the separate WP1.5 actual-app-role integration suite.",
       "BDD-AUD-002/003 HTTP composition and public response assertions belong to WP1.6. Terminal VERSION_CONFLICT receipt/inbox atomicity belongs to WP1.4; tenant RLS belongs to WP1.5; mutable-authority revocation races belong to WP2.4.",
       "The tests-first log records the intended pre-implementation retry and uncertain-commit failures; that initial run also exposed a test-fixture double-close cleanup issue, corrected before the passing run."
     ]
   },
   "limitations": [
-    "This task evidence describes an uncommitted working tree based on HEAD ab0b4bd7e13d912ad56f0fbc8147848d730de743. Pre-existing unrelated working-tree changes were preserved; no commit was created.",
+    "This WP1.3 evidence is pinned to tested source commit fb3d4f2cf6b1023cca5e90f2768783c892c96d13. The post-test evidence/documentation commit does not change the tested WP1.3 implementation. No hosted CI result is claimed for the WP1.5 final-closeout candidate.",
     "No independent review is claimed."
   ],
   "unresolved_decisions": [],

@@ -1,0 +1,9 @@
+npm notice run symphony-prototype@1.0.0 test:bdd:phase0
+npm notice run cross-env NODE_OPTIONS=--import=tsx npx cucumber-js --config cucumber.cjs --profile default --tags "@phase0 and not @wip"
+npm notice run symphony-prototype@1.0.0 npx
+npm notice run cucumber-js --config cucumber.cjs --profile default --tags @phase0 and not @wip
+
+
+0 scenarios
+0 steps
+0m 0.000s (0m 0.000s executing your code)

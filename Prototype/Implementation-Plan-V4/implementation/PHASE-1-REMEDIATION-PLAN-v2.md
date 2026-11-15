@@ -650,7 +650,7 @@ WP6.1 and WP6.3 contract tests can start in WP0. WP6.3 uses its own deterministi
 
 ### WP7 — Complete toolchain/typecheck/CI command and failure-propagation gate
 
-**Finding:** P1-09, supporting P1-01–08/10/11. **Authority:** Node 26.7.0 and npm 12.2.0 are the active owner-directed toolchain pins; historical Phase 0 artifacts record npm 11.19.0. PostgreSQL server 18.0 (installed package build 18.0-2) is the active target; the earlier CI 18.6 run remains historical evidence.
+**Finding:** P1-09, supporting P1-01–08/10/11. **Authority:** Node 26.7.0 and npm 12.2.0 are the active exact owner-directed toolchain pins. Historical Phase 0 artifacts retain their actual run environments. PostgreSQL server 18.0 (installed package build 18.0-2) is the active target; the earlier CI 18.6 run remains historical evidence.
 **Likely paths:** root `package.json`, workspace scripts/manifests, solution TS configs, `.github/workflows/ci.yml`, Playwright/Cucumber config, migration/seed tools, CI evidence collector.
 
 #### Atomic task breakdown
@@ -662,7 +662,7 @@ WP6.1 and WP6.3 contract tests can start in WP0. WP6.3 uses its own deterministi
 
 WP7 begins in WP0 and is expanded at each integration boundary; it is not deferred until product work is complete.
 
-1. Keep exact runtime pins consistent with `.nvmrc`, package engines, npm lockfile/packageManager, Docker Compose, CI matrix, and docs. Active pins are Node 26.7.0/npm 12.2.0; historical Phase 0 reports record npm 11.19.0 and remain unchanged. The owner directed the new active npm pin on 2026-11-07; the Phase 0 gate was rerun under the active pins on the clean WP0 closure candidate recorded in `docs/phase1/PHASE1_CONTRACT_BASELINE.md` and `evidence/phase1/phase0-candidate-verification.md`.
+1. Keep exact runtime pins consistent with `.nvmrc`, package engines, npm lockfile/packageManager, Docker Compose, CI matrix, and docs. Active pins are Node 26.7.0/npm 12.2.0. Preserve historical Phase 0 reports as factual records of their runs. The owner directed the exact active npm pin on 2026-11-07; the Phase 0 gate was rerun under the active pins on the clean WP0 closure candidate recorded in `docs/phase1/PHASE1_CONTRACT_BASELINE.md` and `evidence/phase1/phase0-candidate-verification.md`.
 2. Add a TypeScript solution config referencing every new workspace (`packages/domain`, contracts, DB, testkit, API, workspace) and keep legacy TypeScript project separately explicit. Use project references/build order; no `skipLibCheck`/exclude workaround to hide errors unless the existing architectural standard explicitly permits it and the reason is documented.
 3. Add explicit scripts for API tests, workspace build/typecheck, command tests, full DB integration, BDD, UI/Playwright, a11y, trace, architecture, privacy/purge nonfunctional tests, and legacy floor. Reconcile `test:ui` with existing legacy runner: use a distinct `test:workspace` or similarly unambiguous name; do not silently replace legacy E2E coverage.
 4. Create root `verify:phase1` with a fixed, documented order. It must include `verify:phase0` or the equivalent Phase 0 floor, plus all Phase 1 suites, migrations on clean PostgreSQL 18, API/auth, workspace build/typecheck, BDD/trace, a11y and no-mock login browser tests. It must never include Phase 2 feature claims.

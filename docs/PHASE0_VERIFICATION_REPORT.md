@@ -1,6 +1,6 @@
 # Phase 0 Remediation Verification Report
 
-> **Historical version note (2026-11-10):** This report preserves the versions actually used in the 2026-11-06 Phase 0 runs, including the PostgreSQL 18.6 CI image. The active project target was later aligned to the installed PostgreSQL server 18.0 / package build 18.0-2; see `toolchain.json`. Historical run claims below are not current toolchain requirements.
+> **Historical version note (2026-11-10):** This report preserves the versions actually used in the 2026-11-06 Phase 0 runs, including the npm CLI and PostgreSQL 18.6 CI image. The current exact project requirement is Node 26.7.0 / npm 12.2.0 and PostgreSQL server 18.0 / package build 18.0-2; see `toolchain.json`. Historical run claims below are not current toolchain requirements.
 
 **Status:** Phase 0 remediation complete; Phase 1 login E2E failures carried forward
 **Date:** 6 November 2026 (Africa/Johannesburg)  
@@ -22,7 +22,7 @@ This report records local verification of the remediation and CI follow-up fixes
 | PostgreSQL | 18.0 (local disposable cluster); Compose and CI use PostgreSQL 18 |
 | CI runner | `ubuntu-latest`; latest Phase 0 gate run [42201289720](https://github.com/codemwizard/CooperativeManagement/actions/runs/42201289720) |
 
-Node/npm choices follow the user-selected installed runtime and the package compatibility range. PostgreSQL 18 follows ADR-005 and the architecture decision. Raw `pg` SQL migration execution under a session advisory lock is recorded in ADR-022; Kysely remains the repository/query adapter. The migration integration environment is a disposable local PostgreSQL 18 cluster; CI uses the isolated PostgreSQL 18 Compose service.
+The Node/npm values in this section record the runtime used for this historical report, not the current requirement. The project now requires exactly Node 26.7.0 and npm 12.2.0, enforced through `toolchain.json`, package metadata, the lockfile and CI. PostgreSQL 18 follows ADR-005 and the architecture decision. Raw `pg` SQL migration execution under a session advisory lock is recorded in ADR-022; Kysely remains the repository/query adapter. The migration integration environment is a disposable local PostgreSQL 18 cluster; CI uses the isolated PostgreSQL 18 Compose service.
 
 ## Current local results
 

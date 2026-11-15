@@ -9,6 +9,7 @@ import { createDb } from '../db/client.js';
 import { PostgresCommandTransactionRunner } from '../repositories/postgres-command-transaction.js';
 import { PostgresRepository } from '../repositories/postgres-repository.js';
 import type { SymphonyDatabase } from '../types/database.js';
+import { canonicalPostgresPolicyExpression, tenantPolicyTableSetErrors } from '../testing/tenant-policy-manifest.js';
 
 type TablePolicy = {
   table: string;
@@ -18,7 +19,32 @@ type TablePolicy = {
 };
 type Matrix = { tables: TablePolicy[]; planned_phase1_tables: TablePolicy[] };
 type Inventory = { tables: { table: string }[]; planned_phase1_tables: { table: string }[] };
+type TenantPolicyEntry = {
+  table: string;
+  parent_tables: string[];
+  tenant_resolution_sql: string;
+  insert_with_check: string;
+  update_using: string;
+  update_with_check: string;
+};
+type PolicyManifest = {
+  table_count: number;
+  required_tenant_scoped_count: number;
+  policy_entries: TenantPolicyEntry[];
+  outbox_policy: {
+    table: string; rls_enabled: boolean; rls_forced: boolean; name: string;
+    permissive: boolean; command: string; roles: string[]; using: string | null; with_check: string;
+    function: {
+      signature: string; owner: string; security_definer: boolean; search_path: string;
+      public_execute: boolean; app_execute: boolean;
+    };
+  };
+};
 type TestAggregate = AggregateRoot & { readonly label: string };
+
+function quoteIdentifier(identifier: string): string {
+  return `"${identifier.replaceAll('"', '""')}"`;
+}
 
 const adminUrl = process.env.PHASE1_TEST_ADMIN_DATABASE_URL;
 const migrationUrl = process.env.MIGRATION_TEST_DATABASE_URL;
@@ -45,9 +71,10 @@ describe('WP1.5 actual restricted-role tenant isolation', () => {
   const runner = new PostgresCommandTransactionRunner(db, { recoveryDb });
   const repository = new PostgresRepository<TestAggregate>(db, 'Wp15TenantIsolationFixture');
   const appliedIds: { aggregateId: string; eventId: string; outboxId: string }[] = [];
+  let adminOutboxInspectionPolicyInstalled = false;
   let matrix: Matrix;
   let inventory: Inventory;
-  let manifest: { table_count: number; policy_entries: { table: string; tenant_resolution_sql: string }[] };
+  let manifest: PolicyManifest;
 
   beforeAll(async () => {
     if (!adminUrl || !migrationUrl || !appUrl) {
@@ -70,6 +97,21 @@ describe('WP1.5 actual restricted-role tenant isolation', () => {
       "SELECT current_user, current_database(), current_setting('server_version_num') AS server_version_num",
     );
     expect(appIdentity.rows[0]).toMatchObject({ current_user: 'symphony_app', current_database: databaseName, server_version_num: '180000' });
+
+    // FORCE RLS intentionally gives the application no outbox read path. Add a
+    // test-database-only inspection policy for the fixture administrator so
+    // assertions can distinguish an inserted row from an RLS-hidden row.
+    // The application role is not a member of this policy's target role.
+    await admin.query('DROP POLICY IF EXISTS wp1_5_test_admin_outbox_inspection ON symphony.event_outbox');
+    await admin.query(`DO $policy$
+      BEGIN
+        EXECUTE format(
+          'CREATE POLICY wp1_5_test_admin_outbox_inspection ON symphony.event_outbox FOR ALL TO %I USING (true) WITH CHECK (true)',
+          current_user
+        );
+      END
+      $policy$`);
+    adminOutboxInspectionPolicyInstalled = true;
 
     await admin.query('INSERT INTO symphony.tenants (id, name) VALUES ($1, $2), ($3, $4)', [tenantA, 'wp1.5-a', tenantB, 'wp1.5-b']);
     await admin.query("SELECT set_config('app.tenant_id', $1, false)", [tenantA]);
@@ -107,14 +149,18 @@ describe('WP1.5 actual restricted-role tenant isolation', () => {
       await admin.query('DELETE FROM symphony.users WHERE id = $1', [userB]).catch(() => undefined);
       await admin.query('DELETE FROM symphony.organizations WHERE id = $1', [organizationB]).catch(() => undefined);
       await admin.query('DELETE FROM symphony.tenants WHERE id = ANY($1::uuid[])', [[tenantA, tenantB]]).catch(() => undefined);
+      if (adminOutboxInspectionPolicyInstalled) {
+        await admin.query('DROP POLICY wp1_5_test_admin_outbox_inspection ON symphony.event_outbox').catch(() => undefined);
+      }
     }
     await Promise.all([db.destroy(), recoveryDb.destroy(), app.end(), admin.end()]);
   }, 30_000);
 
-  it('matches the 55-table migration catalog, frozen policy manifest, and effective application grants', async () => {
+  it('matches all 55 tables, all 37 PostgreSQL policy expressions, the frozen manifest, and effective grants', async () => {
     const expectedTables = [...inventory.tables, ...inventory.planned_phase1_tables].map((row) => row.table).sort();
-    const actual = await admin.query<{ table_name: string; relrowsecurity: boolean; relforcerowsecurity: boolean }>(
-      `SELECT c.relname AS table_name, c.relrowsecurity, c.relforcerowsecurity
+    const actual = await admin.query<{ table_name: string; table_owner: string; relrowsecurity: boolean; relforcerowsecurity: boolean }>(
+      `SELECT c.relname AS table_name, pg_get_userbyid(c.relowner) AS table_owner,
+              c.relrowsecurity, c.relforcerowsecurity
        FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace
        WHERE n.nspname='symphony' AND c.relkind IN ('r','p') AND c.relname <> 'schema_migrations'
        ORDER BY c.relname`,
@@ -126,10 +172,137 @@ describe('WP1.5 actual restricted-role tenant isolation', () => {
     const tenantRows = [...policies.values()].filter((row) => row.classification === 'tenant_scoped');
     expect(tenantRows).toHaveLength(37);
     expect(manifest.table_count).toBe(tenantRows.length);
+    expect(manifest.required_tenant_scoped_count).toBe(tenantRows.length);
+    expect(tenantPolicyTableSetErrors(
+      tenantRows.map((row) => row.table),
+      manifest.policy_entries.map((entry) => entry.table),
+    )).toEqual([]);
     const catalog = new Map(actual.rows.map((row) => [row.table_name, row]));
     for (const row of tenantRows) {
       expect(catalog.get(row.table)?.relrowsecurity, `${row.table} ENABLE RLS`).toBe(true);
       expect(catalog.get(row.table)?.relforcerowsecurity, `${row.table} FORCE RLS`).toBe(true);
+    }
+
+    const policyCatalog = await admin.query<{
+      schemaname: string; tablename: string; policyname: string; permissive: string;
+      roles: string[]; cmd: string; qual: string | null; with_check: string | null;
+    }>(
+      `SELECT n.nspname AS schemaname, c.relname AS tablename, p.polname AS policyname,
+              CASE WHEN p.polpermissive THEN 'PERMISSIVE' ELSE 'RESTRICTIVE' END AS permissive,
+              to_json(ARRAY(SELECT CASE WHEN role_oid=0 THEN 'public' ELSE pg_get_userbyid(role_oid) END
+                    FROM unnest(p.polroles) AS role_oid ORDER BY 1)) AS roles,
+              CASE p.polcmd WHEN '*' THEN 'ALL' WHEN 'r' THEN 'SELECT' WHEN 'a' THEN 'INSERT'
+                    WHEN 'w' THEN 'UPDATE' WHEN 'd' THEN 'DELETE' END AS cmd,
+              pg_get_expr(p.polqual, p.polrelid) AS qual,
+              pg_get_expr(p.polwithcheck, p.polrelid) AS with_check
+       FROM pg_policy p JOIN pg_class c ON c.oid=p.polrelid
+       JOIN pg_namespace n ON n.oid=c.relnamespace
+       WHERE n.nspname='symphony' ORDER BY c.relname, p.polname`,
+    );
+    const actualTenantPolicies = policyCatalog.rows.filter((row) => policies.get(row.tablename)?.classification === 'tenant_scoped');
+    expect(actualTenantPolicies).toHaveLength(tenantRows.length * 2);
+
+    // PostgreSQL parses each frozen manifest expression on a transaction-only
+    // structural clone, then deparses both expected and installed policies.
+    // This avoids substring/regex acceptance and leaves no schema behind.
+    const oracleSchema = `wp15_policy_oracle_${randomUUID().replaceAll('-', '')}`;
+    const oracleClient = await admin.connect();
+    try {
+      await oracleClient.query('BEGIN');
+      await oracleClient.query(`CREATE SCHEMA ${quoteIdentifier(oracleSchema)}`);
+      for (const entry of manifest.policy_entries) {
+        const expectedPolicyName = `${entry.table}_tenant_scope`;
+        const actualTablePolicies = actualTenantPolicies.filter((row) => row.tablename === entry.table);
+        expect(actualTablePolicies.map((row) => row.policyname).sort(), `${entry.table} has only the admission and scope policies`)
+          .toEqual([`${entry.table}_tenant_admission`, expectedPolicyName].sort());
+        const actualScope = actualTablePolicies.find((row) => row.policyname === expectedPolicyName);
+        const actualAdmission = actualTablePolicies.find((row) => row.policyname === `${entry.table}_tenant_admission`);
+        expect(actualScope, `${entry.table} restrictive scope policy exists`).toMatchObject({
+          permissive: 'RESTRICTIVE', roles: ['public'], cmd: 'ALL',
+        });
+        expect(actualAdmission, `${entry.table} expected admission policy exists`).toMatchObject({
+          permissive: 'PERMISSIVE',
+          cmd: entry.table === 'security_attempts' ? 'INSERT' : 'ALL',
+        });
+        const expectedAdmissionRoles = ['symphony_app', catalog.get(entry.table)!.table_owner];
+        if (entry.table === 'domain_events') expectedAdmissionRoles.push('symphony_outbox_writer');
+        expect(actualAdmission?.roles.sort(), `${entry.table} admission roles are exactly the app, owner, and approved writer identities`)
+          .toEqual(expectedAdmissionRoles.sort());
+        expect(entry.insert_with_check, `${entry.table} INSERT check matches the frozen tenant expression`).toBe(entry.tenant_resolution_sql);
+        expect(entry.update_using, `${entry.table} UPDATE USING matches the frozen tenant expression`).toBe(entry.tenant_resolution_sql);
+        expect(entry.update_with_check, `${entry.table} UPDATE check matches the frozen tenant expression`).toBe(entry.tenant_resolution_sql);
+
+        const oracleTable = `${quoteIdentifier(oracleSchema)}.${quoteIdentifier(entry.table)}`;
+        await oracleClient.query(`CREATE TABLE ${oracleTable} (LIKE symphony.${quoteIdentifier(entry.table)})`);
+        await oracleClient.query(
+          `CREATE POLICY ${quoteIdentifier(expectedPolicyName)} ON ${oracleTable}
+           AS RESTRICTIVE FOR ALL TO PUBLIC USING (${entry.update_using}) WITH CHECK (${entry.update_with_check})`,
+        );
+        const oracle = await oracleClient.query<{ qual: string | null; with_check: string | null }>(
+          'SELECT qual, with_check FROM pg_policies WHERE schemaname=$1 AND tablename=$2 AND policyname=$3',
+          [oracleSchema, entry.table, expectedPolicyName],
+        );
+        expect(oracle.rowCount, `${entry.table} manifest expression parses as one policy`).toBe(1);
+        expect(actualScope?.qual, `${entry.table} has a USING predicate`).not.toBeNull();
+        expect(actualScope?.with_check, `${entry.table} has a WITH CHECK predicate`).not.toBeNull();
+        expect(
+          canonicalPostgresPolicyExpression(actualScope!.qual!, 'symphony', entry.table),
+          `${entry.table} actual USING equals the parsed manifest expression`,
+        ).toBe(canonicalPostgresPolicyExpression(oracle.rows[0]!.qual!, oracleSchema, entry.table));
+        expect(
+          canonicalPostgresPolicyExpression(actualScope!.with_check!, 'symphony', entry.table),
+          `${entry.table} actual WITH CHECK equals the parsed manifest expression`,
+        ).toBe(canonicalPostgresPolicyExpression(oracle.rows[0]!.with_check!, oracleSchema, entry.table));
+      }
+    } finally {
+      await oracleClient.query('ROLLBACK').catch(() => undefined);
+      oracleClient.release();
+    }
+    expect(actualTenantPolicies.map((row) => row.tablename).sort()).toEqual(
+      manifest.policy_entries.map((entry) => entry.table).flatMap((table) => [table, table]).sort(),
+    );
+
+    const outboxSpec = manifest.outbox_policy;
+    const outboxRelation = await admin.query<{ relrowsecurity: boolean; relforcerowsecurity: boolean }>(
+      `SELECT c.relrowsecurity, c.relforcerowsecurity FROM pg_class c
+       JOIN pg_namespace n ON n.oid=c.relnamespace WHERE n.nspname='symphony' AND c.relname=$1`,
+      [outboxSpec.table],
+    );
+    expect(outboxRelation.rows[0], 'event_outbox itself must enable and force RLS').toEqual({ relrowsecurity: true, relforcerowsecurity: true });
+    const outboxPolicies = policyCatalog.rows.filter((row) => row.tablename === outboxSpec.table);
+    expect(outboxPolicies.map((row) => row.policyname).sort()).toEqual([
+      outboxSpec.name, 'wp1_5_test_admin_outbox_inspection',
+    ].sort());
+    const writerPolicy = outboxPolicies.find((row) => row.policyname === outboxSpec.name);
+    expect(writerPolicy, 'the approved writer policy must be installed').toMatchObject({
+      permissive: outboxSpec.permissive ? 'PERMISSIVE' : 'RESTRICTIVE',
+      roles: outboxSpec.roles,
+      cmd: outboxSpec.command,
+      qual: outboxSpec.using,
+    });
+    expect(writerPolicy?.with_check).not.toBeNull();
+
+    const outboxOracleSchema = `wp15_outbox_oracle_${randomUUID().replaceAll('-', '')}`;
+    const outboxOracleClient = await admin.connect();
+    try {
+      await outboxOracleClient.query('BEGIN');
+      await outboxOracleClient.query(`CREATE SCHEMA ${quoteIdentifier(outboxOracleSchema)}`);
+      const oracleOutboxTable = `${quoteIdentifier(outboxOracleSchema)}.${quoteIdentifier(outboxSpec.table)}`;
+      await outboxOracleClient.query(`CREATE TABLE ${oracleOutboxTable} (LIKE symphony.${quoteIdentifier(outboxSpec.table)})`);
+      await outboxOracleClient.query(
+        `CREATE POLICY ${quoteIdentifier(outboxSpec.name)} ON ${oracleOutboxTable}
+         FOR INSERT TO symphony_outbox_writer WITH CHECK (${outboxSpec.with_check})`,
+      );
+      const oracleOutbox = await outboxOracleClient.query<{ with_check: string | null }>(
+        'SELECT with_check FROM pg_policies WHERE schemaname=$1 AND tablename=$2 AND policyname=$3',
+        [outboxOracleSchema, outboxSpec.table, outboxSpec.name],
+      );
+      expect(oracleOutbox.rowCount).toBe(1);
+      expect(canonicalPostgresPolicyExpression(writerPolicy!.with_check!, 'symphony', outboxSpec.table))
+        .toBe(canonicalPostgresPolicyExpression(oracleOutbox.rows[0]!.with_check!, outboxOracleSchema, outboxSpec.table));
+    } finally {
+      await outboxOracleClient.query('ROLLBACK').catch(() => undefined);
+      outboxOracleClient.release();
     }
 
     const permissions = ['SELECT', 'INSERT', 'UPDATE', 'DELETE', 'TRUNCATE', 'REFERENCES', 'TRIGGER'] as const;
@@ -174,17 +347,31 @@ describe('WP1.5 actual restricted-role tenant isolation', () => {
       );
       expect(result.rows[0]?.allowed, sequence.sequence_name).toBe(false);
     }
-    const functions = await admin.query<{ signature: string; app_execute: boolean; public_execute: boolean; owner: string }>(
-      `SELECT p.oid::regprocedure::text AS signature,
+    const functions = await admin.query<{
+      signature: string; is_enqueue: boolean; app_execute: boolean; public_execute: boolean;
+      owner: string; oid: string; security_definer: boolean; function_settings: string[] | null;
+    }>(
+      `SELECT format('%I.%I(%s)', n.nspname, p.proname, pg_catalog.oidvectortypes(p.proargtypes)) AS signature,
+              p.oid = 'symphony.enqueue_command_outbox_message(uuid, uuid)'::regprocedure AS is_enqueue,
+              p.oid::text AS oid,
               has_function_privilege('symphony_app', p.oid, 'EXECUTE') AS app_execute,
               COALESCE((SELECT bool_or(a.grantee=0 AND a.privilege_type='EXECUTE') FROM aclexplode(COALESCE(p.proacl, acldefault('f',p.proowner))) a), false) AS public_execute,
-              pg_get_userbyid(p.proowner) AS owner
+              pg_get_userbyid(p.proowner) AS owner,
+              p.prosecdef AS security_definer,
+              p.proconfig AS function_settings
        FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace
        WHERE n.nspname='symphony' ORDER BY signature`,
     );
-    const enqueue = functions.rows.find((row) => row.signature === 'symphony.enqueue_command_outbox_message(uuid,uuid)');
-    expect(enqueue).toMatchObject({ app_execute: true, public_execute: false, owner: 'symphony_outbox_writer' });
-    expect(functions.rows.filter((row) => row.app_execute).map((row) => row.signature)).toEqual(['symphony.enqueue_command_outbox_message(uuid,uuid)']);
+    const enqueue = functions.rows.find((row) => row.is_enqueue);
+    expect(enqueue).toMatchObject({
+      app_execute: manifest.outbox_policy.function.app_execute,
+      public_execute: manifest.outbox_policy.function.public_execute,
+      owner: manifest.outbox_policy.function.owner,
+      security_definer: manifest.outbox_policy.function.security_definer,
+      function_settings: [`search_path=${manifest.outbox_policy.function.search_path}`],
+    });
+    expect(enqueue?.signature.replaceAll(/\s+/g, '')).toBe(manifest.outbox_policy.function.signature.replaceAll(/\s+/g, ''));
+    expect(functions.rows.filter((row) => row.app_execute).map((row) => row.oid)).toEqual([enqueue?.oid]);
     expect(functions.rows.some((row) => row.public_execute)).toBe(false);
     const defaultPrivileges = await admin.query("SELECT 1 FROM pg_default_acl d JOIN pg_roles r ON r.oid=d.defaclrole WHERE r.rolname IN ('symphony_app','symphony_outbox_writer') LIMIT 1");
     expect(defaultPrivileges.rowCount).toBe(0);
@@ -211,6 +398,7 @@ describe('WP1.5 actual restricted-role tenant isolation', () => {
       { table_name: 'domain_events', privilege_type: 'SELECT' },
       { table_name: 'event_outbox', privilege_type: 'INSERT' },
     ]);
+    await expect(app.query('SET ROLE symphony_outbox_writer')).rejects.toMatchObject({ code: '42501' });
   });
 
   it('fails closed for missing, empty, mismatched, and cross-tenant inherited scopes', async () => {
@@ -263,6 +451,150 @@ describe('WP1.5 actual restricted-role tenant isolation', () => {
       client.release();
     }
   });
+
+  it('uses unfiltered app-role reads to cover every distinct manifested tenant-parent chain', async () => {
+    const ids = Object.fromEntries([
+      'state', 'person', 'personIdentifier', 'platformRole', 'roleAssignment', 'event',
+      'capacityGrant', 'delegation', 'enrolmentSession', 'approvalPolicy', 'organizationEnrollment',
+      'handover', 'evidenceVersion', 'supportItem', 'admission', 'verificationAssignment',
+      'finding', 'requirement', 'requirementLink', 'appointment', 'bylawDocument', 'bylawVersion', 'bylawProvision',
+    ].map((key) => [key, randomUUID()]));
+    const fixtureRows: { table: string; id: string }[] = [];
+    const insert = async (table: string, id: string, statement: string, values: unknown[]) => {
+      await admin.query(statement, values);
+      fixtureRows.push({ table, id });
+    };
+
+    try {
+      await admin.query("SELECT set_config('app.tenant_id', $1, false)", [tenantB]);
+      await insert('aggregate_states', ids.state!,
+        'INSERT INTO symphony.aggregate_states (id, tenant_id, aggregate_type) VALUES ($1,$2,$3)',
+        [ids.state, tenantB, 'Wp15TenantScopeFixture']);
+      await insert('persons', ids.person!,
+        'INSERT INTO symphony.persons (id, tenant_id, pseudonym_id) VALUES ($1,$2,$3)',
+        [ids.person, tenantB, `wp15-person-${ids.person}`]);
+      await insert('person_identifiers', ids.personIdentifier!,
+        'INSERT INTO symphony.person_identifiers (id, person_id, identifier_type, identifier_encrypted, blind_index, is_primary) VALUES ($1,$2,$3,$4,$5,false)',
+        [ids.personIdentifier, ids.person, 'none', Buffer.from('synthetic'), Buffer.from('fixture')]);
+      await insert('platform_roles', ids.platformRole!,
+        'INSERT INTO symphony.platform_roles (id, code, name) VALUES ($1,$2,$3)',
+        [ids.platformRole, `wp15-${ids.platformRole}`, 'WP1.5 synthetic role']);
+      await insert('user_role_assignments', ids.roleAssignment!,
+        'INSERT INTO symphony.user_role_assignments (id, user_id, platform_role_id, tenant_id) VALUES ($1,$2,$3,$4)',
+        [ids.roleAssignment, userB, ids.platformRole, tenantB]);
+      const authenticationEventId = randomUUID();
+      await insert('authentication_events', authenticationEventId,
+        'INSERT INTO symphony.authentication_events (id, user_id, method, result) VALUES ($1,$2,$3,$4)',
+        [authenticationEventId, userB, 'wp15-fixture', 'success']);
+      await insert('domain_events', ids.event!,
+        `INSERT INTO symphony.domain_events (id, tenant_id, aggregate_id, aggregate_type, event_type, occurred_at, sequence)
+         VALUES ($1,$2,$3,$4,$5,now(),1)`,
+        [ids.event, tenantB, randomUUID(), 'Wp15TenantScopeFixture', 'Wp15FixtureCreated']);
+      await insert('capacity_grants', ids.capacityGrant!,
+        'INSERT INTO symphony.capacity_grants (id,user_id,organization_id,capacity_type,granted_by_user_id,source_event_id) VALUES ($1,$2,$3,$4,$5,$6)',
+        [ids.capacityGrant, userB, organizationB, 'wp15_fixture', userB, ids.event]);
+      await insert('delegations', ids.delegation!,
+        'INSERT INTO symphony.delegations (id,delegator_user_id,delegatee_user_id,organization_id) VALUES ($1,$2,$3,$4)',
+        [ids.delegation, userB, userB, organizationB]);
+      await insert('enrolment_sessions', ids.enrolmentSession!,
+        'INSERT INTO symphony.enrolment_sessions (id,tenant_id,enroller_user_id,organization_id,representative_person_id) VALUES ($1,$2,$3,$4,$5)',
+        [ids.enrolmentSession, tenantB, userB, organizationB, ids.person]);
+      await insert('approval_policies', ids.approvalPolicy!,
+        'INSERT INTO symphony.approval_policies (id,organization_id,record_class) VALUES ($1,$2,$3)',
+        [ids.approvalPolicy, organizationB, 'wp15-fixture']);
+      await insert('organization_enrollment', ids.organizationEnrollment!,
+        'INSERT INTO symphony.organization_enrollment (id,organization_id,enrolment_mode,initiator_user_id) VALUES ($1,$2,$3,$4)',
+        [ids.organizationEnrollment, organizationB, 'assisted', userB]);
+      await insert('enrolment_handovers', ids.handover!,
+        'INSERT INTO symphony.enrolment_handovers (id,organization_id,outgoing_user_id,incoming_user_id) VALUES ($1,$2,$3,$4)',
+        [ids.handover, organizationB, userB, userB]);
+      await insert('evidence_versions', ids.evidenceVersion!,
+        'INSERT INTO symphony.evidence_versions (id,evidence_item_id,version_number,supplier_user_id,origin,stage) VALUES ($1,$2,$3,$4,$5,$6)',
+        [ids.evidenceVersion, itemB, 917, userB, 'wp15_fixture', 'submitted']);
+      await insert('evidence_support_items', ids.supportItem!,
+        'INSERT INTO symphony.evidence_support_items (id,evidence_version_id,support_type) VALUES ($1,$2,$3)',
+        [ids.supportItem, ids.evidenceVersion, 'wp15_fixture']);
+      await insert('evidence_admissions', ids.admission!,
+        'INSERT INTO symphony.evidence_admissions (id,evidence_version_id,admitted_by_user_id,admission_kind) VALUES ($1,$2,$3,$4)',
+        [ids.admission, ids.evidenceVersion, userB, 'claim_admission']);
+      await insert('verification_assignments', ids.verificationAssignment!,
+        'INSERT INTO symphony.verification_assignments (id,evidence_item_id,assigned_to_user_id,evidence_version_id) VALUES ($1,$2,$3,$4)',
+        [ids.verificationAssignment, itemB, userB, ids.evidenceVersion]);
+      await insert('verification_findings', ids.finding!,
+        'INSERT INTO symphony.verification_findings (id,assignment_id,evidence_version_id,assurance_class,result) VALUES ($1,$2,$3,$4,$5)',
+        [ids.finding, ids.verificationAssignment, ids.evidenceVersion, 'wp15_fixture', 'pass']);
+      await insert('requirement_definitions', ids.requirement!,
+        'INSERT INTO symphony.requirement_definitions (id,source_tier,description) VALUES ($1,$2,$3)',
+        [ids.requirement, 'catalogue', 'Synthetic WP1.5 tenant policy fixture']);
+      await insert('evidence_requirement_links', ids.requirementLink!,
+        'INSERT INTO symphony.evidence_requirement_links (id,evidence_item_id,requirement_id) VALUES ($1,$2,$3)',
+        [ids.requirementLink, itemB, ids.requirement]);
+      await insert('appointments', ids.appointment!,
+        'INSERT INTO symphony.appointments (id,organization_id,person_id,position_id,started_at) VALUES ($1,$2,$3,$4,now())',
+        [ids.appointment, organizationB, ids.person, randomUUID()]);
+      await insert('bylaw_documents', ids.bylawDocument!,
+        'INSERT INTO symphony.bylaw_documents (id,organization_id) VALUES ($1,$2)',
+        [ids.bylawDocument, organizationB]);
+      await insert('bylaw_versions', ids.bylawVersion!,
+        'INSERT INTO symphony.bylaw_versions (id,bylaw_document_id,version_number,status) VALUES ($1,$2,1,$3)',
+        [ids.bylawVersion, ids.bylawDocument, 'draft']);
+      await insert('bylaw_provisions', ids.bylawProvision!,
+        'INSERT INTO symphony.bylaw_provisions (id,bylaw_version_id,section_ref,text,confirmed_by_user_id) VALUES ($1,$2,$3,$4,$5)',
+        [ids.bylawProvision, ids.bylawVersion, 'wp15-fixture', 'Synthetic policy fixture', userB]);
+
+      const relationshipCoverage: { table: string; parentTables: string[]; id: string }[] = [
+        { table: 'aggregate_states', parentTables: [], id: ids.state! },
+        { table: 'person_identifiers', parentTables: ['persons'], id: ids.personIdentifier! },
+        { table: 'user_role_assignments', parentTables: ['users'], id: ids.roleAssignment! },
+        { table: 'authentication_events', parentTables: ['users'], id: fixtureRows.find((row) => row.table === 'authentication_events')!.id },
+        { table: 'capacity_grants', parentTables: ['organizations', 'users', 'domain_events'], id: ids.capacityGrant! },
+        { table: 'delegations', parentTables: ['organizations', 'users'], id: ids.delegation! },
+        { table: 'enrolment_sessions', parentTables: ['organizations', 'users', 'persons'], id: ids.enrolmentSession! },
+        { table: 'approval_policies', parentTables: ['organizations'], id: ids.approvalPolicy! },
+        { table: 'evidence_versions', parentTables: ['evidence_items', 'organizations', 'users'], id: ids.evidenceVersion! },
+        { table: 'evidence_support_items', parentTables: ['evidence_versions', 'evidence_items', 'organizations'], id: ids.supportItem! },
+        { table: 'evidence_admissions', parentTables: ['evidence_versions', 'evidence_items', 'organizations', 'users'], id: ids.admission! },
+        { table: 'verification_assignments', parentTables: ['evidence_items', 'organizations', 'evidence_versions', 'users'], id: ids.verificationAssignment! },
+        { table: 'verification_findings', parentTables: ['verification_assignments', 'evidence_items', 'organizations'], id: ids.finding! },
+        { table: 'evidence_requirement_links', parentTables: ['evidence_items', 'organizations'], id: ids.requirementLink! },
+        { table: 'appointments', parentTables: ['organizations', 'persons'], id: ids.appointment! },
+        { table: 'bylaw_versions', parentTables: ['bylaw_documents', 'organizations'], id: ids.bylawVersion! },
+        { table: 'bylaw_provisions', parentTables: ['bylaw_versions', 'bylaw_documents', 'organizations', 'users'], id: ids.bylawProvision! },
+      ];
+      const manifestClasses = new Set(manifest.policy_entries.map((entry) => JSON.stringify(entry.parent_tables)));
+      const fixtureClasses = new Set(relationshipCoverage.map((entry) => JSON.stringify(entry.parentTables)));
+      expect([...fixtureClasses].sort(), 'fixture coverage includes each distinct manifest parent chain')
+        .toEqual([...manifestClasses].sort());
+
+      const appClient = await app.connect();
+      try {
+        for (const fixture of relationshipCoverage) {
+          await appClient.query('BEGIN');
+          await appClient.query("SELECT set_config('app.tenant_id', $1, true)", [tenantA]);
+          const foreignRows = await appClient.query(`SELECT id FROM symphony.${fixture.table} WHERE id=$1`, [fixture.id]);
+          expect(foreignRows.rows, `${fixture.table} unfiltered tenant-A probe hides tenant-B row (${fixture.parentTables.join(' > ') || 'direct tenant'})`).toEqual([]);
+          await appClient.query('ROLLBACK');
+
+          await appClient.query('BEGIN');
+          await appClient.query("SELECT set_config('app.tenant_id', $1, true)", [tenantB]);
+          const tenantRows = await appClient.query(`SELECT id FROM symphony.${fixture.table} WHERE id=$1`, [fixture.id]);
+          expect(tenantRows.rows.map((row) => row.id), `${fixture.table} valid tenant-B parent chain remains visible`).toEqual([fixture.id]);
+          await appClient.query('ROLLBACK');
+        }
+      } finally {
+        await appClient.query('ROLLBACK').catch(() => undefined);
+        appClient.release();
+      }
+    } finally {
+      for (const fixture of [...fixtureRows].reverse()) {
+        if (fixture.table === 'evidence_versions') await admin.query('ALTER TABLE symphony.evidence_versions DISABLE TRIGGER evidence_versions_immutability');
+        if (fixture.table === 'domain_events') await admin.query('ALTER TABLE symphony.domain_events DISABLE TRIGGER domain_events_immutability');
+        await admin.query(`DELETE FROM symphony.${fixture.table} WHERE id=$1`, [fixture.id]);
+        if (fixture.table === 'evidence_versions') await admin.query('ALTER TABLE symphony.evidence_versions ENABLE TRIGGER evidence_versions_immutability');
+        if (fixture.table === 'domain_events') await admin.query('ALTER TABLE symphony.domain_events ENABLE TRIGGER domain_events_immutability');
+      }
+    }
+  }, 30_000);
 
   it('keeps app.tenant_id transaction-local across pool reuse and rollback', async () => {
     const client = await app.connect();
