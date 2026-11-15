@@ -745,4 +745,16 @@ describe('WP0.9 Phase 1 gate contract', () => {
       rmSync(directory, { recursive: true, force: true });
     }
   });
+
+  it('keeps the WP5.3 API-backed login test out of legacy E2E while retaining its dedicated Phase 1 gate', () => {
+    const pkg = readJson('package.json');
+    const legacyConfig = readFileSync(path.join(root, 'playwright.config.ts'), 'utf8');
+    const dedicatedConfig = readFileSync(path.join(root, 'playwright.phase1.config.ts'), 'utf8');
+    expect(pkg.scripts['test:e2e']).toContain('tools/run_e2e.mjs');
+    expect(pkg.scripts['test:login:api']).toContain('playwright.phase1.config.ts');
+    expect(pkg.scripts['test:login:api']).toContain('tests/workspace/login-api.spec.ts');
+    expect(pkg.scripts['verify:phase1']).toContain('npm run test:login:api');
+    expect(legacyConfig).toMatch(/testIgnore\s*:\s*\[[^\]]*tests\/workspace\/login-api\.spec\.ts/s);
+    expect(dedicatedConfig).toContain("testMatch: /login-api\\.spec\\.ts/");
+  });
 });

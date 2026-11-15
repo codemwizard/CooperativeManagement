@@ -5,6 +5,9 @@ const externalServer = process.env.SYMPHONY_E2E_EXTERNAL_SERVER === '1';
 export default defineConfig({
   testDir: './tests',
   testMatch: /.*\.spec\.ts/,
+  // This no-mock browser-to-API acceptance test has its own two-server,
+  // test-database configuration in playwright.phase1.config.ts.
+  testIgnore: ['tests/workspace/login-api.spec.ts'],
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,

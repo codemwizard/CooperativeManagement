@@ -4,7 +4,7 @@
   "status": {
     "implementation": "complete",
     "unit_test": "passed",
-    "integration_test": "blocked",
+    "integration_test": "passed",
     "bdd_ui_test": "not_applicable",
     "gate_verified": "blocked"
   },
@@ -13,7 +13,7 @@
     "node": "v26.7.0",
     "npm": "12.2.0",
     "postgres": "PostgreSQL 18.0-2; server_version_num=180000",
-    "database_role": "symphony for migration/fixture checks; symphony_app for restricted runtime checks; temporary symphony_outbox_writer membership remains granted to symphony",
+    "database_role": "postgres test administrator; symphony_migrator migration; symphony_app runtime; writer membership finalized",
     "data_mode": "test",
     "key_provider": "unknown"
   },
@@ -23,20 +23,29 @@
     { "command": "npm run typecheck:v4", "result": "passed", "artifact": "evidence/phase1/wp1.5/local-verification.md" },
     { "command": "npm run verify:phase1:contracts", "result": "passed", "artifact": "evidence/phase1/wp1.5/local-verification.md" },
     { "command": "WP1.5 live app privilege and RLS verification", "result": "passed", "artifact": "evidence/phase1/wp1.5/local-verification.md" },
-    { "command": "WP1.5 full restricted-role DB integration and CI bootstrap gate", "result": "blocked", "artifact": "evidence/phase1/wp1.5/local-verification.md" }
+    { "command": "node tools/bootstrap_wp1_5_database.mjs (fresh isolated PG18 UTF8 test database)", "result": "passed", "artifact": "evidence/phase1/wp1.5/local/2026-11-15/local-role-bootstrap.raw.log" },
+    { "command": "npm run db:migrate:test (clean install then replay)", "result": "passed", "artifact": "evidence/phase1/wp1.5/local/2026-11-15/local-db-migrate-clean.raw.log" },
+    { "command": "npm run test:db:migrations", "result": "passed", "artifact": "evidence/phase1/wp1.5/local/2026-11-15/local-migration-suite.raw.log" },
+    { "command": "npm run test:db --workspace @symphony/db", "result": "passed", "artifact": "evidence/phase1/wp1.5/local/2026-11-15/local-db-integration.raw.log" },
+    { "command": "npm run test:bdd:wp1.5", "result": "passed", "artifact": "evidence/phase1/wp1.5/local/2026-11-15/local-bdd-wp1.5.raw.log" },
+    { "command": "npm run verify:phase0", "result": "passed", "artifact": "evidence/phase1/wp1.5/local/2026-11-15/local-phase0-gate.raw.log" },
+    { "command": "node tools/finalize_wp1_5_database.mjs", "result": "passed", "artifact": "evidence/phase1/wp1.5/local/2026-11-15/local-role-finalizer.raw.log" },
+    { "command": "node vitest.mjs run src/__tests__/tenant-rls-app-role.integration.test.ts --reporter=verbose (packages/db, isolated test URLs)", "result": "passed", "artifact": "evidence/phase1/wp1.5/local/2026-11-15/ci-follow-up-review.md" },
+    { "command": "npm run test:db --workspace @symphony/db (local non-superuser admin identity)", "result": "failed", "artifact": "evidence/phase1/wp1.5/local/2026-11-15/ci-follow-up-review.md" },
+    { "command": "WP1.5 complete CI-equivalent admin-role suite, migration bootstrap and finalizer", "result": "blocked", "artifact": "evidence/phase1/wp1.5/local/2026-11-15/ci-follow-up-review.md" }
   ],
   "claims": {
-    "behavior_proved": "Migration 0013 applies and replays safely; the live app privilege matrix matches all 55 inventory rows; missing and empty tenant context return no rows or deny SELECT for all 37 tenant tables; focused cross-tenant, pool-reuse, catalogue/control-plane, and transactional outbox-function checks pass.",
-    "path_proved": "Migration runner, app-role SQL connections, matrix-based catalog audit, direct RLS probes, and transaction-local tenant context were exercised against symphony_phase1_test.",
-    "configuration_proved": "DATA_MODE=test, PostgreSQL 18.0-2, symphony_app as the application identity, and the symphony migration identity on symphony_phase1_test. No credentials are included in this record.",
+    "behavior_proved": "Migration 0013 clean install and replay pass; migration upgrade and failure-atomicity tests pass; the live app privilege matrix matches all 55 inventory rows; missing and empty tenant context return no rows or deny SELECT for all 37 tenant tables; the complete actual-role DB suite passes 58/58; WP1.5 cross-organisation BDD passes 1 scenario/7 steps; the finalizer revokes temporary migrator membership. Function lookup is independent of regprocedure display formatting, and test-only administrator visibility does not grant symphony_app outbox read access.",
+    "path_proved": "Migration runner, app-role SQL connections, matrix-based catalog audit, direct RLS probes, and transaction-local tenant context were exercised against a fresh UTF8 symphony_wp1_5_test database.",
+    "configuration_proved": "DATA_MODE=test, PostgreSQL 18.0 package build 18.0-2/server_version_num=180000, UTF8 isolated symphony_wp1_5_test, postgres administrator, generated symphony_migrator and symphony_app roles, and finalizer-verified writer membership revocation. No credentials are included in this record.",
     "coverage_limitations": [
-      "The complete tenant-rls-app-role.integration.test.ts and DB integration suite were not run because PHASE1_TEST_ADMIN_DATABASE_URL is unavailable.",
-      "The temporary membership from symphony to symphony_outbox_writer remains; only the membership grantor/admin or CI finalizer can revoke it.",
-      "A clean-install CI run, migration-0013-specific failure atomicity proof, and complete outbox worker/append-only suite remain outstanding."
+      "All local implementation/runtime gates are now passed on an isolated UTF8 PostgreSQL 18 cluster. SHA-pinned workflow CI artifacts for this exact committed candidate, including hosted finalizer evidence, remain outstanding; gate_verified remains blocked until those artifacts are attached.",
+      "The generic legacy E2E run had two Phase 2 component-shell timeouts, separate from the WP1.5 DB and BDD gates; this WP1.5 record does not claim those tests passed. The three legacy login page tests passed.",
+      "WP5.3 API-backed login is not a WP1.5 dependency or criterion; its separate browser/API composition is still pending WP5.3."
     ]
   },
   "limitations": [
-    "WP1.5 is not closed. A successful effective privilege audit and focused smoke checks do not replace the required restricted-role integration and CI evidence.",
+    "Local WP1.5 runtime acceptance passed. WP1.5 is not formally closed until the exact committed candidate has SHA-bound CI database/BDD/role-finalizer evidence and the task record is updated from that run.",
     "Independent review is not claimed."
   ],
   "unresolved_decisions": [],

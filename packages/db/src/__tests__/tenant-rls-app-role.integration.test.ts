@@ -45,6 +45,7 @@ describe('WP1.5 actual restricted-role tenant isolation', () => {
   const runner = new PostgresCommandTransactionRunner(db, { recoveryDb });
   const repository = new PostgresRepository<TestAggregate>(db, 'Wp15TenantIsolationFixture');
   const appliedIds: { aggregateId: string; eventId: string; outboxId: string }[] = [];
+  let adminOutboxInspectionPolicyInstalled = false;
   let matrix: Matrix;
   let inventory: Inventory;
   let manifest: { table_count: number; policy_entries: { table: string; tenant_resolution_sql: string }[] };
@@ -70,6 +71,21 @@ describe('WP1.5 actual restricted-role tenant isolation', () => {
       "SELECT current_user, current_database(), current_setting('server_version_num') AS server_version_num",
     );
     expect(appIdentity.rows[0]).toMatchObject({ current_user: 'symphony_app', current_database: databaseName, server_version_num: '180000' });
+
+    // FORCE RLS intentionally gives the application no outbox read path. Add a
+    // test-database-only inspection policy for the fixture administrator so
+    // assertions can distinguish an inserted row from an RLS-hidden row.
+    // The application role is not a member of this policy's target role.
+    await admin.query('DROP POLICY IF EXISTS wp1_5_test_admin_outbox_inspection ON symphony.event_outbox');
+    await admin.query(`DO $policy$
+      BEGIN
+        EXECUTE format(
+          'CREATE POLICY wp1_5_test_admin_outbox_inspection ON symphony.event_outbox FOR ALL TO %I USING (true) WITH CHECK (true)',
+          current_user
+        );
+      END
+      $policy$`);
+    adminOutboxInspectionPolicyInstalled = true;
 
     await admin.query('INSERT INTO symphony.tenants (id, name) VALUES ($1, $2), ($3, $4)', [tenantA, 'wp1.5-a', tenantB, 'wp1.5-b']);
     await admin.query("SELECT set_config('app.tenant_id', $1, false)", [tenantA]);
@@ -107,6 +123,9 @@ describe('WP1.5 actual restricted-role tenant isolation', () => {
       await admin.query('DELETE FROM symphony.users WHERE id = $1', [userB]).catch(() => undefined);
       await admin.query('DELETE FROM symphony.organizations WHERE id = $1', [organizationB]).catch(() => undefined);
       await admin.query('DELETE FROM symphony.tenants WHERE id = ANY($1::uuid[])', [[tenantA, tenantB]]).catch(() => undefined);
+      if (adminOutboxInspectionPolicyInstalled) {
+        await admin.query('DROP POLICY wp1_5_test_admin_outbox_inspection ON symphony.event_outbox').catch(() => undefined);
+      }
     }
     await Promise.all([db.destroy(), recoveryDb.destroy(), app.end(), admin.end()]);
   }, 30_000);
@@ -174,17 +193,19 @@ describe('WP1.5 actual restricted-role tenant isolation', () => {
       );
       expect(result.rows[0]?.allowed, sequence.sequence_name).toBe(false);
     }
-    const functions = await admin.query<{ signature: string; app_execute: boolean; public_execute: boolean; owner: string }>(
+    const functions = await admin.query<{ signature: string; is_enqueue: boolean; app_execute: boolean; public_execute: boolean; owner: string; oid: string }>(
       `SELECT p.oid::regprocedure::text AS signature,
+              p.oid = 'symphony.enqueue_command_outbox_message(uuid, uuid)'::regprocedure AS is_enqueue,
+              p.oid::text AS oid,
               has_function_privilege('symphony_app', p.oid, 'EXECUTE') AS app_execute,
               COALESCE((SELECT bool_or(a.grantee=0 AND a.privilege_type='EXECUTE') FROM aclexplode(COALESCE(p.proacl, acldefault('f',p.proowner))) a), false) AS public_execute,
               pg_get_userbyid(p.proowner) AS owner
        FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace
        WHERE n.nspname='symphony' ORDER BY signature`,
     );
-    const enqueue = functions.rows.find((row) => row.signature === 'symphony.enqueue_command_outbox_message(uuid,uuid)');
+    const enqueue = functions.rows.find((row) => row.is_enqueue);
     expect(enqueue).toMatchObject({ app_execute: true, public_execute: false, owner: 'symphony_outbox_writer' });
-    expect(functions.rows.filter((row) => row.app_execute).map((row) => row.signature)).toEqual(['symphony.enqueue_command_outbox_message(uuid,uuid)']);
+    expect(functions.rows.filter((row) => row.app_execute).map((row) => row.oid)).toEqual([enqueue?.oid]);
     expect(functions.rows.some((row) => row.public_execute)).toBe(false);
     const defaultPrivileges = await admin.query("SELECT 1 FROM pg_default_acl d JOIN pg_roles r ON r.oid=d.defaclrole WHERE r.rolname IN ('symphony_app','symphony_outbox_writer') LIMIT 1");
     expect(defaultPrivileges.rowCount).toBe(0);

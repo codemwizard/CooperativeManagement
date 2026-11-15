@@ -16,6 +16,10 @@ The plan has two completion gates:
 
 Passing the broad DB workspace suite alone does not satisfy either gate. It is useful regression evidence, but it does not prove clean migration setup, migration 0013 failure atomicity/upgrade, WP1.5-owned BDD acceptance, role finalization, or candidate-bound CI evidence. Phase 1/Phase 2 BDD and browser failures are recorded against their mapped owners and do not reopen the already-closed WP0 baseline unless a dependency explicitly requires them.
 
+**Gate ownership clarification:** WP1.5 requires the complete `@symphony/db` suite to pass on its candidate because the CI job runs that suite as a regression gate. A failing WP1.2/WP1.3 test therefore blocks a clean WP1.5 candidate result until it is diagnosed and resolved or shown to be an invalid local test environment; code ownership of a correction remains with the work package whose behavior/test is wrong. This does not transfer WP1.2/WP1.3 acceptance ownership or authorize rewriting their assertions to accommodate a misconfigured local database role. The CI contract provisions the PostgreSQL service's `symphony` bootstrap identity as the database administrator; local runs must use an identity meeting the same required privileges before treating forced-RLS-visible fixture counts or cleanup failures as product regressions.
+
+The API-backed login browser test is WP5-owned and is not a WP1.5 dependency or closeout criterion. It remains a required check in the later Phase 1/WP5 gate with `playwright.phase1.config.ts`, which starts the workspace and API servers and requires an isolated test database. The legacy `test:e2e` suite must not discover that test under `playwright.config.ts`; its run is recorded separately and cannot block or satisfy WP1.5. This separation does not waive the WP5.3 implementation or its dependency gate for WP1.6.
+
 ## 2. Current status and evidence boundary
 
 - `evidence/phase1/wp1.5/task-evidence.json` currently reports `implementation: complete`, `integration_test: blocked`, and `gate_verified: blocked`; its commit is `working-tree`. Preserve that status until all WP1.5 closure evidence below passes.
