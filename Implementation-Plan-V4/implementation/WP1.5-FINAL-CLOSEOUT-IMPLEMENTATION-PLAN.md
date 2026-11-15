@@ -162,7 +162,7 @@ WP1.5 does not implement API composition/login, HTTP authorization mapping, reco
 
 ## 8. Current closeout state
 
-The prior d7fb CI record remains passed for its exact source candidate. Implementation for the additional archive, policy-oracle, row-behavior, outbox, workflow-contract, and app-role audit findings is now present in the worktree and locally verified as recorded below. The new final-closeout gate remains **pending** until the WP1.3 evidence pin is corrected, the worktree is committed as an immutable candidate, the candidate-bound CI evidence is available, and the candidate-specific evidence index/checksums are validated. Do not change the WP1.5 task record’s historical d7fb SHA or claim the current worktree has CI acceptance.
+The prior d7fb CI record remains passed for its exact source candidate. Implementation for the additional archive, policy-oracle, row-behavior, outbox, workflow-contract, and app-role audit findings is committed and locally verified as recorded below. WP1.3 evidence is pinned to tested source commit `fb3d4f2cf6b1023cca5e90f2768783c892c96d13` and passes schema validation. The new final-closeout gate remains **pending** until the approved Phase 0 gate and candidate-bound CI evidence pass on the exact final candidate SHA, and the candidate-specific hashes/checksums are validated. Do not change the WP1.5 task record’s historical d7fb SHA or claim CI acceptance for this new candidate.
 
 ## 9. Execution record — 2026-11-15
 
@@ -186,12 +186,11 @@ The prior d7fb CI record remains passed for its exact source candidate. Implemen
 - Nested-archive TDD regression: the new test first failed because `docs/phase1.zip` was included in the source-review ZIP; after excluding opaque archives, the focused test and complete archive suite pass. Red output is retained at `evidence/phase1/wp1.5/local/2026-11-15/archive-nested-container.red.raw.log`.
 - Independent-verifier TDD regression: the builder test first failed because the generated ZIP had not passed the standalone `verify_archive_hygiene.py`; the builder now invokes that verifier and removes output on verifier failure. Red output is `evidence/phase1/wp1.5/local/2026-11-15/archive-independent-verifier.red.raw.log`.
 - Traceability verification: **passed**, covering 205 scenarios, with all 26 hard non-WIP scenarios mapped to step definitions.
+- Source-review archive built from commit `fb3d4f2cf6b1023cca5e90f2768783c892c96d13`: standalone verifier passed; **1,081 members** listed; the three tracked nested ZIP archives were excluded. Archive SHA, full member list, and verifier output are retained in `evidence/phase1/wp1.5/local/2026-11-15/source-review-fb3d4f2.*`.
+- WP1.3 evidence record now pins to `fb3d4f2cf6b1023cca5e90f2768783c892c96d13`; schema validation returned no errors. This pin identifies tested source; it does not claim hosted CI.
 
 ### Remaining closure gates
 
-1. Commit the implementation, docs, and raw local evidence as a clean immutable source candidate; leave `CI-Results/WP1.5/wp1.5-run2/` unstaged and unchanged.
-2. Set `evidence/phase1/wp1.3/task-evidence.json` to the exact implementation candidate SHA whose full DB, domain, typecheck, architecture, and contract tests passed; update its command artifacts and remove the `working-tree` claim. Then validate the evidence record against the schema.
-3. Run `npm run verify:phase0` using the approved Node 26.7.0/npm 12.2.0 toolchain on the candidate and retain the result. The local attempt stopped at migration integration because its URL did not designate the provisioned migrator; the corrected full DB suite passed, but this is not a substitute for the complete Phase 0 gate.
-4. Make any resulting evidence/index synchronization edits and confirm a clean final candidate SHA.
-5. Obtain candidate-specific CI results via the owner-provided CI artifact bundle (no GitHub query is made by this task), retain raw outputs and checksums, and reconcile WP1.5 task/dependency/review-index records only after all same-SHA gates pass.
-6. Keep the prior d7fb evidence immutable. WP5.3 API-backed login and other downstream dependencies remain separately owned; this work does not authorize WP1.6 or close Phase 1.
+1. Run `npm run verify:phase0` using the approved Node 26.7.0/npm 12.2.0 toolchain on the exact final candidate and retain the result. The earlier local attempt stopped at migration integration because its URL did not designate the provisioned migrator; the corrected full DB suite passed, but this is not a substitute for the complete Phase 0 gate.
+2. Obtain candidate-specific CI results via the owner-provided CI artifact bundle (no GitHub query is made by this task), retain raw outputs and checksums, and reconcile WP1.5 task/dependency/review-index records only after all same-SHA gates pass.
+3. Keep the prior d7fb evidence immutable. WP5.3 API-backed login and other downstream dependencies remain separately owned; this work does not authorize WP1.6 or close Phase 1.

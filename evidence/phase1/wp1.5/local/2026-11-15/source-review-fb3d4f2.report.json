@@ -1,0 +1,15 @@
+{
+  "source_commit": "fb3d4f2cf6b1023cca5e90f2768783c892c96d13",
+  "archive": "source-review-fb3d4f2.zip",
+  "archive_sha256": "dcf650bee80683c3f42cfb63da0c89155d345c29a9e6c5bf2bfbe305df9df86f",
+  "member_list": "source-review-fb3d4f2.members.txt",
+  "member_list_sha256": "3622bf50bfda89266f7cc1661f8a80e8948fde3bbcf23fbef53a77493f43380b",
+  "member_count": 1081,
+  "prohibited_environment_or_private_key_members": 0,
+  "opaque_archives_excluded": [
+    "Prototype.zip",
+    "Prototype/docs/phase1.zip",
+    "docs/phase1.zip"
+  ],
+  "independent_verifier": "passed"
+}
