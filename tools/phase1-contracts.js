@@ -303,7 +303,7 @@ export function validateTenantPolicyManifest(manifest, matrix) {
     errors.push(`policy manifest must contain exactly ${required.length} tenant-scoped table entries`);
   }
   if (JSON.stringify(names) !== JSON.stringify(required)) errors.push('policy manifest table set differs from tenant-scoped matrix rows');
-  if (!['candidate_frozen_pending_restricted_role_integration_and_review', 'accepted'].includes(manifest?.status)) {
+  if (!['candidate_frozen_pending_restricted_role_integration_and_review', 'candidate_verified_pending_independent_review', 'accepted'].includes(manifest?.status)) {
     errors.push('policy manifest must declare candidate or accepted status');
   }
   for (const entry of entries) {

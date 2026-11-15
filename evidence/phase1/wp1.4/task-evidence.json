@@ -2,13 +2,13 @@
   "schema_version": 1,
   "task_id": "WP1.4",
   "status": {
-    "implementation": "passed",
+    "implementation": "complete",
     "unit_test": "passed",
     "integration_test": "passed",
     "bdd_ui_test": "not_applicable",
     "gate_verified": "passed"
   },
-  "commit": "working-tree",
+  "commit": "2df9151dd5b04d2b17245cd16bceb79db38a0183",
   "environment": {
     "node": "v26.7.0",
     "npm": "12.2.0",
@@ -19,7 +19,7 @@
   },
   "commands": [
     { "command": "npm run test:unit --workspace @symphony/domain", "result": "passed", "artifact": "evidence/phase1/wp1.4/domain-tests.log" },
-    { "command": "npm run test:db --workspace @symphony/db -- src/__tests__/command-reconciliation.integration.test.ts", "result": "passed (9 tests; app role symphony_app)", "artifact": "evidence/phase1/wp1.4/app-role-reconciliation-tests.log" },
+    { "command": "npm run test:db --workspace @symphony/db -- src/__tests__/command-reconciliation.integration.test.ts (9 tests; app role symphony_app)", "result": "passed", "artifact": "evidence/phase1/wp1.4/app-role-reconciliation-tests.log" },
     { "command": "npm run test:db --workspace @symphony/db -- src/__tests__/command-bus-concurrency.integration.test.ts src/__tests__/command-transaction.integration.test.ts src/__tests__/security-attempt-audit.integration.test.ts", "result": "passed", "artifact": "evidence/phase1/wp1.4/wp13-wp12-regression-tests.log" },
     { "command": "npm run test:migrations --workspace @symphony/db", "result": "passed", "artifact": "evidence/phase1/wp1.4/migration-tests.log" },
     { "command": "npm run db:migrate:test", "result": "passed", "artifact": "evidence/phase1/wp1.4/migration-apply.log" },

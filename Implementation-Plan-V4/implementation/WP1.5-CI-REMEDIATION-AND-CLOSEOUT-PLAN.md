@@ -1,6 +1,6 @@
 # WP1.5 CI Remediation and Closeout Plan
 
-**Status:** Execution in progress. WP1.5 remains open; see the dated execution record under `evidence/phase1/wp1.5/local/`.
+**Status:** WP1.5 closed. Candidate `d7fbf5851b11b07b65bde36f062db7b21f487947` passed the required CI acceptance in run `43683206104`, attempt `1`. Canonical task record: `evidence/phase1/wp1.5/task-evidence.json`; retained raw artifacts and checksums: `evidence/phase1/wp1.5/ci/d7fbf5851b11b07b65bde36f062db7b21f487947/`.
 **Plan owner:** Phase 1 implementation owner.
 **Authority:** `PHASE-1-REMEDIATION-PLAN-v2.md` WP1.5 and WP1.6; `evidence/phase1/task-dependencies.yml`; `docs/phase1/TENANT_ISOLATION_CONTRACT.md`; `evidence/phase1/tenant-table-policy-matrix.json`; `evidence/phase1/wp1.5/task-evidence.json`.
 **Current repository candidate when drafted:** `dd21c22b6301bd74534d5d09dacb6e04daf9ddc7`. This SHA identifies the plan's inspected starting tree only. Each implementation/CI evidence record must use the exact tested candidate SHA.
@@ -20,12 +20,12 @@ Passing the broad DB workspace suite alone does not satisfy either gate. It is u
 
 The API-backed login browser test is WP5-owned and is not a WP1.5 dependency or closeout criterion. It remains a required check in the later Phase 1/WP5 gate with `playwright.phase1.config.ts`, which starts the workspace and API servers and requires an isolated test database. The legacy `test:e2e` suite must not discover that test under `playwright.config.ts`; its run is recorded separately and cannot block or satisfy WP1.5. This separation does not waive the WP5.3 implementation or its dependency gate for WP1.6.
 
-## 2. Current status and evidence boundary
+## 2. Status at plan drafting and final evidence boundary
 
-- `evidence/phase1/wp1.5/task-evidence.json` currently reports `implementation: complete`, `integration_test: blocked`, and `gate_verified: blocked`; its commit is `working-tree`. Preserve that status until all WP1.5 closure evidence below passes.
-- `evidence/phase1/wp1.5/local-verification.md` records local effective-grant/RLS smoke checks but explicitly leaves the admin-backed restricted-role suite, CI finalizer, migration-0013 failure atomicity/upgrade, and full outbox/append-only assertions open.
+- At plan drafting, `evidence/phase1/wp1.5/task-evidence.json` reported a blocked integration and gate status. That historical state has been superseded by the passing run recorded at `evidence/phase1/wp1.5/ci/d7fbf5851b11b07b65bde36f062db7b21f487947/run-summary.md` and the updated canonical task record.
+- `evidence/phase1/wp1.5/local-verification.md` and the dated local reports remain historical evidence. They document constraints and failures observed in earlier local environments; they do not override the later hosted run using the provisioned CI administrator and roles.
 - The supplied `npm run test:db --workspace @symphony/db` run reported 11 files and 57 tests passed, including command transaction/audit, concurrency, reconciliation, and tenant/RLS suites. Preserve this as a distinct full-DB-run artifact with its own commit and runtime provenance. It does not replace either CI artifact below.
-- The supplied CI log has no visible workflow run ID or candidate SHA. Recover those from the CI provider's run metadata before binding it to a candidate. Do not infer a SHA from the current checkout or relabel the pasted log as a clean-candidate pass.
+- The earlier supplied CI log lacked a visible workflow run ID and candidate SHA and remains historical, unpinned input. The later `wp1.5-run2` artifacts provide candidate SHA `d7fbf5851b11b07b65bde36f062db7b21f487947`, run ID `43683206104`, attempt `1`, and matching SHA-named Phase 0/database/legacy artifact sets; only those artifacts are used for this closeout.
 - Historical WP1.1/WP1.2/WP1.4 records and historical PostgreSQL 18.0/18.6 results remain unchanged. Every new record reports the actual PostgreSQL server version and package build used.
 
 ## 3. Observed CI failures and required corrections
@@ -136,4 +136,4 @@ Stop the affected migration/role task and keep its gate red if the fresh databas
 
 **WP1.5 CI acceptance passes only when** the candidate's `db-integration` workflow job, migration checks, WP1.5-owned BDD-AUD-005 scenario, and always-run role finalizer pass on the same clean commit. `verify:all` browser failures and non-WP1.5 Phase 1 BDD failures are separately reported against their mapped tasks; they do not establish or negate WP1.5 database evidence. Do not mark the full repository CI green while any required workflow job fails.
 
-**Current disposition:** the prior candidate passed the recorded local PostgreSQL 18 UTF8 gates, including the WP1.5-owned database-backed BDD and role finalizer. The follow-up CI report exposed CI-6 and CI-7; their fixes and regression checks are now in the worktree but are not committed or remotely verified. WP1.5 remains open until this follow-up candidate's exact GitHub CI run uploads passing SHA-pinned artifacts; then reconcile the task record against that run. WP1.6 remains gated by WP1.5, WP2.2 and WP5.3 passing dependency records. No closure status is claimed by this plan alone.
+**Final disposition (2026-11-15): WP1.5 is closed** on candidate `d7fbf5851b11b07b65bde36f062db7b21f487947`. The SHA-matched CI run passed the Phase 0/toolchain/workflow contract gates, clean migration install and migration regression suite, the complete actual-role DB suite (58/58), BDD-AUD-005 (1 scenario/7 steps), role bootstrap and always-run finalizer, and legacy verification (35/35 browser tests). The canonical evidence record is schema-valid and the full artifacts are retained with checksums under `evidence/phase1/wp1.5/ci/d7fbf5851b11b07b65bde36f062db7b21f487947/`. The WP1.5 closure does not claim independent review or Phase 1 closure. WP1.6 remains not started until every direct dependency in the task graph has a passing record; WP1.5 alone does not satisfy WP1.7, WP2.2, WP5.3, or any other unmet WP1.6 prerequisite.

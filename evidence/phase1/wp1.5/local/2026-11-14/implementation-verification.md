@@ -1,5 +1,7 @@
 # WP1.5 CI remediation implementation verification
 
+> Historical local-only snapshot. Its then-open closure checklist is superseded by the passing candidate-pinned CI closeout in run `43683206104` on `d7fbf5851b11b07b65bde36f062db7b21f487947`; see `evidence/phase1/wp1.5/task-evidence.json` and `evidence/phase1/wp1.5/ci/d7fbf5851b11b07b65bde36f062db7b21f487947/`.
+
 ## Candidate and evidence limits
 
 - Inspected base commit: `dd21c22b6301bd74534d5d09dacb6e04daf9ddc7`.

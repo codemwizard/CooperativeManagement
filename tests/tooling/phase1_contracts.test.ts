@@ -636,7 +636,7 @@ describe('WP0.3 migrated table inventory', () => {
     expect(inventory.tables.filter((table: { rls_current: boolean }) => table.rls_current).map((table: { table: string }) => table.table).sort()).toEqual(['command_receipts', 'domain_events', 'reconciliation_inbox']);
   });
 
-  it('defines a least-privilege RLS/grant policy for every migrated table without pretending it is deployed', () => {
+  it('defines a least-privilege RLS/grant policy for every migrated table and keeps baseline inventory distinct from WP1.5 deployment proof', () => {
     const inventory = readJson('evidence/phase1/tenant-table-inventory.json');
     const matrix = readJson('evidence/phase1/tenant-table-policy-matrix.json');
     expect(validateTenantPolicyMatrix(matrix, inventory)).toEqual([]);
@@ -649,7 +649,7 @@ describe('WP0.3 migrated table inventory', () => {
     const matrix = readJson('evidence/phase1/tenant-table-policy-matrix.json');
     const manifest = readJson('evidence/phase1/wp1.5-tenant-policy-manifest.json');
     expect(validateTenantPolicyManifest(manifest, matrix)).toEqual([]);
-    expect(manifest.status).toBe('candidate_frozen_pending_restricted_role_integration_and_review');
+    expect(manifest.status).toBe('candidate_verified_pending_independent_review');
   });
 });
 

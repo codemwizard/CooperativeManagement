@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "status": "candidate_frozen_pending_restricted_role_integration_and_review",
+  "status": "candidate_verified_pending_independent_review",
   "source": "migrations/0013_tenant_rls_app_role.sql, root migrations 0001-0012, and live PostgreSQL 18.0 catalog for symphony_phase1_test",
   "table_count": 37,
   "required_tenant_scoped_count": 37,

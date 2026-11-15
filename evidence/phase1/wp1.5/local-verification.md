@@ -1,5 +1,7 @@
 # WP1.5 local verification — 2026-11-12
 
+> Historical local snapshot. WP1.5 was later closed by candidate-pinned CI run `43683206104` at `d7fbf5851b11b07b65bde36f062db7b21f487947`; see `task-evidence.json` and the `ci/d7fbf.../` evidence directory for the current disposition.
+
 This is partial implementation evidence, not a WP1.5 closure record. No connection string or password is stored here.
 
 ## Passed

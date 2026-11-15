@@ -6,48 +6,39 @@
     "unit_test": "passed",
     "integration_test": "passed",
     "bdd_ui_test": "not_applicable",
-    "gate_verified": "blocked"
+    "gate_verified": "passed"
   },
-  "commit": "ee2b1486280abfd0194c8af372d7689bf9d82a76",
+  "commit": "d7fbf5851b11b07b65bde36f062db7b21f487947",
   "environment": {
     "node": "v26.7.0",
     "npm": "12.2.0",
-    "postgres": "PostgreSQL 18.0-2; server_version_num=180000",
-    "database_role": "postgres test administrator; symphony_migrator migration; symphony_app runtime; writer membership finalized",
+    "postgres": "PostgreSQL 18.0; server_version_num=180000; postgres:18.0-alpine CI service",
+    "database_role": "CI bootstrap administrator; symphony_migrator; symphony_app; symphony_outbox_writer; temporary membership finalized",
     "data_mode": "test",
     "key_provider": "unknown"
   },
   "commands": [
-    { "command": "npm run db:migrate:test", "result": "passed", "artifact": "evidence/phase1/wp1.5/local-verification.md" },
-    { "command": "npm run test:migrations --workspace @symphony/db", "result": "passed", "artifact": "evidence/phase1/wp1.5/local-verification.md" },
-    { "command": "npm run typecheck:v4", "result": "passed", "artifact": "evidence/phase1/wp1.5/local-verification.md" },
-    { "command": "npm run verify:phase1:contracts", "result": "passed", "artifact": "evidence/phase1/wp1.5/local-verification.md" },
-    { "command": "WP1.5 live app privilege and RLS verification", "result": "passed", "artifact": "evidence/phase1/wp1.5/local-verification.md" },
-    { "command": "node tools/bootstrap_wp1_5_database.mjs (fresh isolated PG18 UTF8 test database)", "result": "passed", "artifact": "evidence/phase1/wp1.5/local/2026-11-15/local-role-bootstrap.raw.log" },
-    { "command": "npm run db:migrate:test (clean install then replay)", "result": "passed", "artifact": "evidence/phase1/wp1.5/local/2026-11-15/local-db-migrate-clean.raw.log" },
-    { "command": "npm run test:db:migrations", "result": "passed", "artifact": "evidence/phase1/wp1.5/local/2026-11-15/local-migration-suite.raw.log" },
-    { "command": "npm run test:db --workspace @symphony/db", "result": "passed", "artifact": "evidence/phase1/wp1.5/local/2026-11-15/local-db-integration.raw.log" },
-    { "command": "npm run test:bdd:wp1.5", "result": "passed", "artifact": "evidence/phase1/wp1.5/local/2026-11-15/local-bdd-wp1.5.raw.log" },
-    { "command": "npm run verify:phase0", "result": "passed", "artifact": "evidence/phase1/wp1.5/local/2026-11-15/local-phase0-gate.raw.log" },
-    { "command": "node tools/finalize_wp1_5_database.mjs", "result": "passed", "artifact": "evidence/phase1/wp1.5/local/2026-11-15/local-role-finalizer.raw.log" },
-    { "command": "node vitest.mjs run src/__tests__/tenant-rls-app-role.integration.test.ts --reporter=verbose (packages/db, isolated test URLs)", "result": "passed", "artifact": "evidence/phase1/wp1.5/local/2026-11-15/ci-follow-up-review.md" },
-    { "command": "npm run test:db --workspace @symphony/db (local non-superuser admin identity)", "result": "failed", "artifact": "evidence/phase1/wp1.5/local/2026-11-15/ci-follow-up-review.md" },
-    { "command": "WP1.5 complete CI-equivalent admin-role suite, migration bootstrap and finalizer", "result": "blocked", "artifact": "evidence/phase1/wp1.5/local/2026-11-15/ci-follow-up-review.md" }
+    { "command": "npm run verify:phase0", "result": "passed", "artifact": "evidence/phase1/wp1.5/ci/d7fbf5851b11b07b65bde36f062db7b21f487947/phase0/phase0-gate.raw.log" },
+    { "command": "node tools/bootstrap_wp1_5_database.mjs", "result": "passed", "artifact": "evidence/phase1/wp1.5/ci/d7fbf5851b11b07b65bde36f062db7b21f487947/database/role-bootstrap.raw.log" },
+    { "command": "npm run db:migrate:test", "result": "passed", "artifact": "evidence/phase1/wp1.5/ci/d7fbf5851b11b07b65bde36f062db7b21f487947/database/db-migrate.raw.log" },
+    { "command": "npm run test:db --workspace @symphony/db", "result": "passed", "artifact": "evidence/phase1/wp1.5/ci/d7fbf5851b11b07b65bde36f062db7b21f487947/database/db-integration.raw.log" },
+    { "command": "npm run test:bdd:wp1.5", "result": "passed", "artifact": "evidence/phase1/wp1.5/ci/d7fbf5851b11b07b65bde36f062db7b21f487947/database/bdd-wp1.5.raw.log" },
+    { "command": "node tools/finalize_wp1_5_database.mjs", "result": "passed", "artifact": "evidence/phase1/wp1.5/ci/d7fbf5851b11b07b65bde36f062db7b21f487947/database/role-finalizer.raw.log" },
+    { "command": "npm run verify:all", "result": "passed", "artifact": "evidence/phase1/wp1.5/ci/d7fbf5851b11b07b65bde36f062db7b21f487947/legacy/verify-all.raw.log" }
   ],
   "claims": {
-    "behavior_proved": "Migration 0013 clean install and replay pass; migration upgrade and failure-atomicity tests pass; the live app privilege matrix matches all 55 inventory rows; missing and empty tenant context return no rows or deny SELECT for all 37 tenant tables; the complete actual-role DB suite passes 58/58; WP1.5 cross-organisation BDD passes 1 scenario/7 steps; the finalizer revokes temporary migrator membership. Function lookup is independent of regprocedure display formatting, and test-only administrator visibility does not grant symphony_app outbox read access.",
-    "path_proved": "Migration runner, app-role SQL connections, matrix-based catalog audit, direct RLS probes, and transaction-local tenant context were exercised against a fresh UTF8 symphony_wp1_5_test database.",
-    "configuration_proved": "DATA_MODE=test, PostgreSQL 18.0 package build 18.0-2/server_version_num=180000, UTF8 isolated symphony_wp1_5_test, postgres administrator, generated symphony_migrator and symphony_app roles, and finalizer-verified writer membership revocation. No credentials are included in this record.",
+    "behavior_proved": "On the SHA-pinned CI candidate, clean PostgreSQL 18 installation applied migrations 0001-0013; migration integration tests covered replay, 0012-to-0013 upgrade, injected failure rollback and retry; all 11 database test files passed (58 tests), including the 55-table effective privilege/RLS matrix, missing/empty/mismatched tenant scope, cross-tenant reads/writes, pooled context reset, outbox function boundary, append-only rules and WP1.4 inbox grant preservation. BDD-AUD-005 passed 1 scenario/7 steps using the PostgreSQL-backed symphony_app path and denied access to Org B evidence by its known identifier under Org A context. The role finalizer verified temporary migrator membership was revoked. CI-1 through CI-7 regression checks passed in the migration, type/build, toolchain and workflow contract gates.",
+    "path_proved": "GitHub Actions run 43683206104 attempt 1, candidate d7fbf5851b11b07b65bde36f062db7b21f487947. The database job provisioned isolated PostgreSQL service roles, applied migrations, ran the complete @symphony/db suite and tagged WP1.5 BDD, then ran the always() role finalizer. The Phase 0 job and legacy verify-all job also completed successfully. Raw logs and phase0 CI metadata are retained under evidence/phase1/wp1.5/ci/d7fbf5851b11b07b65bde36f062db7b21f487947/.",
+    "configuration_proved": "Node 26.7.0, npm 12.2.0, PostgreSQL 18.0 (server_version_num=180000), isolated symphony_test CI service, DATA_MODE=test, CI bootstrap administrator, separate symphony_migrator and symphony_app identities, and finalizer-verified outbox-writer membership state. No credentials or connection strings are retained.",
     "coverage_limitations": [
-      "All local implementation/runtime gates are now passed on an isolated UTF8 PostgreSQL 18 cluster. SHA-pinned workflow CI artifacts for this exact committed candidate, including hosted finalizer evidence, remain outstanding; gate_verified remains blocked until those artifacts are attached.",
-      "The generic legacy E2E run had two Phase 2 component-shell timeouts, separate from the WP1.5 DB and BDD gates; this WP1.5 record does not claim those tests passed. The three legacy login page tests passed.",
-      "WP5.3 API-backed login is not a WP1.5 dependency or criterion; its separate browser/API composition is still pending WP5.3."
+      "The Phase 0 gate's @phase0 BDD selection reported zero scenarios; the project Phase 0 command map documents that no enabled Phase 0 scenarios exist. WP1.5 behavior coverage is separately provided by BDD-AUD-005 (1/1 scenario, 7/7 steps).",
+      "The verify:all legacy E2E suite passed 35/35. WP5.3 API-backed login composition is not a WP1.5 criterion and remains owned by WP5.3.",
+      "Independent review is recorded separately and is not claimed by this implementation evidence. This WP1.5 task closure does not close Phase 1 or authorize WP1.6; its dependency graph remains authoritative."
     ]
   },
   "limitations": [
-    "Local WP1.5 runtime acceptance passed. WP1.5 is not formally closed until the exact committed candidate has SHA-bound CI database/BDD/role-finalizer evidence and the task record is updated from that run.",
-    "Independent review is not claimed."
+    "This record closes WP1.5 only. It does not claim production readiness, Phase 1 closure, or satisfaction of WP1.6's other dependencies."
   ],
   "unresolved_decisions": [],
-  "reviewer": "Implementation self-review; no independent reviewer claimed."
+  "reviewer": "Implementation evidence reconciled by Codex from SHA-matched CI artifacts; independent reviewer not claimed."
 }
