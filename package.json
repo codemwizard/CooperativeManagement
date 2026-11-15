@@ -43,7 +43,7 @@
     "test:unit": "cd packages/domain && npx vitest run --reporter=verbose",
     "typecheck:v4": "npx tsc --build --force packages/domain packages/contracts packages/db packages/testkit && npm run typecheck --workspace @symphony/domain && npm run typecheck --workspace @symphony/contracts && npm run typecheck --workspace @symphony/db && npm run typecheck --workspace @symphony/testkit && npm run typecheck --workspace @symphony/api && npm run typecheck --workspace @symphony/workspace",
     "test:db": "cd packages/db && npx vitest run --reporter=verbose",
-    "test:db:migrations": "node tools/require_migration_test_db.mjs && npm run test:migrations --workspace @symphony/db",
+    "test:db:migrations": "node --env-file-if-exists=.env.local tools/run_migration_test_gate.mjs",
     "test:bdd": "cross-env NODE_OPTIONS=--import=tsx npx cucumber-js --config cucumber.cjs --profile default",
     "test:a11y": "node tools/run_e2e.mjs tests/workspace/a11y.spec.ts",
     "db:start": "docker compose up --wait db -d",
@@ -81,7 +81,7 @@
   },
   "engines": {
     "node": ">=26.7.0 <27",
-    "npm": ">=12.2.0 <13"
+    "npm": "12.2.0"
   },
   "allowScripts": {
     "argon2@0.45.2": true,

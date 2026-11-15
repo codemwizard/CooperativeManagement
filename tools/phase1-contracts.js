@@ -426,6 +426,7 @@ export function validatePhase1Gate(packageJson, repoRoot = ROOT) {
   for (const name of mustHaveScripts) if (!scripts[name]) errors.push(`mandatory npm script ${name} is missing`);
   const targetFiles = [
     'tools/phase1-contracts.js', 'tools/run_phase1_bdd.mjs', 'tools/phase1-command-contract-oracle.js',
+    'tools/run_migration_test_gate.mjs',
     'tests/tooling/phase1_contracts.test.ts', 'evidence/phase1/command-contract-vectors.json',
     'tests/workspace/login.spec.ts', 'tests/workspace/login-api.spec.ts', 'playwright.phase1.config.ts',
     'tests/workspace/a11y.spec.ts', 'features/09_commands_audit_and_integrity.feature',
@@ -451,7 +452,7 @@ export function validatePhase1Gate(packageJson, repoRoot = ROOT) {
     [scripts['typecheck:v4'], 'tsc --build --force'],
     [scripts['verify:arch'], 'depcruise'],
     [scripts['test:unit'], 'vitest run'],
-    [scripts['test:db:migrations'], 'tools/require_migration_test_db.mjs'],
+    [scripts['test:db:migrations'], 'tools/run_migration_test_gate.mjs'],
     [scripts['test:db'], 'vitest run'],
     [scripts['test:api'], '@symphony/api'],
     [workspaceApiScripts['test:api'], 'vitest run'],

@@ -1,0 +1,278 @@
+npm notice run symphony-prototype@1.0.0 verify:phase0
+npm notice run npm run test:phase0-contract && npm run test:toolchain && npm run verify:toolchain && npm run verify:archive-hygiene && npm run typecheck:v4 && npm run verify:arch && npm run test:unit && npm run test:db:migrations && npm run test:bdd:phase0 && npm run verify:trace && npm run test:a11y && npm run verify:legacy-floor
+npm notice run symphony-prototype@1.0.0 test:phase0-contract
+npm notice run npx vitest run tests/tooling/phase0_scripts.test.ts
+npm notice run symphony-prototype@1.0.0 npx
+npm notice run 'vitest' run tests/tooling/phase0_scripts.test.ts
+
+[1m[7m[36m RUN [39m[27m[22m [36mv2.1.9 [39m[90m/home/runner/work/CooperativeManagement/CooperativeManagement[39m
+
+ [32m✓[39m tests/tooling/phase0_scripts.test.ts [2m([22m[2m11 tests[22m[2m)[22m[90m 210[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m1 passed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[32m11 passed[39m[22m[90m (11)[39m
+[2m   Start at [22m 05:57:38
+[2m   Duration [22m 432ms[2m (transform 37ms, setup 0ms, collect 39ms, tests 210ms, environment 0ms, prepare 41ms)[22m
+
+npm notice run symphony-prototype@1.0.0 test:toolchain
+npm notice run node --test tests/tooling/verify_toolchain.test.mjs
+✔ accepts a fully aligned local and CI matrix (1.308831ms)
+✔ rejects global npm installation in the CI helper (0.221339ms)
+✔ reports mismatched declarations and actual runtime versions (0.175143ms)
+✔ rejects floating major-only and mismatched minor PostgreSQL image tags (0.23411ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 4
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 46.815374
+npm notice run symphony-prototype@1.0.0 verify:toolchain
+npm notice run node tools/verify_toolchain.mjs
+PASS: Node 26.7.0, npm 12.2.0, PostgreSQL 18.0 (package build 18.0-2).
+npm notice run symphony-prototype@1.0.0 verify:archive-hygiene
+npm notice run node tools/run_python_tool.js -m unittest tests/tooling/test_archive_hygiene.py && node tools/run_python_tool.js tools/verify_archive_hygiene.py
+.....
+----------------------------------------------------------------------
+Ran 5 tests in 0.002s
+
+OK
+PASS: Git index and .env.example contain no prohibited environment or private-key paths.
+npm notice run symphony-prototype@1.0.0 typecheck:v4
+npm notice run npx tsc --build --force packages/domain packages/contracts packages/db packages/testkit && npm run typecheck --workspace @symphony/domain && npm run typecheck --workspace @symphony/contracts && npm run typecheck --workspace @symphony/db && npm run typecheck --workspace @symphony/testkit && npm run typecheck --workspace @symphony/api && npm run typecheck --workspace @symphony/workspace
+npm notice run symphony-prototype@1.0.0 npx
+npm notice run 'tsc' --build --force packages/domain packages/contracts packages/db packages/testkit
+npm notice run @symphony/domain@0.1.0 typecheck
+npm notice run tsc --noEmit
+npm notice run @symphony/contracts@0.1.0 typecheck
+npm notice run tsc --noEmit
+npm notice run @symphony/db@0.1.0 typecheck
+npm notice run tsc --noEmit
+npm notice run @symphony/testkit@0.1.0 typecheck
+npm notice run tsc --noEmit
+npm notice run @symphony/api@0.1.0 typecheck
+npm notice run tsc --noEmit
+npm notice run @symphony/workspace@0.1.0 typecheck
+npm notice run tsc --noEmit
+npm notice run symphony-prototype@1.0.0 verify:arch
+npm notice run npx depcruise packages/domain/src packages/contracts/src packages/db/src packages/testkit/src apps/api/src apps/workspace/src --config .dependency-cruiser.cjs
+npm notice run symphony-prototype@1.0.0 npx
+npm notice run 'depcruise' packages/domain/src packages/contracts/src packages/db/src packages/testkit/src apps/api/src apps/workspace/src --config .dependency-cruiser.cjs
+
+✔ no dependency violations found (132 modules, 263 dependencies cruised)
+
+npm notice run symphony-prototype@1.0.0 test:unit
+npm notice run cd packages/domain && npx vitest run --reporter=verbose
+npm notice run symphony-prototype@1.0.0 npx
+npm notice run 'vitest' run --reporter=verbose
+
+[1m[7m[36m RUN [39m[27m[22m [36mv2.1.9 [39m[90m/home/runner/work/CooperativeManagement/CooperativeManagement/packages/domain[39m
+
+ [32m✓[39m src/identity/__tests__/auth.test.ts[2m > [22mAuthService[2m > [22mtemporaryCredential_isHashedArgon2id
+ [32m✓[39m src/kernel/__tests__/tenant-isolation.test.ts[2m > [22mTenant isolation (INV-001)[2m > [22mcommandForAnotherTenant_isRejected
+ [32m✓[39m src/kernel/__tests__/tenant-isolation.test.ts[2m > [22mTenant isolation (INV-001)[2m > [22mrepositoryLoad_neverReturnsAnotherTenantsRecord
+ [32m✓[39m src/kernel/__tests__/tenant-isolation.test.ts[2m > [22mTenant isolation (INV-001)[2m > [22meventsFromAnotherTenant_notVisible
+ [32m✓[39m src/kernel/__tests__/command-bus.test.ts[2m > [22mCommandBus[2m > [22mrepeatedCommandId_doesNotApplyTwice
+ [32m✓[39m src/kernel/__tests__/command-bus.test.ts[2m > [22mCommandBus[2m > [22mstaleExpectedVersion_isRejected
+ [32m✓[39m src/kernel/__tests__/command-bus.test.ts[2m > [22mCommandBus[2m > [22mdbFailure_rollsBackAll
+ [32m✓[39m src/kernel/__tests__/command-bus.test.ts[2m > [22mCommandBus[2m > [22mconcurrentCommands_onlyOneWins
+ [32m✓[39m src/kernel/__tests__/command-bus.test.ts[2m > [22mCommandBus[2m > [22mcrossTenantCommand_isRejected
+ [32m✓[39m src/kernel/__tests__/command-bus.test.ts[2m > [22mCommandBus[2m > [22munauthorisedCommand_mutatesNothing
+ [32m✓[39m src/identity/__tests__/auth.test.ts[2m > [22mAuthService[2m > [22mtemporaryCredential_singleUse
+ [32m✓[39m src/authz/__tests__/policy.test.ts[2m > [22mPolicyEngine[2m > [22mgrantCapacity_IFV_allowedByChairperson
+ [32m✓[39m src/authz/__tests__/policy.test.ts[2m > [22mPolicyEngine[2m > [22mgrantCapacity_IFV_deniedToSecretary
+ [32m✓[39m src/authz/__tests__/policy.test.ts[2m > [22mPolicyEngine[2m > [22mIFV_cannotVerifyOwnSuppliedVersion
+ [32m✓[39m src/authz/__tests__/policy.test.ts[2m > [22mPolicyEngine[2m > [22mIFV_boundToOrganisation_cannotActOnAnother
+ [32m✓[39m src/authz/__tests__/policy.test.ts[2m > [22mPolicyEngine[2m > [22minstitutionalRole_cannotWriteEvidence
+ [32m✓[39m src/authz/__tests__/policy.test.ts[2m > [22mPolicyEngine[2m > [22mrevokedCapacity_isNoLongerEffective
+ [32m✓[39m src/authz/__tests__/policy.test.ts[2m > [22mPolicyEngine[2m > [22mdelegation_extendsCapacity
+ [32m✓[39m src/privacy/__tests__/pii-vault.test.ts[2m > [22mKeyProvider — PII vault[2m > [22mencrypt_thenDecrypt_returnsSamePlaintext
+ [32m✓[39m src/privacy/__tests__/pii-vault.test.ts[2m > [22mKeyProvider — PII vault[2m > [22msamePlaintext_sameKeyRef_producesDifferentCiphertext
+ [32m✓[39m src/privacy/__tests__/pii-vault.test.ts[2m > [22mKeyProvider — PII vault[2m > [22mproviderMetadata_identifiesCipherVersionAndTestOnlyScope_withoutPlaintext
+ [32m✓[39m src/privacy/__tests__/pii-vault.test.ts[2m > [22mKeyProvider — PII vault[2m > [22mwrongKey_failsClosed
+ [32m✓[39m src/privacy/__tests__/pii-vault.test.ts[2m > [22mKeyProvider — PII vault[2m > [22mtamperedCiphertext_failsClosed
+ [32m✓[39m src/privacy/__tests__/pii-vault.test.ts[2m > [22mKeyProvider — PII vault[2m > [22munsupportedCiphertextVersion_failsClosed
+ [32m✓[39m src/privacy/__tests__/pii-vault.test.ts[2m > [22mKeyProvider — PII vault[2m > [22mdifferentPersonKeys_producesDifferentCiphertext
+ [32m✓[39m src/privacy/__tests__/pii-vault.test.ts[2m > [22mKeyProvider — PII vault[2m > [22mblindIndex_matchesSamePlaintext
+ [32m✓[39m src/privacy/__tests__/pii-vault.test.ts[2m > [22mKeyProvider — PII vault[2m > [22mblindIndex_differentPepper_doesNotMatch
+ [32m✓[39m src/privacy/__tests__/pii-vault.test.ts[2m > [22mKeyProvider — PII vault[2m > [22mcryptoShred_keyDeleted_ciphertextUnreadable
+ [32m✓[39m src/privacy/__tests__/pii-vault.test.ts[2m > [22mKeyProvider — PII vault[2m > [22mnrcPattern_neverInEventPayload
+ [32m✓[39m src/privacy/__tests__/pii-vault.test.ts[2m > [22mKeyProvider — PII vault[2m > [22mnrcPattern_neverInLog
+ [32m✓[39m src/identity/__tests__/auth.test.ts[2m > [22mAuthService[2m > [22mtemporaryCredential_isExpiredAfterDefault72h
+ [32m✓[39m src/authz/__tests__/capacity-service.test.ts[2m > [22mCapacityService[2m > [22mgrantCapacity_allowed_byChairperson
+ [32m✓[39m src/authz/__tests__/capacity-service.test.ts[2m > [22mCapacityService[2m > [22mgrantCapacity_denied_toSecretary
+ [32m✓[39m src/authz/__tests__/capacity-service.test.ts[2m > [22mCapacityService[2m > [22mrevokeCapacity_allowed_byChairperson
+ [32m✓[39m src/authz/__tests__/capacity-service.test.ts[2m > [22mCapacityService[2m > [22mrevokeCapacity_annotatesExistingFindings
+ [32m✓[39m src/kernel/__tests__/command-bus-transaction.test.ts[2m > [22mWP1.2-A transaction context and WP1.2-B denial audit boundary[2m > [22mpasses one context identity through receipt, aggregate, policy, and writes
+ [32m✓[39m src/kernel/__tests__/command-bus-transaction.test.ts[2m > [22mWP1.2-A transaction context and WP1.2-B denial audit boundary[2m > [22mrolls back the command transaction before recording a denial without policy detail
+ [32m✓[39m src/kernel/__tests__/command-bus-transaction.test.ts[2m > [22mWP1.2-A transaction context and WP1.2-B denial audit boundary[2m > [22mreturns a retryable classification when the required audit write fails
+ [32m✓[39m src/kernel/__tests__/command-bus-transaction.test.ts[2m > [22mWP1.2-A transaction context and WP1.2-B denial audit boundary[2m > [22mfails closed without trusted actor and tenant context and audits mismatched context as the trusted actor
+ [32m✓[39m src/identity/__tests__/auth.test.ts[2m > [22mAuthService[2m > [22mtemporaryCredential_expiresAtExact72HourBoundary[33m 301[2mms[22m[39m
+ [32m✓[39m src/kernel/__tests__/command-digest.test.ts[2m > [22mWP1.1 command semantic digest[2m > [22mkeeps the digest implementation and persisted receipt version labels aligned
+ [32m✓[39m src/kernel/__tests__/command-digest.test.ts[2m > [22mWP1.1 command semantic digest[2m > [22mmatches the approved RFC 8785 canonical semantic-envelope vector
+ [32m✓[39m src/kernel/__tests__/command-digest.test.ts[2m > [22mWP1.1 command semantic digest[2m > [22mexcludes lookup and transport metadata while retaining semantic changes
+ [32m✓[39m src/kernel/__tests__/command-digest.test.ts[2m > [22mWP1.1 command semantic digest[2m > [22muses the active key version and returns a 32-byte HMAC digest
+ [32m✓[39m src/kernel/__tests__/command-digest.test.ts[2m > [22mWP1.1 command semantic digest[2m > [22mreplays with the stored historical key version and fails closed when it is unavailable
+ [32m✓[39m src/kernel/__tests__/command-digest.test.ts[2m > [22mWP1.1 command semantic digest[2m > [22mrejects invalid JSON values and unavailable canonicalization versions
+ [32m✓[39m src/kernel/__tests__/command-receipt-contract.test.ts[2m > [22mWP1.1 durable command receipt contract[2m > [22maccepts a tenant-scoped receipt with a versioned safe result
+ [32m✓[39m src/kernel/__tests__/command-receipt-contract.test.ts[2m > [22mWP1.1 durable command receipt contract[2m > [22muses a strict success variant with non-negative version and UUID event ids
+ [32m✓[39m src/kernel/__tests__/command-receipt-contract.test.ts[2m > [22mWP1.1 durable command receipt contract[2m > [22maccepts only the terminal VERSION_CONFLICT result shape
+ [32m✓[39m src/kernel/__tests__/command-receipt-contract.test.ts[2m > [22mWP1.1 durable command receipt contract[2m > [22mrejects unkeyed or wrong-length digests and unsupported contract versions
+ [32m✓[39m src/kernel/__tests__/command-receipt-contract.test.ts[2m > [22mWP1.1 durable command receipt contract[2m > [22mrejects payload and unapproved receipt fields rather than persisting request material
+ [32m✓[39m src/kernel/__tests__/command-receipt-contract.test.ts[2m > [22mWP1.1 durable command receipt contract[2m > [22mexposes stable snake-case types without widening the result union
+ [32m✓[39m src/identity/__tests__/auth.test.ts[2m > [22mAuthService[2m > [22mfirstLogin_requiresPasswordChange
+ [32m✓[39m src/privacy/__tests__/test-data-mode.test.ts[2m > [22mDataModeGuard[2m > [22mtestMode_rejectsRealNRC
+ [32m✓[39m src/privacy/__tests__/test-data-mode.test.ts[2m > [22mDataModeGuard[2m > [22mtestMode_acceptsSyntheticNRC
+ [32m✓[39m src/privacy/__tests__/test-data-mode.test.ts[2m > [22mDataModeGuard[2m > [22mtestMode_rejectsRealCoopRegNumber
+ [32m✓[39m src/privacy/__tests__/test-data-mode.test.ts[2m > [22mDataModeGuard[2m > [22mtestMode_acceptsSyntheticCoopRegNumber
+ [32m✓[39m src/privacy/__tests__/test-data-mode.test.ts[2m > [22mDataModeGuard[2m > [22mrealMode_outsideApprovedRegion_refusesToStart
+ [32m✓[39m src/privacy/__tests__/test-data-mode.test.ts[2m > [22mDataModeGuard[2m > [22mrealMode_approvedRegion_starts
+ [32m✓[39m src/privacy/__tests__/test-data-mode.test.ts[2m > [22mPurgeSeedService[2m > [22mpurgeToSeed_removesAllTenantData
+ [32m✓[39m src/privacy/__tests__/consent.test.ts[2m > [22mConsentService[2m > [22mrecordConsent_before_PII_entry
+ [32m✓[39m src/privacy/__tests__/consent.test.ts[2m > [22mConsentService[2m > [22mwithdrawConsent_triggersRetentionEvaluation
+ [32m✓[39m src/privacy/__tests__/consent.test.ts[2m > [22mConsentService[2m > [22mpublicRegisterFields_useLegalObligation_notConsent
+ [32m✓[39m src/identity/__tests__/auth.test.ts[2m > [22mAuthService[2m > [22mauthenticationEvent_containsNoPII
+ [32m✓[39m src/identity/__tests__/auth.test.ts[2m > [22mAuthService[2m > [22mcredential_neverAppearsInEventPayload
+ [32m✓[39m src/authz/__tests__/policy-table.test.ts[2m > [22mPolicyEngine — policy table[2m > [22m'Chairperson may grant IFV'
+ [32m✓[39m src/authz/__tests__/policy-table.test.ts[2m > [22mPolicyEngine — policy table[2m > [22m'Vice-Chairperson may grant IFV'
+ [32m✓[39m src/authz/__tests__/policy-table.test.ts[2m > [22mPolicyEngine — policy table[2m > [22m'Secretary may NOT grant IFV'
+ [32m✓[39m src/authz/__tests__/policy-table.test.ts[2m > [22mPolicyEngine — policy table[2m > [22m'Treasurer may NOT grant IFV'
+ [32m✓[39m src/authz/__tests__/policy-table.test.ts[2m > [22mPolicyEngine — policy table[2m > [22m'Platform enroller may grant IFV'
+ [32m✓[39m src/authz/__tests__/policy-table.test.ts[2m > [22mPolicyEngine — policy table[2m > [22m'IFV holder alone may NOT grant IFV'
+ [32m✓[39m src/authz/__tests__/policy-table.test.ts[2m > [22mPolicyEngine — policy table[2m > [22m'IFV cannot verify own supplied versio…'
+ [32m✓[39m src/authz/__tests__/policy-table.test.ts[2m > [22mPolicyEngine — policy table[2m > [22m'IFV may verify version supplied by an…'
+ [32m✓[39m src/authz/__tests__/policy-table.test.ts[2m > [22mPolicyEngine — policy table[2m > [22m'IFV cannot act on another org\'s vers…'
+ [32m✓[39m src/authz/__tests__/policy-table.test.ts[2m > [22mPolicyEngine — policy table[2m > [22m'No IFV capacity → deny RecordFinding'
+ [32m✓[39m src/authz/__tests__/policy-table.test.ts[2m > [22mPolicyEngine — policy table[2m > [22m'Expired IFV capacity → deny'
+ [32m✓[39m src/authz/__tests__/policy-table.test.ts[2m > [22mPolicyEngine — policy table[2m > [22m'pfi_analyst cannot AddEvidence'
+ [32m✓[39m src/authz/__tests__/policy-table.test.ts[2m > [22mPolicyEngine — policy table[2m > [22m'pfi_analyst cannot AmendClaim'
+ [32m✓[39m src/authz/__tests__/policy-table.test.ts[2m > [22mPolicyEngine — policy table[2m > [22m'union_ta cannot AdmitEvidence'
+ [32m✓[39m src/authz/__tests__/policy-table.test.ts[2m > [22mPolicyEngine — policy table[2m > [22m'fund_manager cannot ApproveMinutes'
+ [32m✓[39m src/authz/__tests__/policy-table.test.ts[2m > [22mPolicyEngine — policy table[2m > [22m'ta cannot RecordTaCompletion (write)'
+ [32m✓[39m src/authz/__tests__/policy-table.test.ts[2m > [22mPolicyEngine — policy table[2m > [22m'external_verifier cannot RecordFindin…'
+ [32m✓[39m src/authz/__tests__/policy-table.test.ts[2m > [22mPolicyEngine — policy table[2m > [22m'pfi_credit cannot GrantCapacity'
+ [32m✓[39m src/authz/__tests__/policy-table.test.ts[2m > [22mPolicyEngine — policy table[2m > [22m'Chairperson may ApproveMinutes'
+ [32m✓[39m src/authz/__tests__/policy-table.test.ts[2m > [22mPolicyEngine — policy table[2m > [22m'Vice-Chairperson may ApproveMinutes'
+ [32m✓[39m src/authz/__tests__/policy-table.test.ts[2m > [22mPolicyEngine — policy table[2m > [22m'Secretary may ApproveMinutes'
+ [32m✓[39m src/authz/__tests__/policy-table.test.ts[2m > [22mPolicyEngine — policy table[2m > [22m'Plain member cannot ApproveMinutes'
+ [32m✓[39m src/authz/__tests__/policy-table.test.ts[2m > [22mPolicyEngine — policy table[2m > [22m'acting_officer delegation allows Appr…'
+ [32m✓[39m src/authz/__tests__/policy-table.test.ts[2m > [22mPolicyEngine — policy table[2m > [22m'Chairperson cannot act on another org…'
+ [32m✓[39m src/authz/__tests__/policy-table.test.ts[2m > [22mPolicyEngine — policy table[2m > [22m'Secretary cannot add evidence to anot…'
+ [32m✓[39m src/privacy/__tests__/retention.test.ts[2m > [22mRetentionPolicy[2m > [22mmemberDataRetention_twoYearFloor
+ [32m✓[39m src/privacy/__tests__/retention.test.ts[2m > [22mRetentionPolicy[2m > [22mcryptoShred_keepsTransactionFacts
+
+[2m Test Files [22m [1m[32m13 passed[39m[22m[90m (13)[39m
+[2m      Tests [22m [1m[32m92 passed[39m[22m[90m (92)[39m
+[2m   Start at [22m 05:57:51
+[2m   Duration [22m 1.57s[2m (transform 369ms, setup 0ms, collect 774ms, tests 1.23s, environment 2ms, prepare 696ms)[22m
+
+npm notice run symphony-prototype@1.0.0 test:db:migrations
+npm notice run node tools/require_migration_test_db.mjs && npm run test:migrations --workspace @symphony/db
+Migration test database configured: symphony_test
+npm notice run @symphony/db@0.1.0 test:migrations
+npm notice run vitest run --reporter=verbose src/__tests__/migration-runner-config.test.ts src/__tests__/migration-executor.test.ts src/__tests__/migration-runner.integration.test.ts
+
+[1m[7m[36m RUN [39m[27m[22m [36mv2.1.9 [39m[90m/home/runner/work/CooperativeManagement/CooperativeManagement/packages/db[39m
+
+ [32m✓[39m src/__tests__/migration-runner.integration.test.ts[2m > [22mPostgreSQL migration runner integration[2m > [22mserializes concurrent clean installs and makes replay a no-op[33m 559[2mms[22m[39m
+ [32m✓[39m src/__tests__/migration-runner.integration.test.ts[2m > [22mPostgreSQL migration runner integration[2m > [22mupgrades from migration 0012 and rolls every migration 0013 effect back before a successful retry
+ [32m✓[39m src/__tests__/migration-runner.integration.test.ts[2m > [22mPostgreSQL migration runner integration[2m > [22mrolls back a failed PostgreSQL migration without a ledger row and safely retries it
+ [32m✓[39m src/__tests__/migration-runner.integration.test.ts[2m > [22mPostgreSQL migration runner integration[2m > [22mretains required schema invariants and applies the Phase 0 global seeds[33m 322[2mms[22m[39m
+ [32m✓[39m src/__tests__/migration-runner.integration.test.ts[2m > [22mPostgreSQL migration runner integration[2m > [22minstalls the WP1.1 receipt schema constraints
+ [32m✓[39m src/__tests__/migration-runner.integration.test.ts[2m > [22mPostgreSQL migration runner integration[2m > [22minstalls the minimized WP1.2 security-attempt table without business-command binding
+ [32m✓[39m src/__tests__/migration-runner.integration.test.ts[2m > [22mPostgreSQL migration runner integration[2m > [22minstalls only encrypted reconciliation payload and forced tenant RLS
+ [32m✓[39m src/__tests__/migration-runner.integration.test.ts[2m > [22mPostgreSQL migration runner integration[2m > [22maborts WP1.1 migration on a non-empty legacy receipt table without changing it
+ [32m✓[39m src/__tests__/migration-executor.test.ts[2m > [22mexecuteSqlMigration[2m > [22mcommits the SQL and migration ledger row in one transaction
+ [32m✓[39m src/__tests__/migration-executor.test.ts[2m > [22mexecuteSqlMigration[2m > [22mrolls back a failed migration and never records it as applied
+ [32m✓[39m src/__tests__/migration-runner-config.test.ts[2m > [22mmigration runner configuration safety[2m > [22maccepts and safely quotes only the canonical schema
+ [32m✓[39m src/__tests__/migration-runner-config.test.ts[2m > [22mmigration runner configuration safety[2m > [22mrejects schema "public" before opening a database connection
+ [32m✓[39m src/__tests__/migration-runner-config.test.ts[2m > [22mmigration runner configuration safety[2m > [22mrejects schema "symphony; DROP SCHEMA public CASCADE" before opening a database connection
+ [32m✓[39m src/__tests__/migration-runner-config.test.ts[2m > [22mmigration runner configuration safety[2m > [22mrejects schema "\"symphony\"" before opening a database connection
+
+[2m Test Files [22m [1m[32m3 passed[39m[22m[90m (3)[39m
+[2m      Tests [22m [1m[32m14 passed[39m[22m[90m (14)[39m
+[2m   Start at [22m 05:57:53
+[2m   Duration [22m 2.01s[2m (transform 66ms, setup 0ms, collect 87ms, tests 1.54s, environment 0ms, prepare 109ms)[22m
+
+npm notice run symphony-prototype@1.0.0 test:bdd:phase0
+npm notice run cross-env NODE_OPTIONS=--import=tsx npx cucumber-js --config cucumber.cjs --profile default --tags "@phase0 and not @wip"
+npm notice run symphony-prototype@1.0.0 npx
+npm notice run 'cucumber-js' --config cucumber.cjs --profile default --tags @phase0 and not @wip
+
+
+0 scenarios
+0 steps
+0m 0.000s (0m 0.000s executing your code)
+npm notice run symphony-prototype@1.0.0 verify:trace
+npm notice run tsx tools/verify-trace.ts
+Running traceability gate...
+
+  Found 205 scenarios in features/.
+  174 are @wip (pending step definitions).
+  26 are @hard non-@wip (must have step definitions).
+  ✅ All @REQ-xxx tags match known codes.
+  ✅ 26 @hard non-@wip scenario(s) covered by 7 step-definition file(s): auth-steps.ts, authz-steps.ts, data-mode-steps.ts, kernel-steps.ts, privacy-steps.ts, workspace-path.ts, workspace-steps.ts.
+     (Authoritative coverage check: npm run test:bdd)
+
+✅ Traceability gate passed.
+npm notice run symphony-prototype@1.0.0 test:a11y
+npm notice run node tools/run_e2e.mjs tests/workspace/a11y.spec.ts
+
+Running 1 test using 1 worker
+
+  ✓  1 [chromium] › tests/workspace/a11y.spec.ts:22:3 › /components placeholder page — a11y › Phase 0 scaffold has zero axe violations (1.5s)
+
+  1 passed (8.4s)
+npm notice run symphony-prototype@1.0.0 verify:legacy-floor
+npm notice run npm run build && npm run verify:oracle && npm run verify:help && npm run verify:bundle && npm run test
+npm notice run symphony-prototype@1.0.0 build
+npm notice run tsc --noEmit && vite build
+[36mvite v5.4.21 [32mbuilding for production...[36m[39m
+transforming...
+[32m✓[39m 1640 modules transformed.
+rendering chunks...
+computing gzip size...
+[2mdist/[22m[32mindex.html                 [39m[1m[2m  0.44 kB[22m[1m[22m[2m │ gzip:   0.31 kB[22m
+[2mdist/[22m[2massets/[22m[35mindex-CUbEzOSE.css  [39m[1m[2m 17.90 kB[22m[1m[22m[2m │ gzip:   4.40 kB[22m
+[2mdist/[22m[2massets/[22m[36mindex-DjKOmytQ.js   [39m[1m[33m511.06 kB[39m[22m[2m │ gzip: 127.35 kB[22m
+[33m
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.[39m
+[32m✓ built in 6.10s[39m
+npm notice run symphony-prototype@1.0.0 verify:oracle
+npm notice run node tools/run_python_tool.js tools/reference_oracle.py
+OK: 10 cases x 3 destinations match expected-results.json; data integrity clean.
+npm notice run symphony-prototype@1.0.0 verify:help
+npm notice run node tools/run_python_tool.js tools/validate_help.py
+OK: 91 help entries, 23 tour steps, 8 required visible texts.
+npm notice run symphony-prototype@1.0.0 verify:bundle
+npm notice run node tools/run_python_tool.js tools/verify_bundle.py
+[1/3] Checking dist/ directory existence and file exclusions...
+[2/3] Checking for forbidden financial institution terms...
+[3/3] Checking bundle content cleanliness...
+OK: Bundle sanitized, zero forbidden files, zero forbidden terms.
+npm notice run symphony-prototype@1.0.0 test
+npm notice run vitest run
+
+[1m[7m[36m RUN [39m[27m[22m [36mv2.1.9 [39m[90m/home/runner/work/CooperativeManagement/CooperativeManagement[39m
+
+ [32m✓[39m tests/contracts.test.ts [2m([22m[2m21 tests[22m[2m)[22m[90m 36[2mms[22m[39m
+ [32m✓[39m tests/eqs_scoring.test.ts [2m([22m[2m47 tests[22m[2m)[22m[90m 63[2mms[22m[39m
+ [32m✓[39m tests/persistence_integrity.test.ts [2m([22m[2m24 tests[22m[2m)[22m[90m 67[2mms[22m[39m
+ [32m✓[39m tests/engine.test.ts [2m([22m[2m24 tests[22m[2m)[22m[90m 60[2mms[22m[39m
+ [32m✓[39m tests/evidence_transitions.test.ts [2m([22m[2m12 tests[22m[2m)[22m[90m 17[2mms[22m[39m
+ [32m✓[39m tests/tooling/phase1_contracts.test.ts [2m([22m[2m107 tests[22m[2m)[22m[33m 765[2mms[22m[39m
+ [32m✓[39m tests/promote_security.test.ts [2m([22m[2m14 tests[22m[2m)[22m[90m 13[2mms[22m[39m
+ [32m✓[39m tests/tooling/phase0_scripts.test.ts [2m([22m[2m11 tests[22m[2m)[22m[90m 282[2mms[22m[39m
+ [32m✓[39m tests/inventory_consistency.test.ts [2m([22m[2m6 tests[22m[2m)[22m[90m 5[2mms[22m[39m
+ [32m✓[39m tests/crypto.test.ts [2m([22m[2m8 tests[22m[2m)[22m[90m 8[2mms[22m[39m
+ [32m✓[39m tests/assetSummary.test.ts [2m([22m[2m3 tests[22m[2m)[22m[90m 2[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m11 passed[39m[22m[90m (11)[39m
+[2m      Tests [22m [1m[32m277 passed[39m[22m[90m (277)[39m
+[2m   Start at [22m 05:58:17
+[2m   Duration [22m 1.48s[2m (transform 513ms, setup 0ms, collect 1.01s, tests 1.32s, environment 2ms, prepare 568ms)[22m
+

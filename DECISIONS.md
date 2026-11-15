@@ -39,7 +39,7 @@ This document records the architectural choices and resolutions made per `AGENT.
 - **Rationale:** The plan requires views to use injected results rather than recomputing inside views. Passing result maps makes that dependency explicit and keeps reducers deterministic.
 
 ## 9. Windows Runtime Tooling
-- **Decision:** This prototype is configured for the current Windows runtime (`node >=25 <27`, `npm >=11.6.2`) and uses `tools/run_python_tool.js` to invoke the bundled Codex Python runtime when `python` is not on PATH.
+- **Decision:** This prototype uses the exact approved Windows toolchain: Node.js `26.7.0` and npm `12.2.0`. These exact versions are enforced by `toolchain.json`, package metadata, lockfile, CI and the toolchain verifier. `tools/run_python_tool.js` invokes the bundled Codex Python runtime when `python` is not on PATH.
 - **Rationale:** The active workspace is `C:\Workspace\GitHub\Symphony\Prototype`, and the user directed Windows execution. The wrapper prefers `PYTHON` when supplied and otherwise falls back to the bundled local runtime.
 
 ## 10. Evidence Re-Supply Semantics

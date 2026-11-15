@@ -48,7 +48,8 @@ describe('Phase 0 script contracts', () => {
       expect(scripts[name], `${name} must be defined`).toContain(target);
       if (target.endsWith('.ts')) expect(existsSync(path.join(root, target))).toBe(true);
     }
-    expect(scripts['test:db:migrations']).toContain('tools/require_migration_test_db.mjs');
+    expect(scripts['test:db:migrations']).toContain('tools/run_migration_test_gate.mjs');
+    expect(scripts['test:db:migrations']).toContain('--env-file-if-exists=.env.local');
     expect(scripts['verify:legacy-floor']).toContain('npm run test');
     expect(scripts['verify:all']).toContain('npm run test:e2e');
   });
@@ -137,6 +138,16 @@ describe('Phase 0 script contracts', () => {
     expect(aggregate).not.toMatch(/--if-present|test:e2e|test:api|purge:seed|test:command/);
     expect(aggregate).not.toMatch(/npm run test:bdd(?=\s|$)/);
     expect(scripts['test:bdd:phase0']).toContain('@phase0 and not @wip');
+  });
+
+  it('routes migration checks through the isolated least-privilege role bootstrap contract', () => {
+    const gate = readFileSync(path.join(root, 'tools/run_migration_test_gate.mjs'), 'utf8');
+    expect(gate).toContain("from './phase0-migration-role.mjs'");
+    expect(gate).toContain('MIGRATION_TEST_DATABASE_URL: migrationUrl');
+    expect(gate).toContain("'REVOKE symphony_outbox_writer FROM symphony_migrator'");
+    expect(gate).toContain('DROP ROLE IF EXISTS');
+    expect(gate).toContain("spawnSync(command, args");
+    expect(gate).not.toMatch(/console\.(log|error)\([^\n]*(adminUrl|migrationUrl|temporaryPassword)/);
   });
 
   it('proves failure in a mandatory command stops later commands', () => {

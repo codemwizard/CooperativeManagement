@@ -7,8 +7,8 @@
 
 ## 1. Prerequisites
 
-- **Node.js:** `>= v20 LTS` (tested on Node v20 / v22)
-- **npm:** `>= 10`
+- **Node.js:** `26.7.0` (exact project runtime; see `.nvmrc`)
+- **npm:** `12.2.0` (exact project runtime; see `package.json` and `toolchain.json`)
 - **Python:** `>= 3.10` (required for bundle verification scanner)
 - **OS:** Linux, macOS, or Windows (PowerShell)
 

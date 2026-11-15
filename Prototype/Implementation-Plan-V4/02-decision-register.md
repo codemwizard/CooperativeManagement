@@ -298,7 +298,7 @@ Other targeted corrections are recorded in the v2.1 plan, versioned Phase 1 cont
 
 ### 6.4 Active toolchain pin (owner direction, 7 November 2026)
 
-The active repository toolchain is Node.js `26.7.0` and npm `12.2.0`. This direction supersedes npm `11.19.0` as the active expected version in repository metadata, the toolchain validator, CI setup, and current development documentation. Retained Phase 0/CI evidence that actually ran under npm `11.19.0` remains historical and must not be rewritten. Run `npm run verify:phase0` with Node `26.7.0` and npm `12.2.0` and retain a new result before using it as the current WP0.13 Phase 0 candidate pass.
+The active repository toolchain is exactly Node.js `26.7.0` and npm `12.2.0`. These exact versions are required by repository metadata, the toolchain validator, CI setup, and current development documentation. Historical Phase 0/CI evidence must preserve the runtime actually used in each run; do not rewrite those records. Run `npm run verify:phase0` with Node `26.7.0` and npm `12.2.0` and retain a new result before using it as the current WP0.13 Phase 0 candidate pass.
 
 ### 6.5 WP0 Baseline Closure and Phase 1 Authorization (owner decision, 7 November 2026)
 

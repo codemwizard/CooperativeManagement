@@ -12,7 +12,7 @@
 | Component | Target Requirement | Measured Environment | Status |
 |---|---|---|---|
 | **Node.js** | `>=25 <27` (`package.json`) | `v26.7.0` | ✅ In-spec |
-| **npm** | `>=11.6.2` (`package.json`) | `12.2.0` | ✅ In-spec |
+| **npm** | `12.2.0` (exact project requirement) | `12.2.0` | ✅ Exact match |
 | **Python** | Python 3.x | `3.14.0` | ✅ In-spec |
 | **TypeScript** | `^5.5.3` | `5.5.3` (`node_modules/typescript`) | ✅ In-spec |
 | **Playwright** | `^1.48.0` | `1.48.0` | ✅ In-spec |
