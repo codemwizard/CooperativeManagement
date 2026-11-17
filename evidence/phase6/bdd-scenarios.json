@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "phase": "original-phase-6",
+  "source": "Implementation-Plan-V4/06-phased-plan.md WP6.2 and REQ-AUD-007",
+  "policy": "This scenario remains mandatory original Phase 6 acceptance and is excluded from the Phase 1 manifest by owner-approved D-13 Option A.",
+  "decision": {
+    "id": "D-13",
+    "owner_decision": "Option A",
+    "date": "2026-11-17"
+  },
+  "scenarios": [
+    {
+      "id": "BDD-AUD-016",
+      "feature": "features/09_commands_audit_and_integrity.feature",
+      "proves": "Validation runs preserve the rule version used at execution.",
+      "phase": "original-phase-6"
+    }
+  ]
+}

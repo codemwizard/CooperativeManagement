@@ -1,0 +1,22 @@
+{
+  "version": 1,
+  "phase": "original-phase-6",
+  "source_manifest": "evidence/phase6/bdd-scenarios.json",
+  "rule": "Every Phase 6 manifest scenario has exactly one original-plan owner and an observable product path; the owner is an IMP-Px-WPy.z identifier, not a remediation graph node.",
+  "scenarios": [
+    {
+      "id": "BDD-AUD-016",
+      "feature": "features/09_commands_audit_and_integrity.feature",
+      "requirements": [
+        "REQ-AUD-007"
+      ],
+      "scenario": "Validation runs are immutable",
+      "owner_tasks": [
+        "IMP-P6-WP6.2"
+      ],
+      "required_path": "Original Phase 6 WP6.2 validation-run and rule-version persistence path: execute a run against rule version 3, commit rule version 4 through the real rule-update path, read the original run from PostgreSQL unchanged, and execute a new run that records version 4.",
+      "assertion_rule": "Execute the exact tagged scenario with observable persisted-state assertions; no mock, @wip, skip, fixture mutation or in-memory substitute.",
+      "phase1_disposition": "excluded_by_owner_approved_D-13_Option_A"
+    }
+  ]
+}

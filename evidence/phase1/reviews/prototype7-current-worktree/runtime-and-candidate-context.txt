@@ -1,0 +1,4 @@
+node=v26.7.0
+npm=11.19.0
+head=9919440c71e167050f8e011a6ed3a432e779eb66
+worktree=dirty; output is not candidate-pinned

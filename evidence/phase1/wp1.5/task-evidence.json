@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "task_id": "WP1.5",
+  "task_id": "REM-WP1.5",
   "status": {
     "implementation": "complete",
     "unit_test": "passed",
@@ -18,26 +18,54 @@
     "key_provider": "unknown"
   },
   "commands": [
-    { "command": "npm run verify:phase0", "result": "passed", "artifact": "evidence/phase1/wp1.5/ci/d7fbf5851b11b07b65bde36f062db7b21f487947/phase0/phase0-gate.raw.log" },
-    { "command": "node tools/bootstrap_wp1_5_database.mjs", "result": "passed", "artifact": "evidence/phase1/wp1.5/ci/d7fbf5851b11b07b65bde36f062db7b21f487947/database/role-bootstrap.raw.log" },
-    { "command": "npm run db:migrate:test", "result": "passed", "artifact": "evidence/phase1/wp1.5/ci/d7fbf5851b11b07b65bde36f062db7b21f487947/database/db-migrate.raw.log" },
-    { "command": "npm run test:db --workspace @symphony/db", "result": "passed", "artifact": "evidence/phase1/wp1.5/ci/d7fbf5851b11b07b65bde36f062db7b21f487947/database/db-integration.raw.log" },
-    { "command": "npm run test:bdd:wp1.5", "result": "passed", "artifact": "evidence/phase1/wp1.5/ci/d7fbf5851b11b07b65bde36f062db7b21f487947/database/bdd-wp1.5.raw.log" },
-    { "command": "node tools/finalize_wp1_5_database.mjs", "result": "passed", "artifact": "evidence/phase1/wp1.5/ci/d7fbf5851b11b07b65bde36f062db7b21f487947/database/role-finalizer.raw.log" },
-    { "command": "npm run verify:all", "result": "passed", "artifact": "evidence/phase1/wp1.5/ci/d7fbf5851b11b07b65bde36f062db7b21f487947/legacy/verify-all.raw.log" }
+    {
+      "command": "npm run verify:phase0",
+      "result": "passed",
+      "artifact": "evidence/phase1/wp1.5/ci/d7fbf5851b11b07b65bde36f062db7b21f487947/phase0/phase0-gate.raw.log"
+    },
+    {
+      "command": "node tools/bootstrap_wp1_5_database.mjs",
+      "result": "passed",
+      "artifact": "evidence/phase1/wp1.5/ci/d7fbf5851b11b07b65bde36f062db7b21f487947/database/role-bootstrap.raw.log"
+    },
+    {
+      "command": "npm run db:migrate:test",
+      "result": "passed",
+      "artifact": "evidence/phase1/wp1.5/ci/d7fbf5851b11b07b65bde36f062db7b21f487947/database/db-migrate.raw.log"
+    },
+    {
+      "command": "npm run test:db --workspace @symphony/db",
+      "result": "passed",
+      "artifact": "evidence/phase1/wp1.5/ci/d7fbf5851b11b07b65bde36f062db7b21f487947/database/db-integration.raw.log"
+    },
+    {
+      "command": "npm run test:bdd:wp1.5",
+      "result": "passed",
+      "artifact": "evidence/phase1/wp1.5/ci/d7fbf5851b11b07b65bde36f062db7b21f487947/database/bdd-wp1.5.raw.log"
+    },
+    {
+      "command": "node tools/finalize_wp1_5_database.mjs",
+      "result": "passed",
+      "artifact": "evidence/phase1/wp1.5/ci/d7fbf5851b11b07b65bde36f062db7b21f487947/database/role-finalizer.raw.log"
+    },
+    {
+      "command": "npm run verify:all",
+      "result": "passed",
+      "artifact": "evidence/phase1/wp1.5/ci/d7fbf5851b11b07b65bde36f062db7b21f487947/legacy/verify-all.raw.log"
+    }
   ],
   "claims": {
-    "behavior_proved": "On the SHA-pinned CI candidate, clean PostgreSQL 18 installation applied migrations 0001-0013; migration integration tests covered replay, 0012-to-0013 upgrade, injected failure rollback and retry; all 11 database test files passed (58 tests), including the 55-table effective privilege/RLS matrix, missing/empty/mismatched tenant scope, cross-tenant reads/writes, pooled context reset, outbox function boundary, append-only rules and WP1.4 inbox grant preservation. BDD-AUD-005 passed 1 scenario/7 steps using the PostgreSQL-backed symphony_app path and denied access to Org B evidence by its known identifier under Org A context. The role finalizer verified temporary migrator membership was revoked. CI-1 through CI-7 regression checks passed in the migration, type/build, toolchain and workflow contract gates.",
-    "path_proved": "GitHub Actions run 43683206104 attempt 1, candidate d7fbf5851b11b07b65bde36f062db7b21f487947. The database job provisioned isolated PostgreSQL service roles, applied migrations, ran the complete @symphony/db suite and tagged WP1.5 BDD, then ran the always() role finalizer. The Phase 0 job and legacy verify-all job also completed successfully. Raw logs and phase0 CI metadata are retained under evidence/phase1/wp1.5/ci/d7fbf5851b11b07b65bde36f062db7b21f487947/.",
+    "behavior_proved": "On the SHA-pinned CI candidate, clean PostgreSQL 18 installation applied migrations 0001-0013; migration integration tests covered replay, 0012-to-0013 upgrade, injected failure rollback and retry; all 11 database test files passed (58 tests), including the 55-table effective privilege/RLS matrix, missing/empty/mismatched tenant scope, cross-tenant reads/writes, pooled context reset, outbox function boundary, append-only rules and REM-WP1.4 inbox grant preservation. BDD-AUD-005 passed 1 scenario/7 steps using the PostgreSQL-backed symphony_app path and denied access to Org B evidence by its known identifier under Org A context. The role finalizer verified temporary migrator membership was revoked. CI-1 through CI-7 regression checks passed in the migration, type/build, toolchain and workflow contract gates.",
+    "path_proved": "GitHub Actions run 43683206104 attempt 1, candidate d7fbf5851b11b07b65bde36f062db7b21f487947. The database job provisioned isolated PostgreSQL service roles, applied migrations, ran the complete @symphony/db suite and tagged REM-WP1.5 BDD, then ran the always() role finalizer. The Phase 0 job and legacy verify-all job also completed successfully. Raw logs and phase0 CI metadata are retained under evidence/phase1/wp1.5/ci/d7fbf5851b11b07b65bde36f062db7b21f487947/.",
     "configuration_proved": "Node 26.7.0, npm 12.2.0, PostgreSQL 18.0 (server_version_num=180000), isolated symphony_test CI service, DATA_MODE=test, CI bootstrap administrator, separate symphony_migrator and symphony_app identities, and finalizer-verified outbox-writer membership state. No credentials or connection strings are retained.",
     "coverage_limitations": [
-      "The Phase 0 gate's @phase0 BDD selection reported zero scenarios; the project Phase 0 command map documents that no enabled Phase 0 scenarios exist. WP1.5 behavior coverage is separately provided by BDD-AUD-005 (1/1 scenario, 7/7 steps).",
-      "The verify:all legacy E2E suite passed 35/35. WP5.3 API-backed login composition is not a WP1.5 criterion and remains owned by WP5.3.",
-      "Independent review is recorded separately and is not claimed by this implementation evidence. This WP1.5 task closure does not close Phase 1 or authorize WP1.6; its dependency graph remains authoritative."
+      "The Phase 0 gate's @phase0 BDD selection reported zero scenarios; the project Phase 0 command map documents that no enabled Phase 0 scenarios exist. REM-WP1.5 behavior coverage is separately provided by BDD-AUD-005 (1/1 scenario, 7/7 steps).",
+      "The verify:all legacy E2E suite passed 35/35. REM-WP5.3 API-backed login composition is not a REM-WP1.5 criterion and remains owned by REM-WP5.3.",
+      "Independent review is recorded separately and is not claimed by this implementation evidence. This REM-WP1.5 task closure does not close Phase 1 or authorize REM-WP1.6; its dependency graph remains authoritative."
     ]
   },
   "limitations": [
-    "This record closes WP1.5 only. It does not claim production readiness, Phase 1 closure, or satisfaction of WP1.6's other dependencies."
+    "This record closes REM-WP1.5 only. It does not claim production readiness, Phase 1 closure, or satisfaction of REM-WP1.6's other dependencies."
   ],
   "unresolved_decisions": [],
   "reviewer": "Implementation evidence reconciled by Codex from SHA-matched CI artifacts; independent reviewer not claimed."

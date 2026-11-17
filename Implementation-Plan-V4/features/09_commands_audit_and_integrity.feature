@@ -97,7 +97,7 @@ Feature: Commands, audit trail and integrity
     When a finding is recorded for version 1 against that assignment
     Then the database or command rejects it with reason "FINDING_VERSION_MISMATCH"
 
-  @REQ-AUD-002 @BDD-AUD-014 @hard
+  @REQ-AUD-008 @BDD-AUD-014 @hard
   Scenario: Authorisation is enforced on the server for every command
     When a command is sent with a forged role header
     Then the server uses the stored user, capacities and appointments
@@ -109,7 +109,7 @@ Feature: Commands, audit trail and integrity
     Then the event shows occurred_at two days ago and recorded_at now
     And ordering of events within the aggregate follows the aggregate version
 
-  @REQ-AUD-001 @BDD-AUD-016
+  @phase6 @REQ-AUD-007 @BDD-AUD-016 @INV-017
   Scenario: Validation runs are immutable
     Given a validation run recorded against rule version 3
     When the rule is updated to version 4

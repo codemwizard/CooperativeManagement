@@ -2,63 +2,600 @@
   "version": 1,
   "format": "JSON-compatible YAML; JSON parsing is normative",
   "tasks": {
-    "WP0.1": { "depends_on": [], "edge_reasons": {} },
-    "WP0.2": { "depends_on": ["WP0.1"], "edge_reasons": { "WP0.1": "The reconciliation command identity and non-reserving pre-acceptance boundary must be fixed before defining what a stale command retains." } },
-    "WP0.3": { "depends_on": [], "edge_reasons": {} },
-    "WP0.4": { "depends_on": [], "edge_reasons": {} },
-    "WP0.5": { "depends_on": ["WP0.3"], "edge_reasons": { "WP0.3": "Purge-role privileges and audit-table protection require the accepted application role and table grant boundary." } },
-    "WP0.6": { "depends_on": ["WP0.3"], "edge_reasons": { "WP0.3": "Demo server controls must use the same accepted role and tenant isolation boundary as other tenant mutations." } },
-    "WP0.7": { "depends_on": [], "edge_reasons": {} },
-    "WP0.8": { "depends_on": [], "edge_reasons": {} },
-    "WP0.9": { "depends_on": [], "edge_reasons": {} },
-    "WP0.10": { "depends_on": [], "edge_reasons": {} },
-    "WP0.11": { "depends_on": [], "edge_reasons": {} },
-    "WP0.12": { "depends_on": [], "edge_reasons": {} },
-    "WP0.13": { "depends_on": ["WP0.1", "WP0.2", "WP0.3", "WP0.4", "WP0.5", "WP0.6", "WP0.7", "WP0.8", "WP0.9", "WP0.10", "WP0.11", "WP0.12"], "edge_reasons": {
-      "WP0.1": "Closure requires the accepted command receipt, digest, replay and race contract.",
-      "WP0.2": "Closure requires the accepted reconciliation retention, access, expiry and backup contract.",
-      "WP0.3": "Closure requires the accepted tenant table and least-privilege database role contract.",
-      "WP0.4": "Closure requires the authority dependency inventory and revocation linearization contract.",
-      "WP0.5": "Closure requires the guarded purge target and durable audit boundary contract.",
-      "WP0.6": "Closure requires the server-enforced demo authorization contract.",
-      "WP0.7": "Closure requires the scoped privacy requirement map and legal assumption register.",
-      "WP0.8": "Closure requires source traceability for the temporary credential expiry default.",
-      "WP0.9": "Closure requires the frozen scenario list and mandatory Phase 1 gate contract.",
-      "WP0.10": "Closure requires ratified session security values before authentication implementation.",
-      "WP0.11": "Closure requires the accepted runtime and data-mode composition matrix.",
-      "WP0.12": "Closure requires validated common evidence records for task-level completion."
-    } },
-    "WP1.1": { "depends_on": ["WP0.1", "WP0.12", "WP0.13"], "edge_reasons": { "WP0.1": "Receipt persistence must implement the ratified receipt identity and replay semantics.", "WP0.12": "Receipt task completion must use the common evidence schema.", "WP0.13": "Command implementation is blocked until the complete technical baseline is approved." } },
-    "WP1.2": { "depends_on": ["WP1.1", "WP0.3", "WP0.4"], "edge_reasons": { "WP1.1": "The transaction adapter and receipt DB mapping must carry forward migration 0009, its versioned safe-result contract, and its tenant-scoped uniqueness; WP1.2 adds the separate pre-acceptance security-attempt path.", "WP0.3": "WP0.3 fixes the tenant-role/RLS contract that the adapter must preserve. WP1.2 exercises transaction behavior with isolated migration/test credentials and claims no app-role or RLS proof; WP1.5 owns those runtime grants and policies.", "WP0.4": "The transaction context must honor the accepted mutable-authority dependency inventory and common lock order established by WP0.4; WP1.2 establishes context propagation but does not implement WP2 authority models." } },
-    "WP1.3": { "depends_on": ["WP1.2"], "edge_reasons": { "WP1.2": "Fault injection and concurrency behavior require the PostgreSQL transaction adapter." } },
-    "WP1.4": { "depends_on": ["WP0.2", "WP1.1", "WP1.2", "WP1.3"], "edge_reasons": { "WP0.2": "Inbox fields and lifecycle implement the reconciliation contract.", "WP1.1": "Inbox rows are created only for accepted terminal stale-command outcomes.", "WP1.2": "Inbox persistence shares the receipt transaction boundary.", "WP1.3": "Terminal-conflict receipt/inbox writes use the established bounded retry and fresh-connection uncertain-commit recovery contract; WP1.4 closes WP1.3's unproven live COMMIT connection-loss evidence." } },
-    "WP1.7": { "depends_on": ["WP1.4", "WP1.5", "WP2.2"], "edge_reasons": { "WP1.4": "Authorization is applied to persisted inbox lifecycle and records.", "WP1.5": "Inbox authorization and cross-tenant non-disclosure require the complete restricted-role RLS and grant boundary.", "WP2.2": "Original-actor checks and officer takeover require current persisted membership and trusted authority loading." } },
-    "WP1.5": { "depends_on": ["WP0.3", "WP1.2", "WP1.4"], "edge_reasons": { "WP0.3": "RLS policies and grants must match the accepted table-role contract.", "WP1.2": "The adapter's existing tenant-context composition must be brought into line with the accepted app.tenant_id contract and proved against PostgreSQL.", "WP1.4": "Migration 0013 must grant the inbox table created by WP1.4 migration 0012, and the WP1.5 role matrix must preserve its tested SELECT/INSERT/UPDATE, no-DELETE boundary." } },
-    "WP1.6": { "depends_on": ["WP1.1", "WP1.2", "WP1.3", "WP1.4", "WP1.7", "WP1.5", "WP2.2", "WP5.3"], "edge_reasons": { "WP1.1": "The API facade invokes the accepted command and receipt contract.", "WP1.2": "The facade uses the integrated PostgreSQL transaction path.", "WP1.3": "The facade must preserve transaction fault and retry semantics.", "WP1.4": "Stale commands exposed through the facade must persist reconciliation data.", "WP1.7": "The facade inbox operations require current persisted authority.", "WP1.5": "The facade must enforce tenant context at the database boundary.", "WP2.2": "The facade must use verified actor and tenant authorization context.", "WP5.3": "The HTTP command route must authenticate through persisted-session middleware; a caller-provided or test-only principal would bypass the production boundary." } },
-    "WP2.1": { "depends_on": ["WP0.4"], "edge_reasons": { "WP0.4": "The pure policy matrix uses the complete authority dependency and revocation model; it has no database integration dependency." } },
-    "WP2.2": { "depends_on": ["WP1.1", "WP1.2", "WP1.5", "WP2.1"], "edge_reasons": { "WP1.1": "Capacity mutations use command identity and receipt semantics.", "WP1.2": "Capacity mutations need atomic PostgreSQL transaction behavior.", "WP1.5": "Persisted capacity and membership records require tenant isolation.", "WP2.1": "Capacity writes must apply the default-deny authorization policy." } },
-    "WP2.3": { "depends_on": ["WP2.2"], "edge_reasons": { "WP2.2": "Delegation extends the persisted capacity model and its actor authority." } },
-    "WP2.4": { "depends_on": ["WP0.4", "WP2.1", "WP2.2", "WP2.3"], "edge_reasons": { "WP0.4": "Race tests must enforce the ratified revocation linearization rule.", "WP2.1": "Race tests exercise the policy decisions under revocation.", "WP2.2": "Capacity grant and revoke state is the primary mutable authority dependency.", "WP2.3": "Delegation creates additional mutable authority dependencies to serialize." } },
-    "WP2.5": { "depends_on": ["WP2.1", "WP2.2", "WP2.3", "WP2.4"], "edge_reasons": { "WP2.1": "Policy evolution must preserve default-deny decisions.", "WP2.2": "Policy version persistence depends on the implemented capacity records.", "WP2.3": "Policy evolution must account for delegated authority.", "WP2.4": "Policy version changes must be serialized against protected commands." } },
-    "WP3.1": { "depends_on": ["WP0.7", "WP0.9"], "edge_reasons": { "WP0.7": "Audience serializers are limited to the mapped privacy requirements.", "WP0.9": "Canary tests use the frozen privacy scenario and API contract IDs." } },
-    "WP3.6": { "depends_on": ["WP0.7"], "edge_reasons": { "WP0.7": "Generic field encryption is limited to fields required by mapped privacy and reconciliation requirements; no identifier vault or blind index is included." } },
-    "WP3.2": { "depends_on": ["WP3.6", "WP0.7", "WP1.2", "WP1.5"], "edge_reasons": { "WP3.6": "Identifier persistence reuses the generic encryption operation and does not redefine it.", "WP0.7": "Identifier persistence and matching are limited to mapped privacy requirements.", "WP1.2": "Encrypted identifier storage uses the established PostgreSQL transaction boundary.", "WP1.5": "Identifier reads and writes must be isolated by tenant RLS." } },
-    "WP3.3": { "depends_on": ["WP0.7", "WP1.2"], "edge_reasons": { "WP0.7": "Every persisted consent or retention field must map to an accepted privacy requirement and scenario.", "WP1.2": "Any justified privacy state mutation requires atomic persistence." } },
-    "WP3.4": { "depends_on": ["WP0.11", "WP3.2"], "edge_reasons": { "WP0.11": "Provider composition is selected by the ratified environment/data-mode matrix.", "WP3.2": "Provider lifecycle tests operate on the accepted encryption implementation." } },
-    "WP3.5": { "depends_on": ["WP0.11", "WP3.2", "WP3.4"], "edge_reasons": { "WP0.11": "Residency refusal is profile-specific under the accepted runtime matrix.", "WP3.2": "Real-data startup must reject an unapproved key provider.", "WP3.4": "Startup validation inspects the actually composed provider and its lifecycle state." } },
-    "WP4.1": { "depends_on": ["WP0.3", "WP0.5"], "edge_reasons": { "WP0.3": "Purge guard design uses the accepted application and database role model.", "WP0.5": "Target identity, allowlist and audit boundary implement the purge contract; this inventory/preflight task has no transaction implementation dependency." } },
-    "WP4.2": { "depends_on": ["WP4.1"], "edge_reasons": { "WP4.1": "The guarded purge/reseed operation starts after its target guards and table allowlist are proven; it owns a separate privileged database transaction and does not reuse the WP1.2 command transaction adapter." } },
-    "WP4.3": { "depends_on": ["WP4.2", "WP0.9"], "edge_reasons": { "WP4.2": "Reset behavior is verified only after the purge operation exists.", "WP0.9": "Reset acceptance is included in the frozen Phase 1 test and gate contract." } },
-    "WP5.1": { "depends_on": ["WP0.9", "WP0.10", "WP0.11", "WP1.1"], "edge_reasons": { "WP0.9": "Authentication routes and acceptance scenarios use the frozen API contract.", "WP0.10": "Session implementation follows ratified transport and security values.", "WP0.11": "Authentication composition must be valid for every runtime profile.", "WP1.1": "Authentication state changes use the accepted command/receipt boundary where commands apply." } },
-    "WP5.2": { "depends_on": ["WP5.1", "WP1.2"], "edge_reasons": { "WP5.1": "Credential issuance and login routes must exist before persistence is integrated.", "WP1.2": "Credential/session persistence uses the PostgreSQL transaction path." } },
-    "WP5.3": { "depends_on": ["WP0.10", "WP5.2", "WP2.2"], "edge_reasons": { "WP0.10": "Session lifetime, CSRF, revocation and rate limits must be ratified before coding.", "WP5.2": "Session policy operates on the persisted session implementation.", "WP2.2": "Forced-change authorization depends on verified actor and tenant context." } },
-    "WP5.4": { "depends_on": ["WP5.3", "WP6.1"], "edge_reasons": { "WP5.3": "Browser login must exercise the implemented session and forced-change policy.", "WP6.1": "Browser tests target the real workspace routes and shell." } },
-    "WP5.5": { "depends_on": ["WP5.2", "WP5.3", "WP5.4"], "edge_reasons": { "WP5.2": "Authentication acceptance depends on persisted credential behavior.", "WP5.3": "Authentication acceptance depends on the complete session security policy.", "WP5.4": "Final route acceptance requires actual browser-to-API behavior." } },
-    "WP6.1": { "depends_on": ["WP0.9"], "edge_reasons": { "WP0.9": "Workspace acceptance uses the frozen route and accessibility scenario contracts." } },
-    "WP6.2": { "depends_on": ["WP0.6", "WP2.2", "WP6.1"], "edge_reasons": { "WP0.6": "Demo controls implement the server-side authorization boundary.", "WP2.2": "Demo operations require trusted actor and tenant authorization.", "WP6.1": "Demo controls are exposed only through the implemented workspace shell." } },
-    "WP6.3": { "depends_on": ["WP6.1"], "edge_reasons": { "WP6.1": "Accessibility acceptance is run against the Phase 1 workspace routes." } },
-    "WP7.1": { "depends_on": ["WP0.9", "WP0.12"], "edge_reasons": { "WP0.9": "CI command inventory and acceptance tags come from the approved gate contract.", "WP0.12": "CI evidence uses the common machine-validated evidence schema." } },
-    "WP7.2": { "depends_on": ["WP1.6", "WP2.5", "WP3.5", "WP4.3", "WP5.5", "WP6.3", "WP7.1"], "edge_reasons": { "WP1.6": "The final gate must include verified command API composition.", "WP2.5": "The final gate must include completed authorization and race behavior.", "WP3.5": "The final gate must include privacy and residency startup enforcement.", "WP4.3": "The final gate must include guarded purge and reset acceptance.", "WP5.5": "The final gate must include browser-to-API authentication acceptance.", "WP6.3": "The final gate must include route accessibility results.", "WP7.1": "The final workflow consumes the CI composition and evidence contract." } },
-    "WP8": { "depends_on": ["WP0.13", "WP7.2"], "edge_reasons": { "WP0.13": "Phase closure requires the signed contract baseline and approved dependency map.", "WP7.2": "Phase closure requires a passing integrated CI evidence artifact." } }
+    "REM-WP0.1": {
+      "plan_id": "phase1-remediation",
+      "title": "command/receipt contract",
+      "source": "Implementation-Plan-V4/implementation/PHASE-1-REMEDIATION-PLAN-v2.md",
+      "depends_on": [],
+      "edge_reasons": {}
+    },
+    "REM-WP0.2": {
+      "plan_id": "phase1-remediation",
+      "title": "reconciliation contract",
+      "source": "Implementation-Plan-V4/implementation/PHASE-1-REMEDIATION-PLAN-v2.md",
+      "depends_on": [
+        "REM-WP0.1"
+      ],
+      "edge_reasons": {
+        "REM-WP0.1": "The reconciliation command identity and non-reserving pre-acceptance boundary must be fixed before defining what a stale command retains."
+      }
+    },
+    "REM-WP0.3": {
+      "plan_id": "phase1-remediation",
+      "title": "tenant isolation",
+      "source": "Implementation-Plan-V4/implementation/PHASE-1-REMEDIATION-PLAN-v2.md",
+      "depends_on": [],
+      "edge_reasons": {}
+    },
+    "REM-WP0.4": {
+      "plan_id": "phase1-remediation",
+      "title": "authority serialization",
+      "source": "Implementation-Plan-V4/implementation/PHASE-1-REMEDIATION-PLAN-v2.md",
+      "depends_on": [],
+      "edge_reasons": {}
+    },
+    "REM-WP0.5": {
+      "plan_id": "phase1-remediation",
+      "title": "purge contract",
+      "source": "Implementation-Plan-V4/implementation/PHASE-1-REMEDIATION-PLAN-v2.md",
+      "depends_on": [
+        "REM-WP0.3"
+      ],
+      "edge_reasons": {
+        "REM-WP0.3": "Purge-role privileges and audit-table protection require the accepted application role and table grant boundary."
+      }
+    },
+    "REM-WP0.6": {
+      "plan_id": "phase1-remediation",
+      "title": "demo authorization",
+      "source": "Implementation-Plan-V4/implementation/PHASE-1-REMEDIATION-PLAN-v2.md",
+      "depends_on": [
+        "REM-WP0.3"
+      ],
+      "edge_reasons": {
+        "REM-WP0.3": "Demo server controls must use the same accepted role and tenant isolation boundary as other tenant mutations."
+      }
+    },
+    "REM-WP0.7": {
+      "plan_id": "phase1-remediation",
+      "title": "privacy mapping",
+      "source": "Implementation-Plan-V4/implementation/PHASE-1-REMEDIATION-PLAN-v2.md",
+      "depends_on": [],
+      "edge_reasons": {}
+    },
+    "REM-WP0.8": {
+      "plan_id": "phase1-remediation",
+      "title": "Credential lifetime source",
+      "source": "Implementation-Plan-V4/implementation/PHASE-1-REMEDIATION-PLAN-v2.md",
+      "depends_on": [],
+      "edge_reasons": {}
+    },
+    "REM-WP0.9": {
+      "plan_id": "phase1-remediation",
+      "title": "frozen BDD map",
+      "source": "Implementation-Plan-V4/implementation/PHASE-1-REMEDIATION-PLAN-v2.md",
+      "depends_on": [],
+      "edge_reasons": {}
+    },
+    "REM-WP0.10": {
+      "plan_id": "phase1-remediation",
+      "title": "Session security policy",
+      "source": "Implementation-Plan-V4/implementation/PHASE-1-REMEDIATION-PLAN-v2.md",
+      "depends_on": [],
+      "edge_reasons": {}
+    },
+    "REM-WP0.11": {
+      "plan_id": "phase1-remediation",
+      "title": "runtime profile matrix",
+      "source": "Implementation-Plan-V4/implementation/PHASE-1-REMEDIATION-PLAN-v2.md",
+      "depends_on": [],
+      "edge_reasons": {}
+    },
+    "REM-WP0.12": {
+      "plan_id": "phase1-remediation",
+      "title": "evidence schema and WP0.13 closure",
+      "source": "Implementation-Plan-V4/implementation/PHASE-1-REMEDIATION-PLAN-v2.md",
+      "depends_on": [],
+      "edge_reasons": {}
+    },
+    "REM-WP0.13": {
+      "plan_id": "phase1-remediation",
+      "title": "Contract baseline, dependency map and closure-review readiness",
+      "source": "Implementation-Plan-V4/implementation/PHASE-1-REMEDIATION-PLAN-v2.md",
+      "depends_on": [
+        "REM-WP0.1",
+        "REM-WP0.2",
+        "REM-WP0.3",
+        "REM-WP0.4",
+        "REM-WP0.5",
+        "REM-WP0.6",
+        "REM-WP0.7",
+        "REM-WP0.8",
+        "REM-WP0.9",
+        "REM-WP0.10",
+        "REM-WP0.11",
+        "REM-WP0.12"
+      ],
+      "edge_reasons": {
+        "REM-WP0.1": "Closure requires the accepted command receipt, digest, replay and race contract.",
+        "REM-WP0.2": "Closure requires the accepted reconciliation retention, access, expiry and backup contract.",
+        "REM-WP0.3": "Closure requires the accepted tenant table and least-privilege database role contract.",
+        "REM-WP0.4": "Closure requires the authority dependency inventory and revocation linearization contract.",
+        "REM-WP0.5": "Closure requires the guarded purge target and durable audit boundary contract.",
+        "REM-WP0.6": "Closure requires the server-enforced demo authorization contract.",
+        "REM-WP0.7": "Closure requires the scoped privacy requirement map and legal assumption register.",
+        "REM-WP0.8": "Closure requires source traceability for the temporary credential expiry default.",
+        "REM-WP0.9": "Closure requires the frozen scenario list and mandatory Phase 1 gate contract.",
+        "REM-WP0.10": "Closure requires ratified session security values before authentication implementation.",
+        "REM-WP0.11": "Closure requires the accepted runtime and data-mode composition matrix.",
+        "REM-WP0.12": "Closure requires validated common evidence records for task-level completion."
+      }
+    },
+    "REM-WP1.1": {
+      "plan_id": "phase1-remediation",
+      "title": "Receipt contract/storage shape",
+      "source": "Implementation-Plan-V4/implementation/PHASE-1-REMEDIATION-PLAN-v2.md",
+      "depends_on": [
+        "REM-WP0.1",
+        "REM-WP0.12",
+        "REM-WP0.13"
+      ],
+      "edge_reasons": {
+        "REM-WP0.1": "Receipt persistence must implement the ratified receipt identity and replay semantics.",
+        "REM-WP0.12": "Receipt task completion must use the common evidence schema.",
+        "REM-WP0.13": "Command implementation is blocked until the complete technical baseline is approved."
+      }
+    },
+    "REM-WP1.2": {
+      "plan_id": "phase1-remediation",
+      "title": "Transaction boundary",
+      "source": "Implementation-Plan-V4/implementation/PHASE-1-REMEDIATION-PLAN-v2.md",
+      "depends_on": [
+        "REM-WP1.1",
+        "REM-WP0.3",
+        "REM-WP0.4"
+      ],
+      "edge_reasons": {
+        "REM-WP1.1": "The transaction adapter and receipt DB mapping must carry forward migration 0009, its versioned safe-result contract, and its tenant-scoped uniqueness; REM-WP1.2 adds the separate pre-acceptance security-attempt path.",
+        "REM-WP0.3": "REM-WP0.3 fixes the tenant-role/RLS contract that the adapter must preserve. REM-WP1.2 exercises transaction behavior with isolated migration/test credentials and claims no app-role or RLS proof; REM-WP1.5 owns those runtime grants and policies.",
+        "REM-WP0.4": "The transaction context must honor the accepted mutable-authority dependency inventory and common lock order established by REM-WP0.4; REM-WP1.2 establishes context propagation but does not implement WP2 authority models."
+      }
+    },
+    "REM-WP1.3": {
+      "plan_id": "phase1-remediation",
+      "title": "Idempotency/concurrency/uncertain commit",
+      "source": "Implementation-Plan-V4/implementation/PHASE-1-REMEDIATION-PLAN-v2.md",
+      "depends_on": [
+        "REM-WP1.2"
+      ],
+      "edge_reasons": {
+        "REM-WP1.2": "Fault injection and concurrency behavior require the PostgreSQL transaction adapter."
+      }
+    },
+    "REM-WP1.4": {
+      "plan_id": "phase1-remediation",
+      "title": "Reconciliation persistence",
+      "source": "Implementation-Plan-V4/implementation/PHASE-1-REMEDIATION-PLAN-v2.md",
+      "depends_on": [
+        "REM-WP0.2",
+        "REM-WP1.1",
+        "REM-WP1.2",
+        "REM-WP1.3",
+        "REM-WP3.6"
+      ],
+      "edge_reasons": {
+        "REM-WP0.2": "Inbox fields and lifecycle implement the reconciliation contract.",
+        "REM-WP1.1": "Inbox rows are created only for accepted terminal stale-command outcomes.",
+        "REM-WP1.2": "Inbox persistence shares the receipt transaction boundary.",
+        "REM-WP1.3": "Terminal-conflict receipt/inbox writes use the established bounded retry and fresh-connection uncertain-commit recovery contract; REM-WP1.4 closes REM-WP1.3's unproven live COMMIT connection-loss evidence.",
+        "REM-WP3.6": "Persisted inbox fields require the separately specified and tested generic field-encryption operation; REM-WP3.6 does not include identifier vault or blind-index scope."
+      }
+    },
+    "REM-WP1.7": {
+      "plan_id": "phase1-remediation",
+      "title": "Reconciliation authorization",
+      "source": "Implementation-Plan-V4/implementation/PHASE-1-REMEDIATION-PLAN-v2.md",
+      "depends_on": [
+        "REM-WP1.4",
+        "REM-WP1.5",
+        "REM-WP2.2"
+      ],
+      "edge_reasons": {
+        "REM-WP1.4": "Authorization is applied to persisted inbox lifecycle and records.",
+        "REM-WP1.5": "Inbox authorization and cross-tenant non-disclosure require the complete restricted-role RLS and grant boundary.",
+        "REM-WP2.2": "Original-actor checks and officer takeover require current persisted membership and trusted authority loading."
+      }
+    },
+    "REM-WP1.5": {
+      "plan_id": "phase1-remediation",
+      "title": "Tenant isolation and runtime-role rollout",
+      "source": "Implementation-Plan-V4/implementation/PHASE-1-REMEDIATION-PLAN-v2.md",
+      "depends_on": [
+        "REM-WP0.3",
+        "REM-WP1.2",
+        "REM-WP1.4"
+      ],
+      "edge_reasons": {
+        "REM-WP0.3": "RLS policies and grants must match the accepted table-role contract.",
+        "REM-WP1.2": "The adapter's existing tenant-context composition must be brought into line with the accepted app.tenant_id contract and proved against PostgreSQL.",
+        "REM-WP1.4": "Migration 0013 must grant the inbox table created by REM-WP1.4 migration 0012, and the REM-WP1.5 role matrix must preserve its tested SELECT/INSERT/UPDATE, no-DELETE boundary."
+      }
+    },
+    "REM-WP1.6": {
+      "plan_id": "phase1-remediation",
+      "title": "Application composition/BDD",
+      "source": "Implementation-Plan-V4/implementation/PHASE-1-REMEDIATION-PLAN-v2.md",
+      "depends_on": [
+        "REM-WP1.1",
+        "REM-WP1.2",
+        "REM-WP1.3",
+        "REM-WP1.4",
+        "REM-WP1.5",
+        "REM-WP2.2",
+        "REM-WP5.3"
+      ],
+      "edge_reasons": {
+        "REM-WP1.1": "The API facade invokes the accepted command and receipt contract.",
+        "REM-WP1.2": "The facade uses the integrated PostgreSQL transaction path.",
+        "REM-WP1.3": "The facade must preserve transaction fault and retry semantics.",
+        "REM-WP1.4": "The facade returns the accepted persisted terminal-conflict result and opaque reconciliation reference without adding inbox access.",
+        "REM-WP1.5": "The facade must enforce tenant context at the database boundary.",
+        "REM-WP2.2": "The facade must use verified actor and tenant authorization context.",
+        "REM-WP5.3": "The HTTP command route must authenticate through persisted-session middleware; a caller-provided or test-only principal would bypass the production boundary."
+      }
+    },
+    "REM-WP2.1": {
+      "plan_id": "phase1-remediation",
+      "title": "Policy matrix",
+      "source": "Implementation-Plan-V4/implementation/PHASE-1-REMEDIATION-PLAN-v2.md",
+      "depends_on": [
+        "REM-WP0.4"
+      ],
+      "edge_reasons": {
+        "REM-WP0.4": "The pure policy matrix uses the complete authority dependency and revocation model; it has no database integration dependency."
+      }
+    },
+    "REM-WP2.2": {
+      "plan_id": "phase1-remediation",
+      "title": "Trusted authority loading",
+      "source": "Implementation-Plan-V4/implementation/PHASE-1-REMEDIATION-PLAN-v2.md",
+      "depends_on": [
+        "REM-WP1.1",
+        "REM-WP1.2",
+        "REM-WP1.5",
+        "REM-WP2.1"
+      ],
+      "edge_reasons": {
+        "REM-WP1.1": "Capacity mutations use command identity and receipt semantics.",
+        "REM-WP1.2": "Capacity mutations need atomic PostgreSQL transaction behavior.",
+        "REM-WP1.5": "Persisted capacity and membership records require tenant isolation.",
+        "REM-WP2.1": "Capacity writes must apply the default-deny authorization policy."
+      }
+    },
+    "REM-WP2.3": {
+      "plan_id": "phase1-remediation",
+      "title": "Capacity grant/revoke persistence",
+      "source": "Implementation-Plan-V4/implementation/PHASE-1-REMEDIATION-PLAN-v2.md",
+      "depends_on": [
+        "REM-WP2.2"
+      ],
+      "edge_reasons": {
+        "REM-WP2.2": "Delegation extends the persisted capacity model and its actor authority."
+      }
+    },
+    "REM-WP2.4": {
+      "plan_id": "phase1-remediation",
+      "title": "Authority race and history interpretation",
+      "source": "Implementation-Plan-V4/implementation/PHASE-1-REMEDIATION-PLAN-v2.md",
+      "depends_on": [
+        "REM-WP0.4",
+        "REM-WP2.1",
+        "REM-WP2.2",
+        "REM-WP2.3"
+      ],
+      "edge_reasons": {
+        "REM-WP0.4": "Race tests must enforce the ratified revocation linearization rule.",
+        "REM-WP2.1": "Race tests exercise the policy decisions under revocation.",
+        "REM-WP2.2": "Capacity grant and revoke state is the primary mutable authority dependency.",
+        "REM-WP2.3": "Delegation creates additional mutable authority dependencies to serialize."
+      }
+    },
+    "REM-WP2.5": {
+      "plan_id": "phase1-remediation",
+      "title": "Phase 1 BDD scope closure",
+      "source": "Implementation-Plan-V4/implementation/PHASE-1-REMEDIATION-PLAN-v2.md",
+      "depends_on": [
+        "REM-WP2.1",
+        "REM-WP2.2",
+        "REM-WP2.3",
+        "REM-WP2.4",
+        "REM-WP1.6"
+      ],
+      "edge_reasons": {
+        "REM-WP2.1": "BDD scope closeout requires the approved pure policy matrix and its unit evidence.",
+        "REM-WP2.2": "BDD scope closeout requires trusted persisted authority evidence for the mapped server-authorization scenario.",
+        "REM-WP2.3": "Capacity acceptance must include the persisted grant/revoke command behavior owned by this task.",
+        "REM-WP2.4": "Scope closure must include the in-scope authority race proof and its explicit limitations.",
+        "REM-WP1.6": "The Phase 1 server-authorization scenario requires the actual POST /commands API composition; scope closure consumes its passing scenario evidence and cannot claim a direct policy or facade test as API proof."
+      }
+    },
+    "REM-WP3.1": {
+      "plan_id": "phase1-remediation",
+      "title": "Audience disclosure and serialization",
+      "source": "Implementation-Plan-V4/implementation/PHASE-1-REMEDIATION-PLAN-v2.md",
+      "depends_on": [
+        "REM-WP0.7",
+        "REM-WP0.9"
+      ],
+      "edge_reasons": {
+        "REM-WP0.7": "Audience serializers are limited to the mapped privacy requirements.",
+        "REM-WP0.9": "Canary tests use the frozen privacy scenario and API contract IDs."
+      }
+    },
+    "REM-WP3.6": {
+      "plan_id": "phase1-remediation",
+      "title": "Generic field encryption (bounded prerequisite)",
+      "source": "Implementation-Plan-V4/implementation/PHASE-1-REMEDIATION-PLAN-v2.md",
+      "depends_on": [
+        "REM-WP0.7"
+      ],
+      "edge_reasons": {
+        "REM-WP0.7": "Generic field encryption is limited to fields required by mapped privacy and reconciliation requirements; no identifier vault or blind index is included."
+      }
+    },
+    "REM-WP3.2": {
+      "plan_id": "phase1-remediation",
+      "title": "Identifier encryption and blind index",
+      "source": "Implementation-Plan-V4/implementation/PHASE-1-REMEDIATION-PLAN-v2.md",
+      "depends_on": [
+        "REM-WP3.6",
+        "REM-WP0.7",
+        "REM-WP1.2",
+        "REM-WP1.5"
+      ],
+      "edge_reasons": {
+        "REM-WP3.6": "Identifier persistence reuses the generic encryption operation and does not redefine it.",
+        "REM-WP0.7": "Identifier persistence and matching are limited to mapped privacy requirements.",
+        "REM-WP1.2": "Encrypted identifier storage uses the established PostgreSQL transaction boundary.",
+        "REM-WP1.5": "Identifier reads and writes must be isolated by tenant RLS."
+      }
+    },
+    "REM-WP3.3": {
+      "plan_id": "phase1-remediation",
+      "title": "Minimum required privacy-state persistence (conditional scope)",
+      "source": "Implementation-Plan-V4/implementation/PHASE-1-REMEDIATION-PLAN-v2.md",
+      "depends_on": [
+        "REM-WP0.7",
+        "REM-WP1.2"
+      ],
+      "edge_reasons": {
+        "REM-WP0.7": "Every persisted consent or retention field must map to an accepted privacy requirement and scenario.",
+        "REM-WP1.2": "Any justified privacy state mutation requires atomic persistence."
+      }
+    },
+    "REM-WP3.4": {
+      "plan_id": "phase1-remediation",
+      "title": "Key lifecycle and shredding decision",
+      "source": "Implementation-Plan-V4/implementation/PHASE-1-REMEDIATION-PLAN-v2.md",
+      "depends_on": [
+        "REM-WP0.11",
+        "REM-WP3.2"
+      ],
+      "edge_reasons": {
+        "REM-WP0.11": "Provider composition is selected by the ratified environment/data-mode matrix.",
+        "REM-WP3.2": "Provider lifecycle tests operate on the accepted encryption implementation."
+      }
+    },
+    "REM-WP3.5": {
+      "plan_id": "phase1-remediation",
+      "title": "Residency and startup enforcement",
+      "source": "Implementation-Plan-V4/implementation/PHASE-1-REMEDIATION-PLAN-v2.md",
+      "depends_on": [
+        "REM-WP0.11",
+        "REM-WP3.2",
+        "REM-WP3.4"
+      ],
+      "edge_reasons": {
+        "REM-WP0.11": "Residency refusal is profile-specific under the accepted runtime matrix.",
+        "REM-WP3.2": "Real-data startup must reject an unapproved key provider.",
+        "REM-WP3.4": "Startup validation inspects the actually composed provider and its lifecycle state."
+      }
+    },
+    "REM-WP4.1": {
+      "plan_id": "phase1-remediation",
+      "title": "Target guard and table/audit inventory",
+      "source": "Implementation-Plan-V4/implementation/PHASE-1-REMEDIATION-PLAN-v2.md",
+      "depends_on": [
+        "REM-WP0.3",
+        "REM-WP0.5"
+      ],
+      "edge_reasons": {
+        "REM-WP0.3": "Purge guard design uses the accepted application and database role model.",
+        "REM-WP0.5": "Target identity, allowlist and audit boundary implement the purge contract; this inventory/preflight task has no transaction implementation dependency."
+      }
+    },
+    "REM-WP4.2": {
+      "plan_id": "phase1-remediation",
+      "title": "Transactional purge/reseed",
+      "source": "Implementation-Plan-V4/implementation/PHASE-1-REMEDIATION-PLAN-v2.md",
+      "depends_on": [
+        "REM-WP4.1"
+      ],
+      "edge_reasons": {
+        "REM-WP4.1": "The guarded purge/reseed operation starts after its target guards and table allowlist are proven; it owns a separate privileged database transaction and does not reuse the REM-WP1.2 command transaction adapter."
+      }
+    },
+    "REM-WP4.3": {
+      "plan_id": "phase1-remediation",
+      "title": "CLI and BDD",
+      "source": "Implementation-Plan-V4/implementation/PHASE-1-REMEDIATION-PLAN-v2.md",
+      "depends_on": [
+        "REM-WP4.2",
+        "REM-WP0.9"
+      ],
+      "edge_reasons": {
+        "REM-WP4.2": "Reset behavior is verified only after the purge operation exists.",
+        "REM-WP0.9": "Reset acceptance is included in the frozen Phase 1 test and gate contract."
+      }
+    },
+    "REM-WP5.1": {
+      "plan_id": "phase1-remediation",
+      "title": "Shared API contract/server composition",
+      "source": "Implementation-Plan-V4/implementation/PHASE-1-REMEDIATION-PLAN-v2.md",
+      "depends_on": [
+        "REM-WP0.9",
+        "REM-WP0.10",
+        "REM-WP0.11",
+        "REM-WP1.1"
+      ],
+      "edge_reasons": {
+        "REM-WP0.9": "Authentication routes and acceptance scenarios use the frozen API contract.",
+        "REM-WP0.10": "Session implementation follows ratified transport and security values.",
+        "REM-WP0.11": "Authentication composition must be valid for every runtime profile.",
+        "REM-WP1.1": "Authentication state changes use the accepted command/receipt boundary where commands apply."
+      }
+    },
+    "REM-WP5.2": {
+      "plan_id": "phase1-remediation",
+      "title": "Credential persistence/consumption",
+      "source": "Implementation-Plan-V4/implementation/PHASE-1-REMEDIATION-PLAN-v2.md",
+      "depends_on": [
+        "REM-WP5.1",
+        "REM-WP1.2"
+      ],
+      "edge_reasons": {
+        "REM-WP5.1": "Credential issuance and login routes must exist before persistence is integrated.",
+        "REM-WP1.2": "Credential/session persistence uses the PostgreSQL transaction path."
+      }
+    },
+    "REM-WP5.3": {
+      "plan_id": "phase1-remediation",
+      "title": "Sessions and forced-change authorization",
+      "source": "Implementation-Plan-V4/implementation/PHASE-1-REMEDIATION-PLAN-v2.md",
+      "depends_on": [
+        "REM-WP0.10",
+        "REM-WP5.2"
+      ],
+      "edge_reasons": {
+        "REM-WP0.10": "Session lifetime, CSRF, revocation, forced-change allowlist and abuse controls must be ratified before implementation.",
+        "REM-WP5.2": "Session policy operates on the persisted credential/session implementation."
+      }
+    },
+    "REM-WP5.4": {
+      "plan_id": "phase1-remediation",
+      "title": "Workspace login/password UI",
+      "source": "Implementation-Plan-V4/implementation/PHASE-1-REMEDIATION-PLAN-v2.md",
+      "depends_on": [
+        "REM-WP5.3",
+        "REM-WP6.1"
+      ],
+      "edge_reasons": {
+        "REM-WP5.3": "Browser login must exercise the implemented session and forced-change policy.",
+        "REM-WP6.1": "Browser tests target the real workspace routes and shell."
+      }
+    },
+    "REM-WP5.5": {
+      "plan_id": "phase1-remediation",
+      "title": "BDD and regression",
+      "source": "Implementation-Plan-V4/implementation/PHASE-1-REMEDIATION-PLAN-v2.md",
+      "depends_on": [
+        "REM-WP5.2",
+        "REM-WP5.3",
+        "REM-WP5.4"
+      ],
+      "edge_reasons": {
+        "REM-WP5.2": "Authentication acceptance depends on persisted credential behavior.",
+        "REM-WP5.3": "Authentication acceptance depends on the complete session security policy.",
+        "REM-WP5.4": "Final route acceptance requires actual browser-to-API behavior."
+      }
+    },
+    "REM-WP6.1": {
+      "plan_id": "phase1-remediation",
+      "title": "Real routes and accessible shell",
+      "source": "Implementation-Plan-V4/implementation/PHASE-1-REMEDIATION-PLAN-v2.md",
+      "depends_on": [
+        "REM-WP0.9"
+      ],
+      "edge_reasons": {
+        "REM-WP0.9": "Workspace acceptance uses the frozen route and accessibility scenario contracts."
+      }
+    },
+    "REM-WP6.2": {
+      "plan_id": "phase1-remediation",
+      "title": "Demo controls and server authorization",
+      "source": "Implementation-Plan-V4/implementation/PHASE-1-REMEDIATION-PLAN-v2.md",
+      "depends_on": [
+        "REM-WP0.6",
+        "REM-WP2.2",
+        "REM-WP6.1"
+      ],
+      "edge_reasons": {
+        "REM-WP0.6": "Demo controls implement the server-side authorization boundary.",
+        "REM-WP2.2": "Demo operations require trusted actor and tenant authorization.",
+        "REM-WP6.1": "Demo controls are exposed only through the implemented workspace shell."
+      }
+    },
+    "REM-WP6.3": {
+      "plan_id": "phase1-remediation",
+      "title": "Capability and presentation acceptance",
+      "source": "Implementation-Plan-V4/implementation/PHASE-1-REMEDIATION-PLAN-v2.md",
+      "depends_on": [
+        "REM-WP6.1"
+      ],
+      "edge_reasons": {
+        "REM-WP6.1": "Accessibility acceptance is run against the Phase 1 workspace routes."
+      }
+    },
+    "REM-WP7.1": {
+      "plan_id": "phase1-remediation",
+      "title": "Gate command contract",
+      "source": "Implementation-Plan-V4/implementation/PHASE-1-REMEDIATION-PLAN-v2.md",
+      "depends_on": [
+        "REM-WP0.9",
+        "REM-WP0.12"
+      ],
+      "edge_reasons": {
+        "REM-WP0.9": "CI command inventory and acceptance tags come from the approved gate contract.",
+        "REM-WP0.12": "CI evidence uses the common machine-validated evidence schema."
+      }
+    },
+    "REM-WP7.2": {
+      "plan_id": "phase1-remediation",
+      "title": "CI composition/evidence",
+      "source": "Implementation-Plan-V4/implementation/PHASE-1-REMEDIATION-PLAN-v2.md",
+      "depends_on": [
+        "REM-WP1.6",
+        "REM-WP1.7",
+        "REM-WP2.5",
+        "REM-WP3.5",
+        "REM-WP4.3",
+        "REM-WP5.5",
+        "REM-WP6.3",
+        "REM-WP7.1"
+      ],
+      "edge_reasons": {
+        "REM-WP1.6": "The final gate must include verified command API composition.",
+        "REM-WP1.7": "The final gate must include current-authority reconciliation-inbox access and non-disclosure proofs.",
+        "REM-WP2.5": "The final gate must include completed authorization and race behavior.",
+        "REM-WP3.5": "The final gate must include privacy and residency startup enforcement.",
+        "REM-WP4.3": "The final gate must include guarded purge and reset acceptance.",
+        "REM-WP5.5": "The final gate must include browser-to-API authentication acceptance.",
+        "REM-WP6.3": "The final gate must include route accessibility results.",
+        "REM-WP7.1": "The final workflow consumes the CI composition and evidence contract."
+      }
+    },
+    "REM-WP8": {
+      "plan_id": "phase1-remediation",
+      "title": "Independent Phase 1 closure review",
+      "source": "Implementation-Plan-V4/implementation/PHASE-1-REMEDIATION-PLAN-v2.md",
+      "depends_on": [
+        "REM-WP0.13",
+        "REM-WP7.2"
+      ],
+      "edge_reasons": {
+        "REM-WP0.13": "Phase closure requires the signed contract baseline and approved dependency map.",
+        "REM-WP7.2": "Phase closure requires a passing integrated CI evidence artifact."
+      }
+    }
   }
 }

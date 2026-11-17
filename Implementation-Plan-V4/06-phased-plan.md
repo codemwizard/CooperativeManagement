@@ -48,7 +48,7 @@ Vertical slices, cooperative process first. Sizes: S ≤ 3 days, M ≤ 2 weeks, 
 | 1.8 | Test-data mode, purge-to-seed, residency switch, identifier guard | PRV-007 | M |
 | 1.9 | Workspace shell, routing, context bar, persona navigation, DemoPanel, login and password-change, `presentEvidence` skeleton, CapabilityGap, capability registry | UXW-001..004, EXT-001 | L |
 
-**Gate 1:** scenarios in features 09 and the privacy parts of 02 pass; roles and IFV capacity grantable and revocable with audit; no PII in any union/TA response; purge-to-seed works; `/components` accessible.
+**Gate 1:** all 41 scenarios in the owner-approved Phase 1 BDD manifest pass with no skip, filter, `@wip`, or zero discovery. This includes the mapped feature 09 and privacy scenarios; `@phase6` BDD-AUD-016 is excluded from this gate by D-13 Option A and remains mandatory under original Phase 6 WP6.2. Roles and IFV capacity are grantable and revocable with audit; no PII in any union/TA response; purge-to-seed works; `/components` is accessible.
 
 ## Phase 2 — Cooperative enrolment and evidence core, with the IFV
 
@@ -87,7 +87,7 @@ WPs: 5.1 meetings, eligible-population and rule snapshots, attendance, quorum co
 ## Phase 6 — Compliance, findings, next actions
 
 WPs: 6.1 audit engagements and reports, education and training records, annual return filings (separate from certificate); 6.2 validation runs (immutable), findings catalogue (`03` §11), next-action ranking; 6.3 Overview tiles, Findings screen; 6.4 requirement status projection across dimensions. REQ: ID-004, BYL-005, UXW-002..005.
-**Gate 6:** every finding rule has a scenario; ranking table tests green; no score on any readiness surface.
+**Gate 6:** every finding rule has a scenario; ranking table tests green; no score on any readiness surface; BDD-AUD-016 proves validation-run rule-version immutability through original WP6.2's real validation-run and rule-update product paths.
 
 ## Phase 7 — Extension framework
 

@@ -1,7 +1,7 @@
 {
   "version": 1,
   "authority": "03-specification-delta.md §§8,13; PRV/ID/UNI requirements and exact BDD tags in Implementation-Plan-V4/features/02_identity_privacy_and_access.feature; owner/legal approval assumed by explicit user direction 2026-11-07.",
-  "rule": "Only fields explicitly required by an accepted scenario may be persisted. Candidate fields are not implementation authorization by themselves. A row marked no_current_entity is a WP3.3 design input; do not silently add a table or field.",
+  "rule": "Only fields explicitly required by an accepted scenario may be persisted. Candidate fields are not implementation authorization by themselves. A row marked no_current_entity is a REM-WP3.3 design input; do not silently add a table or field.",
   "mappings": [
     {
       "bdd_ids": [
@@ -25,7 +25,7 @@
       ],
       "lawful_basis": "Consent only for consent-dependent fields; do not treat as universal basis.",
       "retention": "Per-category retention_policies policy; no value inferred by this mapping.",
-      "status": "existing candidate schema; API/DB behavior belongs to WP3.3",
+      "status": "existing candidate schema; API/DB behavior belongs to REM-WP3.3",
       "requirements": [
         "REQ-PRV-001"
       ]
@@ -52,7 +52,7 @@
       ],
       "lawful_basis": "Withdrawal ends the specified consent basis only; independently sourced legal obligation is evaluated separately.",
       "retention": "Policy-controlled per data category, including recorded legal/retention conflict review.",
-      "status": "candidate state exists; transition/job behavior belongs to WP3.3/WP3.4",
+      "status": "candidate state exists; transition/job behavior belongs to REM-WP3.3/REM-WP3.4",
       "requirements": [
         "REQ-PRV-001"
       ]
@@ -81,7 +81,7 @@
       ],
       "lawful_basis": "Field-specific basis from the source-backed purpose; do not derive from the blind index.",
       "retention": "Identifier category policy; active/replica/backup behavior must be separately evidenced.",
-      "status": "existing schema candidate; ciphertext/provider and duplicate-review proof belongs to WP3.2",
+      "status": "existing schema candidate; ciphertext/provider and duplicate-review proof belongs to REM-WP3.2",
       "requirements": [
         "REQ-ID-005",
         "REQ-PRV-002"
@@ -105,7 +105,7 @@
       ],
       "lawful_basis": "Read authorization is not created by the existence of stored ciphertext.",
       "retention": "Underlying identifier category policy.",
-      "status": "projection/access contract; WP3.3 API response canaries and WP6.3 rendered views",
+      "status": "projection/access contract; REM-WP3.3 API response canaries and REM-WP6.3 rendered views",
       "requirements": [
         "REQ-PRV-003"
       ]
@@ -127,7 +127,7 @@
       ],
       "lawful_basis": "Not applicable to event/log payload; do not serialize personal fields.",
       "retention": "Event retention per audit policy; logs per operational policy, both without raw PII.",
-      "status": "serialization/logging boundary owned by WP3.1",
+      "status": "serialization/logging boundary owned by REM-WP3.1",
       "requirements": [
         "REQ-PRV-004"
       ]
@@ -154,7 +154,7 @@
       ],
       "lawful_basis": "No legal outcome is inferred; preserve source-scoped needs_legal_validation on unresolved exceptions.",
       "retention": "Per-category policy; numeric durations and exception outcomes must come from approved source/policy, not test fixture.",
-      "status": "policy/evidence map; provider lifecycle belongs to WP3.4; current local provider is not durable shred proof",
+      "status": "policy/evidence map; provider lifecycle belongs to REM-WP3.4; current local provider is not durable shred proof",
       "requirements": [
         "REQ-PRV-005",
         "REQ-PRV-008"
@@ -178,7 +178,7 @@
       ],
       "lawful_basis": "Feature cites public statutory inspection and member inspection; owner/legal approval is assumed, and only scenario-scoped fields are permitted.",
       "retention": "Inspection audit retention is policy-controlled; log inspector and receipt reference only where the scenario requires, no other members' PII.",
-      "status": "member inspection session/policy needs WP3.3 mapping; visible route and assertions belong to WP6.3",
+      "status": "member inspection session/policy needs REM-WP3.3 mapping; visible route and assertions belong to REM-WP6.3",
       "requirements": [
         "REQ-PRV-006"
       ]
@@ -201,7 +201,7 @@
       ],
       "lawful_basis": "Synthetic-only control, not a claim about real-data identity validity.",
       "retention": "Test fixture lifecycle; no real identity data is permitted.",
-      "status": "domain/API validation belongs to WP3.1; do not treat client validation as enforcement",
+      "status": "domain/API validation belongs to REM-WP3.1; do not treat client validation as enforcement",
       "requirements": [
         "REQ-PRV-007",
         "REQ-PRV-009"
@@ -223,7 +223,7 @@
       ],
       "lawful_basis": "Approved-region source/configuration must be recorded; no region value invented here.",
       "retention": "Not applicable to startup configuration.",
-      "status": "WP3.5 startup composition",
+      "status": "REM-WP3.5 startup composition",
       "requirements": [
         "REQ-PRV-007"
       ]
@@ -244,7 +244,7 @@
       ],
       "lawful_basis": "Synthetic disposable test data only.",
       "retention": "Test database reset; successful audit remains durable according to operational policy.",
-      "status": "WP4.1/WP4.2; WP0.5 specifies target/role/table contract",
+      "status": "REM-WP4.1/REM-WP4.2; REM-WP0.5 specifies target/role/table contract",
       "requirements": [
         "REQ-PRV-007",
         "REQ-PRV-009"
@@ -269,7 +269,7 @@
       ],
       "lawful_basis": "Feature explicitly distinguishes statutory s.28 fields as legal_obligation from identifier consent; payment is external and only receipt reference is stored.",
       "retention": "Member-register and inspection-audit category policies; no numeric value inferred by this map.",
-      "status": "candidate fields are exactly those required by scenario, not approved schema; WP3.3 must map source/command/retention before persistence and WP6.3 exercises rendered route",
+      "status": "candidate fields are exactly those required by scenario, not approved schema; REM-WP3.3 must map source/command/retention before persistence and REM-WP6.3 exercises rendered route",
       "requirements": [
         "REQ-PRV-006",
         "REQ-PRV-010"
@@ -293,7 +293,7 @@
       ],
       "lawful_basis": "Scenario cites Act s.59(2); owner/legal validation is assumed for the supplied baseline only.",
       "retention": "Account/inspection evidence category policy; preserve source-specific holds/conflicts.",
-      "status": "no current entity or API; WP3.3 must not infer a generalized consent portal and WP6.3 owns route behavior",
+      "status": "no current entity or API; REM-WP3.3 must not infer a generalized consent portal and REM-WP6.3 owns route behavior",
       "requirements": [
         "REQ-PRV-011"
       ]

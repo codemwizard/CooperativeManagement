@@ -1,7 +1,7 @@
 {
   "version": 1,
-  "source": "53-table baseline migration inventory plus WP1.2 security_attempts and WP1.4 reconciliation_inbox; PostgreSQL 18.0 pg_constraint foreign-key catalog from symphony_phase1_test",
-  "status": "WP0 proposed, reviewable table/row allowlist; no destructive statements executed",
+  "source": "53-table baseline migration inventory plus REM-WP1.2 security_attempts and REM-WP1.4 reconciliation_inbox; PostgreSQL 18.0 pg_constraint foreign-key catalog from symphony_phase1_test",
+  "status": "REM-WP0 proposed, reviewable table/row allowlist; no destructive statements executed",
   "target": {
     "database": "symphony_phase1_test",
     "schema": "symphony",
@@ -126,7 +126,7 @@
     {
       "table": "reconciliation_inbox",
       "disposition": "delete_all_rows_in_marked_isolated_test_database",
-      "predicate": "TRUE only after DB marker/profile/role guard passes; encrypted payload follows WP1.4 lifecycle expiry before purge"
+      "predicate": "TRUE only after DB marker/profile/role guard passes; encrypted payload follows REM-WP1.4 lifecycle expiry before purge"
     },
     {
       "table": "consent_records",
@@ -331,7 +331,7 @@
   ],
   "audit_ledger": {
     "table": "purge_audit",
-    "status": "future WP4.2 control-plane table; never in delete allowlist; purge role cannot update/delete prior audit rows"
+    "status": "future REM-WP4.2 control-plane table; never in delete allowlist; purge role cannot update/delete prior audit rows"
   },
   "execution_constraints": [
     "Use individual DELETE statements in one transaction; no TRUNCATE, CASCADE, DROP SCHEMA, dynamic all-table discovery, or broad grant.",
@@ -339,7 +339,7 @@
     "Require exact migration inventory match; any new table without an explicit preserve/delete row policy fails before SQL.",
     "Write successful audit row in the same transaction as purge and deterministic reseed.",
     "Refusal audit must not mutate the target before the target is independently verified.",
-    "This candidate list must be reviewed against current migration SQL and foreign-key graph before WP0.5 can pass."
+    "This candidate list must be reviewed against current migration SQL and foreign-key graph before REM-WP0.5 can pass."
   ],
   "purge_role_contract": {
     "name": "symphony_phase1_purger",

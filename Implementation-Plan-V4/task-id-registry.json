@@ -1,0 +1,634 @@
+{
+  "version": 1,
+  "policy": {
+    "original": "IMP-Px-WPy.z (original product phase included)",
+    "remediation": "REM-WPy.z (with REM-WP8 reserved for the independent closure review milestone)",
+    "dependency_graph": "Phase 1 remediation only; no cross-plan edges without explicit reviewed rationale"
+  },
+  "original_tasks": [
+    {
+      "id": "IMP-P0-WP0.1",
+      "title": "Ratify ADRs; resolve O-12 to O-17; log ADR-001 (freeze lifted) in `DECISIONS.md` and mark legacy-only rules",
+      "plan_id": "implementation-plan-v4",
+      "source": "Implementation-Plan-V4/06-phased-plan.md"
+    },
+    {
+      "id": "IMP-P0-WP0.2",
+      "title": "Dev environment: Docker or local PostgreSQL, `docker-compose.yml`, CI with Postgres service, Node pin",
+      "plan_id": "implementation-plan-v4",
+      "source": "Implementation-Plan-V4/06-phased-plan.md"
+    },
+    {
+      "id": "IMP-P0-WP0.3",
+      "title": "Scaffold `packages/*`, `apps/*`, dependency-cruiser rules, tsconfig project references",
+      "plan_id": "implementation-plan-v4",
+      "source": "Implementation-Plan-V4/06-phased-plan.md"
+    },
+    {
+      "id": "IMP-P0-WP0.4",
+      "title": "Pack v0.1.1 → v0.2: fixes in `01` §5, new tables in `04` §4, migration 0001 rewritten",
+      "plan_id": "implementation-plan-v4",
+      "source": "Implementation-Plan-V4/06-phased-plan.md"
+    },
+    {
+      "id": "IMP-P0-WP0.5",
+      "title": "Legal catalogue seed: the two in-force instruments (Act No. 20 of 1998; SI 26 of 1999 with Forms 1–6), the §13 statutory seeds as `text_checked`, all other entries `needs_legal_validation`, Cap. 397 flagged `repealed instrument`; obtain the missing Act sections (O-20)",
+      "plan_id": "implementation-plan-v4",
+      "source": "Implementation-Plan-V4/06-phased-plan.md"
+    },
+    {
+      "id": "IMP-P0-WP0.6",
+      "title": "Run legacy `verify:all` and record baseline counts and timings",
+      "plan_id": "implementation-plan-v4",
+      "source": "Implementation-Plan-V4/06-phased-plan.md"
+    },
+    {
+      "id": "IMP-P0-WP0.7",
+      "title": "Trace tool and Cucumber harness; copy features, mark `@wip`; generate matrix",
+      "plan_id": "implementation-plan-v4",
+      "source": "Implementation-Plan-V4/06-phased-plan.md"
+    },
+    {
+      "id": "IMP-P0-WP0.8",
+      "title": "Synthetic fixture corpus: by-laws, identifiers (reserved range), minutes",
+      "plan_id": "implementation-plan-v4",
+      "source": "Implementation-Plan-V4/06-phased-plan.md"
+    },
+    {
+      "id": "IMP-P0-WP0.9",
+      "title": "Design tokens, `/components` page, a11y tooling",
+      "plan_id": "implementation-plan-v4",
+      "source": "Implementation-Plan-V4/06-phased-plan.md"
+    },
+    {
+      "id": "IMP-P1-WP1.1",
+      "title": "Command bus: envelope, idempotency, optimistic concurrency, atomic state+event+outbox",
+      "plan_id": "implementation-plan-v4",
+      "source": "Implementation-Plan-V4/06-phased-plan.md"
+    },
+    {
+      "id": "IMP-P1-WP1.2",
+      "title": "Tenancy and isolation",
+      "plan_id": "implementation-plan-v4",
+      "source": "Implementation-Plan-V4/06-phased-plan.md"
+    },
+    {
+      "id": "IMP-P1-WP1.3",
+      "title": "Event store (append-only), outbox worker stub",
+      "plan_id": "implementation-plan-v4",
+      "source": "Implementation-Plan-V4/06-phased-plan.md"
+    },
+    {
+      "id": "IMP-P1-WP1.4",
+      "title": "`testkit`, in-memory repository, repository contract suite on PostgreSQL",
+      "plan_id": "implementation-plan-v4",
+      "source": "Implementation-Plan-V4/06-phased-plan.md"
+    },
+    {
+      "id": "IMP-P1-WP1.5",
+      "title": "Authentication: users, sessions, temporary credentials, authentication events",
+      "plan_id": "implementation-plan-v4",
+      "source": "Implementation-Plan-V4/06-phased-plan.md"
+    },
+    {
+      "id": "IMP-P1-WP1.6",
+      "title": "Authorisation engine; default role/position/capacity catalogue (`03` §2.1); capacity grants including **Internal Field Verifier** and Field Agent; delegations",
+      "plan_id": "implementation-plan-v4",
+      "source": "Implementation-Plan-V4/06-phased-plan.md"
+    },
+    {
+      "id": "IMP-P1-WP1.7",
+      "title": "PII vault, KeyProvider (local), blind index, consent, masking serializer, retention policy table",
+      "plan_id": "implementation-plan-v4",
+      "source": "Implementation-Plan-V4/06-phased-plan.md"
+    },
+    {
+      "id": "IMP-P1-WP1.8",
+      "title": "Test-data mode, purge-to-seed, residency switch, identifier guard",
+      "plan_id": "implementation-plan-v4",
+      "source": "Implementation-Plan-V4/06-phased-plan.md"
+    },
+    {
+      "id": "IMP-P1-WP1.9",
+      "title": "Workspace shell, routing, context bar, persona navigation, DemoPanel, login and password-change, `presentEvidence` skeleton, CapabilityGap, capability registry",
+      "plan_id": "implementation-plan-v4",
+      "source": "Implementation-Plan-V4/06-phased-plan.md"
+    },
+    {
+      "id": "IMP-P2-WP2.1",
+      "title": "Organisation, certificate details, enrolment state machine, activation gate",
+      "plan_id": "implementation-plan-v4",
+      "source": "Implementation-Plan-V4/06-phased-plan.md"
+    },
+    {
+      "id": "IMP-P2-WP2.2",
+      "title": "Self-enroller placeholder scope (three acts), temporary-credential accounts, handover and closure",
+      "plan_id": "implementation-plan-v4",
+      "source": "Implementation-Plan-V4/06-phased-plan.md"
+    },
+    {
+      "id": "IMP-P2-WP2.3",
+      "title": "Assisted enrolment: enrolment sessions, representative presence, proxy entry, identity-check methods",
+      "plan_id": "implementation-plan-v4",
+      "source": "Implementation-Plan-V4/06-phased-plan.md"
+    },
+    {
+      "id": "IMP-P2-WP2.4",
+      "title": "Evidence core: items/versions (tracks C/R/X), support items, admissions, approvals, disputes",
+      "plan_id": "implementation-plan-v4",
+      "source": "Implementation-Plan-V4/06-phased-plan.md"
+    },
+    {
+      "id": "IMP-P2-WP2.5",
+      "title": "`computeStanding` with origins, audiences, stages; level projection; property tests",
+      "plan_id": "implementation-plan-v4",
+      "source": "Implementation-Plan-V4/06-phased-plan.md"
+    },
+    {
+      "id": "IMP-P2-WP2.6",
+      "title": "Observation attestation, platform checks, proxy-operator disclosure flag",
+      "plan_id": "implementation-plan-v4",
+      "source": "Implementation-Plan-V4/06-phased-plan.md"
+    },
+    {
+      "id": "IMP-P2-WP2.7",
+      "title": "IFV workflow: assignments, findings (exact version), conflict rules on `person_id`, revocation behaviour, assurance classes",
+      "plan_id": "implementation-plan-v4",
+      "source": "Implementation-Plan-V4/06-phased-plan.md"
+    },
+    {
+      "id": "IMP-P2-WP2.8",
+      "title": "Persons, identifiers, NRC duplicate review, fallback identifiers",
+      "plan_id": "implementation-plan-v4",
+      "source": "Implementation-Plan-V4/06-phased-plan.md"
+    },
+    {
+      "id": "IMP-P2-WP2.9",
+      "title": "Screens: enrolment, Setup Path, Evidence register, Provenance drawer v2, IFV workbench, status strip",
+      "plan_id": "implementation-plan-v4",
+      "source": "Implementation-Plan-V4/06-phased-plan.md"
+    },
+    {
+      "id": "IMP-P2-WP2.10",
+      "title": "Offline-tolerant replay test (design check only)",
+      "plan_id": "implementation-plan-v4",
+      "source": "Implementation-Plan-V4/06-phased-plan.md"
+    },
+    {
+      "id": "IMP-P3-WP3.1",
+      "title": "By-law documents and versions",
+      "plan_id": "implementation-plan-v4",
+      "source": "Implementation-Plan-V4/06-phased-plan.md"
+    },
+    {
+      "id": "IMP-P3-WP3.2",
+      "title": "Provisions (manual, import, AI-assisted) with confirmation",
+      "plan_id": "implementation-plan-v4",
+      "source": "Implementation-Plan-V4/06-phased-plan.md"
+    },
+    {
+      "id": "IMP-P3-WP3.3",
+      "title": "Precedence policy and held_draft",
+      "plan_id": "implementation-plan-v4",
+      "source": "Implementation-Plan-V4/06-phased-plan.md"
+    },
+    {
+      "id": "IMP-P3-WP3.4",
+      "title": "Legal catalogue and advisory routing",
+      "plan_id": "implementation-plan-v4",
+      "source": "Implementation-Plan-V4/06-phased-plan.md"
+    },
+    {
+      "id": "IMP-P3-WP3.5",
+      "title": "Requirement definitions and dimensions",
+      "plan_id": "implementation-plan-v4",
+      "source": "Implementation-Plan-V4/06-phased-plan.md"
+    },
+    {
+      "id": "IMP-P3-WP3.6",
+      "title": "Meeting, membership and resolution rules extraction",
+      "plan_id": "implementation-plan-v4",
+      "source": "Implementation-Plan-V4/06-phased-plan.md"
+    },
+    {
+      "id": "IMP-P3-WP3.7",
+      "title": "By-law and legal screens",
+      "plan_id": "implementation-plan-v4",
+      "source": "Implementation-Plan-V4/06-phased-plan.md"
+    },
+    {
+      "id": "IMP-P4-WP4.1",
+      "title": "Governance profile versions, bodies and positions",
+      "plan_id": "implementation-plan-v4",
+      "source": "Implementation-Plan-V4/06-phased-plan.md"
+    },
+    {
+      "id": "IMP-P4-WP4.2",
+      "title": "Appointments, events, vacancy/combined/unknown states and acting appointments",
+      "plan_id": "implementation-plan-v4",
+      "source": "Implementation-Plan-V4/06-phased-plan.md"
+    },
+    {
+      "id": "IMP-P4-WP4.3",
+      "title": "Combination rules with enforcement mode",
+      "plan_id": "implementation-plan-v4",
+      "source": "Implementation-Plan-V4/06-phased-plan.md"
+    },
+    {
+      "id": "IMP-P4-WP4.4",
+      "title": "Committees and memberships",
+      "plan_id": "implementation-plan-v4",
+      "source": "Implementation-Plan-V4/06-phased-plan.md"
+    },
+    {
+      "id": "IMP-P4-WP4.5",
+      "title": "Certificate officers as history",
+      "plan_id": "implementation-plan-v4",
+      "source": "Implementation-Plan-V4/06-phased-plan.md"
+    },
+    {
+      "id": "IMP-P4-WP4.6",
+      "title": "Governance screens",
+      "plan_id": "implementation-plan-v4",
+      "source": "Implementation-Plan-V4/06-phased-plan.md"
+    },
+    {
+      "id": "IMP-P5-WP5.1",
+      "title": "Meetings, eligible-population and rule snapshots, attendance and quorum",
+      "plan_id": "implementation-plan-v4",
+      "source": "Implementation-Plan-V4/06-phased-plan.md"
+    },
+    {
+      "id": "IMP-P5-WP5.2",
+      "title": "Track R duty process, minutes versions and approvals",
+      "plan_id": "implementation-plan-v4",
+      "source": "Implementation-Plan-V4/06-phased-plan.md"
+    },
+    {
+      "id": "IMP-P5-WP5.3",
+      "title": "Resolutions, held_draft and idempotent atomic effects",
+      "plan_id": "implementation-plan-v4",
+      "source": "Implementation-Plan-V4/06-phased-plan.md"
+    },
+    {
+      "id": "IMP-P5-WP5.4",
+      "title": "By-law amendment flow to submitted state",
+      "plan_id": "implementation-plan-v4",
+      "source": "Implementation-Plan-V4/06-phased-plan.md"
+    },
+    {
+      "id": "IMP-P5-WP5.5",
+      "title": "Action items",
+      "plan_id": "implementation-plan-v4",
+      "source": "Implementation-Plan-V4/06-phased-plan.md"
+    },
+    {
+      "id": "IMP-P5-WP5.6",
+      "title": "Meeting and duty-process screens",
+      "plan_id": "implementation-plan-v4",
+      "source": "Implementation-Plan-V4/06-phased-plan.md"
+    },
+    {
+      "id": "IMP-P6-WP6.1",
+      "title": "Audit engagements/reports, education/training records and annual returns",
+      "plan_id": "implementation-plan-v4",
+      "source": "Implementation-Plan-V4/06-phased-plan.md"
+    },
+    {
+      "id": "IMP-P6-WP6.2",
+      "title": "Validation runs with immutable rule snapshots and findings catalogue",
+      "plan_id": "implementation-plan-v4",
+      "source": "Implementation-Plan-V4/06-phased-plan.md"
+    },
+    {
+      "id": "IMP-P6-WP6.3",
+      "title": "Overview tiles and findings screen",
+      "plan_id": "implementation-plan-v4",
+      "source": "Implementation-Plan-V4/06-phased-plan.md"
+    },
+    {
+      "id": "IMP-P6-WP6.4",
+      "title": "Requirement status projection across dimensions",
+      "plan_id": "implementation-plan-v4",
+      "source": "Implementation-Plan-V4/06-phased-plan.md"
+    },
+    {
+      "id": "IMP-P7-WP7.1",
+      "title": "Module registry and contract",
+      "plan_id": "implementation-plan-v4",
+      "source": "Implementation-Plan-V4/06-phased-plan.md"
+    },
+    {
+      "id": "IMP-P7-WP7.2",
+      "title": "Indicator framework and one test indicator",
+      "plan_id": "implementation-plan-v4",
+      "source": "Implementation-Plan-V4/06-phased-plan.md"
+    },
+    {
+      "id": "IMP-P7-WP7.3",
+      "title": "Operational and ESG module stubs with visible not_implemented gaps",
+      "plan_id": "implementation-plan-v4",
+      "source": "Implementation-Plan-V4/06-phased-plan.md"
+    },
+    {
+      "id": "IMP-P7-WP7.4",
+      "title": "EQS/ESG Index adapters over projections with fixture parity",
+      "plan_id": "implementation-plan-v4",
+      "source": "Implementation-Plan-V4/06-phased-plan.md"
+    },
+    {
+      "id": "IMP-P7-WP7.5",
+      "title": "Extension and index documentation",
+      "plan_id": "implementation-plan-v4",
+      "source": "Implementation-Plan-V4/06-phased-plan.md"
+    }
+  ],
+  "remediation_tasks": [
+    {
+      "id": "REM-WP0.1",
+      "title": "command/receipt contract",
+      "plan_id": "phase1-remediation",
+      "source": "Implementation-Plan-V4/implementation/PHASE-1-REMEDIATION-PLAN-v2.md"
+    },
+    {
+      "id": "REM-WP0.2",
+      "title": "reconciliation contract",
+      "plan_id": "phase1-remediation",
+      "source": "Implementation-Plan-V4/implementation/PHASE-1-REMEDIATION-PLAN-v2.md"
+    },
+    {
+      "id": "REM-WP0.3",
+      "title": "tenant isolation",
+      "plan_id": "phase1-remediation",
+      "source": "Implementation-Plan-V4/implementation/PHASE-1-REMEDIATION-PLAN-v2.md"
+    },
+    {
+      "id": "REM-WP0.4",
+      "title": "authority serialization",
+      "plan_id": "phase1-remediation",
+      "source": "Implementation-Plan-V4/implementation/PHASE-1-REMEDIATION-PLAN-v2.md"
+    },
+    {
+      "id": "REM-WP0.5",
+      "title": "purge contract",
+      "plan_id": "phase1-remediation",
+      "source": "Implementation-Plan-V4/implementation/PHASE-1-REMEDIATION-PLAN-v2.md"
+    },
+    {
+      "id": "REM-WP0.6",
+      "title": "demo authorization",
+      "plan_id": "phase1-remediation",
+      "source": "Implementation-Plan-V4/implementation/PHASE-1-REMEDIATION-PLAN-v2.md"
+    },
+    {
+      "id": "REM-WP0.7",
+      "title": "privacy mapping",
+      "plan_id": "phase1-remediation",
+      "source": "Implementation-Plan-V4/implementation/PHASE-1-REMEDIATION-PLAN-v2.md"
+    },
+    {
+      "id": "REM-WP0.8",
+      "title": "Credential lifetime source",
+      "plan_id": "phase1-remediation",
+      "source": "Implementation-Plan-V4/implementation/PHASE-1-REMEDIATION-PLAN-v2.md"
+    },
+    {
+      "id": "REM-WP0.9",
+      "title": "frozen BDD map",
+      "plan_id": "phase1-remediation",
+      "source": "Implementation-Plan-V4/implementation/PHASE-1-REMEDIATION-PLAN-v2.md"
+    },
+    {
+      "id": "REM-WP0.10",
+      "title": "Session security policy",
+      "plan_id": "phase1-remediation",
+      "source": "Implementation-Plan-V4/implementation/PHASE-1-REMEDIATION-PLAN-v2.md"
+    },
+    {
+      "id": "REM-WP0.11",
+      "title": "runtime profile matrix",
+      "plan_id": "phase1-remediation",
+      "source": "Implementation-Plan-V4/implementation/PHASE-1-REMEDIATION-PLAN-v2.md"
+    },
+    {
+      "id": "REM-WP0.12",
+      "title": "evidence schema and WP0.13 closure",
+      "plan_id": "phase1-remediation",
+      "source": "Implementation-Plan-V4/implementation/PHASE-1-REMEDIATION-PLAN-v2.md"
+    },
+    {
+      "id": "REM-WP0.13",
+      "title": "Contract baseline, dependency map and closure-review readiness",
+      "plan_id": "phase1-remediation",
+      "source": "Implementation-Plan-V4/implementation/PHASE-1-REMEDIATION-PLAN-v2.md"
+    },
+    {
+      "id": "REM-WP1.1",
+      "title": "Receipt contract/storage shape",
+      "plan_id": "phase1-remediation",
+      "source": "Implementation-Plan-V4/implementation/PHASE-1-REMEDIATION-PLAN-v2.md"
+    },
+    {
+      "id": "REM-WP1.2",
+      "title": "Transaction boundary",
+      "plan_id": "phase1-remediation",
+      "source": "Implementation-Plan-V4/implementation/PHASE-1-REMEDIATION-PLAN-v2.md"
+    },
+    {
+      "id": "REM-WP1.3",
+      "title": "Idempotency/concurrency/uncertain commit",
+      "plan_id": "phase1-remediation",
+      "source": "Implementation-Plan-V4/implementation/PHASE-1-REMEDIATION-PLAN-v2.md"
+    },
+    {
+      "id": "REM-WP1.4",
+      "title": "Reconciliation persistence",
+      "plan_id": "phase1-remediation",
+      "source": "Implementation-Plan-V4/implementation/PHASE-1-REMEDIATION-PLAN-v2.md"
+    },
+    {
+      "id": "REM-WP1.7",
+      "title": "Reconciliation authorization",
+      "plan_id": "phase1-remediation",
+      "source": "Implementation-Plan-V4/implementation/PHASE-1-REMEDIATION-PLAN-v2.md"
+    },
+    {
+      "id": "REM-WP1.5",
+      "title": "Tenant isolation and runtime-role rollout",
+      "plan_id": "phase1-remediation",
+      "source": "Implementation-Plan-V4/implementation/PHASE-1-REMEDIATION-PLAN-v2.md"
+    },
+    {
+      "id": "REM-WP1.6",
+      "title": "Application composition/BDD",
+      "plan_id": "phase1-remediation",
+      "source": "Implementation-Plan-V4/implementation/PHASE-1-REMEDIATION-PLAN-v2.md"
+    },
+    {
+      "id": "REM-WP2.1",
+      "title": "Policy matrix",
+      "plan_id": "phase1-remediation",
+      "source": "Implementation-Plan-V4/implementation/PHASE-1-REMEDIATION-PLAN-v2.md"
+    },
+    {
+      "id": "REM-WP2.2",
+      "title": "Trusted authority loading",
+      "plan_id": "phase1-remediation",
+      "source": "Implementation-Plan-V4/implementation/PHASE-1-REMEDIATION-PLAN-v2.md"
+    },
+    {
+      "id": "REM-WP2.3",
+      "title": "Capacity grant/revoke persistence",
+      "plan_id": "phase1-remediation",
+      "source": "Implementation-Plan-V4/implementation/PHASE-1-REMEDIATION-PLAN-v2.md"
+    },
+    {
+      "id": "REM-WP2.4",
+      "title": "Authority race and history interpretation",
+      "plan_id": "phase1-remediation",
+      "source": "Implementation-Plan-V4/implementation/PHASE-1-REMEDIATION-PLAN-v2.md"
+    },
+    {
+      "id": "REM-WP2.5",
+      "title": "Phase 1 BDD scope closure",
+      "plan_id": "phase1-remediation",
+      "source": "Implementation-Plan-V4/implementation/PHASE-1-REMEDIATION-PLAN-v2.md"
+    },
+    {
+      "id": "REM-WP3.1",
+      "title": "Audience disclosure and serialization",
+      "plan_id": "phase1-remediation",
+      "source": "Implementation-Plan-V4/implementation/PHASE-1-REMEDIATION-PLAN-v2.md"
+    },
+    {
+      "id": "REM-WP3.6",
+      "title": "Generic field encryption (bounded prerequisite)",
+      "plan_id": "phase1-remediation",
+      "source": "Implementation-Plan-V4/implementation/PHASE-1-REMEDIATION-PLAN-v2.md"
+    },
+    {
+      "id": "REM-WP3.2",
+      "title": "Identifier encryption and blind index",
+      "plan_id": "phase1-remediation",
+      "source": "Implementation-Plan-V4/implementation/PHASE-1-REMEDIATION-PLAN-v2.md"
+    },
+    {
+      "id": "REM-WP3.3",
+      "title": "Minimum required privacy-state persistence (conditional scope)",
+      "plan_id": "phase1-remediation",
+      "source": "Implementation-Plan-V4/implementation/PHASE-1-REMEDIATION-PLAN-v2.md"
+    },
+    {
+      "id": "REM-WP3.4",
+      "title": "Key lifecycle and shredding decision",
+      "plan_id": "phase1-remediation",
+      "source": "Implementation-Plan-V4/implementation/PHASE-1-REMEDIATION-PLAN-v2.md"
+    },
+    {
+      "id": "REM-WP3.5",
+      "title": "Residency and startup enforcement",
+      "plan_id": "phase1-remediation",
+      "source": "Implementation-Plan-V4/implementation/PHASE-1-REMEDIATION-PLAN-v2.md"
+    },
+    {
+      "id": "REM-WP4.1",
+      "title": "Target guard and table/audit inventory",
+      "plan_id": "phase1-remediation",
+      "source": "Implementation-Plan-V4/implementation/PHASE-1-REMEDIATION-PLAN-v2.md"
+    },
+    {
+      "id": "REM-WP4.2",
+      "title": "Transactional purge/reseed",
+      "plan_id": "phase1-remediation",
+      "source": "Implementation-Plan-V4/implementation/PHASE-1-REMEDIATION-PLAN-v2.md"
+    },
+    {
+      "id": "REM-WP4.3",
+      "title": "CLI and BDD",
+      "plan_id": "phase1-remediation",
+      "source": "Implementation-Plan-V4/implementation/PHASE-1-REMEDIATION-PLAN-v2.md"
+    },
+    {
+      "id": "REM-WP5.1",
+      "title": "Shared API contract/server composition",
+      "plan_id": "phase1-remediation",
+      "source": "Implementation-Plan-V4/implementation/PHASE-1-REMEDIATION-PLAN-v2.md"
+    },
+    {
+      "id": "REM-WP5.2",
+      "title": "Credential persistence/consumption",
+      "plan_id": "phase1-remediation",
+      "source": "Implementation-Plan-V4/implementation/PHASE-1-REMEDIATION-PLAN-v2.md"
+    },
+    {
+      "id": "REM-WP5.3",
+      "title": "Sessions and forced-change authorization",
+      "plan_id": "phase1-remediation",
+      "source": "Implementation-Plan-V4/implementation/PHASE-1-REMEDIATION-PLAN-v2.md"
+    },
+    {
+      "id": "REM-WP5.4",
+      "title": "Workspace login/password UI",
+      "plan_id": "phase1-remediation",
+      "source": "Implementation-Plan-V4/implementation/PHASE-1-REMEDIATION-PLAN-v2.md"
+    },
+    {
+      "id": "REM-WP5.5",
+      "title": "BDD and regression",
+      "plan_id": "phase1-remediation",
+      "source": "Implementation-Plan-V4/implementation/PHASE-1-REMEDIATION-PLAN-v2.md"
+    },
+    {
+      "id": "REM-WP6.1",
+      "title": "Real routes and accessible shell",
+      "plan_id": "phase1-remediation",
+      "source": "Implementation-Plan-V4/implementation/PHASE-1-REMEDIATION-PLAN-v2.md"
+    },
+    {
+      "id": "REM-WP6.2",
+      "title": "Demo controls and server authorization",
+      "plan_id": "phase1-remediation",
+      "source": "Implementation-Plan-V4/implementation/PHASE-1-REMEDIATION-PLAN-v2.md"
+    },
+    {
+      "id": "REM-WP6.3",
+      "title": "Capability and presentation acceptance",
+      "plan_id": "phase1-remediation",
+      "source": "Implementation-Plan-V4/implementation/PHASE-1-REMEDIATION-PLAN-v2.md"
+    },
+    {
+      "id": "REM-WP7.1",
+      "title": "Gate command contract",
+      "plan_id": "phase1-remediation",
+      "source": "Implementation-Plan-V4/implementation/PHASE-1-REMEDIATION-PLAN-v2.md"
+    },
+    {
+      "id": "REM-WP7.2",
+      "title": "CI composition/evidence",
+      "plan_id": "phase1-remediation",
+      "source": "Implementation-Plan-V4/implementation/PHASE-1-REMEDIATION-PLAN-v2.md"
+    },
+    {
+      "id": "REM-WP8",
+      "title": "Independent Phase 1 closure review",
+      "plan_id": "phase1-remediation",
+      "source": "Implementation-Plan-V4/implementation/PHASE-1-REMEDIATION-PLAN-v2.md"
+    }
+  ],
+  "crosswalks": [
+    {
+      "remediation_tasks": [
+        "REM-WP2.1",
+        "REM-WP2.2",
+        "REM-WP2.3",
+        "REM-WP2.4",
+        "REM-WP2.5"
+      ],
+      "original_tasks": [
+        "IMP-P1-WP1.6"
+      ],
+      "relationship": "These remediation tasks implement and verify the Phase 1 authorization-engine/capacity capability. This is traceability only, not a dependency edge or a claim that the original work package is closed.",
+      "source": "Implementation-Plan-V4/06-phased-plan.md; Implementation-Plan-V4/implementation/PHASE-1-REMEDIATION-PLAN-v2.md"
+    }
+  ]
+}

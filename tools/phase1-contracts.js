@@ -4,7 +4,7 @@ import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const WP0_IDS = Array.from({ length: 13 }, (_, index) => `WP0.${index + 1}`);
+const WP0_IDS = Array.from({ length: 13 }, (_, index) => `REM-WP0.${index + 1}`);
 const MANDATORY_GATE_SCRIPTS = [
   'verify:phase0', 'verify:phase1:contracts', 'typecheck:v4', 'verify:arch', 'test:unit',
   'test:db:migrations', 'test:db --workspace @symphony/db', 'test:api',
@@ -77,7 +77,10 @@ function graphErrors(graph) {
   if (!graph || graph.version !== 1 || !graph.tasks || typeof graph.tasks !== 'object') return ['dependency graph must contain version 1 and a tasks map'];
   for (const id of WP0_IDS) if (!(id in graph.tasks)) errors.push(`required task ${id} is missing from dependency graph`);
   for (const [id, task] of Object.entries(graph.tasks)) {
-    if (!/^WP\d+(?:\.\d+)?$/.test(id)) errors.push(`invalid task ID ${id}`);
+    if (!/^REM-WP\d+(?:\.\d+)?$/.test(id)) errors.push(`invalid task ID ${id}`);
+    if (task?.plan_id !== 'phase1-remediation' || typeof task?.title !== 'string' || task.title.trim().length < 3 || task?.source !== 'Implementation-Plan-V4/implementation/PHASE-1-REMEDIATION-PLAN-v2.md') {
+      errors.push(`${id} must identify the remediation plan, task title, and authoritative source document`);
+    }
     if (!task || !Array.isArray(task.depends_on) || !task.edge_reasons || typeof task.edge_reasons !== 'object') {
       errors.push(`${id} must declare depends_on and edge_reasons`);
       continue;
@@ -109,8 +112,59 @@ function graphErrors(graph) {
     visited.add(id);
   };
   for (const id of Object.keys(graph.tasks)) visit(id);
-  const aggregateDeps = graph.tasks['WP0.13']?.depends_on ?? [];
-  for (const id of WP0_IDS.slice(0, 12)) if (!aggregateDeps.includes(id)) errors.push(`WP0.13 must depend on ${id}`);
+  const aggregateDeps = graph.tasks['REM-WP0.13']?.depends_on ?? [];
+  for (const id of WP0_IDS.slice(0, 12)) if (!aggregateDeps.includes(id)) errors.push(`REM-WP0.13 must depend on ${id}`);
+  return [...new Set(errors)];
+}
+
+export function validateTaskIdRegistry(registry, graph) {
+  const errors = [];
+  if (!registry || registry.version !== 1 || !Array.isArray(registry.original_tasks)
+    || !Array.isArray(registry.remediation_tasks) || !Array.isArray(registry.crosswalks)) {
+    return ['task ID registry must declare original tasks, remediation tasks, and crosswalks'];
+  }
+  const checkUnique = (entries, pattern, label) => {
+    const seen = new Set();
+    for (const entry of entries) {
+      if (!pattern.test(entry?.id ?? '')) errors.push(`${label} has invalid canonical ID ${entry?.id}`);
+      if (seen.has(entry?.id)) errors.push(`${label} repeats ID ${entry.id}`);
+      seen.add(entry?.id);
+      if (typeof entry?.title !== 'string' || entry.title.trim().length < 3) errors.push(`${label} ${entry?.id} has no task title`);
+      if (typeof entry?.source !== 'string' || !existsSync(path.join(ROOT, entry.source))) errors.push(`${label} ${entry?.id} has no existing source document`);
+    }
+    return seen;
+  };
+  const originalIds = checkUnique(registry.original_tasks, /^IMP-P\d+-WP\d+\.\d+$/, 'original task registry');
+  // REM-WP8 is the single phase-closure review milestone; implementation tasks use REM-WPx.y.
+  const remediationIds = checkUnique(registry.remediation_tasks, /^REM-WP(?:\d+\.\d+|8)$/, 'remediation task registry');
+  const originalPlanPath = path.join(ROOT, 'Implementation-Plan-V4/06-phased-plan.md');
+  if (!existsSync(originalPlanPath)) {
+    errors.push('original task source Implementation-Plan-V4/06-phased-plan.md is missing');
+  } else {
+    const source = readFileSync(originalPlanPath, 'utf8');
+    const sourceTaskIds = new Set(
+      [...source.matchAll(/\b([0-7])\.(\d{1,2})\b/g)].map(([, phase, task]) => `IMP-P${phase}-WP${phase}.${task}`),
+    );
+    for (const id of sourceTaskIds) if (!originalIds.has(id)) errors.push(`original task ${id} from 06-phased-plan.md is absent from the registry`);
+    for (const id of originalIds) if (!sourceTaskIds.has(id)) errors.push(`registry original task ${id} is absent from 06-phased-plan.md`);
+  }
+  const graphIds = new Set(Object.keys(graph?.tasks ?? {}));
+  for (const id of graphIds) if (!remediationIds.has(id)) errors.push(`dependency graph task ${id} is absent from the registry`);
+  for (const id of remediationIds) if (!graphIds.has(id)) errors.push(`registry remediation task ${id} is absent from the dependency graph`);
+  for (const entry of registry.remediation_tasks) {
+    const node = graph?.tasks?.[entry.id];
+    if (node && (node.title !== entry.title || node.source !== entry.source || node.plan_id !== entry.plan_id)) {
+      errors.push(`registry metadata for ${entry.id} differs from its dependency graph node`);
+    }
+  }
+  for (const [index, crosswalk] of registry.crosswalks.entries()) {
+    if (!Array.isArray(crosswalk.remediation_tasks) || crosswalk.remediation_tasks.length === 0
+      || !Array.isArray(crosswalk.original_tasks) || crosswalk.original_tasks.length === 0
+      || typeof crosswalk.relationship !== 'string' || crosswalk.relationship.trim().length < 20
+      || typeof crosswalk.source !== 'string') errors.push(`crosswalk ${index} must state both ID sets, relationship, and source`);
+    for (const id of crosswalk.remediation_tasks ?? []) if (!remediationIds.has(id)) errors.push(`crosswalk ${index} names unknown remediation task ${id}`);
+    for (const id of crosswalk.original_tasks ?? []) if (!originalIds.has(id)) errors.push(`crosswalk ${index} names unknown original task ${id}`);
+  }
   return [...new Set(errors)];
 }
 
@@ -125,7 +179,7 @@ export function validateDeferredFollowups(records, graph) {
         errors.push(`${record.task_id} deferred follow-up ${index} names unknown owner ${followup?.task_id}`);
       }
     }
-    if (/^WP0\.(?:[1-9]|1[01])$/.test(record?.task_id ?? '')
+    if (/^REM-WP0\.(?:[1-9]|1[01])$/.test(record?.task_id ?? '')
       && ['integration_test', 'bdd_ui_test'].some((level) => record.status?.[level] === 'not_applicable')
       && !(record.deferred_followups?.length > 0)) {
       errors.push(`${record.task_id} marks a product-path test not_applicable without naming downstream acceptance evidence`);
@@ -155,11 +209,11 @@ export function validateDependencyGraph(graph, records, targetTask, closureReadi
   for (const predecessor of collectAncestors(graph, targetTask)) {
     if (!validPassingRecord(records?.[predecessor])) errors.push(`${predecessor} has no passing completion record`);
   }
-  if (targetTask === 'WP0.13') {
+  if (targetTask === 'REM-WP0.13') {
     const required = ['project_owner_signed', 'phase0_candidate_passed', 'all_contract_decisions_resolved', 'independent_reviewer_named', 'reviewer_independent', 'reviewer_available'];
-    for (const key of required) if (closureReadiness?.[key] !== true) errors.push(`WP0.13 closure readiness ${key} is not confirmed`);
-    if (closureReadiness?.phase0_candidate_worktree_dirty !== false) errors.push('WP0.13 Phase 0 candidate must be a clean exact commit');
-    if (!/^[0-9a-f]{40}$/i.test(String(closureReadiness?.phase0_candidate_commit ?? ''))) errors.push('WP0.13 Phase 0 candidate commit must be a full Git SHA');
+    for (const key of required) if (closureReadiness?.[key] !== true) errors.push(`REM-WP0.13 closure readiness ${key} is not confirmed`);
+    if (closureReadiness?.phase0_candidate_worktree_dirty !== false) errors.push('REM-WP0.13 Phase 0 candidate must be a clean exact commit');
+    if (!/^[0-9a-f]{40}$/i.test(String(closureReadiness?.phase0_candidate_commit ?? ''))) errors.push('REM-WP0.13 Phase 0 candidate commit must be a full Git SHA');
   }
   return [...new Set(errors)];
 }
@@ -246,9 +300,9 @@ export function validateTenantTableInventory(inventory, migrationTexts) {
   const created = new Set();
   const enabled = new Set();
   const forced = new Set();
-  // rls_current records the deployed baseline through 0012. Migration 0013 is
-  // still a WP1.5 candidate until the restricted-role database gate passes.
-  for (const source of migrationTexts.filter((text) => !text.includes('-- WP1.5: complete tenant isolation and least-privilege runtime grants.'))) {
+  // rls_current records the historical catalog through 0012. Migration 0013
+  // owns the later rollout and must not rewrite that baseline assertion.
+  for (const source of migrationTexts.filter((text) => !/^-- WP1\.5: complete tenant isolation and least-privilege runtime grants\./m.test(text))) {
     for (const match of source.matchAll(/CREATE\s+TABLE\s+(?:IF\s+NOT\s+EXISTS\s+)?(?:symphony\.)?([a-z_][a-z0-9_]*)/gi)) created.add(match[1].toLowerCase());
     for (const match of source.matchAll(/ALTER\s+TABLE\s+(?:symphony\.)?([a-z_][a-z0-9_]*)\s+ENABLE\s+ROW\s+LEVEL\s+SECURITY/gi)) enabled.add(match[1].toLowerCase());
     for (const match of source.matchAll(/ALTER\s+TABLE\s+(?:symphony\.)?([a-z_][a-z0-9_]*)\s+FORCE\s+ROW\s+LEVEL\s+SECURITY/gi)) forced.add(match[1].toLowerCase());
@@ -347,6 +401,34 @@ export function validateAuthorityDependencyInventory(inventory, migrationInvento
     'identity-conflict-and-ineligibility-facts', 'policy-and-configuration-version',
   ]);
   const errors = [];
+  const expectedLockOrder = ['command_aggregate', 'global_policy', 'organization', 'tenant', 'actor_tenant', 'actor'];
+  const expectedScopes = ['global_policy', 'organization', 'tenant', 'actor_tenant', 'actor'];
+  if (inventory?.version !== 2 || inventory?.authority_contract !== 'phase1-authorization-capacity-v3') {
+    errors.push('authority inventory must use version 2 and phase1-authorization-capacity-v3');
+  }
+  const serialization = inventory?.serialization;
+  if (serialization?.table !== 'symphony.authority_scope_versions') errors.push('authority serialization must use symphony.authority_scope_versions');
+  if (JSON.stringify(serialization?.lock_order) !== JSON.stringify(expectedLockOrder)) errors.push('authority serialization lock_order must match the canonical D-16 order');
+  if (JSON.stringify(serialization?.scope_types_in_lock_order) !== JSON.stringify(expectedScopes)) errors.push('authority serialization scope types must match the Phase 1 D-16 scopes');
+  if (!/FOR SHARE/.test(serialization?.protected_command_lock_mode ?? '')) errors.push('protected commands must use FOR SHARE scope locks');
+  if (!/FOR UPDATE/.test(serialization?.authority_mutation_lock_mode ?? '')) errors.push('authority mutations must use FOR UPDATE scope locks');
+  const canonicalKeys = serialization?.canonical_scope_keys ?? {};
+  const expectedCanonicalKeys = {
+    global_policy: '(global_policy, NULL, fixed sentinel UUID 00000000-0000-0000-0000-000000000001)',
+    organization: '(organization, tenant_id UUID, organization scope_id UUID)',
+    tenant: '(tenant, tenant_id UUID, same tenant scope_id UUID)',
+    actor_tenant: '(actor_tenant, tenant_id UUID, actor_user_id scope_id UUID)',
+    actor: '(actor, NULL, actor_user_id scope_id UUID)',
+  };
+  for (const [scope, key] of Object.entries(expectedCanonicalKeys)) {
+    if (canonicalKeys[scope] !== key) errors.push(`authority serialization canonical key for ${scope} must match the D-16 tuple`);
+  }
+  if (!/UNIQUE NULLS NOT DISTINCT/.test(serialization?.database_identity ?? '')) errors.push('authority scope database identity must preserve nullable tuple uniqueness');
+  if (!/COALESCE\(tenant_id::text.*COLLATE C.*scope_id::text.*COLLATE C/.test(serialization?.lock_order_rule ?? '')) errors.push('authority lock key order must sort tenant and scope UUID tuple components with C collation');
+  if (!/ENABLE.*FORCE ROW LEVEL SECURITY/i.test(serialization?.rls_and_privilege_contract ?? '')) errors.push('authority scope table must require enabled and forced RLS');
+  if (!/UPDATE \(version\)/.test(serialization?.rls_and_privilege_contract ?? '')) errors.push('authority scope app role must receive version-only update privilege');
+  if (/person.shared.identity/i.test((serialization?.lock_order ?? []).join(' '))) errors.push('person/shared-identity must not appear in the Phase 1 lock order');
+  if (!/protected commands? do not increment/i.test(serialization?.version_update_policy ?? '')) errors.push('scope version policy must prohibit increments for read-only protected commands');
   const rows = inventory?.dependencies ?? [];
   const ids = rows.map((row) => row.id);
   if (new Set(ids).size !== ids.length) errors.push('authority dependency inventory has duplicate IDs');
@@ -355,11 +437,31 @@ export function validateAuthorityDependencyInventory(inventory, migrationInvento
   for (const row of rows) {
     if (!row.mutable) errors.push(`${row.id} must explicitly classify mutability`);
     if (!Array.isArray(row.mutation_paths) || row.mutation_paths.length === 0) errors.push(`${row.id} lacks mutation/change paths`);
-    if (!Array.isArray(row.required_race_cases) || !row.required_race_cases.some((test) => test.includes('first-then')))
-      errors.push(`${row.id} lacks a protected-command-first race case`);
-    if (!Array.isArray(row.required_race_cases) || !row.required_race_cases.some((test) => test.includes('first-then-protected-command')))
-      errors.push(`${row.id} lacks a change-first race case`);
-    if (row.proof_owner !== 'WP2.4') errors.push(`${row.id} race proof must be owned by WP2.4`);
+    if (row.phase1_authorization_dependency === false) {
+      if (row.phase_scope !== 'original-phase-2-carry-forward') errors.push(`${row.id} must name its later-phase carry-forward scope`);
+      if (row.proof_owner !== 'REM-WP2.4 (Phase 1 exclusion classification only); IMP-P2-WP2.7 (Phase 2 race evidence)')
+        errors.push(`${row.id} must separate Phase 1 scope classification from its Phase 2 race-evidence owner`);
+      if (row.scope_types?.some((scope) => expectedScopes.includes(scope))) errors.push(`${row.id} Phase 2-only dependency must not declare Phase 1 scope rows`);
+      if (Array.isArray(row.required_race_cases)) errors.push(`${row.id} Phase 2 race cases must not be treated as REM-WP2.4 Phase 1 gates`);
+      if (!Array.isArray(row.phase2_required_race_cases) || row.phase2_required_race_cases.length === 0) errors.push(`${row.id} must retain its Phase 2 race cases separately`);
+    } else {
+      if (!Array.isArray(row.scope_types) || row.scope_types.length === 0 || row.scope_types.some((scope) => !expectedScopes.includes(scope)))
+        errors.push(`${row.id} must declare only valid Phase 1 authority scope types`);
+      if (!['supported', 'frozen'].includes(row.phase1_mutation_disposition)) errors.push(`${row.id} must be classified as supported or frozen in Phase 1`);
+      if (row.proof_owner !== 'REM-WP2.4') errors.push(`${row.id} Phase 1 proof must be owned by REM-WP2.4`);
+      if (row.phase1_mutation_disposition === 'supported') {
+        if (!Array.isArray(row.required_race_cases) || !row.required_race_cases.some((test) => test.startsWith('protected-command-first-')))
+          errors.push(`${row.id} lacks a protected-command-first race case`);
+        if (!Array.isArray(row.required_race_cases) || !row.required_race_cases.some((test) => test.includes('first-then-protected-command')))
+          errors.push(`${row.id} lacks a mutation-first race case`);
+        if (Array.isArray(row.required_freeze_proofs)) errors.push(`${row.id} supported mutation cannot be marked runtime-frozen`);
+      } else {
+        if (!Array.isArray(row.required_freeze_proofs) || row.required_freeze_proofs.length < 2)
+          errors.push(`${row.id} frozen path requires PostgreSQL privilege and registry/startup negative proofs`);
+        if (Array.isArray(row.required_race_cases)) errors.push(`${row.id} frozen writer must not demand race tests for nonexistent runtime mutations`);
+      }
+    }
+    if (row.phase1_authorization_dependency !== false && row.scope_types?.includes('person/shared-identity')) errors.push(`${row.id} improperly includes Phase 2 person/shared-identity in Phase 1 scopes`);
     for (const table of row.source_tables ?? []) if (!tables.has(table)) errors.push(`${row.id} references unknown source table ${table}`);
     if (typeof row.serialization_target !== 'string' || row.serialization_target.trim().length < 20) errors.push(`${row.id} lacks a precise serialization target`);
   }
@@ -496,6 +598,7 @@ function main() {
   const schema = readJson('evidence/phase1/task-evidence.schema.json');
   const example = readJson('evidence/phase1/examples/wp0-12.example.json');
   const graph = readJson('evidence/phase1/task-dependencies.yml');
+  const taskIdRegistry = readJson('Implementation-Plan-V4/task-id-registry.json');
   const records = readJson('evidence/phase1/tasks.json');
   const readiness = readJson('evidence/phase1/wp0-closure-readiness.json');
   const modeMatrix = readJson('evidence/phase1/runtime-mode-matrix.json');
@@ -513,6 +616,7 @@ function main() {
     ...records.flatMap((record) => validateEvidence(record, schema).map((error) => `${record.task_id}: ${error}`)),
     ...validateDeferredFollowups(records, graph).map((error) => `deferred follow-up: ${error}`),
     ...validateDependencyGraph(graph, {}).map((error) => `dependency graph: ${error}`),
+    ...validateTaskIdRegistry(taskIdRegistry, graph).map((error) => `task ID registry: ${error}`),
     ...validatePhase1Gate(readJson('package.json')).map((error) => `Phase 1 gate: ${error}`),
     ...validateTenantTableInventory(tenantInventory, migrationTexts).map((error) => `tenant inventory: ${error}`),
     ...validateTenantPolicyMatrix(tenantPolicyMatrix, tenantInventory).map((error) => `tenant policy matrix: ${error}`),
@@ -522,7 +626,7 @@ function main() {
     ...validateBddOwnerMap(bddOwnerMap, bddManifest, graph).map((error) => `BDD owner map: ${error}`),
   ];
   if (records.length !== WP0_IDS.length || WP0_IDS.some((id) => !records.some((record) => record.task_id === id))) {
-    errors.push('task evidence must include exactly one common-schema record for every WP0.1-WP0.13 task');
+    errors.push('task evidence must include exactly one common-schema record for every REM-WP0.1-REM-WP0.13 task');
   }
   const recordMap = Object.fromEntries(records.map((record) => [record.task_id, record]));
   if (errors.length) {
@@ -530,26 +634,26 @@ function main() {
     process.exitCode = 1;
     return;
   }
-  console.log('Phase 1 WP0 contract artifacts are structurally valid.');
+  console.log('Phase 1 REM-WP0 contract artifacts are structurally valid.');
   console.log(`Dependency graph: ${Object.keys(graph.tasks).length} task nodes; all edges are known, justified and acyclic.`);
   console.log('Phase 1 gate manifest: all mandatory commands and BDD scenario source IDs resolve.');
   console.log(`Runtime mode contract: ${modeMatrix.profiles.length} allowed profiles; every other pair is rejected.`);
   const rlsProtected = tenantInventory.tables.filter((entry) => entry.rls_current).length;
   const plannedTenantTables = tenantInventory.planned_phase1_tables ?? [];
   console.log(`Tenant inventory: ${tenantInventory.tables.length} baseline + ${plannedTenantTables.length} planned table(s) (${tenantInventory.tables.length + plannedTenantTables.length} migration tables); ${rlsProtected} baseline tables currently have ENABLE+FORCE RLS.`);
-  const closureBlockers = validateDependencyGraph(graph, recordMap, 'WP0.13', readiness);
+  const closureBlockers = validateDependencyGraph(graph, recordMap, 'REM-WP0.13', readiness);
   const closureApproved = readiness.project_owner_signed
     && readiness.phase0_candidate_passed
     && readiness.all_contract_decisions_resolved
     && readiness.independent_reviewer_named
     && readiness.reviewer_independent
     && readiness.reviewer_available;
-  console.log(`WP0.13 is ${closureBlockers.length
+  console.log(`REM-WP0.13 is ${closureBlockers.length
     ? `BLOCKED (${closureBlockers.length} unmet prerequisites)`
     : closureApproved ? 'CLOSED (owner approval and candidate pass recorded)' : 'eligible for owner sign-off'}.`);
-  for (const blocker of closureBlockers) console.log(`WP0.13 unmet: ${blocker}`);
+  for (const blocker of closureBlockers) console.log(`REM-WP0.13 unmet: ${blocker}`);
   console.log(`Project owner: ${readiness.project_owner_signed ? 'signed' : 'pending'}; independent reviewer: ${readiness.independent_reviewer_named ? 'identified' : 'not identified'}; Phase 1 task authorization and sequencing are governed by the decision register and dependency graph.`);
-  console.log('This validates the gate structure only; it does not claim WP0 acceptance or Phase 1 product behavior.');
+  console.log('This validates the gate structure only; it does not claim REM-WP0 acceptance or Phase 1 product behavior.');
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(path.resolve(process.argv[1])).href) main();

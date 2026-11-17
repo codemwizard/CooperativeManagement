@@ -8,7 +8,7 @@
   "required": ["schema_version", "task_id", "status", "commit", "environment", "commands", "claims", "limitations", "unresolved_decisions", "reviewer"],
   "properties": {
     "schema_version": { "const": 1 },
-    "task_id": { "type": "string", "pattern": "^WP[0-9]+(?:\\.[0-9]+)?$" },
+    "task_id": { "type": "string", "pattern": "^REM-WP[0-9]+(?:\\.[0-9]+)?$" },
     "status": {
       "type": "object",
       "additionalProperties": false,
@@ -49,7 +49,7 @@
       }
     },
     "sub_gates": {
-      "description": "Required separately reported WP1.2 acceptance sub-gates. Each must cite its exact commands and repository-relative output artifacts.",
+      "description": "Required separately reported REM-WP1.2 acceptance sub-gates. Each must cite its exact commands and repository-relative output artifacts.",
       "type": "array",
       "minItems": 2,
       "maxItems": 2,
@@ -58,7 +58,7 @@
         "additionalProperties": false,
         "required": ["gate_id", "status", "commands"],
         "properties": {
-          "gate_id": { "enum": ["WP1.2-A", "WP1.2-B"] },
+          "gate_id": { "enum": ["REM-WP1.2-A", "REM-WP1.2-B"] },
           "status": { "enum": ["passed", "failed", "pending", "blocked"] },
           "commands": {
             "type": "array",
@@ -81,7 +81,7 @@
             "then": { "properties": { "commands": { "items": { "properties": { "result": { "const": "passed" } }, "required": ["result"] } } } }
           },
           {
-            "if": { "properties": { "gate_id": { "const": "WP1.2-B" }, "status": { "const": "passed" } }, "required": ["gate_id", "status"] },
+            "if": { "properties": { "gate_id": { "const": "REM-WP1.2-B" }, "status": { "const": "passed" } }, "required": ["gate_id", "status"] },
             "then": {
               "properties": {
                 "commands": {
@@ -120,7 +120,7 @@
         "additionalProperties": false,
         "required": ["task_id", "scope", "acceptance_evidence"],
         "properties": {
-          "task_id": { "type": "string", "pattern": "^WP[0-9]+(?:\\.[0-9]+)?$" },
+          "task_id": { "type": "string", "pattern": "^REM-WP[0-9]+(?:\\.[0-9]+)?$" },
           "scope": { "type": "string", "minLength": 1 },
           "acceptance_evidence": { "type": "string", "minLength": 1 }
         }
@@ -132,15 +132,15 @@
   },
   "allOf": [
     {
-      "if": { "properties": { "task_id": { "const": "WP1.2" } }, "required": ["task_id"] },
+      "if": { "properties": { "task_id": { "const": "REM-WP1.2" } }, "required": ["task_id"] },
       "then": {
         "required": ["sub_gates"],
         "properties": {
           "commit": { "pattern": "^(?:[0-9a-f]{40}|working-tree)$" },
           "sub_gates": {
             "allOf": [
-              { "contains": { "properties": { "gate_id": { "const": "WP1.2-A" } }, "required": ["gate_id"] }, "minContains": 1, "maxContains": 1 },
-              { "contains": { "properties": { "gate_id": { "const": "WP1.2-B" } }, "required": ["gate_id"] }, "minContains": 1, "maxContains": 1 }
+              { "contains": { "properties": { "gate_id": { "const": "REM-WP1.2-A" } }, "required": ["gate_id"] }, "minContains": 1, "maxContains": 1 },
+              { "contains": { "properties": { "gate_id": { "const": "REM-WP1.2-B" } }, "required": ["gate_id"] }, "minContains": 1, "maxContains": 1 }
             ]
           }
         }
@@ -149,7 +149,7 @@
     {
       "if": {
         "properties": {
-          "task_id": { "const": "WP1.2" },
+          "task_id": { "const": "REM-WP1.2" },
           "status": { "properties": { "gate_verified": { "const": "passed" } }, "required": ["gate_verified"] }
         },
         "required": ["task_id", "status"]
@@ -165,7 +165,7 @@
     {
       "if": {
         "properties": {
-          "task_id": { "const": "WP1.3" },
+          "task_id": { "const": "REM-WP1.3" },
           "status": { "properties": { "gate_verified": { "const": "passed" } }, "required": ["gate_verified"] }
         },
         "required": ["task_id", "status"]

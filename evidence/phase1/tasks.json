@@ -1,7 +1,7 @@
 [
   {
     "schema_version": 1,
-    "task_id": "WP0.1",
+    "task_id": "REM-WP0.1",
     "status": {
       "implementation": "complete",
       "unit_test": "passed",
@@ -34,26 +34,26 @@
       ]
     },
     "limitations": [
-      "No WP1 implementation authorized."
+      "No REM-WP1 implementation authorized."
     ],
     "unresolved_decisions": [],
     "reviewer": "Gemini 3.8 Flash (High) - Independent Review Session 1fcbac00-0538-45bf-9355-7d7403ea4820",
     "deferred_followups": [
       {
         "scope": "Implement transactional receipt/state/event/outbox atomicity and contention behavior.",
-        "task_id": "WP1.2",
+        "task_id": "REM-WP1.2",
         "acceptance_evidence": "PostgreSQL independent-connection tests prove rollback, reservation visibility, both contention outcomes and bounded same-ID retries."
       },
       {
         "scope": "Expose classified safe command results through API composition.",
-        "task_id": "WP1.6",
+        "task_id": "REM-WP1.6",
         "acceptance_evidence": "API tests prove non-disclosure and no raw request/payload/PII in receipt or response."
       }
     ]
   },
   {
     "schema_version": 1,
-    "task_id": "WP0.2",
+    "task_id": "REM-WP0.2",
     "status": {
       "implementation": "complete",
       "unit_test": "passed",
@@ -92,20 +92,20 @@
     "reviewer": "Gemini 3.8 Flash (High) - Independent Review Session 1fcbac00-0538-45bf-9355-7d7403ea4820",
     "deferred_followups": [
       {
-        "scope": "WP1.4 implements encrypted inbox persistence, tenant-scoped storage and active-store lifecycle; WP1.7 implements authorization using current persisted actor/officer authority.",
-        "task_id": "WP1.4",
-        "acceptance_evidence": "WP1.4 PostgreSQL tests prove encrypted persistence, tenant policy, expiry and tombstone. WP1.7 API/DB tests prove current membership/permission, authorized takeover audit, unrelated actor denial and cross-tenant non-disclosure using WP2.2 authority."
+        "scope": "REM-WP1.4 implements encrypted inbox persistence, tenant-scoped storage and active-store lifecycle; REM-WP1.7 implements authorization using current persisted actor/officer authority.",
+        "task_id": "REM-WP1.4",
+        "acceptance_evidence": "REM-WP1.4 PostgreSQL tests prove encrypted persistence, tenant policy, expiry and tombstone. REM-WP1.7 API/DB tests prove current membership/permission, authorized takeover audit, unrelated actor denial and cross-tenant non-disclosure using REM-WP2.2 authority."
       },
       {
         "scope": "Record actual selected deployment provider, replica, backup, snapshot and restore lifecycle facts before real-data deployment.",
-        "task_id": "WP3.4",
+        "task_id": "REM-WP3.4",
         "acceptance_evidence": "Operational evidence states measured deletion propagation and backup expiry/restore behavior without overstating crypto-erasure."
       }
     ]
   },
   {
     "schema_version": 1,
-    "task_id": "WP0.3",
+    "task_id": "REM-WP0.3",
     "status": {
       "implementation": "complete",
       "unit_test": "passed",
@@ -145,14 +145,14 @@
     "deferred_followups": [
       {
         "scope": "Provision least-privilege runtime identity and enforce RLS/predicates.",
-        "task_id": "WP1.5",
+        "task_id": "REM-WP1.5",
         "acceptance_evidence": "PostgreSQL tests under non-owner/no-BYPASSRLS role cover unset/wrong tenant, every policy, catalogue writes and pool reuse."
       }
     ]
   },
   {
     "schema_version": 1,
-    "task_id": "WP0.4",
+    "task_id": "REM-WP0.4",
     "status": {
       "implementation": "complete",
       "unit_test": "passed",
@@ -185,21 +185,21 @@
       ]
     },
     "limitations": [
-      "Authorization product code is assigned to WP2; WP0 acceptance is the complete authority dependency and serialization contract plus model evidence."
+      "Authorization product code is assigned to REM-WP2; REM-WP0 acceptance is the complete authority dependency and serialization contract plus model evidence."
     ],
     "unresolved_decisions": [],
     "reviewer": "Gemini 3.8 Flash (High) - Independent Review Session 1fcbac00-0538-45bf-9355-7d7403ea4820",
     "deferred_followups": [
       {
         "scope": "Serialize authority changes with protected mutations.",
-        "task_id": "WP2.4",
+        "task_id": "REM-WP2.4",
         "acceptance_evidence": "PostgreSQL barrier tests prove both serial orders for every inventoried change path."
       }
     ]
   },
   {
     "schema_version": 1,
-    "task_id": "WP0.5",
+    "task_id": "REM-WP0.5",
     "status": {
       "implementation": "complete",
       "unit_test": "passed",
@@ -232,26 +232,26 @@
       ]
     },
     "limitations": [
-      "Purge product code is assigned to WP4; WP0 acceptance is the exact target/role/table contract and preflight refusal evidence."
+      "Purge product code is assigned to REM-WP4; REM-WP0 acceptance is the exact target/role/table contract and preflight refusal evidence."
     ],
     "unresolved_decisions": [],
     "reviewer": "Gemini 3.8 Flash (High) - Independent Review Session 1fcbac00-0538-45bf-9355-7d7403ea4820",
     "deferred_followups": [
       {
         "scope": "Install marker and provision dedicated purge role in disposable test environment.",
-        "task_id": "WP4.1",
+        "task_id": "REM-WP4.1",
         "acceptance_evidence": "Zero-delete-SQL tests prove every guard under actual restricted credentials."
       },
       {
         "scope": "Run allowlisted purge/reset/seed transaction.",
-        "task_id": "WP4.2",
+        "task_id": "REM-WP4.2",
         "acceptance_evidence": "PostgreSQL tests prove atomic rollback, audit, preserved catalogues and repeatability."
       }
     ]
   },
   {
     "schema_version": 1,
-    "task_id": "WP0.6",
+    "task_id": "REM-WP0.6",
     "status": {
       "implementation": "complete",
       "unit_test": "passed",
@@ -284,21 +284,21 @@
       ]
     },
     "limitations": [
-      "Demo API/workspace implementation is assigned to WP6; WP0 acceptance is the server-policy contract and decision vectors."
+      "Demo API/workspace implementation is assigned to REM-WP6; REM-WP0 acceptance is the server-policy contract and decision vectors."
     ],
     "unresolved_decisions": [],
     "reviewer": "Gemini 3.8 Flash (High) - Independent Review Session 1fcbac00-0538-45bf-9355-7d7403ea4820",
     "deferred_followups": [
       {
         "scope": "Implement server-side demo reset guard and provision explicit synthetic actor/tenant config.",
-        "task_id": "WP6.2",
+        "task_id": "REM-WP6.2",
         "acceptance_evidence": "API tests prove the authorized tenant-only mutation and all denial cases have no row changes."
       }
     ]
   },
   {
     "schema_version": 1,
-    "task_id": "WP0.7",
+    "task_id": "REM-WP0.7",
     "status": {
       "implementation": "complete",
       "unit_test": "passed",
@@ -338,14 +338,14 @@
     "deferred_followups": [
       {
         "scope": "Implement only the minimum persistence justified by the accepted field trace.",
-        "task_id": "WP3.3",
+        "task_id": "REM-WP3.3",
         "acceptance_evidence": "Requirement-to-entity/command/transition/API tests prove mapped behavior and no unmapped storage."
       }
     ]
   },
   {
     "schema_version": 1,
-    "task_id": "WP0.8",
+    "task_id": "REM-WP0.8",
     "status": {
       "implementation": "complete",
       "unit_test": "passed",
@@ -393,21 +393,21 @@
       ]
     },
     "limitations": [
-      "Password complexity and concrete rate-limit algorithm remain sourced WP5 completion inputs, not WP0.8 blockers."
+      "D-14 owner-approved password and rate-limit parameters are contract inputs for REM-WP5; runtime hashing, persistence and shared-store behavior remain deferred implementation evidence."
     ],
     "unresolved_decisions": [],
     "reviewer": "Gemini 3.8 Flash (High) - Independent Review Session 1fcbac00-0538-45bf-9355-7d7403ea4820",
     "deferred_followups": [
       {
         "scope": "Integrate source-backed temporary credential policy into API/session composition.",
-        "task_id": "WP5.1",
+        "task_id": "REM-WP5.1",
         "acceptance_evidence": "API tests prove single use, forced change, exact expiry and no secret leakage."
       }
     ]
   },
   {
     "schema_version": 1,
-    "task_id": "WP0.9",
+    "task_id": "REM-WP0.9",
     "status": {
       "implementation": "complete",
       "unit_test": "passed",
@@ -432,11 +432,12 @@
       }
     ],
     "claims": {
-      "behavior_proved": "All 42 frozen manifest IDs map exactly once to source requirement tags, owner tasks and required observable product paths; structural test rejects missing IDs, unknown owners or unspecified path.",
-      "path_proved": "Manifest/source/gate contract only; 17 current strict-run misses remain deferred acceptance, not product behavior claimed.",
+      "behavior_proved": "All 41 owner-approved Phase 1 manifest IDs map exactly once to source requirement tags, owner tasks and required observable product paths; BDD-AUD-016 is explicitly mapped to original Phase 6 by D-13 Option A.",
+      "path_proved": "Manifest/source/gate contract only; 16 current Phase 1 strict-run misses remain deferred acceptance, not product behavior claimed. BDD-AUD-016 is assigned to original Phase 6 WP6.2.",
       "configuration_proved": "Gate includes verify:phase0 and explicit Phase 1 suites; Phase 1 login config requires local test-scoped PostgreSQL.",
       "coverage_limitations": [
-        "Later product-path tests are recorded in deferred_followups and remain mandatory for their owning Phase 1 tasks."
+        "Later product-path tests are recorded in deferred_followups and remain mandatory for their owning Phase 1 tasks.",
+        "BDD-AUD-016 is not Phase 1 acceptance; its original Phase 6 owner/path is recorded in evidence/phase6/bdd-work-package-map.json."
       ]
     },
     "limitations": [
@@ -446,15 +447,15 @@
     "reviewer": "Gemini 3.8 Flash (High) - Independent Review Session 1fcbac00-0538-45bf-9355-7d7403ea4820",
     "deferred_followups": [
       {
-        "scope": "Execute all frozen acceptance scenarios after owning WP1-WP6 paths exist.",
-        "task_id": "WP7.2",
-        "acceptance_evidence": "Strict final gate reports all 42 IDs passed with no @wip, skip, filter, missing scenario or zero discovery."
+        "scope": "Execute all 41 owner-approved Phase 1 acceptance scenarios after their REM-WP1–REM-WP6 paths exist.",
+        "task_id": "REM-WP7.2",
+        "acceptance_evidence": "Strict final gate reports all 41 Phase 1 IDs passed with no @wip, skip, filter, missing scenario or zero discovery; BDD-AUD-016 is separately retained for original Phase 6."
       }
     ]
   },
   {
     "schema_version": 1,
-    "task_id": "WP0.10",
+    "task_id": "REM-WP0.10",
     "status": {
       "implementation": "complete",
       "unit_test": "passed",
@@ -480,33 +481,33 @@
     ],
     "claims": {
       "behavior_proved": "Contract vectors prove exact forced-change route allowlist, CSRF+Origin requirement, 30-minute idle/12-hour absolute expiry boundaries and 72-hour temporary credential equality-expired rule.",
-      "path_proved": "Pure session policy model; no session store/API/browser behavior claimed. Numeric progressive-delay and password rules remain explicit pre-WP5 sourced inputs.",
+      "path_proved": "Pure session policy model; no session store/API/browser behavior claimed. D-14 fixes exact password, Argon2id and account/trusted-source progressive-delay policy; REM-WP5 must prove the runtime implementation.",
       "configuration_proved": "No session transport values invented.",
       "coverage_limitations": [
         "Later product-path tests are recorded in deferred_followups and remain mandatory for their owning Phase 1 tasks."
       ]
     },
     "limitations": [
-      "Password complexity has no source value in the supplied decision package; WP5 must obtain a source before its completion. This does not block WP0 policy acceptance."
+      "D-14 policy values are owner-approved; runtime validation, hashing, shared-store concurrency and route behavior remain mandatory REM-WP5 acceptance evidence. The 12-code-point minimum is below the NIST single-factor minimum and is not claimed as NIST-conformant."
     ],
     "unresolved_decisions": [],
     "reviewer": "Gemini 3.8 Flash (High) - Independent Review Session 1fcbac00-0538-45bf-9355-7d7403ea4820",
     "deferred_followups": [
       {
         "scope": "Implement the ratified auth/session route and policy contract.",
-        "task_id": "WP5.1",
+        "task_id": "REM-WP5.1",
         "acceptance_evidence": "API boundary, rotation, revocation, CSRF/Origin, rate-limit and forced-change tests pass."
       },
       {
         "scope": "Exercise user-visible login/change/logout flow.",
-        "task_id": "WP5.4",
+        "task_id": "REM-WP5.4",
         "acceptance_evidence": "Real browser-to-API tests verify cookie flags and route restrictions without interception."
       }
     ]
   },
   {
     "schema_version": 1,
-    "task_id": "WP0.11",
+    "task_id": "REM-WP0.11",
     "status": {
       "implementation": "complete",
       "unit_test": "passed",
@@ -539,26 +540,26 @@
       ]
     },
     "limitations": [
-      "Full application startup composition is assigned downstream; WP0 acceptance is the approved profile matrix and configuration decision vectors."
+      "Full application startup composition is assigned downstream; REM-WP0 acceptance is the approved profile matrix and configuration decision vectors."
     ],
     "unresolved_decisions": [],
     "reviewer": "Gemini 3.8 Flash (High) - Independent Review Session 1fcbac00-0538-45bf-9355-7d7403ea4820",
     "deferred_followups": [
       {
         "scope": "Apply one authoritative runtime profile in application composition.",
-        "task_id": "WP1.6",
+        "task_id": "REM-WP1.6",
         "acceptance_evidence": "Startup tests prove valid profiles compose and invalid profiles fail before listen/mutating DB access."
       },
       {
         "scope": "Enforce profile and role guard in CI.",
-        "task_id": "WP7.1",
+        "task_id": "REM-WP7.1",
         "acceptance_evidence": "CI fixtures prove forbidden settings fail mandatory gate."
       }
     ]
   },
   {
     "schema_version": 1,
-    "task_id": "WP0.12",
+    "task_id": "REM-WP0.12",
     "status": {
       "implementation": "complete",
       "unit_test": "passed",
@@ -587,7 +588,7 @@
       "path_proved": "Ajv 2020-12 validator and focused Vitest suite.",
       "configuration_proved": "No database or key provider required.",
       "coverage_limitations": [
-        "Tooling contract success does not constitute WP0 closure or product behavior."
+        "Tooling contract success does not constitute REM-WP0 closure or product behavior."
       ]
     },
     "limitations": [],
@@ -596,7 +597,7 @@
   },
   {
     "schema_version": 1,
-    "task_id": "WP0.13",
+    "task_id": "REM-WP0.13",
     "status": {
       "implementation": "complete",
       "unit_test": "passed",
@@ -626,11 +627,11 @@
       }
     ],
     "claims": {
-      "behavior_proved": "WP0.1-WP0.12 evidence records validate as complete; all 94 WP0 tooling contract tests pass and the evidence/dependency/BDD/RLS/purge/runtime matrices validate. Full Phase 0 gate verified on clean commit f1fa5f9413747c0ac3cbd73413179101d33f653e under Node 26.7.0/npm 12.2.0. Independent review completed and owner closure granted. WP0 closed.",
-      "path_proved": "Full Phase 0 gate against isolated symphony_phase1_test and WP0 contract graph/evidence validator on clean candidate commit.",
+      "behavior_proved": "REM-WP0.1-REM-WP0.12 evidence records validate as complete; all 94 REM-WP0 tooling contract tests pass and the evidence/dependency/BDD/RLS/purge/runtime matrices validate. Full Phase 0 gate verified on clean commit f1fa5f9413747c0ac3cbd73413179101d33f653e under Node 26.7.0/npm 12.2.0. Independent review completed and owner closure granted. REM-WP0 closed.",
+      "path_proved": "Full Phase 0 gate against isolated symphony_phase1_test and REM-WP0 contract graph/evidence validator on clean candidate commit.",
       "configuration_proved": "DATA_MODE=test; MIGRATION_TEST_DATABASE_URL targets symphony_phase1_test; database role symphony owns that isolated database. No production data target used.",
       "coverage_limitations": [
-        "Downstream product path tests remain explicitly deferred to their owning WP1-WP7 tasks and mandatory Phase 1 gate."
+        "Downstream product path tests remain explicitly deferred to their owning REM-WP1-WP7 tasks and mandatory Phase 1 gate."
       ]
     },
     "limitations": [

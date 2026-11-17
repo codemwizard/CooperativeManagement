@@ -72,12 +72,14 @@ Requirement (`03`, `03b`) → scenarios (`features/`) → pack invariant/scenari
 | VER-006 | VER-014 | 2 |
 | VER-007 | VER-016, VER-017 | 2 |
 | VER-008 | EVD-012, EVD-013, VER-018 | 2 |
-| AUD-001 | AUD-001, AUD-010, AUD-016 | 1 |
-| AUD-002 | AUD-002, AUD-003, AUD-014 | 1 |
+| AUD-001 | AUD-001, AUD-010 | 1 |
+| AUD-002 | AUD-002, AUD-003 | 1 |
 | AUD-003 | AUD-004 | 1 |
 | AUD-004 | AUD-005, AUD-006 | 1 |
 | AUD-005 | AUD-007 | 1 |
 | AUD-006 | AUD-008, AUD-009 | 1 |
+| AUD-007 | AUD-016 | 6 |
+| AUD-008 | AUD-014 | 1 |
 | UXW-001 | UXW-001, UXW-002, UXW-012 | 1 |
 | UXW-002 | UXW-003, UXW-004, UXW-006, UXW-007, UXW-014, UXW-016 | 1–6 |
 | UXW-003 | UXW-008, UXW-009 | 1 |
