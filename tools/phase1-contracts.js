@@ -427,6 +427,7 @@ export function validateAuthorityDependencyInventory(inventory, migrationInvento
   if (!/COALESCE\(tenant_id::text.*COLLATE C.*scope_id::text.*COLLATE C/.test(serialization?.lock_order_rule ?? '')) errors.push('authority lock key order must sort tenant and scope UUID tuple components with C collation');
   if (!/ENABLE.*FORCE ROW LEVEL SECURITY/i.test(serialization?.rls_and_privilege_contract ?? '')) errors.push('authority scope table must require enabled and forced RLS');
   if (!/UPDATE \(version\)/.test(serialization?.rls_and_privilege_contract ?? '')) errors.push('authority scope app role must receive version-only update privilege');
+  if (!/may INSERT only tenant, organization, and actor_tenant.*migration\/bootstrap owner seeds.*global_policy.*actor.*fails closed/i.test(serialization?.row_provisioning ?? '')) errors.push('authority scope row provisioning must separate tenant-owned runtime inserts from preseeded global/actor rows');
   if (/person.shared.identity/i.test((serialization?.lock_order ?? []).join(' '))) errors.push('person/shared-identity must not appear in the Phase 1 lock order');
   if (!/protected commands? do not increment/i.test(serialization?.version_update_policy ?? '')) errors.push('scope version policy must prohibit increments for read-only protected commands');
   const rows = inventory?.dependencies ?? [];

@@ -48,6 +48,7 @@
     "phase1_frozen_enforcement": "symphony_app receives no INSERT, UPDATE, or DELETE on frozen source tables. Only the migration/bootstrap owner may change those rows, outside serving runtime; startup/deployment validation rejects an enabled runtime mutation route or command registration for those sources.",
     "phase1_scope_row_privileges": "symphony_app has SELECT, column-level INSERT(scope_type,tenant_id,scope_id), and UPDATE(version); RLS ENABLE+FORCE scopes rows to app.tenant_id/app.actor_user_id; trigger allows only OLD.version+1 and sets updated_at. No DELETE/TRUNCATE.",
     "rls_and_privilege_contract": "RLS ENABLE and FORCE ROW LEVEL SECURITY. symphony_app has SELECT, INSERT(scope_type,tenant_id,scope_id), UPDATE (version); no DELETE or TRUNCATE; policies restrict tenant/actor rows.",
+    "row_provisioning": "symphony_app may INSERT only tenant, organization, and actor_tenant rows for the transaction tenant, individually in canonical order before the lock pass. The ordered migration/bootstrap owner seeds the singleton global_policy row and all actor rows required by the frozen action catalogue. Runtime verifies those immutable rows exist and fails closed if any is missing; it never inserts them or retries under a privileged role.",
     "retry": "Bounded retries for SQLSTATE 40001/40P01 only, reusing the same logical command ID and transaction inputs.",
     "proof_owner": "REM-WP2.4 PostgreSQL barrier tests; REM-WP0 defines dependency coverage and expected serial outcomes."
   },

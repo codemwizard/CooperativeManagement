@@ -1,13 +1,13 @@
 
  RUN  v2.1.9 C:/Workspace/GitHub/Prototype
 
-(node:4196) [DEP0190] DeprecationWarning: Passing args to a child process with shell option true can lead to security vulnerabilities, as the arguments are not escaped, only concatenated.
+ ✓ tests/tooling/phase1_contracts.test.ts (112 tests) 5490ms
+   ✓ REM-WP0.9 Phase 1 gate contract > proves a failing fixture command prevents later gate commands from running 4115ms
+(node:16828) [DEP0190] DeprecationWarning: Passing args to a child process with shell option true can lead to security vulnerabilities, as the arguments are not escaped, only concatenated.
 (Use `node --trace-deprecation ...` to show where the warning was created)
- ✓ tests/tooling/phase1_contracts.test.ts (112 tests) 3791ms
-   ✓ REM-WP0.9 Phase 1 gate contract > proves a failing fixture command prevents later gate commands from running 2993ms
 
  Test Files  1 passed (1)
       Tests  112 passed (112)
-   Start at  08:56:00
-   Duration  5.02s (transform 166ms, setup 0ms, collect 352ms, tests 3.79s, environment 0ms, prepare 218ms)
+   Start at  15:42:40
+   Duration  7.06s (transform 229ms, setup 0ms, collect 513ms, tests 5.49s, environment 0ms, prepare 438ms)
 

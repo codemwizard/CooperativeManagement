@@ -1,3 +1,3 @@
-efcce4a8e5e6028ff9b7c3152ad6d8975f8df47b30d5bc3c148b3939cc49d6b6  evidence/phase1/reviews/prototype7-current-worktree/phase1-contracts.raw.log
+6f2b5ada975456bcfbc7cfe499fa8ad1a521e3ed881548ab1dc920e4d117c2b4  evidence/phase1/reviews/prototype7-current-worktree/phase1-contracts.raw.log
 0aea62b36a202b0a8eaa1d9bbfc4bf1cc587530ed6f546d35be8483497605091  evidence/phase1/reviews/prototype7-current-worktree/phase1-structural-validator.raw.log
-2cf252e8bd4cd6e0e67ae463a73b4a7a7e008b33d020ae5393d8f9296463d9fe  evidence/phase1/reviews/prototype7-current-worktree/runtime-and-candidate-context.txt
+5e640c7d7360906249ed188442d18312e08c02d76d5613fe88c629a7e967f593  evidence/phase1/reviews/prototype7-current-worktree/runtime-and-candidate-context.txt

@@ -1,6 +1,6 @@
-# Prototype-7 roadmap and readiness reconciliation
+# Prototype-7 and Prototype-8 roadmap and readiness reconciliation
 
-**Review input:** User-supplied “Prototype-7: Implementation roadmap and readiness assessment” (17 November 2026).
+**Review inputs:** User-supplied “Prototype-7: Implementation roadmap and readiness assessment” and “Prototype-8 review” (17 November 2026).
 **Disposition:** Amendments incorporated; no owner policy decision reopened and no task-graph edge changed.
 **Scope:** Specification/readiness reconciliation only. This record does not claim implementation, PostgreSQL runtime evidence, or task completion for unscheduled WP2/WP5 work.
 
@@ -32,18 +32,22 @@
 
 The single serialization model and the DDL/RLS/lock/writer/test requirements are linked from the decision register, WP2/WP5 readiness plan, authorization contract, command transaction contract, tenant-isolation contract, inventory and independent-review index. The index has a dedicated path for this reconciliation and the normative D-16 technical artifact. The WP1.6 review disposition marks older D-13/D-15 statements historical where superseded and records D-16 without erasing review history.
 
+Prototype-8's provisioning correction is now explicit in D-16: the ordered migration/bootstrap owner seeds the singleton `global_policy` row and all global `actor` rows required by the frozen action matrix. Runtime checks those immutable rows and fails closed if absent. Under its tenant RLS policy, `symphony_app` may insert only `tenant`, `organization`, and `actor_tenant` rows; it provisions them individually in canonical order, then takes the complete lock set in canonical order. No owner-role fallback is permitted. The inventory and executable validator enforce this split, and the WP2.4 test matrix includes actual app-role checks for allowed tenant-owned inserts, forbidden global/actor and cross-tenant inserts, missing-row fail-closed behavior, and bootstrap completeness.
+
+The WP1.2 contract-test fixture now branches on the schema's exact `REM-WP1.2-A` ID. It assigns domain/command transaction evidence to A and security-audit/command transaction/migration evidence to B, with assertions that the groups are distinct and contain their required artifacts. The task evidence already used these canonical IDs and was not changed by this correction.
+
 The executable authority inventory validator now rejects drift in contract/inventory version, table name, scope list/order, `FOR SHARE` versus `FOR UPDATE`, tuple keys, nullable tuple uniqueness, C-collated tuple ordering, forced RLS/version-only grant, Phase 2 identity leakage, unsupported mutation dispositions, missing race cases, and absent frozen-writer proofs. Focused tests include adversarial tuple, lock-order, Phase 2 leakage and RLS/grant mutations. The Phase 1 contract suite retains graph, manifest and BDD ownership checks.
 
 ## Validation actually performed
 
 | Check | Result |
 |---|---|
-| `node node_modules/vitest/vitest.mjs run tests/tooling/phase1_contracts.test.ts` | PASS — 112 tests, 1 file. This direct Node invocation was used because the PowerShell `npm` shim reports access denied while trying to read the user-level npm prefix. |
+| `node node_modules/vitest/vitest.mjs run tests/tooling/phase1_contracts.test.ts` | PASS — 112 tests, 1 file. This targeted invocation uses the checked-in local Node/Vitest installation; it does not invoke npm. |
 | `node tools/phase1-contracts.js` | PASS — 45 task nodes; all references valid and graph acyclic; Phase 1 BDD IDs resolve; 4 runtime profiles; REM-WP0.13 reported CLOSED by the existing readiness record. The command explicitly validates gate structure only, not Phase 1 product behavior. |
 | Node runtime observed in this shell | `v26.7.0`. |
-| npm runtime observed in this shell | Both `npm --version` and direct `C:\Program Files\nodejs\npm.cmd --version` reported `11.19.0`; the PowerShell shim also emitted access denied for `C:\Users\User\AppData\Roaming\npm\node_modules\npm\bin\npm-cli.js`. This shell therefore did not observe npm 12.2.0, and no npm-based gates were run. |
+| npm runtime | The project terminal output supplied by the owner is `PS C:\Workspace\GitHub\Prototype> npm --version` → `12.2.0`; this is the official installed version for the project. A prior Codex subprocess record showed `11.19.0` while its PowerShell shim emitted an access-denied diagnostic for the user npm prefix. That subprocess result is an environment-resolution mismatch, not a correction to the owner's observed install. The targeted test run invoked Vitest through Node directly; it did not invoke npm or claim an npm-based gate. |
 | PostgreSQL, API, workspace, Playwright/BDD runtime gates | Not run as part of this documentation/contract reconciliation. No WP2/WP5 runtime pass is claimed. |
 
 The test and validator runs occurred in a dirty worktree with unrelated pre-existing edits. This is not a candidate-pinned CI report and has no candidate SHA. Generate candidate-bound hashes and repeat CI after the user has a clean, committed candidate.
 
-Raw output and runtime context are retained under `evidence/phase1/reviews/prototype7-current-worktree/`; `SHA256SUMS.txt` verifies the two logs and context file. Recorded HEAD is `9919440c71e167050f8e011a6ed3a432e779eb66`, but the worktree was dirty, so HEAD is context only and must not be treated as the tested source candidate.
+Raw output and runtime context are retained under `evidence/phase1/reviews/prototype7-current-worktree/`; `SHA256SUMS.txt` verifies the two logs and context file. Recorded HEAD is `886863f0f4d2190ee7a84ca516ebc140b767c60f`, but the worktree was dirty, so HEAD is context only and must not be treated as the tested source candidate.

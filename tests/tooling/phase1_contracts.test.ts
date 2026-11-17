@@ -437,16 +437,31 @@ describe('REM-WP1.2 evidence sub-gates', () => {
     record.sub_gates = ['REM-WP1.2-A', 'REM-WP1.2-B'].map((gate_id) => ({
       gate_id,
       status: 'passed',
-      commands: gate_id === 'WP1.2-A'
-        ? [commands[0], commands[1], commands[3]]
+      commands: gate_id === 'REM-WP1.2-A'
+        ? [commands[0], commands[1]]
         : [commands[2], commands[1], commands[3]],
     }));
     return record;
   };
 
-  it('requires both WP1.2-A and WP1.2-B before task gate can pass', () => {
+  it('requires both REM-WP1.2-A and REM-WP1.2-B with distinct evidence before task gate can pass', () => {
     const schema = readJson('evidence/phase1/task-evidence.schema.json');
-    expect(validateEvidence(passingWp1Record(), schema)).toEqual([]);
+    const complete = passingWp1Record();
+    const gateA = complete.sub_gates.find((gate: Record<string, any>) => gate.gate_id === 'REM-WP1.2-A');
+    const gateB = complete.sub_gates.find((gate: Record<string, any>) => gate.gate_id === 'REM-WP1.2-B');
+    const artifactsA = gateA.commands.map((command: Record<string, any>) => command.artifact);
+    const artifactsB = gateB.commands.map((command: Record<string, any>) => command.artifact);
+    expect(artifactsA).toEqual([
+      'evidence/phase1/wp1.2/domain-transaction-tests.log',
+      'evidence/phase1/wp1.2/command-transaction-tests.log',
+    ]);
+    expect(artifactsB).toEqual([
+      'evidence/phase1/wp1.2/security-audit-tests.log',
+      'evidence/phase1/wp1.2/command-transaction-tests.log',
+      'evidence/phase1/wp1.2/migration-tests.log',
+    ]);
+    expect(artifactsA).not.toEqual(artifactsB);
+    expect(validateEvidence(complete, schema)).toEqual([]);
 
     const incomplete = passingWp1Record();
     incomplete.sub_gates = incomplete.sub_gates.filter((gate: Record<string, unknown>) => gate.gate_id !== 'REM-WP1.2-B');
@@ -751,6 +766,7 @@ describe('REM-WP0.4 authority dependency inventory', () => {
     expect(inventory.serialization.database_identity).toMatch(/UNIQUE NULLS NOT DISTINCT/);
     expect(inventory.serialization.lock_order_rule).toMatch(/COALESCE\(tenant_id::text, empty string\) COLLATE C.*scope_id::text COLLATE C/);
     expect(inventory.serialization.rls_and_privilege_contract).toMatch(/ENABLE.*FORCE ROW LEVEL SECURITY.*UPDATE \(version\)/);
+    expect(inventory.serialization.row_provisioning).toMatch(/INSERT only tenant, organization, and actor_tenant.*migration\/bootstrap owner seeds.*global_policy.*actor.*fails closed/);
     const identity = inventory.dependencies.find((row: { id: string }) => row.id === 'identity-conflict-and-ineligibility-facts');
     expect(identity.phase1_authorization_dependency).toBe(false);
     expect(identity.phase_scope).toBe('original-phase-2-carry-forward');
@@ -773,6 +789,10 @@ describe('REM-WP0.4 authority dependency inventory', () => {
     const wrongPrivileges = structuredClone(inventory);
     wrongPrivileges.serialization.rls_and_privilege_contract = 'RLS enabled only';
     expect(validateAuthorityDependencyInventory(wrongPrivileges, tables).join(' ')).toMatch(/enabled and forced RLS/);
+
+    const unsafeProvisioning = structuredClone(inventory);
+    unsafeProvisioning.serialization.row_provisioning = 'Runtime inserts all scope rows.';
+    expect(validateAuthorityDependencyInventory(unsafeProvisioning, tables).join(' ')).toMatch(/separate tenant-owned runtime inserts/);
 
     const phase2Leak = structuredClone(inventory);
     phase2Leak.dependencies.find((row: { id: string }) => row.id === 'identity-conflict-and-ineligibility-facts').scope_types = ['tenant'];

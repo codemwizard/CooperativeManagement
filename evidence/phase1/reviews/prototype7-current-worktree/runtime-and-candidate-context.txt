@@ -1,4 +1,6 @@
 node=v26.7.0
-npm=11.19.0
-head=9919440c71e167050f8e011a6ed3a432e779eb66
+npm_project_terminal_owner_supplied=12.2.0
+npm_agent_subprocess_prior_observation=11.19.0 (environment-resolution mismatch; not official project version)
+verification_invocation=node node_modules/vitest/vitest.mjs run tests/tooling/phase1_contracts.test.ts (npm not invoked)
+head=886863f0f4d2190ee7a84ca516ebc140b767c60f
 worktree=dirty; output is not candidate-pinned
