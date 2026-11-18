@@ -3,7 +3,8 @@ import { createHash } from 'node:crypto';
 import { execFileSync, spawnSync } from 'node:child_process';
 import { access, readFile } from 'node:fs/promises';
 
-const candidateCommit = process.argv[2];
+const candidateCommit = process.argv.slice(2).find((value) => /^[0-9a-f]{40}$/.test(value));
+const preflight = process.argv.includes('--preflight');
 assert.match(candidateCommit ?? '', /^[0-9a-f]{40}$/, 'usage: node tools/verify_wp5_2_closure.mjs <implementation-commit-sha>');
 const runGit = (...args) => execFileSync('git', args, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] }).trim();
 const currentHead = runGit('rev-parse', 'HEAD');
@@ -32,11 +33,14 @@ async function recordFor(taskId) {
   return JSON.parse(await readFile(recordPath, 'utf8'));
 }
 
-function assertPassingRecord(record, taskId) {
+function assertPassingRecord(record, taskId, { allowPendingGate = false } = {}) {
   assert.equal(record.task_id, taskId, `${taskId} evidence ID mismatch`);
   assert.equal(record.status.implementation, 'complete', `${taskId} implementation is not complete`);
   for (const key of ['unit_test', 'integration_test', 'bdd_ui_test', 'gate_verified']) {
-    assert.ok(['passed', 'not_applicable'].includes(record.status[key]), `${taskId} ${key} is not passing`);
+    const passingValues = allowPendingGate && key === 'gate_verified'
+      ? ['passed', 'not_applicable', 'pending']
+      : ['passed', 'not_applicable'];
+    assert.ok(passingValues.includes(record.status[key]), `${taskId} ${key} is not passing`);
   }
   assert.match(record.commit, /^[0-9a-f]{40}$/, `${taskId} evidence must pin an immutable commit`);
   const relation = spawnSync('git', ['merge-base', '--is-ancestor', record.commit, candidateCommit], { stdio: 'ignore' });
@@ -55,7 +59,7 @@ async function checkTaskAndDirectDependencies(taskId) {
   const definition = graph.tasks[taskId];
   assert.ok(definition, `task missing from authoritative graph: ${taskId}`);
   const record = await recordFor(taskId);
-  assertPassingRecord(record, taskId);
+  assertPassingRecord(record, taskId, { allowPendingGate: preflight && taskId === 'REM-WP5.2' });
   for (const predecessor of definition.depends_on ?? []) {
     const predecessorDefinition = graph.tasks[predecessor];
     assert.ok(predecessorDefinition, `${taskId} references unknown predecessor ${predecessor}`);
@@ -72,7 +76,7 @@ assert.equal(wp51.status.gate_verified, 'passed');
 assert.equal(wp52.status.implementation, 'complete');
 assert.equal(wp52.status.unit_test, 'passed');
 assert.equal(wp52.status.integration_test, 'passed');
-assert.equal(wp52.status.gate_verified, 'passed');
+assert.equal(wp52.status.gate_verified, preflight ? 'pending' : 'passed');
 
 await checkTaskAndDirectDependencies('REM-WP5.1');
 await checkTaskAndDirectDependencies('REM-WP5.2');
@@ -83,10 +87,12 @@ for (const predecessor of graph.tasks['REM-WP5.1'].depends_on ?? []) {
     assertPassingRecord(transitiveRecord, transitivePredecessor);
   }
 }
-// WP5.3 may start only after the ratified WP0.10 record and this completed WP5.2 record.
-for (const predecessor of graph.tasks['REM-WP5.3'].depends_on ?? []) {
-  const predecessorRecord = await recordFor(predecessor);
-  assertPassingRecord(predecessorRecord, predecessor);
+// The preflight is run before WP5.2 is marked passed; final mode confirms WP5.3 entry dependencies.
+if (!preflight) {
+  for (const predecessor of graph.tasks['REM-WP5.3'].depends_on ?? []) {
+    const predecessorRecord = await recordFor(predecessor);
+    assertPassingRecord(predecessorRecord, predecessor);
+  }
 }
 
 const artifacts = [...wp51.commands, ...wp52.commands].map((command) => command.artifact);
@@ -123,8 +129,9 @@ assert.equal(benchmark.sustained.requestedDurationMs, 60_000);
 assert.equal(benchmark.sustained.verificationUnderOneSecond, true);
 for (const p of ['p50', 'p95', 'p99']) assert.ok(benchmark.sustained.latencyMs[p] < 1000);
 
-console.log(`PASS REM-WP5.2 candidate ${candidateCommit}; evidence HEAD ${currentHead}.`);
-console.log('PASS WP5.1 and WP1.2 predecessor evidence; all direct graph dependencies of WP5.1/WP5.2 and WP5.3 entry dependencies are immutable passing ancestors.');
+console.log(`${preflight ? 'PREFLIGHT PASS' : 'PASS'} REM-WP5.2 candidate ${candidateCommit}; evidence HEAD ${currentHead}.`);
+console.log(`${preflight ? 'PASS' : 'PASS'} WP5.1 and WP1.2 predecessor evidence; all direct graph dependencies of WP5.1/WP5.2${preflight ? '' : ' and WP5.3 entry'} are immutable passing ancestors.`);
 console.log(`PASS ${new Set(artifacts).size} retained command artifacts exist and are tracked at evidence HEAD.`);
 console.log(`PASS blocklist ${manifest.version}: ${manifest.entryCount} entries; source/data SHA-256 match manifest.`);
 console.log(`PASS approved interim Argon2id qualification: ${benchmark.sustained.concurrency} concurrent workers, 60 seconds, all verifications under one second.`);
+if (preflight) console.log('WP5.2 gate status remains pending until the final exact-candidate verification is recorded.');
