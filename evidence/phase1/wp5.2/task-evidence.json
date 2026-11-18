@@ -6,7 +6,7 @@
     "unit_test": "passed",
     "integration_test": "passed",
     "bdd_ui_test": "not_applicable",
-    "gate_verified": "pending"
+    "gate_verified": "passed"
   },
   "commit": "7003723da67057bac110b5e364fdadddee6c6785",
   "environment": {
@@ -72,6 +72,11 @@
       "command": "npm run test:api (WP5.1 predecessor suite)",
       "result": "passed",
       "artifact": "evidence/phase1/wp5.2/wp5.1-api-suite.log"
+    },
+    {
+      "command": "node tools/verify_wp5_2_closure.mjs 7003723da67057bac110b5e364fdadddee6c6785",
+      "result": "passed",
+      "artifact": "evidence/phase1/wp5.2/closure-verifier.log"
     }
   ],
   "claims": {
