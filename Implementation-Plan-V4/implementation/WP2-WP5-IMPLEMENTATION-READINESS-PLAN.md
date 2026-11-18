@@ -1,6 +1,6 @@
 # WP2/WP5 Implementation Readiness and Execution Gates
 
-**Status:** REM-WP2.1 policy implementation and focused task gate are complete on npm 12.2.0. REM-WP5.1 and REM-WP5.2 implementation and acceptance evidence are pinned to candidate `7250896fc29b7d40898a0761a227a0d2c6066389`; the exact-candidate closure verifier is the final gate check. REM-WP5.3 has not started and remains graph-gated on WP5.2; REM-WP2.2–REM-WP2.5, WP5.4–WP5.5 and other runtime gates remain open.
+**Status:** REM-WP2.1 policy implementation and focused task gate are complete on npm 12.2.0. REM-WP5.1 and REM-WP5.2 implementation and acceptance evidence are pinned to candidate `7003723da67057bac110b5e364fdadddee6c6785`; the exact-candidate closure verifier is the final gate check. REM-WP5.3 has not started and remains graph-gated on WP5.2; REM-WP2.2–REM-WP2.5, WP5.4–WP5.5 and other runtime gates remain open.
 **Authority:** `PHASE-1-REMEDIATION-PLAN-v2.md`, `PHASE-1-REMEDIATION-ROADMAP-FROM-WP1.6.md`, `06-phased-plan.md`, `03-specification-delta.md`, `AUTHORIZATION_CAPACITY_CONTRACT.md`, `AUTHENTICATION_CONTRACT.md`, the task graph and Phase 1 BDD owner map.  
 **Purpose:** Convert the review findings into implementable, bounded specifications while preserving the accepted execution graph and keeping original-plan scope distinct from remediation-task scope.
 
