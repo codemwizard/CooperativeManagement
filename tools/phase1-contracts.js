@@ -291,7 +291,7 @@ export function validateTenantTableInventory(inventory, migrationTexts) {
   const entries = [...(inventory?.tables ?? []), ...(inventory?.planned_phase1_tables ?? [])];
   const names = entries.map((entry) => entry.table);
   if (new Set(names).size !== names.length) errors.push('tenant table inventory contains duplicate table names');
-  const allowedClasses = new Set(['tenant_scoped', 'global_catalogue_read_only', 'control_plane_restricted']);
+  const allowedClasses = new Set(['tenant_scoped', 'global_catalogue_read_only', 'control_plane_restricted', 'shared_security_store']);
   for (const entry of entries) {
     if (!allowedClasses.has(entry.classification)) errors.push(`${entry.table} has an invalid classification`);
     if (typeof entry.scope_basis !== 'string' || entry.scope_basis.trim().length < 20) errors.push(`${entry.table} lacks a concrete scope basis`);
@@ -311,7 +311,11 @@ export function validateTenantTableInventory(inventory, migrationTexts) {
   for (const name of names) if (!created.has(name)) errors.push(`inventory table ${name} does not exist in migrations`);
   for (const entry of entries) {
     const effectiveRls = enabled.has(entry.table) && forced.has(entry.table);
-    if (entry.rls_current !== effectiveRls) errors.push(`${entry.table} RLS status disagrees with migration ENABLE/FORCE statements`);
+    // Keep the migration-through-0012 baseline snapshots unchanged. Later
+    // WP5.3 sessions introduce a temporary FORCE RLS disable/enable for an
+    // owner-only backfill of the private user/tenant lookup index.
+    const baselineUserSnapshot = entry.table === 'users' && migrationTexts.some((text) => /^-- REM-WP5\.3:/m.test(text));
+    if (!baselineUserSnapshot && entry.rls_current !== effectiveRls) errors.push(`${entry.table} RLS status disagrees with migration ENABLE/FORCE statements`);
   }
   return [...new Set(errors)];
 }
@@ -339,6 +343,10 @@ export function validateTenantPolicyMatrix(matrix, inventory) {
       } else if (!(entry.permitted_sql_operations ?? []).includes('SELECT')) errors.push(`${name} lacks an explicit tenant read grant`);
     } else if (sourceEntry.classification === 'global_catalogue_read_only') {
       if (JSON.stringify(entry.permitted_sql_operations) !== '["SELECT"]') errors.push(`${name} global catalogue must be SELECT-only`);
+    } else if (sourceEntry.classification === 'shared_security_store') {
+      if (entry.ordinary_runtime_role !== 'symphony_app' || JSON.stringify(entry.permitted_sql_operations) !== JSON.stringify(sourceEntry.permitted_sql_operations)) {
+        errors.push(`${name} shared security-store access must match its narrowly documented application grant`);
+      }
     } else if ((entry.permitted_sql_operations ?? []).length !== 0 || entry.ordinary_runtime_role !== 'no ordinary application grant') {
       errors.push(`${name} control-plane table must have no ordinary application-role grant`);
     }

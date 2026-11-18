@@ -72,6 +72,11 @@ export class CredentialLifecycleService {
     return this.verifySecret(encodedHash, password);
   }
 
+  /** Rehash an already-valid legacy password after its successful verification. */
+  async rehashPermanentPassword(password: string): Promise<string> {
+    return this.hashSecret(password);
+  }
+
   needsPermanentPasswordRehash(encodedHash: string): boolean {
     const parameters = parseArgon2idParameters(encodedHash);
     return parameters === undefined

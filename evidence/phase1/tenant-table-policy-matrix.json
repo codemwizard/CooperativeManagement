@@ -62,6 +62,51 @@
       "tenant_context": "SET LOCAL app.tenant_id only from authenticated server context; credential rows are tenant-bound.",
       "access_policy": "Permanent password hashes are readable and mutable only within the authenticated user's tenant; no ordinary app-role DELETE.",
       "status": "REM-WP5.2 migration 0014 defines the table policy and exact app-role grant; candidate verification is pending."
+    },
+    {
+      "table": "auth_sessions",
+      "classification": "shared_security_store",
+      "scope_basis": "Opaque digest-keyed pre-auth and user sessions; user sessions are tenant-bound and pre-auth rows have no identity.",
+      "scope_resolution": "Session reads use the hash-only SECURITY DEFINER lookup; tenant-bound mutations execute with transaction-local app.tenant_id and explicit tenant predicates.",
+      "ordinary_runtime_role": "symphony_app",
+      "permitted_sql_operations": ["SELECT", "INSERT", "UPDATE", "DELETE"],
+      "delete_grant": false,
+      "required_rls": "ENABLED tenant predicates; FORCE not used because pre-auth rows have no tenant context",
+      "current_rls_enabled_and_forced": false,
+      "explicit_tenant_predicate": true,
+      "tenant_context": "Authenticated tenant is set locally for user-session writes; pre-auth rows are opaque token-hash keyed and have no user identity.",
+      "access_policy": "The session store contains only random token and CSRF digests plus opaque identity/lifecycle metadata. Application access is limited to the session repository and bounded by explicit tenant predicates for authenticated sessions.",
+      "status": "REM-WP5.3 migration 0015; candidate-specific restricted-role verification pending."
+    },
+    {
+      "table": "auth_user_tenant_index",
+      "classification": "control_plane_restricted",
+      "scope_basis": "Private UUID-to-tenant routing index read only by the narrow security-definer login lookup; never exposed to the application role.",
+      "scope_resolution": "not_applicable",
+      "ordinary_runtime_role": "no ordinary application grant",
+      "permitted_sql_operations": [],
+      "delete_grant": false,
+      "required_rls": "review_based_on_scope",
+      "current_rls_enabled_and_forced": false,
+      "explicit_tenant_predicate": false,
+      "tenant_context": "Only the user-row trigger and SECURITY DEFINER lookup access this private index.",
+      "access_policy": "No ordinary runtime table grants; direct cross-tenant identity routing remains inaccessible to symphony_app.",
+      "status": "REM-WP5.3 migration 0015; candidate-specific security-definer and restricted-role verification pending."
+    },
+    {
+      "table": "auth_attempt_events",
+      "classification": "shared_security_store",
+      "scope_basis": "Global account and trusted-source throttle history contains HMACs rather than raw account identifiers or source addresses.",
+      "scope_resolution": "not_applicable",
+      "ordinary_runtime_role": "symphony_app",
+      "permitted_sql_operations": ["SELECT", "INSERT", "UPDATE", "DELETE"],
+      "delete_grant": false,
+      "required_rls": "shared atomic security store; no tenant RLS",
+      "current_rls_enabled_and_forced": false,
+      "explicit_tenant_predicate": false,
+      "tenant_context": "Cross-tenant global login protection; access is through the repository's advisory-locked, bounded transaction operations.",
+      "access_policy": "Contains only HMAC account/source keys and bounded state/timestamps. It enables atomic shared limits across API instances and is not a general audit log.",
+      "status": "REM-WP5.3 migration 0015; candidate-specific restricted-role verification pending."
     }
   ],
   "tables": [

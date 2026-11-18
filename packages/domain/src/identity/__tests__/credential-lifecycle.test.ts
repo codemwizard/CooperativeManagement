@@ -65,6 +65,9 @@ describe('CredentialLifecycleService', () => {
     });
     expect(await service.verifyPermanentPassword(password, legacyHash)).toBe(true);
     expect(service.needsPermanentPasswordRehash(legacyHash)).toBe(true);
+    const upgradedHash=await service.rehashPermanentPassword(password);
+    expect(upgradedHash).toMatch(/^\$argon2id\$v=19\$m=19456,t=2,p=1\$/);
+    expect(await service.verifyPermanentPassword(password,upgradedHash)).toBe(true);
   });
 
   it('enforces Unicode code-point limits and the local versioned blocklist', async () => {

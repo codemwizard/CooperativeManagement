@@ -7,6 +7,10 @@ export interface ApiRouteComposition {
   readonly commands?: FastifyPluginAsync;
   /** Session/pre-auth-token validation is supplied by the authentication composition. */
   verifyCsrf?(request: FastifyRequest): Promise<boolean>;
+  /** Enforces persisted-session authentication and forced-change route restrictions. */
+  authorize?(request: FastifyRequest): Promise<ApiErrorCode | undefined>;
+  /** Rotate the current session after an authorized privilege/tenant change. */
+  rotateSession?(request:FastifyRequest,reply:FastifyReply):Promise<string|undefined>;
 }
 
 export interface ApiReadinessCheck {
@@ -28,6 +32,7 @@ function sendError(reply: FastifyReply, code: ApiErrorCode): void {
 
 export function buildApiServer(options: ApiServerOptions): FastifyInstance {
   const app = Fastify({
+    trustProxy: false,
     logger: {
       ...(options.logStream ? { stream: options.logStream } : {}),
       redact: {
@@ -55,6 +60,8 @@ export function buildApiServer(options: ApiServerOptions): FastifyInstance {
       },
     },
   });
+  app.decorateRequest('authSession', null);
+  app.decorate('rotateAuthSession', options.routes?.rotateSession ?? (async () => undefined));
 
   app.setErrorHandler(async (error: FastifyError, _request, reply) => {
     if (error.code === 'FST_ERR_CTP_BODY_TOO_LARGE') {
@@ -86,14 +93,16 @@ export function buildApiServer(options: ApiServerOptions): FastifyInstance {
     if (['POST', 'PUT', 'PATCH', 'DELETE'].includes(request.method)) {
       const origin = request.headers.origin;
       if (!options.config.publicOrigin || origin !== options.config.publicOrigin) {
-        sendError(reply, 'CSRF_REJECTED');
-        return;
+        sendError(reply, 'CSRF_REJECTED'); return;
       }
       const verified = await options.routes?.verifyCsrf?.(request).catch(() => false) ?? false;
       if (!verified) {
-        sendError(reply, 'CSRF_REJECTED');
+        sendError(reply, 'CSRF_REJECTED'); return;
       }
     }
+
+    const denial = await options.routes?.authorize?.(request).catch(() => 'UNAUTHENTICATED' as const);
+    if (denial) sendError(reply, denial);
   });
 
   app.get('/health/live', async (_request, reply) => {
@@ -105,7 +114,9 @@ export function buildApiServer(options: ApiServerOptions): FastifyInstance {
     reply.header('Cache-Control', 'no-store, private');
     const routeCompositionReady = options.routes?.authentication !== undefined
       && options.routes.commands !== undefined
-      && options.routes.verifyCsrf !== undefined;
+      && options.routes.verifyCsrf !== undefined
+      && (options.routes.authorize !== undefined || options.config.runtimeProfile === 'test')
+      && (options.routes.rotateSession !== undefined || options.config.runtimeProfile === 'test');
     const checks = options.readinessChecks ?? [];
     const checksReady = checks.length > 0
       && (await Promise.all(checks.map(async (check) => {

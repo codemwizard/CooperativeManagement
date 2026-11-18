@@ -345,8 +345,28 @@
       "classification": "tenant_scoped",
       "scope_basis": "Direct tenant_id and composite same-tenant user foreign key; permanent password hash, separate from temporary credentials.",
       "rls_current": true
+    },
+    {
+      "table": "auth_sessions",
+      "classification": "shared_security_store",
+      "scope_basis": "Opaque digest-keyed pre-auth and user sessions; tenant rows are context-bound by RLS, while pre-auth rows have no tenant identity.",
+      "rls_current": false,
+      "permitted_sql_operations": ["SELECT", "INSERT", "UPDATE", "DELETE"]
+    },
+    {
+      "table": "auth_user_tenant_index",
+      "classification": "control_plane_restricted",
+      "scope_basis": "Private UUID-to-tenant lookup index used only by the narrow security-definer authentication subject lookup; no runtime table grants.",
+      "rls_current": false
+    },
+    {
+      "table": "auth_attempt_events",
+      "classification": "shared_security_store",
+      "scope_basis": "Shared account and source throttle reservations keyed only by HMAC; raw identifiers and network addresses are not stored.",
+      "rls_current": false,
+      "permitted_sql_operations": ["SELECT", "INSERT", "UPDATE", "DELETE"]
     }
   ],
-  "known_gap": "REM-WP1.5's original 55-table scope passed candidate-pinned PostgreSQL 18 CI run 43683206104. REM-WP5.2 migration 0014 adds two tenant-scoped credential tables with their own FORCE RLS and app-role policies; those additions require candidate-specific migration and restricted-role validation before their rows are considered verified. The original 37 tenant-scoped, 3 read-only catalogue, and 15 control-plane classifications remain intact.",
-  "status": "REM-WP1.5 original scope passed on candidate d7fbf5851b11b07b65bde36f062db7b21f487947, CI run 43683206104; REM-WP5.2 credential table additions are pending candidate verification"
+  "known_gap": "REM-WP1.5's original 55-table scope passed candidate-pinned PostgreSQL 18 CI run 43683206104. REM-WP5.2 migration 0014 adds two tenant-scoped credential tables; REM-WP5.3 migration 0015 adds a shared session store, a private lookup index and a shared HMAC throttle store. Candidate-specific migration and restricted-role validation are required before these additions are considered verified. The original 37 tenant-scoped, 3 read-only catalogue, and 15 control-plane classifications remain intact.",
+  "status": "REM-WP1.5 original scope passed on candidate d7fbf5851b11b07b65bde36f062db7b21f487947, CI run 43683206104; REM-WP5.2 and REM-WP5.3 additions require candidate-specific verification"
 }

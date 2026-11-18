@@ -19,6 +19,7 @@
     "@symphony/db": "*",
     "@symphony/contracts": "*",
     "fastify": "^5.1.0",
+    "pg": "^8.13.0",
     "zod": "^3.23.8"
   },
   "devDependencies": {

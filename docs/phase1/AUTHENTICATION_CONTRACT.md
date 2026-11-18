@@ -1,7 +1,7 @@
 # Phase 1 authentication and session policy contract
 
 **Contract:** `phase1-authentication-v2`
-**Status:** Owner-approved security baseline (approval assumed at user direction, 2026-11-07); the existing domain credential policy now rejects exactly at the 72-hour boundary. Persistent session/API behavior remains assigned to REM-WP5.
+**Status:** Owner-approved security baseline (approval assumed at user direction, 2026-11-07); the existing domain credential policy now rejects exactly at the 72-hour boundary. REM-WP5.3 session/API implementation and focused runtime-role tests are recorded in `evidence/phase1/wp5.3/task-evidence.json`; exact-candidate gate verification remains pending.
 **Authority:** `03-specification-delta.md` §3.1 and ENR-010; ADR-005/018; Phase 1 REM-WP0.8/REM-WP0.10; existing auth tests are implementation evidence only, not policy approval.
 
 | Policy item | Approved behavior | Implementation and verification gate |

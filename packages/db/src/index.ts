@@ -13,6 +13,8 @@ export { PostgresSecurityAttemptWriter, validateSecurityAttemptRuntimeProfile } 
 export type { SecurityAttemptRuntimeProfile } from './repositories/postgres-security-attempt-writer.js';
 export { PostgresCredentialRepository, PasswordCredentialAlreadyEstablishedError, TemporaryCredentialUnavailableError } from './repositories/postgres-credential-repository.js';
 export type { EstablishPasswordInput, IssueTemporaryCredentialInput, TemporaryCredentialRow } from './repositories/postgres-credential-repository.js';
+export { PostgresAuthSessionRepository } from './repositories/postgres-auth-session-repository.js';
+export type { AuthSessionRow, AuthSubject, LoginAttemptReservation } from './repositories/postgres-auth-session-repository.js';
 
 // DB types (Phase 1 — WP-1.3)
 export type { SymphonyDatabase } from './types/database.js';

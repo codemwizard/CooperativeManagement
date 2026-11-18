@@ -1,5 +1,5 @@
 import { spawn } from 'node:child_process';
-import { randomUUID } from 'node:crypto';
+import { createHash, randomBytes, randomUUID } from 'node:crypto';
 import { promises as fs } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -13,6 +13,7 @@ import {
   PostgresCredentialRepository,
   TemporaryCredentialUnavailableError,
 } from '../repositories/postgres-credential-repository.js';
+import { PostgresAuthSessionRepository } from '../repositories/postgres-auth-session-repository.js';
 
 const migrationBaseUrl = process.env['MIGRATION_TEST_DATABASE_URL'];
 const adminDatabaseUrl = process.env['PHASE1_TEST_ADMIN_DATABASE_URL'];
@@ -638,6 +639,21 @@ describe.skipIf(!migrationBaseUrl || !adminDatabaseUrl || process.env['DATA_MODE
         const currentTemporary = await repository.findCurrentTemporaryCredential(tenantId, primaryUser);
         expect(currentTemporary).toMatchObject({ id: storedTemporary.id, consumedAt: null, revokedAt: null });
         expect(currentTemporary!.secretHash).toMatch(/^\$argon2id\$v=19\$m=19456,t=2,p=1\$/);
+        const lookupClient = await pool.connect();
+        try {
+          await lookupClient.query('BEGIN');
+          await lookupClient.query('SET LOCAL ROLE symphony_app');
+          const loginLookup = await lookupClient.query<{tenant_id:string;temporary_credential_id:string;temporary_secret_hash:string}>(
+            'SELECT tenant_id,temporary_credential_id,temporary_secret_hash FROM symphony.lookup_auth_subject($1::uuid)',[primaryUser],
+          );
+          expect(loginLookup.rows).toEqual([{
+            tenant_id:tenantId,temporary_credential_id:storedTemporary.id,temporary_secret_hash:temporaryHash,
+          }]);
+          await expect(lookupClient.query('SELECT user_id FROM symphony.auth_user_tenant_index WHERE user_id=$1',[primaryUser]))
+            .rejects.toMatchObject({code:'42501'});
+          await lookupClient.query('ROLLBACK');
+        } catch (error) { await lookupClient.query('ROLLBACK').catch(()=>undefined); throw error; }
+        finally { lookupClient.release(); }
         expect(JSON.stringify(currentTemporary)).not.toContain(temporaryPlaintextCanary);
         expect(await service.verifyTemporaryCredential(temporaryPlaintextCanary, {
           credentialId: currentTemporary!.id,
@@ -852,6 +868,193 @@ describe.skipIf(!migrationBaseUrl || !adminDatabaseUrl || process.env['DATA_MODE
       );
       expect(tableAcl.rows[0]?.acl).toMatch(/symphony_app=arw/i);
       expect(tableAcl.rows[0]?.acl).not.toMatch(/symphony_app=[^/]*d/i);
+    });
+
+    it('persists opaque sessions, revokes all sessions at password change, and serializes shared throttle delays across pools', async () => {
+      const tenantId = randomUUID();
+      const userId = randomUUID();
+      const tempId = randomUUID();
+      const repoOnePool = new pg.Pool({ connectionString: testDatabaseUrl, max: 1 });
+      const repoTwoPool = new pg.Pool({ connectionString: testDatabaseUrl, max: 1 });
+      const repoOne = new PostgresAuthSessionRepository(repoOnePool);
+      const repoTwo = new PostgresAuthSessionRepository(repoTwoPool);
+      const rawTemporary = `WP53_TEMP_${randomUUID()}`;
+      const secretHash = await argon2.hash(rawTemporary, { type: argon2.argon2id, ...ARGON2ID_PARAMETERS });
+      const passwordHash = await argon2.hash(`WP53_PASSWORD_${randomUUID()}`, { type: argon2.argon2id, ...ARGON2ID_PARAMETERS });
+      const accountHmac = createHash('sha256').update(randomUUID()).digest();
+      const sourceHmac = createHash('sha256').update(randomUUID()).digest();
+      const resetSourceHmac = createHash('sha256').update(randomUUID()).digest();
+      const boundarySourceHmac = createHash('sha256').update(randomUUID()).digest();
+      const combinedAccountHmac = createHash('sha256').update(randomUUID()).digest();
+      const combinedSourceHmac = createHash('sha256').update(randomUUID()).digest();
+      const rawTokenA = randomBytes(32).toString('base64url');
+      const rawTokenB = randomBytes(32).toString('base64url');
+      const tokenA = createHash('sha256').update(rawTokenA).digest();
+      const tokenB = createHash('sha256').update(rawTokenB).digest();
+      const tokenC = createHash('sha256').update(randomBytes(32).toString('base64url')).digest();
+      const tokenD = createHash('sha256').update(randomBytes(32).toString('base64url')).digest();
+      const tokenE = createHash('sha256').update(randomBytes(32).toString('base64url')).digest();
+      const tokenF = createHash('sha256').update(randomBytes(32).toString('base64url')).digest();
+      const csrfA = createHash('sha256').update(randomUUID()).digest();
+      const csrfB = createHash('sha256').update(randomUUID()).digest();
+      const csrfC = createHash('sha256').update(randomUUID()).digest();
+      const csrfD = createHash('sha256').update(randomUUID()).digest();
+      const csrfE = createHash('sha256').update(randomUUID()).digest();
+      const csrfF = createHash('sha256').update(randomUUID()).digest();
+      const preAuthA = createHash('sha256').update(randomUUID()).digest();
+      const preAuthB = createHash('sha256').update(randomUUID()).digest();
+      const preAuthD = createHash('sha256').update(randomUUID()).digest();
+      const preAuthReplay = createHash('sha256').update(randomUUID()).digest();
+      try {
+        for (const rolePool of [repoOnePool,repoTwoPool]) {
+          const roleClient=await rolePool.connect();
+          try { await roleClient.query('SET ROLE symphony_app'); }
+          finally { roleClient.release(); }
+        }
+        await pool.query('INSERT INTO symphony.tenants(id,name) VALUES($1,$2)', [tenantId,'wp5.3-session-fixture']);
+        const fixtureClient = await pool.connect();
+        try {
+          await fixtureClient.query('BEGIN');
+          await fixtureClient.query("SELECT set_config('app.tenant_id',$1,true)",[tenantId]);
+          await fixtureClient.query(
+            `INSERT INTO symphony.users(id,tenant_id,email,email_normalized,status) VALUES($1,$2,$3,$3,'active')`,
+            [userId,tenantId,`wp5.3-${userId}@example.invalid`],
+          );
+          await fixtureClient.query('COMMIT');
+        } catch (error) { await fixtureClient.query('ROLLBACK').catch(()=>undefined); throw error; }
+        finally { fixtureClient.release(); }
+        const credentialRepository = new PostgresCredentialRepository(pool);
+        await credentialRepository.issueTemporaryCredential({ credentialId:tempId,tenantId,userId,secretHash });
+        const temp = await credentialRepository.findCurrentTemporaryCredential(tenantId,userId);
+        expect(temp?.id).toBe(tempId);
+
+        await repoOne.createPreAuthSession(preAuthA,csrfA);
+        await repoTwo.createPreAuthSession(preAuthB,csrfB);
+        await Promise.all([
+          repoOne.createAuthenticatedSession({preAuthTokenHash:preAuthA,tokenHash:tokenA,csrfHash:csrfA,tenantId,userId,deviceId:'device-a',temporaryCredentialId:tempId,forcedChangeRequired:true}),
+          repoTwo.createAuthenticatedSession({preAuthTokenHash:preAuthB,tokenHash:tokenB,csrfHash:csrfB,tenantId,userId,deviceId:'device-b',temporaryCredentialId:tempId,forcedChangeRequired:true}),
+        ]);
+        expect((await repoOne.findSession(tokenA))?.forcedChangeRequired).toBe(true);
+        expect((await repoTwo.findSession(tokenB))?.userId).toBe(userId);
+        const persistedTokens = await pool.query<{ token_hash: Buffer; csrf_hash: Buffer }>(
+          'SELECT token_hash,csrf_hash FROM symphony.auth_sessions WHERE user_id=$1 ORDER BY device_id',[userId],
+        );
+        expect(persistedTokens.rows).toHaveLength(2);
+        expect(persistedTokens.rows.some((row)=>row.token_hash.equals(tokenA))).toBe(true);
+        expect(persistedTokens.rows.some((row)=>row.token_hash.toString('base64url')===rawTokenA || row.token_hash.toString('base64url')===rawTokenB)).toBe(false);
+
+        await repoOne.createPreAuthSession(preAuthReplay,csrfA);
+        const replayed=await Promise.allSettled([
+          repoOne.createAuthenticatedSession({preAuthTokenHash:preAuthReplay,tokenHash:tokenE,csrfHash:csrfE,tenantId,userId,deviceId:'replay-e',temporaryCredentialId:tempId,forcedChangeRequired:true}),
+          repoTwo.createAuthenticatedSession({preAuthTokenHash:preAuthReplay,tokenHash:tokenF,csrfHash:csrfF,tenantId,userId,deviceId:'replay-f',temporaryCredentialId:tempId,forcedChangeRequired:true}),
+        ]);
+        expect(replayed.filter((result)=>result.status==='fulfilled')).toHaveLength(1);
+        expect(replayed.filter((result)=>result.status==='rejected')).toHaveLength(1);
+        const replaySessions=await pool.query<{token_hash:Buffer}>(
+          'SELECT token_hash FROM symphony.auth_sessions WHERE (token_hash=$1 OR token_hash=$2) AND revoked_at IS NULL',[tokenE,tokenF],
+        );
+        expect(replaySessions.rows).toHaveLength(1);
+        await repoOne.revokeSession(replaySessions.rows[0]!.token_hash,tenantId);
+
+        await repoOne.revokeSession(tokenA,tenantId);
+        expect((await repoOne.findSession(tokenA))?.revokedAt).not.toBeNull();
+        expect((await repoTwo.findSession(tokenB))?.revokedAt).toBeNull();
+        expect(await repoOne.rotateAuthenticatedSession({previousTokenHash:tokenB,nextTokenHash:tokenC,nextCsrfHash:csrfC,tenantId})).toBe(true);
+        expect((await repoTwo.findSession(tokenB))?.revokedAt).not.toBeNull();
+        expect((await repoOne.findSession(tokenC))?.revokedAt).toBeNull();
+        await repoOne.createPreAuthSession(preAuthD,csrfD);
+        await repoOne.createAuthenticatedSession({preAuthTokenHash:preAuthD,tokenHash:tokenD,csrfHash:csrfD,tenantId,userId,deviceId:'device-d',temporaryCredentialId:tempId,forcedChangeRequired:true});
+
+        await pool.query(
+          `WITH instant AS (SELECT clock_timestamp() AS t)
+           UPDATE symphony.auth_sessions s SET issued_at=instant.t-INTERVAL '12 hours',
+             last_activity_at=instant.t,absolute_expires_at=instant.t
+           FROM instant WHERE s.token_hash=$1`,[tokenC],
+        );
+        expect(await repoTwo.touchSession(tokenC,tenantId)).toBe(false);
+        await pool.query('UPDATE symphony.auth_sessions SET last_activity_at=clock_timestamp()-INTERVAL \'30 minutes\' WHERE token_hash=$1',[tokenD]);
+        expect(await repoOne.touchSession(tokenD,tenantId)).toBe(false);
+
+        await repoOne.establishPasswordAndRevokeSessions({tenantId,userId,temporaryCredentialId:tempId,passwordHash});
+        expect((await repoOne.findSession(tokenA))?.revokedAt).not.toBeNull();
+        expect((await repoTwo.findSession(tokenB))?.revokedAt).not.toBeNull();
+        expect((await repoOne.findSession(tokenC))?.revokedAt).not.toBeNull();
+        expect((await repoOne.findSession(tokenD))?.revokedAt).not.toBeNull();
+        expect(await credentialRepository.findPermanentPasswordHash(tenantId,userId)).toBe(passwordHash);
+
+        const steps: number[] = [];
+        for (let index=0;index<5;index++) {
+          const attempt=await repoOne.reserveAttempt(accountHmac,sourceHmac);
+          steps.push(attempt.delayMs);
+          await repoOne.finishAttempt({attemptId:attempt.attemptId,accountHmac,sourceHmac,success:false});
+        }
+        expect(steps).toEqual([0,0,0,0,0]);
+        let arrivals=0;let releaseBarrier!:()=>void;
+        const barrier=new Promise<void>((resolve)=>{releaseBarrier=resolve;});
+        const concurrentReserve=(repository:PostgresAuthSessionRepository)=>{
+          arrivals+=1;if(arrivals===2)releaseBarrier();
+          return barrier.then(()=>repository.reserveAttempt(accountHmac,sourceHmac));
+        };
+        const concurrent=await Promise.all([concurrentReserve(repoOne),concurrentReserve(repoTwo)]);
+        expect(concurrent.map((attempt)=>attempt.delayMs).sort((a,b)=>a-b)).toEqual([1000,2000]);
+        await Promise.all(concurrent.map((attempt)=>repoOne.finishAttempt({attemptId:attempt.attemptId,accountHmac,sourceHmac,success:false})));
+        const capped=await repoTwo.reserveAttempt(accountHmac,sourceHmac);
+        expect(capped.delayMs).toBe(4_000);
+        await repoTwo.finishAttempt({attemptId:capped.attemptId,accountHmac,sourceHmac,success:false});
+        const laterDelays: number[] = [];
+        for (const expectedDelay of [8_000,16_000,32_000]) {
+          const attempt=await repoOne.reserveAttempt(accountHmac,sourceHmac);
+          laterDelays.push(attempt.delayMs);
+          await repoOne.finishAttempt({attemptId:attempt.attemptId,accountHmac,sourceHmac,success:false});
+          expect(attempt.delayMs).toBe(expectedDelay);
+        }
+        expect(laterDelays).toEqual([8_000,16_000,32_000]);
+        const successfulAttempt=await repoOne.reserveAttempt(accountHmac,sourceHmac);
+        await repoOne.finishAttempt({attemptId:successfulAttempt.attemptId,accountHmac,sourceHmac,success:true});
+        const retainedSource=await repoTwo.reserveAttempt(accountHmac,sourceHmac);
+        expect(retainedSource.delayMs).toBe(32_000);
+        await repoTwo.finishAttempt({attemptId:retainedSource.attemptId,accountHmac,sourceHmac,success:false});
+        const reset=await repoTwo.reserveAttempt(accountHmac,resetSourceHmac);
+        expect(reset.delayMs).toBe(0);
+        await repoTwo.finishAttempt({attemptId:reset.attemptId,accountHmac,sourceHmac:resetSourceHmac,success:false});
+
+        await pool.query(
+          `INSERT INTO symphony.auth_attempt_events(attempt_id,dimension,identity_hmac,state,occurred_at)
+           VALUES($1,'account',$2,'failed',clock_timestamp()-INTERVAL '15 minutes'),
+                 ($3,'trusted_source',$4,'reserved',clock_timestamp()-INTERVAL '15 minutes')`,
+          [randomUUID(),accountHmac,randomUUID(),boundarySourceHmac],
+        );
+        const boundary=await repoOne.reserveAttempt(accountHmac,boundarySourceHmac);
+        expect(boundary.delayMs).toBe(0);
+        await repoOne.finishAttempt({attemptId:boundary.attemptId,accountHmac,sourceHmac:boundarySourceHmac,success:true});
+        const expiredRows=await pool.query<{count:string}>(
+          'SELECT count(*)::text AS count FROM symphony.auth_attempt_events WHERE identity_hmac=$1 OR identity_hmac=$2',[accountHmac,boundarySourceHmac],
+        );
+        expect(expiredRows.rows[0]?.count).toBe('0');
+
+        for(let index=0;index<6;index++)await pool.query(
+          `INSERT INTO symphony.auth_attempt_events(attempt_id,dimension,identity_hmac,state)
+           VALUES($1,'account',$2,'failed')`,[randomUUID(),combinedAccountHmac],
+        );
+        for(let index=0;index<5;index++)await pool.query(
+          `INSERT INTO symphony.auth_attempt_events(attempt_id,dimension,identity_hmac,state)
+           VALUES($1,'trusted_source',$2,'failed')`,[randomUUID(),combinedSourceHmac],
+        );
+        const combined=await repoTwo.reserveAttempt(combinedAccountHmac,combinedSourceHmac);
+        expect(combined.delayMs).toBe(2_000);
+        await repoTwo.finishAttempt({attemptId:combined.attemptId,accountHmac:combinedAccountHmac,sourceHmac:combinedSourceHmac,success:true});
+      } finally {
+        await pool.query('DELETE FROM symphony.auth_attempt_events WHERE identity_hmac=$1 OR identity_hmac=$2 OR identity_hmac=$3 OR identity_hmac=$4 OR identity_hmac=$5 OR identity_hmac=$6',[accountHmac,sourceHmac,resetSourceHmac,boundarySourceHmac,combinedAccountHmac,combinedSourceHmac]).catch(()=>undefined);
+        await pool.query('DELETE FROM symphony.auth_sessions WHERE token_hash=$1 OR token_hash=$2',[preAuthA,preAuthB]).catch(()=>undefined);
+        await pool.query('DELETE FROM symphony.auth_sessions WHERE token_hash=$1',[preAuthD]).catch(()=>undefined);
+        await pool.query('DELETE FROM symphony.auth_sessions WHERE token_hash=$1',[preAuthReplay]).catch(()=>undefined);
+        await pool.query('DELETE FROM symphony.auth_sessions WHERE tenant_id=$1',[tenantId]).catch(()=>undefined);
+        await pool.query('DELETE FROM symphony.password_credentials WHERE tenant_id=$1',[tenantId]).catch(()=>undefined);
+        await pool.query('DELETE FROM symphony.temporary_credentials WHERE tenant_id=$1',[tenantId]).catch(()=>undefined);
+        await pool.query('DELETE FROM symphony.users WHERE tenant_id=$1',[tenantId]).catch(()=>undefined);
+        await pool.query('DELETE FROM symphony.tenants WHERE id=$1',[tenantId]).catch(()=>undefined);
+        await repoOnePool.end(); await repoTwoPool.end();
+      }
     });
 
     it('aborts WP1.1 migration on a non-empty legacy receipt table without changing it', async () => {

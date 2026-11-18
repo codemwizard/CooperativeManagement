@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "source": "Original migration inventory plus REM-WP1.2 security_attempts, REM-WP1.4 reconciliation_inbox, and REM-WP5.2 credential tables; PostgreSQL 18.0 pg_constraint foreign-key catalog requires candidate refresh",
+  "source": "Original migration inventory plus REM-WP1.2 security_attempts, REM-WP1.4 reconciliation_inbox, REM-WP5.2 credential tables, and REM-WP5.3 auth stores; PostgreSQL 18.0 pg_constraint foreign-key catalog requires candidate refresh",
   "status": "REM-WP0 proposed, reviewable table/row allowlist; no destructive statements executed",
   "target": {
     "database": "symphony_phase1_test",
@@ -334,6 +334,21 @@
       "table": "security_attempts",
       "disposition": "preserve_append_only_security_history_outside_purge_allowlist",
       "reason": "Authenticated command-denial observations are security audit records; the purge role has no DELETE grant. Migration 0010 creates this table, which is explicitly preserved outside the purge allowlist."
+    },
+    {
+      "table": "auth_sessions",
+      "disposition": "preserve_authentication_session_store_outside_purge_allowlist",
+      "reason": "Authentication sessions are security state and are not tenant business data; session expiration/revocation is owned by REM-WP5.3, not the test-data purge operation."
+    },
+    {
+      "table": "auth_user_tenant_index",
+      "disposition": "preserve_private_authentication_lookup_index",
+      "reason": "The UUID-to-tenant lookup index is maintained by a database trigger and is private control-plane routing metadata, not test-owned business data."
+    },
+    {
+      "table": "auth_attempt_events",
+      "disposition": "preserve_short_lived_authentication_security_history",
+      "reason": "HMAC-keyed account/source attempt history is cross-tenant security control state with a fixed 15-minute retention window and remains outside the purge allowlist."
     },
     {
       "table": "requirement_sources",
