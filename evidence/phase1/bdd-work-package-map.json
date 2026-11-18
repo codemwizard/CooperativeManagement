@@ -12,9 +12,10 @@
       "scenario": "Temporary credentials are single use, expire and force a change",
       "owner_tasks": [
         "REM-WP5.1",
-        "REM-WP5.4"
+        "REM-WP5.4",
+        "REM-WP5.5"
       ],
-      "required_path": "PostgreSQL-backed API plus browser-to-API; no auth-route interception",
+      "required_path": "PostgreSQL-backed API plus real browser-to-workspace-to-API flow; no auth-route interception; exact execution owned by REM-WP5.5",
       "assertion_rule": "Execute this exact tagged scenario with observable assertions on the specified product path; no mock, @wip, skip, tag removal, zero-step pass, or in-memory substitute.",
       "phase0_status": "mapped_and_deferred_to_owner_task"
     },

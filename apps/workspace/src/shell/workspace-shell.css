@@ -1,0 +1,15 @@
+@import '../styles/workspace-accessibility.css';
+
+.app-shell { min-width: 20rem; }
+.app-shell > .app-shell-body { min-width: 0; }
+
+@media (max-width: 52rem) {
+  .app-shell > .app-shell-body { flex-direction: column; overflow: visible !important; }
+  .app-shell > .app-shell-body > nav { width: auto !important; min-width: 0 !important; max-height: 16rem; border-right: 0 !important; border-bottom: 1px solid #dee2e6; }
+  .app-shell > .app-shell-body > main { padding: 1.25rem !important; }
+  .app-shell [role='banner'] { align-items: flex-start !important; flex-wrap: wrap; padding: 0.75rem 1rem !important; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { scroll-behavior: auto !important; transition-duration: 0.01ms !important; }
+}

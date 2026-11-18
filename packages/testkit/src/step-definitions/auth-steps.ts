@@ -11,9 +11,38 @@
  */
 
 import assert from 'node:assert/strict';
-import { Given, When, Then } from '@cucumber/cucumber';
+import { After, Before, Given, When, Then } from '@cucumber/cucumber';
 import type { SymphonyWorld } from './world.js';
 import { AuthService, type IssuedCredential } from '@symphony/domain/identity/auth-service';
+import { assertNoAuthSecretCanaries, createLiveAuthHarness, destroyLiveAuthHarness, type LiveAuthHarness } from './live-auth-harness.js';
+
+interface LiveAuthState {
+  readonly harness: LiveAuthHarness;
+  userId: string;
+  temporaryPassword: string;
+}
+
+function liveAuthState(world: SymphonyWorld): LiveAuthState | undefined {
+  return (world as unknown as Record<string, unknown>)['_liveAuth'] as LiveAuthState | undefined;
+}
+
+Before({ tags: '@BDD-ENR-004' }, async function (this: SymphonyWorld) {
+  if (process.env['WP5_5_LIVE_AUTH_BDD'] !== '1') return;
+  const origin = process.env['WP5_5_PUBLIC_ORIGIN'];
+  if (!origin) throw new Error('WP5.5 BDD public origin is required.');
+  const state: LiveAuthState = {
+    harness: await createLiveAuthHarness(origin),
+    userId: '',
+    temporaryPassword: '',
+  };
+  (this as unknown as Record<string, unknown>)['_liveAuth'] = state;
+  await state.harness.page.goto(`${origin}/login`);
+});
+
+After({ tags: '@BDD-ENR-004' }, async function (this: SymphonyWorld) {
+  const state = liveAuthState(this);
+  if (state) await destroyLiveAuthHarness(state.harness);
+});
 
 // ─── Shared Background steps ───────────────────────────────────────────────────
 
@@ -128,6 +157,13 @@ interface AuthStepState {
 Given(
   'a Secretary account with a temporary password created {int} hours ago',
   async function (this: SymphonyWorld, hoursAgo: number) {
+    const live = liveAuthState(this);
+    if (live) {
+      assert.strictEqual(hoursAgo, 73);
+      live.userId = live.harness.expiredUserId;
+      live.temporaryPassword = live.harness.expiredPassword;
+      return;
+    }
     const world = this as unknown as Record<string, unknown>;
     const clock = new StepClock();
     const svc = new AuthService(clock);
@@ -143,6 +179,12 @@ Given(
 Given(
   'a Secretary account with a fresh temporary password',
   async function (this: SymphonyWorld) {
+    const live = liveAuthState(this);
+    if (live) {
+      live.userId = live.harness.freshUserId;
+      live.temporaryPassword = live.harness.freshPassword;
+      return;
+    }
     const world = this as unknown as Record<string, unknown>;
     const clock = new StepClock();
     const svc = new AuthService(clock);
@@ -156,6 +198,14 @@ Given(
 When(
   'the Secretary logs in with the temporary password',
   async function (this: SymphonyWorld) {
+    const live = liveAuthState(this);
+    if (live) {
+      const { page } = live.harness;
+      await page.getByLabel('Email or user ID').fill(live.userId);
+      await page.getByLabel('Password').fill(live.temporaryPassword);
+      await page.getByRole('button', { name: 'Sign in' }).click();
+      return;
+    }
     const world = this as unknown as Record<string, unknown>;
     const svc = world['_authSvc'] as AuthService;
     const issued = world['_authIssuedCredential'] as IssuedCredential;
@@ -191,8 +241,28 @@ Then(
 );
 
 Then(
+  'login is rejected with the generic authentication failure',
+  async function (this: SymphonyWorld) {
+    const live = liveAuthState(this);
+    assert.ok(live, 'Expected the live PostgreSQL/browser authentication harness.');
+    const alert = live.harness.page.getByRole('alert');
+    await alert.waitFor({ state: 'visible' });
+    assert.strictEqual(await alert.textContent(), 'Sign in failed. Please check your credentials and try again.');
+    assert.match(live.harness.page.url(), /\/login$/);
+  },
+);
+
+Then(
   'the Secretary must change the password before any other action',
-  function (this: SymphonyWorld) {
+  async function (this: SymphonyWorld) {
+    const live = liveAuthState(this);
+    if (live) {
+      await live.harness.page.getByRole('heading', { name: 'Change your password' }).waitFor({ state: 'visible' });
+      await live.harness.page.goto(`${live.harness.origin}/workspace`);
+      await live.harness.page.getByRole('heading', { name: 'Change your password' }).waitFor({ state: 'visible' });
+      assert.match(live.harness.page.url(), /\/login$/);
+      return;
+    }
     const world = this as unknown as Record<string, unknown>;
     const result = world['_authResult'] as { ok: boolean; forcedChangeRequired?: boolean };
     assert.strictEqual(result.ok, true, 'Expected login to succeed');
@@ -206,7 +276,25 @@ Then(
 
 Then(
   'an authentication event {string} is recorded',
-  function (this: SymphonyWorld, _eventName: string) {
+  async function (this: SymphonyWorld, eventName: string) {
+    const live = liveAuthState(this);
+    if (live) {
+      const client = await live.harness.admin.connect();
+      try {
+        await client.query('BEGIN');
+        await client.query("SELECT set_config('app.tenant_id',$1,true)", [live.harness.tenantId]);
+        const result = await client.query<{ method: string; result: string }>(
+          'SELECT method,result FROM symphony.authentication_events WHERE user_id=$1 AND method=$2 ORDER BY occurred_at DESC LIMIT 1',
+          [live.harness.freshUserId, eventName],
+        );
+        assert.deepStrictEqual(result.rows[0], { method: eventName, result: 'success' });
+        await client.query('COMMIT');
+      } catch (error) {
+        await client.query('ROLLBACK').catch(() => undefined);
+        throw error;
+      } finally { client.release(); }
+      return;
+    }
     const world = this as unknown as Record<string, unknown>;
     const events = (world['_authEvents'] as Array<{ type: string }>) ?? [];
     assert.ok(
@@ -219,6 +307,22 @@ Then(
 Then(
   'the temporary password cannot be used again',
   async function (this: SymphonyWorld) {
+    const live = liveAuthState(this);
+    if (live) {
+      const { page, newPassword } = live.harness;
+      await page.getByLabel('Current temporary credential').fill(live.temporaryPassword);
+      await page.getByLabel('New password', { exact: true }).fill(newPassword);
+      await page.getByLabel('Confirm new password').fill(newPassword);
+      await page.getByRole('button', { name: 'Update password' }).click();
+      await page.getByRole('heading', { name: 'Password updated' }).waitFor({ state: 'visible' });
+      await page.getByRole('button', { name: 'Return to sign in' }).click();
+      await page.getByLabel('Email or user ID').fill(live.userId);
+      await page.getByLabel('Password').fill(live.temporaryPassword);
+      await page.getByRole('button', { name: 'Sign in' }).click();
+      await page.getByRole('alert').waitFor({ state: 'visible' });
+      assert.strictEqual(await page.getByRole('alert').textContent(), 'Sign in failed. Please check your credentials and try again.');
+      return;
+    }
     const world = this as unknown as Record<string, unknown>;
     const svc = world['_authSvc'] as AuthService;
     const issued = world['_authIssuedCredential'] as IssuedCredential;
@@ -240,8 +344,30 @@ Then(
 );
 
 Then(
+  'the Secretary can sign in with the new password',
+  async function (this: SymphonyWorld) {
+    const live = liveAuthState(this);
+    assert.ok(live, 'Expected the live PostgreSQL/browser authentication harness.');
+    const { page, context, origin, freshUserId, newPassword } = live.harness;
+    await page.getByLabel('Email or user ID').fill(freshUserId);
+    await page.getByLabel('Password').fill(newPassword);
+    await page.getByRole('button', { name: 'Sign in' }).click();
+    await page.waitForURL(/\/workspace(?:\/.*)?$/);
+    const sessionCookie = (await context.cookies(origin)).find((cookie) => cookie.name === 'symphony.sid');
+    assert.ok(sessionCookie?.httpOnly, 'Expected the HttpOnly server-side session cookie.');
+    await page.reload();
+    await page.waitForURL(/\/workspace(?:\/.*)?$/);
+  },
+);
+
+Then(
   'no password value appears in any event or log',
-  function (this: SymphonyWorld) {
+  async function (this: SymphonyWorld) {
+    const live = liveAuthState(this);
+    if (live) {
+      await assertNoAuthSecretCanaries(live.harness);
+      return;
+    }
     const world = this as unknown as Record<string, unknown>;
     const issued = world['_authIssuedCredential'] as IssuedCredential;
     const events = (world['_authEvents'] as Array<unknown>) ?? [];

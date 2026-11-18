@@ -115,6 +115,13 @@ export class PostgresAuthSessionRepository {
          SELECT $1,$2,$3,$4,$5,$6,$7,issuance.issued_at,issuance.issued_at,issuance.issued_at+INTERVAL '12 hours' FROM issuance`,
         [input.tokenHash,input.csrfHash,input.tenantId,input.userId,input.deviceId,input.temporaryCredentialId,input.forcedChangeRequired],
       );
+      if (input.temporaryCredentialId !== null) {
+        await client.query(
+          `INSERT INTO symphony.authentication_events(user_id,method,result,device_id)
+           VALUES($1,'first_login','success',$2)`,
+          [input.userId,input.deviceId],
+        );
+      }
     });
   }
 

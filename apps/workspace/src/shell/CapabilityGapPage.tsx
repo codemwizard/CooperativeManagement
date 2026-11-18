@@ -14,7 +14,7 @@ interface CapabilityGapPageProps {
 export function CapabilityGapPage({ module }: CapabilityGapPageProps): React.ReactElement {
   return (
     <div>
-      <h1>{module}</h1>
+      <h1 tabIndex={-1}>{module}</h1>
       <div
         style={styles.gap}
         aria-label={`${module}: platform capability not implemented`}
@@ -50,7 +50,7 @@ const styles = {
     fontSize: '1rem',
   },
   note: {
-    color: '#6c757d',
+    color: '#626a70',
     fontSize: '0.875rem',
     marginTop: '1rem',
   },

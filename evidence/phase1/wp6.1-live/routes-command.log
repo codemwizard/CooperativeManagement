@@ -1,0 +1,20 @@
+
+> symphony-prototype@1.0.0 test:wp6.1
+> node --env-file-if-exists=.env.local --env-file-if-exists=.env tools/run_wp6_1_routes.mjs
+
+
+  VITE v5.4.21  ready in 1228 ms
+
+  ➜  Local:   http://127.0.0.1:53186/
+
+Running 3 tests using 1 worker
+
+(node:19712) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+WP6.1 route list: /components, /login, /workspace/overview, /workspace/identity, /workspace/enrolment, /workspace/bylaws, /workspace/governance, /workspace/people, /workspace/meetings, /workspace/committees, /workspace/audit, /workspace/evidence, /workspace/findings
+WP6.1 served routes exercised: /components, /login, /workspace/overview, /workspace/identity, /workspace/enrolment, /workspace/bylaws, /workspace/governance, /workspace/people, /workspace/meetings, /workspace/committees, /workspace/audit, /workspace/evidence, /workspace/findings, /coop/org-1/evidence?filter=open&sort=severity
+  ok 1 tests\workspace\routes.spec.ts:71:1 › served component, login and workspace routes have titles, landmarks and keyboard route focus (20.6s)
+  ok 2 tests\workspace\routes.spec.ts:127:1 › workspace route rejects an unauthenticated browser session (957ms)
+  ok 3 tests\workspace\routes.spec.ts:133:1 › provenance dialog has an accessible name, contains keyboard focus and restores its trigger on Escape (5.8s)
+
+  3 passed (50.1s)

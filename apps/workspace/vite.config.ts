@@ -3,7 +3,12 @@ import react from '@vitejs/plugin-react';
 
 export default defineConfig({
   plugins: [react()],
-  server: { port: 5174 },
+  server: {
+    port: 5174,
+    proxy: {
+      '/auth': { target: process.env.VITE_AUTH_API_TARGET ?? 'http://127.0.0.1:3000', changeOrigin: false },
+    },
+  },
   preview: { port: 5174 },
   define: {
     // Ensure VITE_DEMO is available at build time for tree-shaking

@@ -7,7 +7,7 @@ export default defineConfig({
   testMatch: /.*\.spec\.ts/,
   // This no-mock browser-to-API acceptance test has its own two-server,
   // test-database configuration in playwright.phase1.config.ts.
-  testIgnore: ['tests/workspace/login-api.spec.ts'],
+  testIgnore: ['tests/workspace/login-api.spec.ts', 'tests/workspace/routes.spec.ts'],
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,

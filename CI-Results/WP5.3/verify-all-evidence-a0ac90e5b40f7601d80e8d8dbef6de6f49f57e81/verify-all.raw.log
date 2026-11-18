@@ -1,0 +1,97 @@
+npm notice run symphony-prototype@1.0.0 verify:all
+npm notice run npm run verify:legacy-floor && npm run test:e2e
+npm notice run symphony-prototype@1.0.0 verify:legacy-floor
+npm notice run npm run build && npm run verify:oracle && npm run verify:help && npm run verify:bundle && npm run test
+npm notice run symphony-prototype@1.0.0 build
+npm notice run tsc --noEmit && vite build
+[36mvite v5.4.21 [32mbuilding for production...[36m[39m
+transforming...
+[32m✓[39m 1640 modules transformed.
+rendering chunks...
+computing gzip size...
+[2mdist/[22m[32mindex.html                 [39m[1m[2m  0.44 kB[22m[1m[22m[2m │ gzip:   0.31 kB[22m
+[2mdist/[22m[2massets/[22m[35mindex-CUbEzOSE.css  [39m[1m[2m 17.90 kB[22m[1m[22m[2m │ gzip:   4.40 kB[22m
+[2mdist/[22m[2massets/[22m[36mindex-DjKOmytQ.js   [39m[1m[33m511.06 kB[39m[22m[2m │ gzip: 127.35 kB[22m
+[33m
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.[39m
+[32m✓ built in 7.21s[39m
+npm notice run symphony-prototype@1.0.0 verify:oracle
+npm notice run node tools/run_python_tool.js tools/reference_oracle.py
+OK: 10 cases x 3 destinations match expected-results.json; data integrity clean.
+npm notice run symphony-prototype@1.0.0 verify:help
+npm notice run node tools/run_python_tool.js tools/validate_help.py
+OK: 91 help entries, 23 tour steps, 8 required visible texts.
+npm notice run symphony-prototype@1.0.0 verify:bundle
+npm notice run node tools/run_python_tool.js tools/verify_bundle.py
+[1/3] Checking dist/ directory existence and file exclusions...
+[2/3] Checking for forbidden financial institution terms...
+[3/3] Checking bundle content cleanliness...
+OK: Bundle sanitized, zero forbidden files, zero forbidden terms.
+npm notice run symphony-prototype@1.0.0 test
+npm notice run vitest run
+
+[1m[7m[36m RUN [39m[27m[22m [36mv2.1.9 [39m[90m/home/runner/work/CooperativeManagement/CooperativeManagement[39m
+
+ [32m✓[39m tests/contracts.test.ts [2m([22m[2m21 tests[22m[2m)[22m[90m 49[2mms[22m[39m
+ [32m✓[39m tests/eqs_scoring.test.ts [2m([22m[2m47 tests[22m[2m)[22m[90m 66[2mms[22m[39m
+ [32m✓[39m tests/persistence_integrity.test.ts [2m([22m[2m24 tests[22m[2m)[22m[90m 78[2mms[22m[39m
+ [32m✓[39m tests/engine.test.ts [2m([22m[2m24 tests[22m[2m)[22m[90m 72[2mms[22m[39m
+ [32m✓[39m tests/evidence_transitions.test.ts [2m([22m[2m12 tests[22m[2m)[22m[90m 21[2mms[22m[39m
+ [32m✓[39m tests/promote_security.test.ts [2m([22m[2m14 tests[22m[2m)[22m[90m 13[2mms[22m[39m
+ [32m✓[39m tests/tooling/phase1_contracts.test.ts [2m([22m[2m112 tests[22m[2m)[22m[33m 976[2mms[22m[39m
+ [32m✓[39m tests/tooling/phase0_scripts.test.ts [2m([22m[2m12 tests[22m[2m)[22m[33m 305[2mms[22m[39m
+ [32m✓[39m tests/crypto.test.ts [2m([22m[2m8 tests[22m[2m)[22m[90m 5[2mms[22m[39m
+ [32m✓[39m tests/inventory_consistency.test.ts [2m([22m[2m6 tests[22m[2m)[22m[90m 5[2mms[22m[39m
+ [32m✓[39m tests/tooling/phase0_migration_role.test.ts [2m([22m[2m4 tests[22m[2m)[22m[90m 7[2mms[22m[39m
+ [32m✓[39m tests/assetSummary.test.ts [2m([22m[2m3 tests[22m[2m)[22m[90m 2[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m12 passed[39m[22m[90m (12)[39m
+[2m      Tests [22m [1m[32m287 passed[39m[22m[90m (287)[39m
+[2m   Start at [22m 08:03:57
+[2m   Duration [22m 1.86s[2m (transform 573ms, setup 0ms, collect 1.11s, tests 1.60s, environment 2ms, prepare 717ms)[22m
+
+npm notice run symphony-prototype@1.0.0 test:e2e
+npm notice run node tools/run_e2e.mjs
+
+Running 35 tests using 1 worker
+
+  ✓   1 [chromium] › tests/components.spec.ts:4:3 › Phase 2 component shell › opens the governed requirement chain and evidence drawer in two clicks (1.2s)
+  ✓   2 [chromium] › tests/components.spec.ts:16:3 › Phase 2 component shell › renders mandatory guidance and accessible help text (392ms)
+  ✓   3 [chromium] › tests/components.spec.ts:25:3 › Phase 2 component shell › tour launcher starts, advances, and exits tours from tour data (445ms)
+  ✓   4 [chromium] › tests/journey-core-spine.spec.ts:15:5 › Evidence Provenance Happy Path Slice — Core Spine (R1–R6) › Spine Happy Path Journey › spine_1_open_chisamba_claim: Coop screen shows livestock count claim with scope and supported badge (562ms)
+  ✓   5 [chromium] › tests/journey-core-spine.spec.ts:39:5 › Evidence Provenance Happy Path Slice — Core Spine (R1–R6) › Spine Happy Path Journey › spine_2_inspect_provenance_drawer: Drawer opens; three tabs visible; demo-actor label present; Integrity shows Not checked (199ms)
+  ✓   6 [chromium] › tests/journey-core-spine.spec.ts:71:5 › Evidence Provenance Happy Path Slice — Core Spine (R1–R6) › Spine Happy Path Journey › spine_3_request_verification: PFI user clicks request; confirmation shows Request recorded — not a verification result (210ms)
+  ✓   7 [chromium] › tests/journey-core-spine.spec.ts:95:5 › Evidence Provenance Happy Path Slice — Core Spine (R1–R6) › Spine Happy Path Journey › spine_4_record_finding: VVB workbench shows correct assignment and version; finding submitted; evidence level remains supported (240ms)
+  ✓   8 [chromium] › tests/journey-core-spine.spec.ts:123:5 › Evidence Provenance Happy Path Slice — Core Spine (R1–R6) › Spine Happy Path Journey › spine_5_explicit_promotion: Promote button clicked; evidence level becomes verified; drawer History shows two events (180ms)
+  ✓   9 [chromium] › tests/journey-core-spine.spec.ts:146:5 › Evidence Provenance Happy Path Slice — Core Spine (R1–R6) › Spine Happy Path Journey › spine_6_pfi_readiness_updated: PFI readiness view shows livestock_count requirement as satisfied (120ms)
+  ✓  10 [chromium] › tests/journey-core-spine.spec.ts:164:5 › Evidence Provenance Happy Path Slice — Core Spine (R1–R6) › Spine Happy Path Journey › spine_7_refresh_restores_state: page.reload() preserves verified state without re-running steps (240ms)
+  ✓  11 [chromium] › tests/journey-core-spine.spec.ts:178:5 › Evidence Provenance Happy Path Slice — Core Spine (R1–R6) › Spine Happy Path Journey › spine_8_reset_restores_seed: Reset button clicked restores livestock_count back to supported and clears event log (108ms)
+  ✓  12 [chromium] › tests/journey-core-spine.spec.ts:194:5 › Evidence Provenance Happy Path Slice — Core Spine (R1–R6) › Spine Happy Path Journey › spine_9_replay_works: Re-running steps 3-5 from reset baseline succeeds identically (402ms)
+  ✓  13 [chromium] › tests/journey-core-spine.spec.ts:223:5 › Evidence Provenance Happy Path Slice — Core Spine (R1–R6) › Negative Cases › neg_promote_without_finding: promote dispatched with no finding returns PROMOTE_NO_QUALIFYING_FINDING (407ms)
+  ✓  14 [chromium] › tests/journey-core-spine.spec.ts:240:5 › Evidence Provenance Happy Path Slice — Core Spine (R1–R6) › Negative Cases › neg_promote_wrong_version: finding on version 1 cannot promote version 2 (404ms)
+  ✓  15 [chromium] › tests/journey-core-spine.spec.ts:271:5 › Evidence Provenance Happy Path Slice — Core Spine (R1–R6) › Negative Cases › neg_duplicate_assignment: second request for same version returns DUPLICATE_ASSIGNMENT (403ms)
+  ✓  16 [chromium] › tests/journey-core-spine.spec.ts:302:5 › Evidence Provenance Happy Path Slice — Core Spine (R1–R6) › Negative Cases › neg_failed_write_no_update: failed localStorage write shows save error banner without corrupting state (507ms)
+  ✓  17 [chromium] › tests/journey-core-spine.spec.ts:326:5 › Evidence Provenance Happy Path Slice — Core Spine (R1–R6) › Negative Cases › neg_corrupt_envelope_recovery: corrupt localStorage key is cleared and reset banner shown (469ms)
+  ✓  18 [chromium] › tests/journey-design-changes.spec.ts:4:3 › Design Changes & Journeys (SYMPHONY-DESIGN-PLAN-002) › Landing Page: prominent demo sign-in banner, USSD shortcode text, 2-column layout and coop field agent (352ms)
+  ✓  19 [chromium] › tests/journey-design-changes.spec.ts:27:3 › Design Changes & Journeys (SYMPHONY-DESIGN-PLAN-002) › Create Account Journey: 8-step wizard with agent identity and claims review (690ms)
+  ✓  20 [chromium] › tests/journey-design-changes.spec.ts:80:3 › Design Changes & Journeys (SYMPHONY-DESIGN-PLAN-002) › Cooperative Member Journey: View-only profile, self-enrolment, pending notice, and loan proposals (606ms)
+  ✓  21 [chromium] › tests/journey-design-changes.spec.ts:123:3 › Design Changes & Journeys (SYMPHONY-DESIGN-PLAN-002) › Cooperative Field Agent: routes to Cooperative Journey and blocked by RoleGate on Step 4 (523ms)
+  ✓  22 [chromium] › tests/journey-institutional.spec.ts:7:3 › Phase 10 — Guided Journeys: Institutional Portals (Phase C) › Test 6: NABII cohort overview and drill-down (475ms)
+  ✓  23 [chromium] › tests/journey-institutional.spec.ts:26:3 › Phase 10 — Guided Journeys: Institutional Portals (Phase C) › Test 7: TA gap remediation and verification assignment (489ms)
+  ✓  24 [chromium] › tests/journey-institutional.spec.ts:45:3 › Phase 10 — Guided Journeys: Institutional Portals (Phase C) › Test 8 & 11: PFI discovery, personal data boundary, and role-enforced outcomes (692ms)
+  ✓  25 [chromium] › tests/journey-institutional.spec.ts:79:3 › Phase 10 — Guided Journeys: Institutional Portals (Phase C) › Test 9: VVB Independent Verifier workbench and input validation (496ms)
+  ✓  26 [chromium] › tests/journey-institutional.spec.ts:109:3 › Phase 10 — Guided Journeys: Institutional Portals (Phase C) › Field Agent workbench and mark_verified action (434ms)
+  ✓  27 [chromium] › tests/journey-institutional.spec.ts:120:3 › Phase 10 — Guided Journeys: Institutional Portals (Phase C) › Test 10: Portfolio surveillance and covenant compliance (519ms)
+  ✓  28 [chromium] › tests/journey-institutional.spec.ts:143:3 › Phase 10 — Guided Journeys: Institutional Portals (Phase C) › Test 12: Bank Vertical Slice - Chisamba Bank Story (Inspect, Call Agent, Verify, Message, Decision) (886ms)
+  ✓  29 [chromium] › tests/journey-institutional.spec.ts:242:3 › Phase 10 — Guided Journeys: Institutional Portals (Phase C) › Test 13: NABII 4-State Pipeline Dashboard and TA Request (532ms)
+  ✓  30 [chromium] › tests/journey-institutional.spec.ts:279:3 › Phase 10 — Guided Journeys: Institutional Portals (Phase C) › Test 14: Gate G10 - Low-confidence EQS conflict case in institutional assessment (800ms)
+  ✓  31 [chromium] › tests/journey-phase-b.spec.ts:4:3 › Phase 10 — Guided Journey: Cooperative Slice (Phase B) › complete 8-step cooperative transformation journey (941ms)
+  ✓  32 [chromium] › tests/workspace/a11y.spec.ts:22:3 › /components placeholder page — a11y › Phase 0 scaffold has zero axe violations (684ms)
+  ✓  33 [chromium] › tests/workspace/login.spec.ts:19:3 › Login page › validCredentials_redirectsToWorkspace (447ms)
+  ✓  34 [chromium] › tests/workspace/login.spec.ts:40:3 › Login page › invalidCredentials_showsErrorMessage (414ms)
+  ✓  35 [chromium] › tests/workspace/login.spec.ts:65:3 › Login page › temporaryCredential_promptsPasswordChange (390ms)
+
+  35 passed (19.2s)

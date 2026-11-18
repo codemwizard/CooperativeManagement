@@ -123,6 +123,18 @@ describe.skipIf(!enabled)('WP5.3 Fastify and PostgreSQL integration',()=>{
     const csrf=await appA.inject({method:'GET',url:'/auth/csrf'});
     const login=await appA.inject({method:'POST',url:'/auth/login',headers:{cookie:cookie(csrf),origin:profile.publicOrigin,'x-csrf-token':csrf.json<{csrfToken:string}>().csrfToken},payload:{userId,credential:temporaryCredential,deviceId:'postgres-browser'}});
     expect(login.statusCode).toBe(200);expect(login.json()).toEqual({forcedChangeRequired:true});
+    const eventClient=await isolatedAdmin.connect();
+    try {
+      await eventClient.query('BEGIN');
+      await eventClient.query("SELECT set_config('app.tenant_id',$1,true)",[tenantId]);
+      const event=await eventClient.query<{method:string;result:string;device_id:string}>(
+        'SELECT method,result,device_id FROM symphony.authentication_events WHERE user_id=$1 AND method=$2 ORDER BY occurred_at DESC LIMIT 1',
+        [userId,'first_login'],
+      );
+      expect(event.rows[0]).toMatchObject({method:'first_login',result:'success',device_id:'postgres-browser'});
+      await eventClient.query('COMMIT');
+    } catch(error) { await eventClient.query('ROLLBACK').catch(()=>undefined);throw error; }
+    finally { eventClient.release(); }
     const sessionCookie=cookie(login);
     const session=await appA.inject({method:'GET',url:'/auth/session',headers:{cookie:sessionCookie}});
     expect(session.statusCode).toBe(200);expect(session.json()).toMatchObject({authenticated:true,forcedChangeRequired:true});

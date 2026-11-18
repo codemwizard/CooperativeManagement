@@ -1,0 +1,87 @@
+npm notice run @symphony/db@0.1.0 test:db
+npm notice run vitest run --reporter=verbose
+
+[1m[7m[36m RUN [39m[27m[22m [36mv2.1.9 [39m[90m/home/runner/work/CooperativeManagement/CooperativeManagement/packages/db[39m
+
+ [32m✓[39m src/__tests__/migration-runner.integration.test.ts[2m > [22mPostgreSQL migration runner integration[2m > [22mserializes concurrent clean installs and makes replay a no-op[33m 548[2mms[22m[39m
+ [32m✓[39m src/__tests__/migration-runner.integration.test.ts[2m > [22mPostgreSQL migration runner integration[2m > [22mupgrades from migration 0012 and rolls every migration 0013 effect back before a successful retry[33m 389[2mms[22m[39m
+ [32m✓[39m src/__tests__/migration-runner.integration.test.ts[2m > [22mPostgreSQL migration runner integration[2m > [22mrolls back a failed PostgreSQL migration without a ledger row and safely retries it
+ [32m✓[39m src/__tests__/migration-runner.integration.test.ts[2m > [22mPostgreSQL migration runner integration[2m > [22mretains required schema invariants and applies the Phase 0 global seeds[33m 315[2mms[22m[39m
+ [32m✓[39m src/__tests__/migration-runner.integration.test.ts[2m > [22mPostgreSQL migration runner integration[2m > [22minstalls the WP1.1 receipt schema constraints
+ [32m✓[39m src/__tests__/migration-runner.integration.test.ts[2m > [22mPostgreSQL migration runner integration[2m > [22minstalls the minimized WP1.2 security-attempt table without business-command binding
+ [32m✓[39m src/__tests__/migration-runner.integration.test.ts[2m > [22mPostgreSQL migration runner integration[2m > [22minstalls separate tenant-bound credential tables with fixed expiry, Argon2id hashes and no delete grant
+ [32m✓[39m src/__tests__/migration-runner.integration.test.ts[2m > [22mPostgreSQL migration runner integration[2m > [22mproves secret redaction while atomically consuming temporary credentials and establishing permanent passwords
+ [32m✓[39m src/__tests__/migration-runner.integration.test.ts[2m > [22mPostgreSQL migration runner integration[2m > [22minstalls only encrypted reconciliation payload and forced tenant RLS
+ [32m✓[39m src/__tests__/migration-runner.integration.test.ts[2m > [22mPostgreSQL migration runner integration[2m > [22mpersists opaque sessions, revokes all sessions at password change, and serializes shared throttle delays across pools
+ [32m✓[39m src/__tests__/migration-runner.integration.test.ts[2m > [22mPostgreSQL migration runner integration[2m > [22maborts WP1.1 migration on a non-empty legacy receipt table without changing it
+ [32m✓[39m src/__tests__/tenant-rls-app-role.integration.test.ts[2m > [22mWP1.5 actual restricted-role tenant isolation[2m > [22mmatches all migrated tables, all 39 PostgreSQL tenant policy expressions, the frozen manifest, and effective grants
+ [32m✓[39m src/__tests__/tenant-rls-app-role.integration.test.ts[2m > [22mWP1.5 actual restricted-role tenant isolation[2m > [22mfails closed for missing, empty, mismatched, and cross-tenant inherited scopes
+ [32m✓[39m src/__tests__/tenant-rls-app-role.integration.test.ts[2m > [22mWP1.5 actual restricted-role tenant isolation[2m > [22muses unfiltered app-role reads to cover every distinct manifested tenant-parent chain
+ [32m✓[39m src/__tests__/tenant-rls-app-role.integration.test.ts[2m > [22mWP1.5 actual restricted-role tenant isolation[2m > [22mkeeps app.tenant_id transaction-local across pool reuse and rollback
+ [32m✓[39m src/__tests__/tenant-rls-app-role.integration.test.ts[2m > [22mWP1.5 actual restricted-role tenant isolation[2m > [22mdenies direct outbox access and keeps command event/outbox writes atomic through the real repository adapter
+[90mstdout[2m | src/__tests__/command-reconciliation.integration.test.ts[2m > [22m[2mWP1.4 terminal conflict receipt and reconciliation persistence
+[22m[39mWP1.4 command target: symphony_test; database_role=symphony_app; fixture_role=symphony; DATA_MODE=test
+
+ [32m✓[39m src/__tests__/command-reconciliation.integration.test.ts[2m > [22mWP1.4 terminal conflict receipt and reconciliation persistence[2m > [22mstores one terminal receipt and encrypted inbox item without success effects, and replays safely
+ [32m✓[39m src/__tests__/command-reconciliation.integration.test.ts[2m > [22mWP1.4 terminal conflict receipt and reconciliation persistence[2m > [22mrejects changed actor or semantic envelope without disclosing or duplicating the item
+ [32m✓[39m src/__tests__/command-reconciliation.integration.test.ts[2m > [22mWP1.4 terminal conflict receipt and reconciliation persistence[2m > [22mrolls back the terminal receipt when inbox insertion fails after the insert
+ [32m✓[39m src/__tests__/command-reconciliation.integration.test.ts[2m > [22mWP1.4 terminal conflict receipt and reconciliation persistence[2m > [22mserializes lifecycle transitions and clears expired payload without overwriting a terminal outcome
+ [32m✓[39m src/__tests__/command-reconciliation.integration.test.ts[2m > [22mWP1.4 terminal conflict receipt and reconciliation persistence[2m > [22mdoes not expose the item without matching transaction tenant context and explicit tenant predicate
+ [32m✓[39m src/__tests__/command-reconciliation.integration.test.ts[2m > [22mWP1.4 terminal conflict receipt and reconciliation persistence[2m > [22mproves the restricted role attributes and reconciliation inbox privilege boundary
+ [32m✓[39m src/__tests__/command-reconciliation.integration.test.ts[2m > [22mWP1.4 terminal conflict receipt and reconciliation persistence[2m > [22mdoes not leak transaction-local tenant context when an app connection is reused
+ [32m✓[39m src/__tests__/command-reconciliation.integration.test.ts[2m > [22mWP1.4 terminal conflict receipt and reconciliation persistence[2m > [22mrecovers a real TCP connection loss after the database committed but before the client received COMMIT
+ [32m✓[39m src/__tests__/command-reconciliation.integration.test.ts[2m > [22mWP1.4 terminal conflict receipt and reconciliation persistence[2m > [22mrecovers a real TCP connection loss before PostgreSQL received COMMIT, so the transaction rolled back
+[90mstdout[2m | src/__tests__/command-bus-concurrency.integration.test.ts[2m > [22m[2mWP1.3 PostgreSQL command concurrency and recovery
+[22m[39mWP1.3 test target: symphony_test; PostgreSQL server_version_num=180000; database_role=symphony; DATA_MODE=test
+
+ [32m✓[39m src/__tests__/command-bus-concurrency.integration.test.ts[2m > [22mWP1.3 PostgreSQL command concurrency and recovery[2m > [22mserializes identical concurrent submissions and returns the one committed result
+ [32m✓[39m src/__tests__/command-bus-concurrency.integration.test.ts[2m > [22mWP1.3 PostgreSQL command concurrency and recovery[2m > [22mallows the waiting identical command to execute once when the original owner rolls back
+ [32m✓[39m src/__tests__/command-bus-concurrency.integration.test.ts[2m > [22mWP1.3 PostgreSQL command concurrency and recovery[2m > [22mrejects actor, type, and semantic-envelope reuse without adding side effects
+ [32m✓[39m src/__tests__/command-bus-concurrency.integration.test.ts[2m > [22mWP1.3 PostgreSQL command concurrency and recovery[2m > [22mresolves unique receipt-key contention without committing the losing aggregate effects
+ [32m✓[39m src/__tests__/command-bus-concurrency.integration.test.ts[2m > [22mWP1.3 PostgreSQL command concurrency and recovery[2m > [22mprevents two different commands with the same expected version from overwriting one another
+ [32m✓[39m src/__tests__/command-bus-concurrency.integration.test.ts[2m > [22mWP1.3 PostgreSQL command concurrency and recovery[2m > [22mretries only serialization and deadlock failures within three total attempts
+ [32m✓[39m src/__tests__/command-bus-concurrency.integration.test.ts[2m > [22mWP1.3 PostgreSQL command concurrency and recovery[2m > [22mstops after three retryable transaction failures and returns a generic retryable result
+ [32m✓[39m src/__tests__/command-bus-concurrency.integration.test.ts[2m > [22mWP1.3 PostgreSQL command concurrency and recovery[2m > [22mdoes not retry non-serialization integrity failures
+ [32m✓[39m src/__tests__/command-bus-concurrency.integration.test.ts[2m > [22mWP1.3 PostgreSQL command concurrency and recovery[2m > [22mresolves a committed response loss on a fresh connection without rerunning the handler
+ [32m✓[39m src/__tests__/command-bus-concurrency.integration.test.ts[2m > [22mWP1.3 PostgreSQL command concurrency and recovery[2m > [22mre-enters once after a healthy fresh lookup proves an uncertain commit did not persist
+ [32m✓[39m src/__tests__/command-bus-concurrency.integration.test.ts[2m > [22mWP1.3 PostgreSQL command concurrency and recovery[2m > [22mcounts uncertain-commit re-entry within the three-attempt transaction limit
+ [32m✓[39m src/__tests__/command-bus-concurrency.integration.test.ts[2m > [22mWP1.3 PostgreSQL command concurrency and recovery[2m > [22mreturns outcome-neutral retryable unavailable when the fresh receipt lookup fails
+(node:3333) DeprecationWarning: Calling client.query() when the client is already executing a query is deprecated and will be removed in pg@9.0. Use async/await or an external async flow control mechanism instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+ [32m✓[39m src/__tests__/command-transaction.integration.test.ts[2m > [22mWP1.2-A PostgreSQL transaction boundary[2m > [22mruns the actual CommandBus persistence ports on one PostgreSQL transaction
+ [32m✓[39m src/__tests__/command-transaction.integration.test.ts[2m > [22mWP1.2-A PostgreSQL transaction boundary[2m > [22mrolls receipt, state, event, and outbox writes back at each failing write boundary
+ [32m✓[39m src/__tests__/command-transaction.integration.test.ts[2m > [22mWP1.2-A PostgreSQL transaction boundary[2m > [22mclears transaction-local tenant context after both commit and rollback
+[90mstderr[2m | src/__tests__/command-transaction.integration.test.ts[2m > [22m[2mWP1.2-A PostgreSQL transaction boundary[2m > [22m[2mcommits a PostgreSQL denial audit only after rollback, and fails closed when audit insert fails
+[22m[39msecurity_audit_write_failed
+
+ [32m✓[39m src/__tests__/command-transaction.integration.test.ts[2m > [22mWP1.2-A PostgreSQL transaction boundary[2m > [22mcommits a PostgreSQL denial audit only after rollback, and fails closed when audit insert fails
+ [32m✓[39m src/__tests__/postgres-repository.test.ts[2m > [22mPostgresRepository[2m > [22mconcurrentVersions_onlyOneCommits
+ [32m✓[39m src/__tests__/postgres-repository.test.ts[2m > [22mPostgresRepository[2m > [22mrollbackOnEventInsertFailure
+ [32m✓[39m src/__tests__/event-store.test.ts[2m > [22mEvent store immutability (INV-018)[2m > [22mappendedEvent_cannotBeUpdated
+ [32m✓[39m src/__tests__/event-store.test.ts[2m > [22mEvent store immutability (INV-018)[2m > [22mappendedEvent_cannotBeDeleted
+ [32m✓[39m src/__tests__/event-store.test.ts[2m > [22mEvent store immutability (INV-018)[2m > [22moutboxRecord_deliveredAtSetOnce
+ [32m✓[39m src/__tests__/security-attempt-audit.integration.test.ts[2m > [22mWP1.2-B security-attempt audit mode guard[2m > [22mrefuses missing mode before opening a database transaction
+ [32m✓[39m src/__tests__/security-attempt-audit.integration.test.ts[2m > [22mWP1.2-B security-attempt audit mode guard[2m > [22mrefuses unknown mode before opening a database transaction
+ [32m✓[39m src/__tests__/security-attempt-audit.integration.test.ts[2m > [22mWP1.2-B security-attempt audit mode guard[2m > [22mrefuses real-data mode before opening a database transaction
+ [32m✓[39m src/__tests__/security-attempt-audit.integration.test.ts[2m > [22mWP1.2-B security-attempt audit mode guard[2m > [22mrefuses non-synthetic test data before opening a database transaction
+ [32m✓[39m src/__tests__/security-attempt-audit.integration.test.ts[2m > [22mWP1.2-B PostgreSQL security-attempt persistence[2m > [22mcommits the minimized denial record in a separate transaction
+ [32m✓[39m src/__tests__/postgres-repository-contract.test.ts[2m > [22mPostgresRepository contract[2m > [22mPostgresRepository[2m > [22mRepository contract[2m > [22msave_thenLoad_returnsSameData
+ [32m✓[39m src/__tests__/postgres-repository-contract.test.ts[2m > [22mPostgresRepository contract[2m > [22mPostgresRepository[2m > [22mRepository contract[2m > [22msave_withWrongVersion_throws
+ [32m✓[39m src/__tests__/postgres-repository-contract.test.ts[2m > [22mPostgresRepository contract[2m > [22mPostgresRepository[2m > [22mRepository contract[2m > [22msave_thenLoad_forDifferentTenant_returnsNull
+ [32m✓[39m src/__tests__/postgres-repository-contract.test.ts[2m > [22mPostgresRepository contract[2m > [22mPostgresRepository[2m > [22mRepository contract[2m > [22msave_eventAndOutbox_inSameTransaction
+ [32m✓[39m src/__tests__/postgres-repository-contract.test.ts[2m > [22mPostgresRepository contract[2m > [22mPostgresRepository[2m > [22mRepository contract[2m > [22mload_nonExistent_returnsNull
+ [32m✓[39m src/__tests__/tenant-policy-manifest.test.ts[2m > [22mWP1.5 tenant policy manifest oracle helpers[2m > [22mcanonicalizes only PostgreSQL deparser whitespace and the target relation name
+ [32m✓[39m src/__tests__/tenant-policy-manifest.test.ts[2m > [22mWP1.5 tenant policy manifest oracle helpers[2m > [22mdoes not normalize a changed tenant setting, operator, or parent relationship
+ [32m✓[39m src/__tests__/tenant-policy-manifest.test.ts[2m > [22mWP1.5 tenant policy manifest oracle helpers[2m > [22mrequires exact table-set equality and identifies missing, unexpected, and duplicate tables
+ [32m✓[39m src/__tests__/migration-executor.test.ts[2m > [22mexecuteSqlMigration[2m > [22mcommits the SQL and migration ledger row in one transaction
+ [32m✓[39m src/__tests__/migration-executor.test.ts[2m > [22mexecuteSqlMigration[2m > [22mrolls back a failed migration and never records it as applied
+ [32m✓[39m src/__tests__/migration-runner-config.test.ts[2m > [22mmigration runner configuration safety[2m > [22maccepts and safely quotes only the canonical schema
+ [32m✓[39m src/__tests__/migration-runner-config.test.ts[2m > [22mmigration runner configuration safety[2m > [22mrejects schema "public" before opening a database connection
+ [32m✓[39m src/__tests__/migration-runner-config.test.ts[2m > [22mmigration runner configuration safety[2m > [22mrejects schema "symphony; DROP SCHEMA public CASCADE" before opening a database connection
+ [32m✓[39m src/__tests__/migration-runner-config.test.ts[2m > [22mmigration runner configuration safety[2m > [22mrejects schema "\"symphony\"" before opening a database connection
+
+[2m Test Files [22m [1m[32m12 passed[39m[22m[90m (12)[39m
+[2m      Tests [22m [1m[32m65 passed[39m[22m[90m (65)[39m
+[2m   Start at [22m 08:03:45
+[2m   Duration [22m 6.00s[2m (transform 452ms, setup 0ms, collect 1.22s, tests 3.37s, environment 1ms, prepare 406ms)[22m
+

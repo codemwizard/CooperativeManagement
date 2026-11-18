@@ -1,0 +1,95 @@
+{
+  "schema_version": 1,
+  "task_id": "REM-WP5.4",
+  "status": {
+    "implementation": "complete",
+    "unit_test": "not_applicable",
+    "integration_test": "passed",
+    "bdd_ui_test": "passed",
+    "gate_verified": "pending"
+  },
+  "candidate": {
+    "status": "uncommitted working tree",
+    "head_commit_before_implementation": "d70d7ee35b1aaaa0a1350feb01394ac25ba96896",
+    "implementation_commit": null
+  },
+  "environment": {
+    "node": "v26.7.0",
+    "npm": "v11.19.0 (current shell; package declares npm 12.2.0)",
+    "postgres": "local isolated database with _test suffix; server version not captured in this run",
+    "database_role": "restricted app role for application path; test-admin role for synthetic fixture setup and cleanup",
+    "data_mode": "test",
+    "key_provider": "local-test"
+  },
+  "commands": [
+    {
+      "command": "npm run test:login:api (WP5_4_WORKSPACE_PORT=53181, WP5_4_API_PORT=53007)",
+      "result": "passed; 2 real browser-to-API scenarios against PostgreSQL",
+      "artifact": "evidence/phase1/wp5.4-verified/browser-acceptance.log"
+    },
+    {
+      "command": "Captured API log canary and route assertions in tests/workspace/login-api.spec.ts",
+      "result": "passed; nonempty request log includes login/change-password routes and excludes the unique temporary, permanent and unknown-account password canaries",
+      "artifact": "evidence/phase1/wp5.4-verified/api-redacted.raw.log"
+    },
+    {
+      "command": "axe-core WCAG 2.0/2.1 AA and best-practice scan from the login browser journey",
+      "result": "passed; zero violations on login and forced-password-change screens",
+      "artifact": "evidence/phase1/wp5.4-verified/browser-acceptance.log"
+    },
+    {
+      "command": "npm run typecheck:v4",
+      "result": "passed",
+      "artifact": null
+    },
+    {
+      "command": "npm run verify:arch",
+      "result": "passed; 153 modules and 335 dependencies, no dependency violations",
+      "artifact": null
+    },
+    {
+      "command": "npm run test:phase1:contracts",
+      "result": "passed; 112 tests",
+      "artifact": null
+    },
+    {
+      "command": "API Vitest suite with repository env files loaded",
+      "result": "passed; 6 files and 25 tests, including PostgreSQL auth integration and log redaction",
+      "artifact": "evidence/phase1/wp5.4-verified/api-suite.log"
+    },
+    {
+      "command": "PostgreSQL DB workspace suite with repository env files loaded",
+      "result": "partial; 63 passed and 2 WP1.5 migration-runner tests failed because this local invocation did not provision the CI-only symphony_migrator/symphony_outbox_writer roles",
+      "artifact": "evidence/phase1/wp5.4-verified/postgres-db-suite.log"
+    },
+    {
+      "command": "npm run test:phase0-contract",
+      "result": "passed; 11 passed, 1 skipped",
+      "artifact": null
+    },
+    {
+      "command": "git diff --check",
+      "result": "passed; only standard line-ending conversion warnings",
+      "artifact": null
+    }
+  ],
+  "claims": {
+    "behavior_proved": "Accessible workspace login and forced password-change screens call the real shared API through the same-origin proxy. Real persisted temporary credentials exercise forced-change-only route enforcement, password establishment, session revocation, fresh permanent-password login, refresh persistence, non-enumerating unknown-account errors, HttpOnly session-cookie attributes, response-body token absence, keyboard form submission, visible mismatch feedback, API log redaction and authentication-event canary absence.",
+    "path_proved": "Two focused Playwright scenarios ran with a real Vite workspace, Fastify API and isolated PostgreSQL database. No auth-route interception is used. Axe scans passed on login and forced-change screens.",
+    "configuration_proved": "Local test profile only. The test session cookie is intentionally not Secure on HTTP loopback; production Secure-cookie behavior was not exercised.",
+    "predecessors": {
+      "REM-WP5.3": "Implementation and focused evidence exist in evidence/phase1/wp5.3/task-evidence.json; gate_verified remains pending exact-candidate closure.",
+      "REM-WP6.1": "Implementation and focused route evidence are recorded in evidence/phase1/wp6.1/task-evidence.json; WP6.1 remains partial with gate_verified pending because BDD-UXW-001 and BDD-UXW-004 remain unmet."
+    }
+  },
+  "limitations": [
+    "No implementation commit SHA exists; gate verification remains pending and this record is not a gate PASS.",
+    "REM-WP5.3 exact-candidate closure remains pending and REM-WP6.1 has not passed its gate; the dependency graph does not permit WP5.4 gate closure yet.",
+    "The test profile does not establish production Secure-cookie, TLS, deployment origin, production database or production concurrency behavior.",
+    "The broad DB workspace suite is not fully green locally: two WP1.5 migration-runner tests fail on missing CI role-bootstrap state (expected migrator membership and CREATE SCHEMA permission); its focused temporary-credential PostgreSQL tests passed. CI provisions these roles through tools/bootstrap_wp1_5_database.mjs.",
+    "The run is focused WP5.4 evidence and is not the integrated Phase 1 or REM-WP7.2 gate."
+  ],
+  "unresolved_decisions": [],
+  "reviewer": "Local implementation and acceptance evidence; independent security review not performed.",
+  "deferred_followups": []
+}

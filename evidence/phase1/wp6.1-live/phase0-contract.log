@@ -1,0 +1,15 @@
+
+> symphony-prototype@1.0.0 test:phase0-contract
+> npx vitest run tests/tooling/phase0_scripts.test.ts
+
+
+ RUN  v2.1.9 C:/Workspace/GitHub/Prototype
+
+ ✓ tests/tooling/phase0_scripts.test.ts (12 tests | 1 skipped) 14143ms
+   ✓ Phase 0 script contracts > proves failure in a mandatory command stops later commands 14065ms
+
+ Test Files  1 passed (1)
+      Tests  11 passed | 1 skipped (12)
+   Start at  15:47:03
+   Duration  17.36s (transform 424ms, setup 0ms, collect 486ms, tests 14.14s, environment 1ms, prepare 1.13s)
+

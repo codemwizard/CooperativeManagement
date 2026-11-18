@@ -5,6 +5,7 @@ import { pathToFileURL } from 'node:url';
 import { randomBytes } from 'node:crypto';
 import pg from 'pg';
 import { createAuthComposition } from './authentication-composition.js';
+import { createWriteStream, type WriteStream } from 'node:fs';
 
 /** The runtime profile is checked before Fastify opens the listener. */
 export async function startApi(environment: NodeJS.ProcessEnv = process.env): Promise<void> {
@@ -27,6 +28,9 @@ export async function startApi(environment: NodeJS.ProcessEnv = process.env): Pr
     throw new Error('AUTH_THROTTLE_HMAC_KEY must decode to at least 32 bytes of valid base64 key material.');
   }
   const pool = new pg.Pool({ connectionString: databaseUrl, max: 20 });
+  let authEvidenceLog: WriteStream | undefined;
+  const authEvidenceLogPath = environment['WP5_5_API_LOG_PATH'];
+  if (authEvidenceLogPath) authEvidenceLog = createWriteStream(authEvidenceLogPath, { flags: 'a' });
   const auth = createAuthComposition({ pool, config, throttleHmacKey });
   const app = buildApiServer({
     config,
@@ -34,9 +38,18 @@ export async function startApi(environment: NodeJS.ProcessEnv = process.env): Pr
       authentication: auth.authentication, verifyCsrf: auth.verifyCsrf,
       authorize: auth.authorize, rotateSession: auth.rotateSession,
     },
+    ...(authEvidenceLog ? { logStream: authEvidenceLog } : {}),
     readinessChecks: [{ name: 'postgres-auth', check: auth.healthCheck }],
   });
-  app.addHook('onClose', async () => { await pool.end(); });
+  const shutdown = (): void => { void app.close().catch(() => undefined); };
+  app.addHook('onClose', async () => {
+    await pool.end();
+    if (authEvidenceLog) await new Promise<void>((resolveClose) => authEvidenceLog!.end(resolveClose));
+    process.off('SIGTERM', shutdown);
+    process.off('SIGINT', shutdown);
+  });
+  process.once('SIGTERM', shutdown);
+  process.once('SIGINT', shutdown);
   try {
     await app.listen({ host: config.host, port: config.port });
   } catch (error) {

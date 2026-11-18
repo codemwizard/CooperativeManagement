@@ -1,0 +1,95 @@
+{
+  "schema_version": 1,
+  "task_id": "REM-WP6.1",
+  "status": {
+    "implementation": "partial",
+    "unit_test": "passed",
+    "integration_test": "passed",
+    "bdd_ui_test": "pending",
+    "gate_verified": "pending"
+  },
+  "commit": "working-tree",
+  "environment": {
+    "node": "v26.7.0",
+    "npm": "v11.19.0 (project packageManager is npm 12.2.0)",
+    "postgres": "local PostgreSQL test database with _test suffix; server version not recorded in this run",
+    "database_role": "app role for live browser path; test-admin role for synthetic fixture setup and cleanup",
+    "data_mode": "test",
+    "key_provider": "local-test"
+  },
+  "commands": [
+    {
+      "command": "npm run test:wp6.1 (3 served-route Playwright tests)",
+      "result": "passed",
+      "artifact": "evidence/phase1/wp6.1-live/routes-command.log"
+    },
+    {
+      "command": "npm run typecheck:v4",
+      "result": "passed",
+      "artifact": "evidence/phase1/wp6.1-live/typecheck-v4.log"
+    },
+    {
+      "command": "npm run build:workspace",
+      "result": "passed",
+      "artifact": "evidence/phase1/wp6.1-live/workspace-build.log"
+    },
+    {
+      "command": "npm run verify:arch",
+      "result": "passed",
+      "artifact": "evidence/phase1/wp6.1-live/architecture.log"
+    },
+    {
+      "command": "npm run test:phase1:contracts",
+      "result": "passed",
+      "artifact": "evidence/phase1/wp6.1-live/phase1-contracts.log"
+    },
+    {
+      "command": "npm run test:phase0-contract",
+      "result": "passed",
+      "artifact": "evidence/phase1/wp6.1-live/phase0-contract.log"
+    },
+    {
+      "command": "npm run test:workspace",
+      "result": "passed",
+      "artifact": "evidence/phase1/wp6.1-live/workspace-unit.log"
+    },
+    {
+      "command": "node tools/phase1-contracts.js",
+      "result": "passed",
+      "artifact": "evidence/phase1/wp6.1-live/structural-contract.log"
+    }
+  ],
+  "claims": {
+    "behavior_proved": "The app serves real /components and /login routes plus protected /workspace/* and /coop/:cooperativeId/* shell paths. The route suite checks titles, one h1, landmarks, non-enumerated text, actual navigation URLs, route-change focus, browser back/forward and query-string reload persistence. It checks unauthenticated shell denial, axe on served components/login/workspace/dialog surfaces, and provenance-dialog focus containment, Escape close and focus restoration.",
+    "path_proved": "Three Playwright tests exercised the served Vite workspace with the real Fastify authentication API and PostgreSQL-backed synthetic user. No route interception or static-page substitution is used. The CI workflow runs the focused route suite and retains its artifacts.",
+    "configuration_proved": "Local test profile only. Both API and browser fixture use an isolated PostgreSQL database suffixed _test; the fixture password is Argon2id-hashed before app-role persistence.",
+    "coverage_limitations": [
+      "This is partial WP6.1 implementation evidence, not gate closure.",
+      "BDD-UXW-001 persona-scoped navigation is not implemented because the approved authenticated-session response has no trusted persona or navigation-scope claim. Client-selected persona would not prove authorization.",
+      "BDD-UXW-004 verified-chip provenance is not implemented because this shell has no persisted verified-item read model from which to render verifier, scope, version and assurance class; no sample evidence was invented.",
+      "The /coop/:cooperativeId route currently renders the authenticated shell only; it does not resolve or authorize tenant-specific record data by that route parameter.",
+      "The focused route suite is not an execution of the frozen BDD-UXW-001 through BDD-UXW-004 scenarios through the BDD runner.",
+      "The full Phase 1 BDD set and REM-WP7.2 integrated gate were not run."
+    ]
+  },
+  "limitations": [
+    "The worktree is uncommitted. Replace commit=working-tree with the exact candidate SHA only after the owner commits; gate_verified remains pending.",
+    "Active mapped acceptance items BDD-UXW-001 and BDD-UXW-004 remain unmet, so WP6.1 is partial and cannot be marked passed.",
+    "The focused local run used npm 11.19.0 although the repository declares npm 12.2.0; CI or final verification should use the pinned CLI.",
+    "Production hosting, persistent production data, tenant-specific route resolution and production accessibility review are not claimed."
+  ],
+  "unresolved_decisions": [],
+  "reviewer": "Local implementation and focused acceptance evidence; independent UX/accessibility review not performed.",
+  "deferred_followups": [
+    {
+      "task_id": "REM-WP5.3",
+      "scope": "If workspace navigation requires a persona or tenant claim, define its trusted source through the authenticated persisted session contract before exposing persona-scoped routes.",
+      "acceptance_evidence": "A reviewed session/authority contract and real API/browser tests prove persona and tenant scope are server-derived."
+    },
+    {
+      "task_id": "REM-WP6.3",
+      "scope": "Connect verified assurance presentation to its persisted evidence source and render required provenance fields.",
+      "acceptance_evidence": "Rendered served-route assertions prove verifier, scope, version and assurance class come from the verified-item record."
+    }
+  ]
+}

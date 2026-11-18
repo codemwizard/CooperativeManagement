@@ -8,7 +8,7 @@ const WP0_IDS = Array.from({ length: 13 }, (_, index) => `REM-WP0.${index + 1}`)
 const MANDATORY_GATE_SCRIPTS = [
   'verify:phase0', 'verify:phase1:contracts', 'typecheck:v4', 'verify:arch', 'test:unit',
   'test:db:migrations', 'test:db --workspace @symphony/db', 'test:api',
-  'test:workspace', 'test:bdd:phase1', 'verify:trace', 'test:a11y',
+  'test:workspace', 'test:wp6.1', 'test:bdd:phase1', 'verify:trace', 'test:a11y',
   'test:login:api', 'verify:legacy-floor', 'test:e2e',
 ];
 const SECRET_FIELD = /(?:password|passphrase|secret|token|api[_-]?key|private[_-]?key|connection[_-]?string|credential|nrc|national[_-]?id)/i;
@@ -533,10 +533,14 @@ export function validatePhase1Gate(packageJson, repoRoot = ROOT) {
   }
   if (!aggregate.includes('&&')) errors.push('verify:phase1 must stop on the first failed mandatory check');
   if (!aggregate.trim().startsWith('npm run verify:phase0 &&')) errors.push('verify:phase1 must begin with the complete Phase 0 gate');
-  const mustHaveScripts = ['verify:phase1:contracts', 'test:api', 'test:workspace', 'test:bdd:phase1', 'test:login:api'];
+  const mustHaveScripts = ['verify:phase1:contracts', 'test:api', 'test:workspace', 'test:wp6.1', 'test:bdd:phase1', 'test:login:api', 'test:wp5.5'];
   for (const name of mustHaveScripts) if (!scripts[name]) errors.push(`mandatory npm script ${name} is missing`);
   const targetFiles = [
     'tools/phase1-contracts.js', 'tools/run_phase1_bdd.mjs', 'tools/phase1-command-contract-oracle.js',
+    'tools/run_wp5_5_live_bdd.mjs',
+    'tools/run_wp5_4_browser.mjs',
+    'tools/run_wp6_1_routes.mjs', 'playwright.wp6.1.config.ts', 'tests/workspace/routes.spec.ts',
+    'apps/workspace/src/routes/ComponentsPage.tsx', 'apps/workspace/src/styles/workspace-accessibility.css',
     'tools/run_migration_test_gate.mjs',
     'tests/tooling/phase1_contracts.test.ts', 'evidence/phase1/command-contract-vectors.json',
     'tests/workspace/login.spec.ts', 'tests/workspace/login-api.spec.ts', 'playwright.phase1.config.ts',
@@ -552,7 +556,21 @@ export function validatePhase1Gate(packageJson, repoRoot = ROOT) {
   for (const relativePath of targetFiles) if (!existsSync(path.join(repoRoot, relativePath))) errors.push(`mandatory target ${relativePath} is missing`);
   if (!String(scripts['test:api']).includes('@symphony/api')) errors.push('test:api must invoke the API workspace suite');
   if (!String(scripts['test:workspace']).includes('@symphony/workspace')) errors.push('test:workspace must invoke the workspace unit suite');
-  if (!String(scripts['test:login:api']).includes('tests/workspace/login-api.spec.ts') || !String(scripts['test:login:api']).includes('playwright.phase1.config.ts')) errors.push('test:login:api must run the no-mock browser-to-API acceptance spec with its dedicated composition config');
+  const loginApiRunner = existsSync(path.join(repoRoot, 'tools/run_wp5_4_browser.mjs'))
+    ? readFileSync(path.join(repoRoot, 'tools/run_wp5_4_browser.mjs'), 'utf8') : '';
+  if (!String(scripts['test:login:api']).includes('tools/run_wp5_4_browser.mjs')
+    || !loginApiRunner.includes('tests/workspace/login-api.spec.ts')
+    || !loginApiRunner.includes('playwright.phase1.config.ts')) {
+    errors.push('test:login:api must invoke its dedicated no-mock browser-to-API runner and composition config');
+  }
+  const routeSpec = readFileSync(path.join(repoRoot, 'tests/workspace/routes.spec.ts'), 'utf8');
+  const routeConfig = readFileSync(path.join(repoRoot, 'playwright.wp6.1.config.ts'), 'utf8');
+  if (!String(scripts['test:wp6.1']).includes('tools/run_wp6_1_routes.mjs')
+    || !routeConfig.includes('testMatch: /routes\\.spec\\.ts/')
+    || routeSpec.includes('page.setContent(')) {
+    errors.push('test:wp6.1 must run served route acceptance through its dedicated config without static-page substitution');
+  }
+  if (!String(scripts['verify:phase1']).includes('npm run test:wp5.5')) errors.push('verify:phase1 must include the live WP5.5 auth BDD gate');
   if (!String(scripts['test:bdd:phase1']).includes('tools/run_phase1_bdd.mjs')) errors.push('test:bdd:phase1 must enforce the frozen scenario manifest and zero-discovery failure');
 
   const workspaceApiScripts = readJson('apps/api/package.json').scripts ?? {};
@@ -569,13 +587,14 @@ export function validatePhase1Gate(packageJson, repoRoot = ROOT) {
     [workspaceApiScripts['test:api'], 'vitest run'],
     [scripts['test:workspace'], '@symphony/workspace'],
     [workspaceScripts['test:unit'], 'vitest run'],
+    [scripts['test:wp6.1'], 'tools/run_wp6_1_routes.mjs'],
     [scripts['test:bdd:phase1'], 'tools/run_phase1_bdd.mjs'],
     [scripts['verify:trace'], 'tools/verify-trace.ts'],
     [scripts['test:a11y'], 'tests/workspace/a11y.spec.ts'],
-    [scripts['test:login:api'], 'tests/workspace/login-api.spec.ts'],
     [scripts['verify:legacy-floor'], 'npm run build'],
     [scripts['test:e2e'], 'tools/run_e2e.mjs'],
   ];
+  if (!loginApiRunner.includes('tests/workspace/login-api.spec.ts')) errors.push('mandatory operation is missing or no-op; expected target tests/workspace/login-api.spec.ts');
   for (const [command, target] of operationChecks) {
     if (typeof command !== 'string' || !command.includes(target)) errors.push(`mandatory operation is missing or no-op; expected target ${target}`);
     if (typeof command === 'string' && /--if-present|(?:^|\s)(?:echo|Write-Output)\s/i.test(command)) errors.push(`mandatory operation for ${target} is optional or a no-op`);
@@ -584,6 +603,7 @@ export function validatePhase1Gate(packageJson, repoRoot = ROOT) {
   if (existsSync(loginApiSpec) && /page\.route\s*\(|route\.fulfill\s*\(/.test(readFileSync(loginApiSpec, 'utf8'))) {
     errors.push('test:login:api may not intercept or fulfill the authentication request');
   }
+  if (routeSpec.includes('page.route(') || routeSpec.includes('route.fulfill(')) errors.push('test:wp6.1 may not intercept workspace or authentication routes');
 
   const manifestPath = path.join(repoRoot, 'evidence/phase1/bdd-scenarios.json');
   if (existsSync(manifestPath)) {

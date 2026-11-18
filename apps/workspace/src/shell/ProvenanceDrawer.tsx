@@ -13,31 +13,57 @@ interface ProvenanceDrawerProps {
 }
 
 export function ProvenanceDrawer({ onClose }: ProvenanceDrawerProps): React.ReactElement {
+  const dialogRef = useRef<HTMLDivElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
 
-  // Trap focus and handle Escape
   useEffect(() => {
+    const previousFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
     closeRef.current?.focus();
 
     function handleKeyDown(e: KeyboardEvent): void {
       if (e.key === 'Escape') {
         onClose();
+        return;
+      }
+      if (e.key === 'Tab') {
+        const focusable = dialogRef.current?.querySelectorAll<HTMLElement>(
+          'a[href], button:not(:disabled), input:not(:disabled), select:not(:disabled), textarea:not(:disabled), [tabindex]:not([tabindex="-1"])',
+        );
+        if (!focusable?.length) {
+          e.preventDefault();
+          closeRef.current?.focus();
+          return;
+        }
+        const first = focusable[0]!;
+        const last = focusable[focusable.length - 1]!;
+        const active = document.activeElement;
+        if (e.shiftKey && (active === first || !dialogRef.current?.contains(active))) {
+          e.preventDefault();
+          last.focus();
+        } else if (!e.shiftKey && (active === last || !dialogRef.current?.contains(active))) {
+          e.preventDefault();
+          first.focus();
+        }
       }
     }
 
     window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      previousFocus?.focus({ preventScroll: true });
+    };
   }, [onClose]);
 
   return (
-    <aside
+    <div
+      ref={dialogRef}
       role="dialog"
-      aria-label="Provenance"
+      aria-labelledby="provenance-heading"
       aria-modal="true"
       style={styles.drawer}
     >
       <div style={styles.header}>
-        <h2 style={styles.title}>Provenance</h2>
+        <h2 id="provenance-heading" style={styles.title}>Provenance</h2>
         <button
           ref={closeRef}
           type="button"
@@ -56,7 +82,7 @@ export function ProvenanceDrawer({ onClose }: ProvenanceDrawerProps): React.Reac
           <em>Full provenance drawer: Phase 2</em>
         </p>
       </div>
-    </aside>
+    </div>
   );
 }
 
@@ -100,7 +126,7 @@ const styles = {
     fontSize: '0.875rem',
   },
   phase: {
-    color: '#adb5bd',
+    color: '#6c757d',
     fontSize: '0.75rem',
     marginTop: '1rem',
   },

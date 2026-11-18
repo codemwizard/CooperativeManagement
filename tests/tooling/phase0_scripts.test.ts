@@ -62,7 +62,7 @@ describe('Phase 0 script contracts', () => {
 
   it('uses GitHub Bash pipefail defaults for every verification log pipeline', () => {
     expect(workflow).toMatch(/^defaults:\s*\r?\n  run:\s*\r?\n    shell:\s*bash\s*$/m);
-    expect([...workflow.matchAll(/\|\s*tee\s+artifacts\//g)]).toHaveLength(7);
+    expect([...workflow.matchAll(/\|\s*tee\s+artifacts\//g)]).toHaveLength(10);
   });
 
   it.skipIf(process.platform === 'win32')('does not let tee mask a failing verification command', () => {

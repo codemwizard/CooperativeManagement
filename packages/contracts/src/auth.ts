@@ -24,6 +24,16 @@ export const loginSuccessSchema = z.object({
   forcedChangeRequired: z.boolean(),
 }).strict();
 
+export const csrfResponseSchema = z.object({
+  csrfToken: z.string().min(32),
+}).strict();
+
+export const authSessionResponseSchema = z.object({
+  authenticated: z.literal(true),
+  forcedChangeRequired: z.boolean(),
+  csrfToken: z.string().min(32),
+}).strict();
+
 export const changePasswordSuccessSchema = z.object({
   ok: z.literal(true),
 }).strict();
@@ -35,5 +45,7 @@ export const authenticationErrorSchema = z.object({
 export type LoginRequest = z.infer<typeof loginRequestSchema>;
 export type ChangePasswordRequest = z.infer<typeof changePasswordRequestSchema>;
 export type LoginSuccess = z.infer<typeof loginSuccessSchema>;
+export type CsrfResponse = z.infer<typeof csrfResponseSchema>;
+export type AuthSessionResponse = z.infer<typeof authSessionResponseSchema>;
 export type ChangePasswordSuccess = z.infer<typeof changePasswordSuccessSchema>;
 export type AuthenticationError = z.infer<typeof authenticationErrorSchema>;
