@@ -17,7 +17,9 @@ SECRET_ASSIGNMENT = re.compile(r"(?:PASSWORD|PASSWD|TOKEN|SECRET|CREDENTIAL|PRIV
 PLACEHOLDER = re.compile(r"(?:REPLACE_WITH|CHANGE_ME|YOUR_[A-Z0-9_]+|<[^>]+>|\$\{[A-Z0-9_]+\})", re.I)
 PRIVATE_KEY_NAMES = {"id_rsa", "id_dsa", "id_ecdsa", "id_ed25519"}
 PRIVATE_KEY_SUFFIXES = {".pem", ".p12", ".pfx", ".key"}
-SECRET_FILE_NAMES = {".npmrc", ".pypirc", ".netrc", "credentials", "secrets"}
+SECRET_FILE_NAMES = {
+    ".npmrc", ".pypirc", ".netrc", "credential", "credentials", "secret", "secrets",
+}
 DATABASE_DUMP_SUFFIXES = {".dump", ".backup", ".bak", ".sqlite", ".sqlite3", ".db"}
 
 
@@ -29,8 +31,6 @@ def _is_forbidden_name(name: str) -> bool:
         or (lower_name.startswith(".env.") and lower_name != ENV_EXAMPLE)
         or lower_name in PRIVATE_KEY_NAMES
         or lower_name in SECRET_FILE_NAMES
-        or "credential" in lower_name
-        or "secret" in lower_name
         or suffix in PRIVATE_KEY_SUFFIXES
         or suffix in DATABASE_DUMP_SUFFIXES
         or lower_name.endswith(".sql.gz")

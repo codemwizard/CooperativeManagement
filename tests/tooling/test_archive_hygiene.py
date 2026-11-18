@@ -27,8 +27,18 @@ class ArchiveHygieneTests(unittest.TestCase):
         self.assertEqual(forbidden_archive_paths(paths), paths)
 
     def test_allows_placeholder_template_and_unrelated_dotfiles(self):
-        paths = [".env.example", ".editorconfig", "src/app.ts"]
+        paths = [
+            ".env.example",
+            ".editorconfig",
+            "src/app.ts",
+            "packages/domain/src/identity/credential-lifecycle.ts",
+            "tests/secret-redaction.integration.test.ts",
+        ]
         self.assertEqual(forbidden_archive_paths(paths), [])
+
+    def test_rejects_secret_named_path_segments_without_rejecting_source_names(self):
+        paths = ["credential", "nested/credentials", "secret", "secrets/service-account.json"]
+        self.assertEqual(forbidden_archive_paths(paths), paths)
 
     def test_rejects_unsafe_and_duplicate_archive_member_paths(self):
         paths = [
