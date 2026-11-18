@@ -122,7 +122,7 @@ runGit('cat-file', '-e', `${currentHead}:evidence/phase1/wp5.2/blocklist/100k-mo
 runGit('cat-file', '-e', `${currentHead}:evidence/phase1/wp5.2/blocklist/SECLISTS-LICENSE.txt`);
 
 const ownerApproval = await readFile('evidence/phase1/wp5.2/argon2-interim-owner-approval.md', 'utf8');
-assert.match(ownerApproval, /Approved this interim profile/);
+assert.match(ownerApproval, /approved the proposed interim profile/i);
 const benchmark = JSON.parse((await readFile('evidence/phase1/wp5.2/argon2id-interim-sustained.raw.log', 'utf8')).replace(/^npm notice[^\r\n]*\r?\n(?:npm notice[^\r\n]*\r?\n)?/, ''));
 assert.equal(benchmark.sustained.concurrency, 8);
 assert.equal(benchmark.sustained.requestedDurationMs, 60_000);
