@@ -333,8 +333,20 @@
       "classification": "tenant_scoped",
       "scope_basis": "Direct tenant_id; minimized pre-acceptance authorization observation. REM-WP1.5 adds FORCE RLS and INSERT-only application access.",
       "rls_current": false
+    },
+    {
+      "table": "temporary_credentials",
+      "classification": "tenant_scoped",
+      "scope_basis": "Direct tenant_id and composite same-tenant user foreign key; short-lived authentication secret hash.",
+      "rls_current": true
+    },
+    {
+      "table": "password_credentials",
+      "classification": "tenant_scoped",
+      "scope_basis": "Direct tenant_id and composite same-tenant user foreign key; permanent password hash, separate from temporary credentials.",
+      "rls_current": true
     }
   ],
-  "known_gap": "REM-WP1.5 has no remaining implementation or CI acceptance gap: candidate-pinned PostgreSQL 18 CI run 43683206104 passed clean migration install, the full restricted-role suite, REM-WP1.5 BDD, bootstrap and role finalizer. This inventory retains the pre-REM-WP1.5 RLS baseline through migration 0012; post-0013 effective RLS/grants are proved in evidence/phase1/wp1.5/ci/d7fbf5851b11b07b65bde36f062db7b21f487947/. The inventory and matrix classify 37 tenant-scoped, 3 read-only catalogue, and 15 control-plane tables, including the preserved REM-WP1.4 reconciliation_inbox SELECT/INSERT/UPDATE/no-DELETE boundary.",
-  "status": "REM-WP1.5 implementation and restricted-role database verification passed on candidate d7fbf5851b11b07b65bde36f062db7b21f487947, CI run 43683206104"
+  "known_gap": "REM-WP1.5's original 55-table scope passed candidate-pinned PostgreSQL 18 CI run 43683206104. REM-WP5.2 migration 0014 adds two tenant-scoped credential tables with their own FORCE RLS and app-role policies; those additions require candidate-specific migration and restricted-role validation before their rows are considered verified. The original 37 tenant-scoped, 3 read-only catalogue, and 15 control-plane classifications remain intact.",
+  "status": "REM-WP1.5 original scope passed on candidate d7fbf5851b11b07b65bde36f062db7b21f487947, CI run 43683206104; REM-WP5.2 credential table additions are pending candidate verification"
 }

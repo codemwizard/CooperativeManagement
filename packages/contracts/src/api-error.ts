@@ -1,0 +1,41 @@
+import { z } from 'zod';
+
+export const apiErrorCodeSchema = z.enum([
+  'INVALID_REQUEST',
+  'INVALID_JSON',
+  'INVALID_COMMAND',
+  'UNAUTHENTICATED',
+  'AUTHENTICATION_FAILED',
+  'CSRF_REJECTED',
+  'FORCED_PASSWORD_CHANGE_REQUIRED',
+  'NOT_AUTHORIZED',
+  'IDEMPOTENCY_KEY_REUSED',
+  'VERSION_CONFLICT',
+  'UNSUPPORTED_MEDIA_TYPE',
+  'REQUEST_TOO_LARGE',
+  'COMMAND_TEMPORARILY_UNAVAILABLE',
+  'INTERNAL_ERROR',
+]);
+
+export const apiErrorResponseSchema = z.object({
+  code: apiErrorCodeSchema,
+}).strict();
+
+export type ApiErrorCode = z.infer<typeof apiErrorCodeSchema>;
+
+export const apiErrorStatus = {
+  INVALID_REQUEST: 400,
+  INVALID_JSON: 400,
+  INVALID_COMMAND: 400,
+  UNAUTHENTICATED: 401,
+  AUTHENTICATION_FAILED: 401,
+  CSRF_REJECTED: 403,
+  FORCED_PASSWORD_CHANGE_REQUIRED: 403,
+  NOT_AUTHORIZED: 403,
+  IDEMPOTENCY_KEY_REUSED: 409,
+  VERSION_CONFLICT: 409,
+  REQUEST_TOO_LARGE: 413,
+  UNSUPPORTED_MEDIA_TYPE: 415,
+  COMMAND_TEMPORARILY_UNAVAILABLE: 503,
+  INTERNAL_ERROR: 500,
+} as const satisfies Record<ApiErrorCode, number>;

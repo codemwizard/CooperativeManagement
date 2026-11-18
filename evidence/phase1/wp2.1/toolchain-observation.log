@@ -1,0 +1,8 @@
+node --version
+v26.7.0
+
+npm.cmd --version
+11.19.0
+
+Project pin: npm 12.2.0 (package.json, package-lock.json, toolchain.json)
+Task gate status: pending pinned-toolchain rerun.

@@ -689,14 +689,14 @@ describe('REM-WP0.3 migrated table inventory', () => {
     expect(validateTenantPolicyMatrix(matrix, inventory)).toEqual([]);
     expect(matrix.tables).toHaveLength(54);
     expect(matrix.roles.application).toContain('provisioned on local');
-    expect(matrix.policy_specification.tenant_scoped_table_count).toBe(37);
+    expect(matrix.policy_specification.tenant_scoped_table_count).toBe(39);
   });
 
   it('freezes executable policy expressions and named mismatch cases for all tenant tables', () => {
     const matrix = readJson('evidence/phase1/tenant-table-policy-matrix.json');
     const manifest = readJson('evidence/phase1/wp1.5-tenant-policy-manifest.json');
     expect(validateTenantPolicyManifest(manifest, matrix)).toEqual([]);
-    expect(manifest.status).toBe('candidate_verified_pending_independent_review');
+    expect(manifest.status).toBe('candidate_frozen_pending_restricted_role_integration_and_review');
   });
 
   it('freezes the event_outbox RLS writer capability separately from tenant-table policies', () => {
@@ -841,7 +841,7 @@ describe('REM-WP0.5 purge allowlist and preservation matrix', () => {
     expect(validatePurgeTablePolicyMatrix(matrix, inventory)).toEqual([]);
     expect(matrix.target.marker_installed).toBe(false);
     expect(matrix.purge_role_contract.status).toContain('not provisioned');
-    expect(matrix.delete_tables).toHaveLength(47);
+    expect(matrix.delete_tables).toHaveLength(49);
     expect(matrix.preserve_tables).toHaveLength(6);
   });
 });

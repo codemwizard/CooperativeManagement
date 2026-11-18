@@ -1,0 +1,82 @@
+Test-Path: C:\Program Files\nodejs\npm.ps1:23
+Line |
+  23 |  if (Test-Path $NPM_PREFIX_NPM_CLI_JS) {
+     |      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     | Access to the path 'C:\Users\User\AppData\Roaming\npm\node_modules\npm\bin\npm-cli.js' is denied.
+
+
+> @symphony/domain@0.1.0 test:unit
+> vitest run --reporter=verbose src/authz/__tests__/policy-matrix.test.ts
+
+
+ RUN  v2.1.9 C:/Workspace/GitHub/Prototype/packages/domain
+
+ × src/authz/__tests__/policy-matrix.test.ts > WP2.1 policy default-deny red cases > denies an unregistered action
+   → expected 'allow' to be 'deny' // Object.is equality
+ × src/authz/__tests__/policy-matrix.test.ts > WP2.1 policy default-deny red cases > denies a grant request with an unregistered capacity type
+   → expected 'allow' to be 'deny' // Object.is equality
+ × src/authz/__tests__/policy-matrix.test.ts > WP2.1 policy default-deny red cases > denies a Secretary attempting a capacity revocation
+   → expected 'allow' to be 'deny' // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/authz/__tests__/policy-matrix.test.ts > WP2.1 policy default-deny red cases > denies an unregistered action
+AssertionError: expected 'allow' to be 'deny' // Object.is equality
+
+Expected: "deny"
+Received: "allow"
+
+ ❯ src/authz/__tests__/policy-matrix.test.ts:23:87
+     21| describe('WP2.1 policy default-deny red cases', () => {
+     22|   it('denies an unregistered action', () => {
+     23|     expect(decide('UnknownPolicyAction', target, actor('chairperson'),…
+       |                                                                                       ^
+     24|   });
+     25| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  src/authz/__tests__/policy-matrix.test.ts > WP2.1 policy default-deny red cases > denies a grant request with an unregistered capacity type
+AssertionError: expected 'allow' to be 'deny' // Object.is equality
+
+Expected: "deny"
+Received: "allow"
+
+ ❯ src/authz/__tests__/policy-matrix.test.ts:27:98
+     25| 
+     26|   it('denies a grant request with an unregistered capacity type', () =…
+     27|     expect(decide('GrantCapacity:made_up_capacity', target, actor('cha…
+       |                                                                                                  ^
+     28|   });
+     29| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+ FAIL  src/authz/__tests__/policy-matrix.test.ts > WP2.1 policy default-deny red cases > denies a Secretary attempting a capacity revocation
+AssertionError: expected 'allow' to be 'deny' // Object.is equality
+
+Expected: "deny"
+Received: "allow"
+
+ ❯ src/authz/__tests__/policy-matrix.test.ts:31:98
+     29| 
+     30|   it('denies a Secretary attempting a capacity revocation', () => {
+     31|     expect(decide('RevokeCapacity:internal_verifier', target, actor('s…
+       |                                                                                                  ^
+     32|   });
+     33| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
+
+ Test Files  1 failed (1)
+      Tests  3 failed (3)
+   Start at  19:37:37
+   Duration  893ms (transform 149ms, setup 0ms, collect 107ms, tests 12ms, environment 0ms, prepare 347ms)
+
+npm error Lifecycle script `test:unit` failed with error:
+npm error code 1
+npm error path C:\Workspace\GitHub\Prototype\packages\domain
+npm error workspace @symphony/domain@0.1.0
+npm error location C:\Workspace\GitHub\Prototype\packages\domain
+npm error command failed
+npm error command C:\Windows\system32\cmd.exe /d /s /c vitest run --reporter=verbose src/authz/__tests__/policy-matrix.test.ts

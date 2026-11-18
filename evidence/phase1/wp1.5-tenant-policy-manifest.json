@@ -1,9 +1,9 @@
 {
   "version": 1,
-  "status": "candidate_verified_pending_independent_review",
-  "source": "migrations/0013_tenant_rls_app_role.sql, root migrations 0001-0012, and live PostgreSQL 18.0 catalog for symphony_phase1_test",
-  "table_count": 37,
-  "required_tenant_scoped_count": 37,
+  "status": "candidate_frozen_pending_restricted_role_integration_and_review",
+  "source": "migrations/0013_tenant_rls_app_role.sql and root migrations 0001-0012 were verified for the original 37 tenant-scoped tables; REM-WP5.2 migration 0014 adds two candidate credential-table policies whose full 39-table candidate validation remains pending",
+  "table_count": 39,
+  "required_tenant_scoped_count": 39,
   "policy_entries": [
     {
       "table": "command_receipts",
@@ -545,6 +545,30 @@
       "update_with_check": "tenant_id::text = NULLIF(current_setting('app.tenant_id', true), '')",
       "mismatch_fixture": "wp15-security_attempts-cross-tenant-parent",
       "missing_parent_fixture": "wp15-security_attempts-missing-parent"
+    },
+    {
+      "table": "temporary_credentials",
+      "parent_tables": [],
+      "tenant_resolution_sql": "tenant_id::text = NULLIF(current_setting('app.tenant_id', true), '')",
+      "missing_parent_behavior": "A direct tenant predicate evaluates false when app.tenant_id is missing or empty; the composite user/tenant foreign key rejects missing and mismatched users.",
+      "cross_tenant_parent_behavior": "The direct tenant predicate returns false for another tenant and the composite foreign key prevents a credential from naming a user in another tenant.",
+      "insert_with_check": "tenant_id::text = NULLIF(current_setting('app.tenant_id', true), '')",
+      "update_using": "tenant_id::text = NULLIF(current_setting('app.tenant_id', true), '')",
+      "update_with_check": "tenant_id::text = NULLIF(current_setting('app.tenant_id', true), '')",
+      "mismatch_fixture": "wp52-temporary_credentials-cross-tenant",
+      "missing_parent_fixture": "wp52-temporary_credentials-missing-user"
+    },
+    {
+      "table": "password_credentials",
+      "parent_tables": [],
+      "tenant_resolution_sql": "tenant_id::text = NULLIF(current_setting('app.tenant_id', true), '')",
+      "missing_parent_behavior": "A direct tenant predicate evaluates false when app.tenant_id is missing or empty; the composite user/tenant foreign key rejects missing and mismatched users.",
+      "cross_tenant_parent_behavior": "The direct tenant predicate returns false for another tenant and the composite foreign key prevents a credential from naming a user in another tenant.",
+      "insert_with_check": "tenant_id::text = NULLIF(current_setting('app.tenant_id', true), '')",
+      "update_using": "tenant_id::text = NULLIF(current_setting('app.tenant_id', true), '')",
+      "update_with_check": "tenant_id::text = NULLIF(current_setting('app.tenant_id', true), '')",
+      "mismatch_fixture": "wp52-password_credentials-cross-tenant",
+      "missing_parent_fixture": "wp52-password_credentials-missing-user"
     }
   ],
   "outbox_policy": {

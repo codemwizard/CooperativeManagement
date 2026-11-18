@@ -19,9 +19,9 @@ const ORG_A = 'org-a-uuid';
 const CHAIR_ID = 'chair-001';
 const SECRETARY_ID = 'sec-001';
 const IFV_USER_ID = 'ifv-001';
-const PAST = '2023-01-01T00:00:00Z';
-const FUTURE = '2025-01-01T00:00:00Z';
-const NOW = '2024-06-01T12:00:00Z';
+const PAST = '2026-01-01T00:00:00Z';
+const FUTURE = '2027-01-01T00:00:00Z';
+const NOW = '2026-11-17T12:00:00Z';
 
 // ─── Tests ────────────────────────────────────────────────────────────────────
 
@@ -37,11 +37,12 @@ describe('CapacityService', () => {
     const cmd: CapacityCommand = {
       type: 'GrantCapacity',
       actorUserId: CHAIR_ID,
-      actorAppointments: [{ position: 'chairperson', tenantId: ORG_A, activeFrom: PAST, activeTo: FUTURE }],
+      actorAppointments: [{ position: 'chairperson', tenantId: ORG_A, organizationId: ORG_A, activeFrom: PAST, activeTo: FUTURE }],
       actorCapacities: [],
       actorPlatformRoles: [],
       actorDelegations: [],
       tenantId: ORG_A,
+      organizationId: ORG_A,
       targetUserId: IFV_USER_ID,
       capacityType: 'internal_verifier',
       activeFrom: NOW,
@@ -60,6 +61,7 @@ describe('CapacityService', () => {
       granteeUserId: IFV_USER_ID,
       capacityType: 'internal_verifier',
       tenantId: ORG_A,
+      organizationId: ORG_A,
     });
   });
 
@@ -73,11 +75,12 @@ describe('CapacityService', () => {
     const cmd: CapacityCommand = {
       type: 'GrantCapacity',
       actorUserId: SECRETARY_ID,
-      actorAppointments: [{ position: 'secretary', tenantId: ORG_A, activeFrom: PAST, activeTo: FUTURE }],
+      actorAppointments: [{ position: 'secretary', tenantId: ORG_A, organizationId: ORG_A, activeFrom: PAST, activeTo: FUTURE }],
       actorCapacities: [],
       actorPlatformRoles: [],
       actorDelegations: [],
       tenantId: ORG_A,
+      organizationId: ORG_A,
       targetUserId: IFV_USER_ID,
       capacityType: 'internal_verifier',
       activeFrom: NOW,
@@ -102,11 +105,12 @@ describe('CapacityService', () => {
     const cmd: CapacityCommand = {
       type: 'RevokeCapacity',
       actorUserId: CHAIR_ID,
-      actorAppointments: [{ position: 'chairperson', tenantId: ORG_A, activeFrom: PAST, activeTo: FUTURE }],
+      actorAppointments: [{ position: 'chairperson', tenantId: ORG_A, organizationId: ORG_A, activeFrom: PAST, activeTo: FUTURE }],
       actorCapacities: [],
       actorPlatformRoles: [],
       actorDelegations: [],
       tenantId: ORG_A,
+      organizationId: ORG_A,
       targetUserId: IFV_USER_ID,
       capacityType: 'internal_verifier',
       activeFrom: NOW,
@@ -122,22 +126,18 @@ describe('CapacityService', () => {
     expect(result.events[0]?.eventType).toBe('CapacityRevoked');
   });
 
-  it('revokeCapacity_annotatesExistingFindings', async () => {
-    /**
-     * IFV-7: When an IFV's capacity is revoked, existing findings are NOT altered
-     * but are annotated "verifier no longer active". The service must include
-     * annotation instructions in the result.
-     */
+  it('revokeCapacity_doesNotMutateHistoricalFindings', async () => {
     const svc = new CapacityService();
 
     const cmd: CapacityCommand = {
       type: 'RevokeCapacity',
       actorUserId: CHAIR_ID,
-      actorAppointments: [{ position: 'chairperson', tenantId: ORG_A, activeFrom: PAST, activeTo: FUTURE }],
+      actorAppointments: [{ position: 'chairperson', tenantId: ORG_A, organizationId: ORG_A, activeFrom: PAST, activeTo: FUTURE }],
       actorCapacities: [],
       actorPlatformRoles: [],
       actorDelegations: [],
       tenantId: ORG_A,
+      organizationId: ORG_A,
       targetUserId: IFV_USER_ID,
       capacityType: 'internal_verifier',
       activeFrom: NOW,
@@ -149,9 +149,8 @@ describe('CapacityService', () => {
 
     expect(result.ok).toBe(true);
     if (!result.ok) return;
-    // Result must indicate that existing findings need annotation
-    expect(result.annotateFindings).toBe(true);
-    expect(result.annotationText).toBe('verifier no longer active');
+    expect(result.events[0]?.eventType).toBe('CapacityRevoked');
+    expect(result).not.toHaveProperty('annotateFindings');
   });
 });
 

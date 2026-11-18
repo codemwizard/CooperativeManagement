@@ -1,0 +1,82 @@
+{
+  "schema_version": 1,
+  "task_id": "REM-WP5.2",
+  "status": {
+    "implementation": "partial",
+    "unit_test": "passed",
+    "integration_test": "passed",
+    "bdd_ui_test": "not_applicable",
+    "gate_verified": "pending"
+  },
+  "commit": "working-tree",
+  "environment": {
+    "node": "v26.7.0",
+    "npm": "v12.2.0 (elevated CLI)",
+    "postgres": "18.0 (package build 18.0-2)",
+    "database_role": "migration integration gate; app-role credential/RLS assertions included",
+    "data_mode": "test",
+    "key_provider": "local-test"
+  },
+  "commands": [
+    {
+      "command": "npm run test:unit --workspace @symphony/domain -- src/identity/__tests__/credential-lifecycle.test.ts",
+      "result": "passed",
+      "artifact": "evidence/phase1/wp5.2/credential-lifecycle-unit.log"
+    },
+    {
+      "command": "npm run test:db:migrations",
+      "result": "passed",
+      "artifact": "evidence/phase1/wp5.2/credential-migration-integration.log"
+    },
+    {
+      "command": "npm exec -- tsx tools/benchmark_argon2_wp5_2.ts",
+      "result": "passed",
+      "artifact": "evidence/phase1/wp5.2/argon2id-benchmark.log"
+    },
+    {
+      "command": "npm run typecheck:v4",
+      "result": "passed",
+      "artifact": "evidence/phase1/wp2.1/pinned-toolchain-rerun.log"
+    },
+    {
+      "command": "npm run verify:arch",
+      "result": "passed",
+      "artifact": "evidence/phase1/wp2.1/pinned-toolchain-rerun.log"
+    },
+    {
+      "command": "npm run verify:toolchain",
+      "result": "passed",
+      "artifact": "evidence/phase1/wp2.1/pinned-toolchain-rerun.log"
+    }
+  ],
+  "claims": {
+    "behavior_proved": "Temporary credentials and permanent passwords use distinct tenant-bound records. The lifecycle fixes temporary credentials at 72 hours, hashes secrets with Argon2id m=19456 KiB/t=2/p=1 and unique salts, verifies temporary values without consuming them, and establishes a permanent credential atomically with one-use consumption. Integration tests cover concurrent consumption, replay, duplicate-password rollback, persistence and tenant-isolated app-role access.",
+    "path_proved": "Four focused lifecycle unit tests pass. The PostgreSQL migration suite passes all 16 tests, including the credential schema, exact 72-hour expiry predicate, restricted app-role RLS/grants, atomic consume-and-establish, and concurrent use. Workspace typecheck and architecture gates pass.",
+    "configuration_proved": "Node v26.7.0, npm v12.2.0, PostgreSQL 18.0 / package build 18.0-2. Isolated test database and migration integration identities were used; no credentials are recorded. The application-role checks verify tenant isolation and denied delete behavior.",
+    "coverage_limitations": [
+      "The local versioned password blocklist currently contains a small common-password sample, not a comprehensive compromised-password corpus.",
+      "The local Argon2id measurements meet the one-second per-verification target at concurrency levels 1, 2, 4 and 8. Production expected-load acceptance remains pending because the deployment workload profile is unspecified.",
+      "Persisted sessions, CSRF/Origin enforcement, forced-change API composition, account/source progressive throttling, and session rotation/logout are owned by REM-WP5.3 and remain unimplemented or unverified.",
+      "The legacy unmounted auth route remains a test adapter; the production API server is not declared ready by this task.",
+      "No workspace login/password-change Playwright journey or integrated Phase 1 BDD path is claimed."
+    ]
+  },
+  "limitations": [
+    "This record binds to the uncommitted working tree. Implementation is partial and the task gate remains pending until blocklist coverage and representative expected-load acceptance are closed.",
+    "WP5.3 remains a graph-dependent follow-up; WP5.2 does not claim end-to-end authentication readiness."
+  ],
+  "unresolved_decisions": [],
+  "reviewer": "Implementation self-review; independent security review remains outstanding.",
+  "deferred_followups": [
+    {
+      "task_id": "REM-WP5.3",
+      "scope": "Persisted sessions, forced password change composition, account/source PostgreSQL throttling and accepted session controls.",
+      "acceptance_evidence": "Independent-instance PostgreSQL concurrency tests, actual API session/forced-change tests, and evidence against the approved D-14 contract."
+    },
+    {
+      "task_id": "REM-WP5.4",
+      "scope": "Accessible real workspace login and forced password change journey.",
+      "acceptance_evidence": "Playwright against the real API, workspace and PostgreSQL path with persisted test credentials and cookie/session assertions."
+    }
+  ]
+}

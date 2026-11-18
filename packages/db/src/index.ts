@@ -11,6 +11,8 @@ export { PostgresReconciliationInboxStore } from './repositories/postgres-reconc
 export { PostgresCommandTransactionRunner } from './repositories/postgres-command-transaction.js';
 export { PostgresSecurityAttemptWriter, validateSecurityAttemptRuntimeProfile } from './repositories/postgres-security-attempt-writer.js';
 export type { SecurityAttemptRuntimeProfile } from './repositories/postgres-security-attempt-writer.js';
+export { PostgresCredentialRepository, PasswordCredentialAlreadyEstablishedError, TemporaryCredentialUnavailableError } from './repositories/postgres-credential-repository.js';
+export type { EstablishPasswordInput, IssueTemporaryCredentialInput, TemporaryCredentialRow } from './repositories/postgres-credential-repository.js';
 
 // DB types (Phase 1 — WP-1.3)
 export type { SymphonyDatabase } from './types/database.js';

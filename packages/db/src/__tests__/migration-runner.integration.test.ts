@@ -3,9 +3,16 @@ import { randomUUID } from 'node:crypto';
 import { promises as fs } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import * as argon2 from 'argon2';
 import pg from 'pg';
+import { ARGON2ID_PARAMETERS, CredentialLifecycleService } from '@symphony/domain/identity/credential-lifecycle';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { executeSqlMigration } from '../migration-executor.js';
+import {
+  PasswordCredentialAlreadyEstablishedError,
+  PostgresCredentialRepository,
+  TemporaryCredentialUnavailableError,
+} from '../repositories/postgres-credential-repository.js';
 
 const migrationBaseUrl = process.env['MIGRATION_TEST_DATABASE_URL'];
 const adminDatabaseUrl = process.env['PHASE1_TEST_ADMIN_DATABASE_URL'];
@@ -530,6 +537,280 @@ describe.skipIf(!migrationBaseUrl || !adminDatabaseUrl || process.env['DATA_MODE
       expect(await pool.query("SELECT has_table_privilege('symphony_app','symphony.security_attempts','SELECT') AS select, has_table_privilege('symphony_app','symphony.security_attempts','INSERT') AS insert"))
         .toMatchObject({ rows: [{ select: false, insert: true }] });
     });
+
+    it('installs separate tenant-bound credential tables with fixed expiry, Argon2id hashes and no delete grant', async () => {
+      const tables = await pool.query<{ table_name: string; rls_enabled: boolean; rls_forced: boolean }>(
+        `SELECT c.relname AS table_name, c.relrowsecurity AS rls_enabled, c.relforcerowsecurity AS rls_forced
+         FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace
+         WHERE n.nspname='symphony' AND c.relname = ANY($1::text[]) ORDER BY c.relname`,
+        [['temporary_credentials', 'password_credentials']],
+      );
+      expect(tables.rows).toEqual([
+        { table_name: 'password_credentials', rls_enabled: true, rls_forced: true },
+        { table_name: 'temporary_credentials', rls_enabled: true, rls_forced: true },
+      ]);
+
+      const constraints = await pool.query<{ table_name: string; constraint_name: string; definition: string }>(
+        `SELECT relation.relname AS table_name, constraint_row.conname AS constraint_name,
+                pg_get_constraintdef(constraint_row.oid) AS definition
+         FROM pg_constraint constraint_row
+         JOIN pg_class relation ON relation.oid=constraint_row.conrelid
+         JOIN pg_namespace namespace ON namespace.oid=relation.relnamespace
+         WHERE namespace.nspname='symphony'
+           AND relation.relname = ANY($1::text[])
+         ORDER BY relation.relname, constraint_row.conname`,
+        [['temporary_credentials', 'password_credentials']],
+      );
+      expect(constraints.rows).toEqual(expect.arrayContaining([
+        expect.objectContaining({ table_name: 'temporary_credentials', constraint_name: 'temporary_credentials_fixed_lifetime_ck' }),
+        expect.objectContaining({ table_name: 'temporary_credentials', constraint_name: 'temporary_credentials_terminal_state_ck' }),
+        expect.objectContaining({ table_name: 'temporary_credentials', constraint_name: 'temporary_credentials_user_tenant_fk' }),
+        expect.objectContaining({ table_name: 'password_credentials', constraint_name: 'password_credentials_user_tenant_fk' }),
+      ]));
+      expect(constraints.rows.find((row) => row.constraint_name === 'temporary_credentials_fixed_lifetime_ck')?.definition)
+        .toMatch(/72:00:00/);
+      expect(constraints.rows.find((row) => row.constraint_name === 'temporary_credentials_secret_hash_check')?.definition)
+        .toMatch(/argon2id.*19456.*2.*1/i);
+
+      const grants = await pool.query<{ table_name: string; privilege_type: string }>(
+        `SELECT table_name, privilege_type FROM information_schema.role_table_grants
+         WHERE table_schema='symphony' AND grantee='symphony_app'
+           AND table_name = ANY($1::text[]) ORDER BY table_name, privilege_type`,
+        [['temporary_credentials', 'password_credentials']],
+      );
+      expect(grants.rows).toEqual([
+        { table_name: 'password_credentials', privilege_type: 'INSERT' },
+        { table_name: 'password_credentials', privilege_type: 'SELECT' },
+        { table_name: 'password_credentials', privilege_type: 'UPDATE' },
+        { table_name: 'temporary_credentials', privilege_type: 'INSERT' },
+        { table_name: 'temporary_credentials', privilege_type: 'SELECT' },
+        { table_name: 'temporary_credentials', privilege_type: 'UPDATE' },
+      ]);
+    });
+
+    it('proves secret redaction while atomically consuming temporary credentials and establishing permanent passwords', async () => {
+      const repository = new PostgresCredentialRepository(pool);
+      const service = new CredentialLifecycleService({ now: () => new Date().toISOString() });
+      const tenantId = randomUUID();
+      const primaryUser = randomUUID();
+      const rollbackUser = randomUUID();
+      const boundaryUser = randomUUID();
+      const foreignTenantId = randomUUID();
+      const foreignUserId = randomUUID();
+      const userIds = [primaryUser, rollbackUser, boundaryUser];
+
+      try {
+        await pool.query('INSERT INTO symphony.tenants (id,name) VALUES ($1,$2),($3,$4)', [
+          tenantId, 'wp5.2-synthetic', foreignTenantId, 'wp5.2-foreign-synthetic',
+        ]);
+        for (const [fixtureTenant, fixtureUsers] of [[tenantId, userIds], [foreignTenantId, [foreignUserId]]] as const) {
+          const fixtureClient = await pool.connect();
+          try {
+            await fixtureClient.query('BEGIN');
+            await fixtureClient.query("SELECT set_config('app.tenant_id', $1, true)", [fixtureTenant]);
+            for (const userId of fixtureUsers) {
+              await fixtureClient.query(
+                `INSERT INTO symphony.users (id,tenant_id,email,email_normalized,status)
+                 VALUES ($1,$2,$3,$3,'active')`,
+                [userId, fixtureTenant, `wp5.2-${userId}@example.invalid`],
+              );
+            }
+            await fixtureClient.query('COMMIT');
+          } catch (error) {
+            await fixtureClient.query('ROLLBACK').catch(() => undefined);
+            throw error;
+          } finally {
+            fixtureClient.release();
+          }
+        }
+
+        const temporaryPlaintextCanary = `TEMP_CREDENTIAL_CANARY_${randomUUID()}`;
+        const temporaryCredentialId = randomUUID();
+        const temporaryHash = await argon2.hash(temporaryPlaintextCanary, {
+          type: argon2.argon2id,
+          ...ARGON2ID_PARAMETERS,
+        });
+        const storedTemporary = await repository.issueTemporaryCredential({
+          credentialId: temporaryCredentialId, tenantId, userId: primaryUser, secretHash: temporaryHash,
+        });
+        expect(storedTemporary.id).toBe(temporaryCredentialId);
+        expect(Date.parse(storedTemporary.expiresAt) - Date.parse(storedTemporary.issuedAt)).toBe(72 * 60 * 60 * 1000);
+        const currentTemporary = await repository.findCurrentTemporaryCredential(tenantId, primaryUser);
+        expect(currentTemporary).toMatchObject({ id: storedTemporary.id, consumedAt: null, revokedAt: null });
+        expect(currentTemporary!.secretHash).toMatch(/^\$argon2id\$v=19\$m=19456,t=2,p=1\$/);
+        expect(JSON.stringify(currentTemporary)).not.toContain(temporaryPlaintextCanary);
+        expect(await service.verifyTemporaryCredential(temporaryPlaintextCanary, {
+          credentialId: currentTemporary!.id,
+          hash: currentTemporary!.secretHash,
+          issuedAt: currentTemporary!.issuedAt,
+          expiresAt: currentTemporary!.expiresAt,
+        })).toBe('valid');
+        expect(await service.verifyTemporaryCredential(`WRONG_${temporaryPlaintextCanary}`, {
+          credentialId: currentTemporary!.id,
+          hash: currentTemporary!.secretHash,
+          issuedAt: currentTemporary!.issuedAt,
+          expiresAt: currentTemporary!.expiresAt,
+        })).toBe('invalid');
+        expect((await repository.findCurrentTemporaryCredential(tenantId, primaryUser))?.consumedAt).toBeNull();
+
+        const permanentPasswordCanaryA = `PERMANENT_PASSWORD_CANARY_A_${randomUUID()}`;
+        const permanentPasswordCanaryB = `PERMANENT_PASSWORD_CANARY_B_${randomUUID()}`;
+        const wrongPasswordCanary = `WRONG_PASSWORD_CANARY_${randomUUID()}`;
+        const [passwordA, passwordB] = await Promise.all([
+          service.hashPermanentPassword(permanentPasswordCanaryA),
+          service.hashPermanentPassword(permanentPasswordCanaryB),
+        ]);
+        const concurrent = await Promise.allSettled([
+          repository.establishPermanentPassword({
+            tenantId, userId: primaryUser, temporaryCredentialId: storedTemporary.id, passwordHash: passwordA,
+          }),
+          repository.establishPermanentPassword({
+            tenantId, userId: primaryUser, temporaryCredentialId: storedTemporary.id, passwordHash: passwordB,
+          }),
+        ]);
+        expect(concurrent.filter((result) => result.status === 'fulfilled')).toHaveLength(1);
+        expect(concurrent.filter((result) => result.status === 'rejected')).toHaveLength(1);
+        expect(concurrent.find((result) => result.status === 'rejected'))
+          .toMatchObject({ reason: expect.any(TemporaryCredentialUnavailableError) });
+        const establishedHash = await repository.findPermanentPasswordHash(tenantId, primaryUser);
+        expect(establishedHash === passwordA || establishedHash === passwordB).toBe(true);
+        expect(establishedHash).toMatch(/^\$argon2id\$v=19\$m=19456,t=2,p=1\$/);
+        const winningPasswordCanary = establishedHash === passwordA ? permanentPasswordCanaryA : permanentPasswordCanaryB;
+        const losingPasswordCanary = establishedHash === passwordA ? permanentPasswordCanaryB : permanentPasswordCanaryA;
+        expect(await service.verifyPermanentPassword(winningPasswordCanary, establishedHash!)).toBe(true);
+        expect(await service.verifyPermanentPassword(losingPasswordCanary, establishedHash!)).toBe(false);
+        expect(await service.verifyPermanentPassword(wrongPasswordCanary, establishedHash!)).toBe(false);
+
+        const persistedTemporary = await pool.query<{ secret_hash: string }>(
+          'SELECT secret_hash FROM symphony.temporary_credentials WHERE id=$1', [storedTemporary.id],
+        );
+        const persistedPermanent = await pool.query<{ secret_hash: string }>(
+          'SELECT secret_hash FROM symphony.password_credentials WHERE tenant_id=$1 AND user_id=$2', [tenantId, primaryUser],
+        );
+        expect(persistedTemporary.rows).toHaveLength(1);
+        expect(persistedPermanent.rows).toHaveLength(1);
+        expect(persistedTemporary.rows[0]!.secret_hash).toMatch(/^\$argon2id\$v=19\$m=19456,t=2,p=1\$/);
+        expect(persistedPermanent.rows[0]!.secret_hash).toMatch(/^\$argon2id\$v=19\$m=19456,t=2,p=1\$/);
+        const persistedText = JSON.stringify({
+          temporary: persistedTemporary.rows,
+          permanent: persistedPermanent.rows,
+        });
+        for (const canary of [temporaryPlaintextCanary, permanentPasswordCanaryA, permanentPasswordCanaryB]) {
+          expect(persistedText).not.toContain(canary);
+        }
+
+        const scopedClient = await pool.connect();
+        try {
+          await scopedClient.query('BEGIN');
+          await scopedClient.query('SET LOCAL ROLE symphony_app');
+          await scopedClient.query("SELECT set_config('app.tenant_id', $1, true)", [tenantId]);
+          expect((await scopedClient.query(
+            'SELECT id FROM symphony.temporary_credentials WHERE id=$1', [storedTemporary.id],
+          )).rows).toEqual([{ id: storedTemporary.id }]);
+          expect((await scopedClient.query(
+            'SELECT id FROM symphony.password_credentials WHERE tenant_id=$1 AND user_id=$2', [tenantId, primaryUser],
+          )).rowCount).toBe(1);
+          await scopedClient.query("SELECT set_config('app.tenant_id', $1, true)", [foreignTenantId]);
+          expect((await scopedClient.query(
+            'SELECT id FROM symphony.temporary_credentials WHERE id=$1', [storedTemporary.id],
+          )).rowCount).toBe(0);
+          expect((await scopedClient.query(
+            'SELECT id FROM symphony.password_credentials WHERE user_id=$1', [primaryUser],
+          )).rowCount).toBe(0);
+          await scopedClient.query('ROLLBACK');
+
+          await scopedClient.query('BEGIN');
+          await scopedClient.query('SET LOCAL ROLE symphony_app');
+          await scopedClient.query("SELECT set_config('app.tenant_id', $1, true)", [tenantId]);
+          await expect(scopedClient.query(
+            'UPDATE symphony.temporary_credentials SET tenant_id=$1 WHERE id=$2', [foreignTenantId, storedTemporary.id],
+          )).rejects.toMatchObject({ code: '42501' });
+          await scopedClient.query('ROLLBACK');
+
+          await scopedClient.query('BEGIN');
+          await scopedClient.query('SET LOCAL ROLE symphony_app');
+          await scopedClient.query("SELECT set_config('app.tenant_id', $1, true)", [tenantId]);
+          await expect(scopedClient.query(
+            'DELETE FROM symphony.temporary_credentials WHERE id=$1', [storedTemporary.id],
+          )).rejects.toMatchObject({ code: '42501' });
+          await scopedClient.query('ROLLBACK');
+        } finally {
+          scopedClient.release();
+        }
+        await expect(repository.establishPermanentPassword({
+          tenantId, userId: primaryUser, temporaryCredentialId: storedTemporary.id, passwordHash: passwordA,
+        })).rejects.toBeInstanceOf(TemporaryCredentialUnavailableError);
+        await expect(repository.issueTemporaryCredential({
+          credentialId: randomUUID(), tenantId, userId: primaryUser, secretHash: temporaryHash,
+        }))
+          .rejects.toBeInstanceOf(PasswordCredentialAlreadyEstablishedError);
+
+        const rollbackTemporary = await service.issueTemporaryCredential();
+        const storedRollbackTemporary = await repository.issueTemporaryCredential({
+          credentialId: rollbackTemporary.credentialId, tenantId, userId: rollbackUser, secretHash: rollbackTemporary.hash,
+        });
+        const existingPassword = await service.hashPermanentPassword('first permanent password phrase');
+        await pool.query(
+          'INSERT INTO symphony.password_credentials (tenant_id,user_id,secret_hash) VALUES ($1,$2,$3)',
+          [tenantId, rollbackUser, existingPassword],
+        );
+        await expect(repository.establishPermanentPassword({
+          tenantId,
+          userId: rollbackUser,
+          temporaryCredentialId: storedRollbackTemporary.id,
+          passwordHash: await service.hashPermanentPassword('second permanent password phrase'),
+        })).rejects.toBeInstanceOf(PasswordCredentialAlreadyEstablishedError);
+        expect((await repository.findCurrentTemporaryCredential(tenantId, rollbackUser))?.consumedAt).toBeNull();
+        expect(await repository.findPermanentPasswordHash(tenantId, rollbackUser)).toBe(existingPassword);
+
+        const boundaryTemporary = await service.issueTemporaryCredential();
+        const storedBoundaryTemporary = await repository.issueTemporaryCredential({
+          credentialId: boundaryTemporary.credentialId, tenantId, userId: boundaryUser, secretHash: boundaryTemporary.hash,
+        });
+        const boundaryClient = await pool.connect();
+        try {
+          await boundaryClient.query('BEGIN');
+          await boundaryClient.query("SELECT set_config('app.tenant_id', $1, true)", [tenantId]);
+          await boundaryClient.query(
+            `WITH expiry AS (SELECT transaction_timestamp() AS instant)
+             UPDATE symphony.temporary_credentials AS credential
+             SET issued_at = expiry.instant - INTERVAL '72 hours', expires_at = expiry.instant
+             FROM expiry WHERE credential.id = $1`,
+            [storedBoundaryTemporary.id],
+          );
+          const boundary = await boundaryClient.query<{ is_valid: boolean }>(
+            `SELECT expires_at > transaction_timestamp() AS is_valid
+             FROM symphony.temporary_credentials WHERE id = $1`,
+            [storedBoundaryTemporary.id],
+          );
+          expect(boundary.rows[0]?.is_valid).toBe(false);
+          await boundaryClient.query('ROLLBACK');
+        } catch (error) {
+          await boundaryClient.query('ROLLBACK').catch(() => undefined);
+          throw error;
+        } finally {
+          boundaryClient.release();
+        }
+      } finally {
+        const cleanup = await pool.connect();
+        try {
+          await cleanup.query('BEGIN');
+          await cleanup.query("SELECT set_config('app.tenant_id', $1, true)", [tenantId]);
+          await cleanup.query('DELETE FROM symphony.temporary_credentials WHERE tenant_id=$1', [tenantId]);
+          await cleanup.query('DELETE FROM symphony.password_credentials WHERE tenant_id=$1', [tenantId]);
+          await cleanup.query('DELETE FROM symphony.users WHERE tenant_id=$1', [tenantId]);
+          await cleanup.query('DELETE FROM symphony.tenants WHERE id=$1', [tenantId]);
+          await cleanup.query('DELETE FROM symphony.users WHERE tenant_id=$1', [foreignTenantId]);
+          await cleanup.query('DELETE FROM symphony.tenants WHERE id=$1', [foreignTenantId]);
+          await cleanup.query('COMMIT');
+        } catch (error) {
+          await cleanup.query('ROLLBACK').catch(() => undefined);
+          throw error;
+        } finally {
+          cleanup.release();
+        }
+      }
+    }, 30_000);
 
     it('installs only encrypted reconciliation payload and forced tenant RLS', async () => {
       const columns = await pool.query<{ column_name: string; data_type: string; is_nullable: string }>(

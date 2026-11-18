@@ -10,6 +10,7 @@
 
 import React, { FormEvent, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { authenticationErrorSchema, loginRequestSchema, loginSuccessSchema } from '@symphony/contracts';
 
 type LoginState = 'idle' | 'loading' | 'error' | 'change-password';
 
@@ -33,12 +34,16 @@ export function LoginPage(): React.ReactElement {
       const res = await fetch('/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify(loginRequestSchema.parse({
+          userId: email,
+          credential: password,
+          deviceId: crypto.randomUUID(),
+        })),
       });
 
       if (res.ok) {
-        const body = (await res.json()) as { requiresPasswordChange?: boolean };
-        if (body.requiresPasswordChange) {
+        const body = loginSuccessSchema.parse(await res.json());
+        if (body.forcedChangeRequired) {
           setState('change-password');
         } else {
           navigate('/workspace', { replace: true });
@@ -47,12 +52,9 @@ export function LoginPage(): React.ReactElement {
       }
 
       // Handle error responses
-      let detail = 'Sign in failed. Please check your credentials and try again.';
+      const detail = 'Sign in failed. Please check your credentials and try again.';
       try {
-        const body = (await res.json()) as { detail?: string };
-        if (typeof body.detail === 'string' && body.detail.length > 0) {
-          detail = body.detail;
-        }
+        authenticationErrorSchema.parse(await res.json());
       } catch {
         // ignore parse error
       }

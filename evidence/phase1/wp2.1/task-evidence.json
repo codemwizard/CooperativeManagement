@@ -1,0 +1,73 @@
+{
+  "schema_version": 1,
+  "task_id": "REM-WP2.1",
+  "status": {
+    "implementation": "complete",
+    "unit_test": "passed",
+    "integration_test": "not_applicable",
+    "bdd_ui_test": "not_applicable",
+    "gate_verified": "passed"
+  },
+  "commit": "working-tree",
+  "environment": {
+    "node": "v26.7.0",
+    "npm": "v12.2.0 (elevated CLI; ordinary shell is denied access to the global npm prefix)",
+    "postgres": "not used; pure policy task",
+    "database_role": "not applicable; pure domain function",
+    "data_mode": "unknown",
+    "key_provider": "unknown"
+  },
+  "commands": [
+    {
+      "command": "node tools/verify_wp2_1_policy_matrix.mjs and node --test tools/__tests__/verify_wp2_1_policy_matrix.test.mjs",
+      "result": "passed",
+      "artifact": "evidence/phase1/wp2.1/pinned-toolchain-rerun.log"
+    },
+    {
+      "command": "npm run test:unit --workspace @symphony/domain -- src/authz/__tests__/policy.test.ts src/authz/__tests__/policy-matrix.test.ts src/authz/__tests__/capacity-service.test.ts",
+      "result": "passed",
+      "artifact": "evidence/phase1/wp2.1/policy-unit-tests.log"
+    },
+    {
+      "command": "npm run typecheck:v4",
+      "result": "passed",
+      "artifact": "evidence/phase1/wp2.1/pinned-toolchain-rerun.log"
+    },
+    {
+      "command": "npm run verify:arch",
+      "result": "passed",
+      "artifact": "evidence/phase1/wp2.1/pinned-toolchain-rerun.log"
+    },
+    {
+      "command": "npm run verify:trace",
+      "result": "passed",
+      "artifact": "evidence/phase1/wp2.1/pinned-toolchain-rerun.log"
+    },
+    {
+      "command": "npm run test:unit --workspace @symphony/domain -- src/authz/__tests__/policy-matrix.test.ts (expected test-first red before production implementation)",
+      "result": "failed",
+      "artifact": "evidence/phase1/wp2.1/red-policy-default-allow.log"
+    },
+    {
+      "command": "node --version and elevated npm --version",
+      "result": "passed",
+      "artifact": "evidence/phase1/wp2.1/pinned-toolchain-rerun.log"
+    }
+  ],
+  "claims": {
+    "behavior_proved": "A closed Phase 1 action union and fail-closed runtime validation authorize capacity grant/revocation only for target-organization Chairperson/Vice-Chairperson authority or an active acting-officer delegation for those offices. Assisted enrollers can grant only internal_verifier with an active representative-present session and recorded decision. TA scope mutations require programme_manager role and the target cohort in persisted managed scope. Institutional read-only precedence, malformed/unknown action denial, tenant/organization boundaries, half-open intervals, expiry equality and invalid grant intervals are covered. Capacity revocation emits its event without a historical finding annotation mutation.",
+    "path_proved": "All 22 catalogued actor classes × four Phase 1 actions (88 decisions) pass as pure domain tests, alongside explicit boundary tests. Completeness mutations reject missing, duplicate, unrecognized, untraced rows and missing dimensions. The retained red test directly observed three default-allow failures before the policy engine was replaced. V4 typecheck, architecture and traceability checks pass on this working tree.",
+    "configuration_proved": "Node v26.7.0 was used. `npm.cmd --version` returned 11.19.0 while repository metadata pins npm 12.2.0. No PostgreSQL, API server, database role or key provider is used by this pure policy task.",
+    "coverage_limitations": [
+      "The pinned npm 12.2.0 CLI was verified and used for the focused policy, typecheck, architecture and trace gates. In this managed shell, ordinary npm invocation still resolves to 11.19.0 because access to the global roaming prefix is denied; elevated invocation resolves to 12.2.0.",
+      "No database/API resolution, forged-header path, durable command, PostgreSQL race, BDD product path or independent review is claimed; those remain with REM-WP2.2–REM-WP2.5 and REM-WP1.6.",
+      "TA cohort scope and assisted-enrolment session facts are accepted trusted inputs here; their persisted construction is owned by REM-WP2.2."
+    ]
+  },
+  "limitations": [
+    "The task gate is verified on the pinned npm version, but artifacts remain bound to the current uncommitted working tree. Downstream WP2 dependencies remain subject to the task graph.",
+    "All artifacts are bound to the current uncommitted working tree, not an immutable commit."
+  ],
+  "unresolved_decisions": [],
+  "reviewer": "Implementation self-review. The owner supplied D-17 policy direction; independent task review remains outstanding."
+}

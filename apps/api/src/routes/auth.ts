@@ -5,11 +5,10 @@
  *
  * Routes:
  *   POST /auth/login          — Zod-validated { userId, credential, deviceId }
- *                               Returns { sessionToken, forcedChangeRequired }
- *                               No credential in response body.
+ *                               Returns { forcedChangeRequired }; no bearer token.
  *
  *   POST /auth/change-password — Zod-validated { userId, currentCredential, newPassword }
- *                                Credential fields are redacted in receipt.
+ *                                Legacy test adapter stores a separate permanent hash.
  *
  * Security requirements (AI-Secure-Coding-Policy.md):
  *   - Input validated with Zod (no `any` types)
@@ -20,30 +19,23 @@
 
 import type { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import { z } from 'zod';
+import { apiErrorStatus, changePasswordRequestSchema, loginRequestSchema, loginSuccessSchema } from '@symphony/contracts';
 import { AuthService, type IssuedCredential } from '@symphony/domain/identity/auth-service';
-import { randomBytes } from 'node:crypto';
+import { CredentialLifecycleService } from '@symphony/domain/identity/credential-lifecycle';
 
 // ─── Zod schemas ──────────────────────────────────────────────────────────────
 
-const LoginBodySchema = z.object({
-  userId: z.string().min(1, 'userId is required'),
-  credential: z.string().min(1, 'credential is required'),
-  deviceId: z.string().min(1, 'deviceId is required'),
-});
+const ChangePasswordBodySchema = changePasswordRequestSchema.extend({ userId: z.string().min(1) });
 
-const ChangePasswordBodySchema = z.object({
-  userId: z.string().min(1, 'userId is required'),
-  currentCredential: z.string().min(1, 'currentCredential is required'),
-  newPassword: z.string().min(8, 'newPassword must be at least 8 characters'),
-});
-
-// ─── In-memory credential store (Phase 1 stub — replaced by DB in Phase 2) ───
+// ─── Legacy route-test stores; the shipped server does not mount these routes ──
 
 /**
- * Ephemeral in-memory store for issued credentials.
- * Phase 1 only — a real store backed by the DB is wired in Phase 2.
+ * Ephemeral in-memory store retained only by legacy route tests. The shipped
+ * server stays unready until persisted WP5.3 session composition is wired.
  */
 export const credentialStore = new Map<string, IssuedCredential>();
+/** Legacy route-test adapter only; the shipped server uses the PostgreSQL repository. */
+export const passwordCredentialStore = new Map<string, string>();
 
 // ─── Route plugin ─────────────────────────────────────────────────────────────
 
@@ -53,19 +45,20 @@ export async function authRoutes(
 ): Promise<void> {
   const wallClock = options.clock ?? { now: () => new Date().toISOString() };
   const authService = new AuthService(wallClock);
+  const credentialLifecycle = new CredentialLifecycleService(wallClock);
 
   /**
    * POST /auth/login
    * Body: { userId, credential, deviceId }
-   * Response 200: { sessionToken, forcedChangeRequired }
+   * Response 200: { forcedChangeRequired }
    * Response 401: { code, message }
    */
   fastify.post(
     '/auth/login',
     async (req: FastifyRequest, reply: FastifyReply): Promise<void> => {
-      const parsed = LoginBodySchema.safeParse(req.body);
+      const parsed = loginRequestSchema.safeParse(req.body);
       if (!parsed.success) {
-        await reply.status(400).send({ code: 'INVALID_REQUEST', errors: parsed.error.issues });
+        await reply.status(apiErrorStatus.INVALID_REQUEST).send({ code: 'INVALID_REQUEST' });
         return;
       }
 
@@ -74,28 +67,21 @@ export async function authRoutes(
       // Retrieve stored credential for this user
       const stored = credentialStore.get(userId);
       if (stored === undefined) {
-        await reply.status(401).send({ code: 'INVALID_CREDENTIAL', message: 'No credential on file' });
+        await reply.status(apiErrorStatus.AUTHENTICATION_FAILED).send({ code: 'AUTHENTICATION_FAILED' });
         return;
       }
 
       const result = await authService.verifyCredential(userId, credential, stored, deviceId);
 
       if (!result.ok) {
-        const statusCode = result.code === 'TEMPORARY_CREDENTIAL_EXPIRED' ? 401
-          : result.code === 'CREDENTIAL_ALREADY_USED' ? 401
-          : 401;
-        await reply.status(statusCode).send({ code: result.code });
+        await reply.status(apiErrorStatus.AUTHENTICATION_FAILED).send({ code: 'AUTHENTICATION_FAILED' });
         return;
       }
 
-      // Generate a session token (Phase 1 — not persisted; Phase 2 wires session store)
-      const sessionToken = randomBytes(32).toString('base64url');
-
-      // No credential in response
-      await reply.status(200).send({
-        sessionToken,
+      // Session cookies are added by REM-WP5.3; never return an unpersisted bearer token.
+      await reply.status(200).send(loginSuccessSchema.parse({
         forcedChangeRequired: result.forcedChangeRequired,
-      });
+      }));
     },
   );
 
@@ -131,19 +117,17 @@ export async function authRoutes(
         return;
       }
 
-      // Issue a new permanent credential (hashed)
-      const newIssued = await authService.issueTemporaryCredential(userId, 24 * 365);
-      // In Phase 1 we re-hash the user-supplied password via argon2
-      // The new hash replaces the stored temp credential
-      const argon2 = await import('argon2');
-      const newHash = await argon2.hash(newPassword, { type: argon2.argon2id });
-      newIssued.used = false; // reset for new credential
+      // A permanent password is stored as its own credential type. Never turn
+      // password establishment into a long-lived temporary credential.
+      const newHash = await credentialLifecycle.hashPermanentPassword(newPassword);
 
       // Store the receipt with credentials redacted (INV-021)
       const receipt = authService.buildChangePasswordReceipt(userId, { currentCredential, newPassword });
 
-      // Update the in-memory store with the new credential
-      credentialStore.set(userId, { ...newIssued, hash: newHash });
+      // These maps support legacy route tests only; production uses WP5.2's
+      // transactional PostgreSQL credential repository.
+      credentialStore.delete(userId);
+      passwordCredentialStore.set(userId, newHash);
 
       await reply.status(200).send({ ok: true, receipt: receipt.payload });
     },

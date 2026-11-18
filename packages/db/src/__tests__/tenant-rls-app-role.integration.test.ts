@@ -156,7 +156,7 @@ describe('WP1.5 actual restricted-role tenant isolation', () => {
     await Promise.all([db.destroy(), recoveryDb.destroy(), app.end(), admin.end()]);
   }, 30_000);
 
-  it('matches all 55 tables, all 37 PostgreSQL policy expressions, the frozen manifest, and effective grants', async () => {
+  it('matches all 57 tables, all 39 PostgreSQL policy expressions, the frozen manifest, and effective grants', async () => {
     const expectedTables = [...inventory.tables, ...inventory.planned_phase1_tables].map((row) => row.table).sort();
     const actual = await admin.query<{ table_name: string; table_owner: string; relrowsecurity: boolean; relforcerowsecurity: boolean }>(
       `SELECT c.relname AS table_name, pg_get_userbyid(c.relowner) AS table_owner,
@@ -166,11 +166,11 @@ describe('WP1.5 actual restricted-role tenant isolation', () => {
        ORDER BY c.relname`,
     );
     expect(actual.rows.map((row) => row.table_name)).toEqual(expectedTables);
-    expect(actual.rowCount).toBe(55);
+    expect(actual.rowCount).toBe(57);
 
     const policies = new Map([...matrix.tables, ...matrix.planned_phase1_tables].map((row) => [row.table, row]));
     const tenantRows = [...policies.values()].filter((row) => row.classification === 'tenant_scoped');
-    expect(tenantRows).toHaveLength(37);
+    expect(tenantRows).toHaveLength(39);
     expect(manifest.table_count).toBe(tenantRows.length);
     expect(manifest.required_tenant_scoped_count).toBe(tenantRows.length);
     expect(tenantPolicyTableSetErrors(
@@ -458,6 +458,7 @@ describe('WP1.5 actual restricted-role tenant isolation', () => {
       'capacityGrant', 'delegation', 'enrolmentSession', 'approvalPolicy', 'organizationEnrollment',
       'handover', 'evidenceVersion', 'supportItem', 'admission', 'verificationAssignment',
       'finding', 'requirement', 'requirementLink', 'appointment', 'bylawDocument', 'bylawVersion', 'bylawProvision',
+      'temporaryCredential', 'passwordCredential',
     ].map((key) => [key, randomUUID()]));
     const fixtureRows: { table: string; id: string }[] = [];
     const insert = async (table: string, id: string, statement: string, values: unknown[]) => {
@@ -486,6 +487,14 @@ describe('WP1.5 actual restricted-role tenant isolation', () => {
       await insert('authentication_events', authenticationEventId,
         'INSERT INTO symphony.authentication_events (id, user_id, method, result) VALUES ($1,$2,$3,$4)',
         [authenticationEventId, userB, 'wp15-fixture', 'success']);
+      await insert('temporary_credentials', ids.temporaryCredential!,
+        `WITH issuance AS (SELECT clock_timestamp() AS issued_at)
+         INSERT INTO symphony.temporary_credentials (id,tenant_id,user_id,secret_hash,issued_at,expires_at)
+         SELECT $1,$2,$3,$4,issued_at,issued_at + INTERVAL '72 hours' FROM issuance`,
+        [ids.temporaryCredential, tenantB, userB, '$argon2id$v=19$m=19456,t=2,p=1$YWJj$YWJj']);
+      await insert('password_credentials', ids.passwordCredential!,
+        'INSERT INTO symphony.password_credentials (id,tenant_id,user_id,secret_hash) VALUES ($1,$2,$3,$4)',
+        [ids.passwordCredential, tenantB, userB, '$argon2id$v=19$m=19456,t=2,p=1$YWJj$YWJj']);
       await insert('domain_events', ids.event!,
         `INSERT INTO symphony.domain_events (id, tenant_id, aggregate_id, aggregate_type, event_type, occurred_at, sequence)
          VALUES ($1,$2,$3,$4,$5,now(),1)`,
@@ -544,6 +553,8 @@ describe('WP1.5 actual restricted-role tenant isolation', () => {
 
       const relationshipCoverage: { table: string; parentTables: string[]; id: string }[] = [
         { table: 'aggregate_states', parentTables: [], id: ids.state! },
+        { table: 'temporary_credentials', parentTables: [], id: ids.temporaryCredential! },
+        { table: 'password_credentials', parentTables: [], id: ids.passwordCredential! },
         { table: 'person_identifiers', parentTables: ['persons'], id: ids.personIdentifier! },
         { table: 'user_role_assignments', parentTables: ['users'], id: ids.roleAssignment! },
         { table: 'authentication_events', parentTables: ['users'], id: fixtureRows.find((row) => row.table === 'authentication_events')!.id },

@@ -8,6 +8,7 @@
   "exports": {
     ".": "./src/index.ts",
     "./identity/auth-service": "./src/identity/auth-service.ts",
+    "./identity/credential-lifecycle": "./src/identity/credential-lifecycle.ts",
     "./authz/policy-engine": "./src/authz/policy-engine.ts",
     "./authz/capacity-service": "./src/authz/capacity-service.ts",
     "./privacy/key-provider": "./src/privacy/key-provider.ts",

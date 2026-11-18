@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "source": "53-table baseline migration inventory plus REM-WP1.2 security_attempts and REM-WP1.4 reconciliation_inbox; PostgreSQL 18.0 pg_constraint foreign-key catalog from symphony_phase1_test",
+  "source": "Original migration inventory plus REM-WP1.2 security_attempts, REM-WP1.4 reconciliation_inbox, and REM-WP5.2 credential tables; PostgreSQL 18.0 pg_constraint foreign-key catalog requires candidate refresh",
   "status": "REM-WP0 proposed, reviewable table/row allowlist; no destructive statements executed",
   "target": {
     "database": "symphony_phase1_test",
@@ -63,6 +63,8 @@
     "record_approvals",
     "requirement_definitions",
     "resolution_class_rules",
+    "password_credentials",
+    "temporary_credentials",
     "user_role_assignments",
     "verification_findings",
     "verification_assignments",
@@ -267,6 +269,16 @@
       "table": "resolution_class_rules",
       "disposition": "delete_test_tenant_rows_only",
       "predicate": "organization_id IN captured_test_tenant_organization_ids"
+    },
+    {
+      "table": "password_credentials",
+      "disposition": "delete_all_rows_in_marked_isolated_test_database",
+      "predicate": "TRUE only after DB marker/profile/role guard passes"
+    },
+    {
+      "table": "temporary_credentials",
+      "disposition": "delete_all_rows_in_marked_isolated_test_database",
+      "predicate": "TRUE only after DB marker/profile/role guard passes"
     },
     {
       "table": "user_role_assignments",

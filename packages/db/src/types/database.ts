@@ -109,6 +109,27 @@ export interface TenantTable {
   created_at: Generated<Date>;
 }
 
+export interface TemporaryCredentialTable {
+  id: Generated<string>;
+  tenant_id: string;
+  user_id: string;
+  secret_hash: string;
+  issued_at: Generated<Date>;
+  expires_at: Date;
+  consumed_at: Date | null;
+  revoked_at: Date | null;
+}
+
+export interface PasswordCredentialTable {
+  id: Generated<string>;
+  tenant_id: string;
+  user_id: string;
+  secret_hash: string;
+  hash_version: Generated<string>;
+  established_at: Generated<Date>;
+  updated_at: Generated<Date>;
+}
+
 // ─── Composite DB type ────────────────────────────────────────────────────────
 
 export interface SymphonyDatabase {
@@ -119,5 +140,7 @@ export interface SymphonyDatabase {
   'symphony.security_attempts': SecurityAttemptTable;
   'symphony.reconciliation_inbox': ReconciliationInboxTable;
   'symphony.tenants': TenantTable;
+  'symphony.temporary_credentials': TemporaryCredentialTable;
+  'symphony.password_credentials': PasswordCredentialTable;
 }
 

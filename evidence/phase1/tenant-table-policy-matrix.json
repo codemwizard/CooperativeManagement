@@ -32,6 +32,36 @@
       "tenant_context": "SET LOCAL app.tenant_id only from authenticated server context; insert policy binds tenant_id to that context.",
       "access_policy": "Append-only authenticated command-denial observation only. No SELECT, UPDATE or DELETE for ordinary app role. Unauthenticated authentication attempts use WP5's separate security audit path. Audit failure cannot authorize a command or create a business receipt.",
       "status": "Created by REM-WP1.2 migration 0010_security_attempts.sql; REM-WP1.5 migration 0013 applies ENABLE+FORCE RLS and the INSERT-only policy/grant. The full matrix and effective application privileges passed under ephemeral CI roles in run 43683206104."
+    },
+    {
+      "table": "temporary_credentials",
+      "classification": "tenant_scoped",
+      "scope_basis": "Direct tenant_id and composite same-tenant user foreign key.",
+      "scope_resolution": "row.tenant_id matches transaction-local authenticated tenant context; composite foreign key binds user_id to that tenant.",
+      "ordinary_runtime_role": "symphony_app",
+      "permitted_sql_operations": ["SELECT", "INSERT", "UPDATE"],
+      "delete_grant": false,
+      "required_rls": "ENABLE+FORCE",
+      "current_rls_enabled_and_forced": true,
+      "explicit_tenant_predicate": true,
+      "tenant_context": "SET LOCAL app.tenant_id only from authenticated server context; credential rows are tenant-bound.",
+      "access_policy": "Temporary credential hashes are readable and mutable only within the authenticated user's tenant; no ordinary app-role DELETE.",
+      "status": "REM-WP5.2 migration 0014 defines the table policy and exact app-role grant; candidate verification is pending."
+    },
+    {
+      "table": "password_credentials",
+      "classification": "tenant_scoped",
+      "scope_basis": "Direct tenant_id and composite same-tenant user foreign key.",
+      "scope_resolution": "row.tenant_id matches transaction-local authenticated tenant context; composite foreign key binds user_id to that tenant.",
+      "ordinary_runtime_role": "symphony_app",
+      "permitted_sql_operations": ["SELECT", "INSERT", "UPDATE"],
+      "delete_grant": false,
+      "required_rls": "ENABLE+FORCE",
+      "current_rls_enabled_and_forced": true,
+      "explicit_tenant_predicate": true,
+      "tenant_context": "SET LOCAL app.tenant_id only from authenticated server context; credential rows are tenant-bound.",
+      "access_policy": "Permanent password hashes are readable and mutable only within the authenticated user's tenant; no ordinary app-role DELETE.",
+      "status": "REM-WP5.2 migration 0014 defines the table policy and exact app-role grant; candidate verification is pending."
     }
   ],
   "tables": [
@@ -1020,7 +1050,7 @@
       "update_with_check",
       "mismatch_fixture_and_test"
     ],
-    "tenant_scoped_table_count": 37,
-    "rule": "The executable candidate expressions are in the REM-WP1.5 manifest and migration 0013. Each inherited path was checked against root migration DDL and the live PostgreSQL 18.0 FK catalog. scope_resolution prose alone does not qualify. Integration tests must prove missing and mismatched parent behavior before this candidate is accepted."
+    "tenant_scoped_table_count": 39,
+    "rule": "The executable candidate expressions are in the REM-WP1.5 manifest and migrations 0013/0014. The original 37 tenant policies were verified in the historical PostgreSQL 18.0 candidate; the two credential policies are added by REM-WP5.2 migration 0014 and require candidate-specific restricted-role verification. scope_resolution prose alone does not qualify."
   }
 }

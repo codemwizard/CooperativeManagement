@@ -21,8 +21,8 @@
 import assert from 'node:assert/strict';
 import { Given, When, Then } from '@cucumber/cucumber';
 import type { SymphonyWorld } from './world.js';
-import { decide } from '@symphony/domain/authz/policy-engine';
-import type { ActorContext, PolicyTarget } from '@symphony/domain/authz/policy-engine';
+import { decideLegacyPolicy } from './legacy-policy-compat.js';
+import type { LegacyPolicyActor as ActorContext, LegacyPolicyTarget as PolicyTarget } from './legacy-policy-compat.js';
 import { CapacityService } from '@symphony/domain/authz/capacity-service';
 import type { CapacityCommand, CapacityResult } from '@symphony/domain/authz/capacity-service';
 
@@ -31,6 +31,11 @@ import type { CapacityCommand, CapacityResult } from '@symphony/domain/authz/cap
 const NOW = '2026-11-05T10:00:00.000Z';
 const ACTIVE_FROM = '2026-01-01T00:00:00.000Z';
 const ACTIVE_TO = '2030-01-01T00:00:00.000Z';
+
+function phase1CapacityType(value: string): CapacityCommand['capacityType'] {
+  if (value === 'internal_verifier' || value === 'field_agent' || value === 'delegate' || value === 'acting_officer') return value;
+  throw new Error(`Unknown Phase 1 capacity type: ${value}`);
+}
 
 // ─── Helper: stable IDs from names ───────────────────────────────────────────
 
@@ -124,18 +129,14 @@ When(
     const cmd: CapacityCommand = {
       type: 'GrantCapacity',
       actorUserId: granter.userId,
-      actorAppointments: actorCtx.appointments as Array<{
-        position: string;
-        tenantId: string;
-        activeFrom: string;
-        activeTo: string;
-      }>,
+      actorAppointments: actorCtx.appointments.map((appointment) => ({ ...appointment, organizationId: tenantId })),
       actorCapacities: [],
       actorPlatformRoles: [],
       actorDelegations: [],
       tenantId,
+      organizationId: tenantId,
       targetUserId: userId(granteeName),
-      capacityType,
+      capacityType: phase1CapacityType(capacityType),
       activeFrom: NOW,
       activeTo: ACTIVE_TO,
       now: NOW,
@@ -211,18 +212,14 @@ When(
     const cmd: CapacityCommand = {
       type: 'GrantCapacity',
       actorUserId: creator.userId,
-      actorAppointments: actorCtx.appointments as Array<{
-        position: string;
-        tenantId: string;
-        activeFrom: string;
-        activeTo: string;
-      }>,
+      actorAppointments: actorCtx.appointments.map((appointment) => ({ ...appointment, organizationId: tenantId })),
       actorCapacities: [],
       actorPlatformRoles: [],
       actorDelegations: [],
       tenantId,
+      organizationId: tenantId,
       targetUserId: userId(newUserName),
-      capacityType,
+      capacityType: phase1CapacityType(capacityType),
       activeFrom: NOW,
       activeTo: ACTIVE_TO,
       now: NOW,
@@ -275,12 +272,12 @@ Then(
     const target: PolicyTarget = { id: 'test-target', type: 'Minutes', tenantId };
 
     assert.strictEqual(
-      decide('ApproveMinutes', target, actorCtx, { now: NOW }),
+      decideLegacyPolicy('ApproveMinutes', target, actorCtx, NOW),
       'deny',
       'Expected Ndhlovu to be denied ApproveMinutes (no officer position)',
     );
     assert.strictEqual(
-      decide('AdmitEvidence', target, actorCtx, { now: NOW }),
+      decideLegacyPolicy('AdmitEvidence', target, actorCtx, NOW),
       'deny',
       'Expected Ndhlovu to be denied AdmitEvidence (no officer position)',
     );
@@ -356,18 +353,14 @@ When(
     const cmd: CapacityCommand = {
       type: 'GrantCapacity',
       actorUserId: actorCtx.userId,
-      actorAppointments: actorCtx.appointments as Array<{
-        position: string;
-        tenantId: string;
-        activeFrom: string;
-        activeTo: string;
-      }>,
+      actorAppointments: actorCtx.appointments.map((appointment) => ({ ...appointment, organizationId: tenantId })),
       actorCapacities: [],
       actorPlatformRoles: actorCtx.platformRoles as string[],
       actorDelegations: [],
       tenantId,
+      organizationId: tenantId,
       targetUserId: userId('Mwila'),
-      capacityType,
+      capacityType: phase1CapacityType(capacityType),
       activeFrom: NOW,
       activeTo: ACTIVE_TO,
       now: NOW,
@@ -458,7 +451,7 @@ When(
       tenantId: targetTenantId,
     };
 
-    const decision = decide('RecordFinding', target, actorCtx, { now: NOW });
+    const decision = decideLegacyPolicy('RecordFinding', target, actorCtx, NOW);
 
     if (decision === 'deny') {
       w(this)['_lastRejectionCode'] = 'NOT_AUTHORISED_FOR_ORGANISATION';
@@ -517,7 +510,7 @@ When(
     };
 
     const target: PolicyTarget = { id: 'claim-001', type: 'Claim', tenantId };
-    const decision = decide('RecordFinding', target, actorCtx, { now: NOW });
+    const decision = decideLegacyPolicy('RecordFinding', target, actorCtx, NOW);
 
     if (decision === 'deny') {
       // Map to the domain rule: only a third IFV can resolve, not an officer
@@ -591,7 +584,7 @@ When('they send {string}', function (this: SymphonyWorld, commandName: string) {
   const tenantId = w(this)['_institutionalTenantId'] as string;
   const target: PolicyTarget = { id: 'resource-001', type: 'CooperativeRecord', tenantId };
 
-  const decision = decide(commandName, target, actorCtx, { now: NOW });
+  const decision = decideLegacyPolicy(commandName, target, actorCtx, NOW);
 
   if (decision === 'deny') {
     // kernel-steps.ts `it is rejected with reason` reads from this.lastRejectionReason

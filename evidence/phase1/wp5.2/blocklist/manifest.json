@@ -1,0 +1,19 @@
+{
+  "version": "phase1-ncsc-top100k-v1",
+  "source": {
+    "project": "danielmiessler/SecLists",
+    "commit": "6b19c2f5088c45b5dadb4d8918d2ab4f7efb03a9",
+    "path": "Passwords/Common-Credentials/100k-most-used-passwords-NCSC.txt",
+    "url": "https://github.com/danielmiessler/SecLists/blob/6b19c2f5088c45b5dadb4d8918d2ab4f7efb03a9/Passwords/Common-Credentials/100k-most-used-passwords-NCSC.txt",
+    "sourceSha256": "C2E5696882C603B76BB67A47EE970897E5A76FC4C3F5547ABE3D0CA340C576E0",
+    "nonEmptySourceEntryCount": 99839,
+    "attribution": "NCSC-derived most-used password list, vendored via SecLists; no runtime lookup.",
+    "licenseReference": "https://github.com/danielmiessler/SecLists/blob/6b19c2f5088c45b5dadb4d8918d2ab4f7efb03a9/LICENSE"
+  },
+  "transformation": "Decode strict UTF-8; remove an optional BOM; split on LF; remove one trailing CR; omit empty lines; lowercase entries; deduplicate; sort by Unicode code-unit order; encode as compact UTF-8 JSON plus LF.",
+  "entryCount": 97746,
+  "output": {
+    "path": "packages/domain/src/identity/password-blocklist-v1.json",
+    "sha256": "F35ABFB8FAB6A152DFB26271C5A200BE2940C57EA5E0A7AA0395F527DB7D2734"
+  }
+}
