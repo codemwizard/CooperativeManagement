@@ -9,7 +9,7 @@ import { workspacePath } from '../../packages/testkit/src/step-definitions/works
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const scripts = JSON.parse(readFileSync(path.join(root, 'package.json'), 'utf8')).scripts;
 const compose = readFileSync(path.join(root, 'docker-compose.yml'), 'utf8');
-const workflow = readFileSync(path.join(root, '.github/workflows/ci.yml'), 'utf8');
+const workflow = readFileSync(path.join(root, '.github/workflows/ci.yml'), 'utf8').replace(/\r\n/g, '\n');
 const tempDirectories: string[] = [];
 
 afterEach(() => {
@@ -55,7 +55,7 @@ describe('Phase 0 script contracts', () => {
   });
 
   it('preserves the Phase 0 gate exit code when tee captures its log', () => {
-    const gateStep = workflow.split(/\n\s*- name: Run the mandatory Phase 0 gate\n/)[1]?.split(/\n\s*- name:/, 1)[0] ?? '';
+    const gateStep = workflow.match(/^[ \t]*-[ \t]*name: Run the mandatory Phase 0 gate[ \t]*\n(?<step>(?:(?!^[ \t]*-[ \t]*name:).*(?:\n|$))*)/m)?.groups?.step ?? '';
     expect(gateStep).toContain('shell: bash');
     expect(gateStep).toMatch(/run:\s*npm run verify:phase0\s+2>&1\s+\|\s+tee\s+/);
   });

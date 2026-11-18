@@ -22,7 +22,7 @@ test.describe('Login page', () => {
       void route.fulfill({
         status: 200,
         contentType: 'application/json',
-        body: JSON.stringify({ ok: true, requiresPasswordChange: false }),
+        body: JSON.stringify({ forcedChangeRequired: false }),
       });
     });
 
@@ -43,7 +43,7 @@ test.describe('Login page', () => {
       void route.fulfill({
         status: 401,
         contentType: 'application/json',
-        body: JSON.stringify({ ok: false, detail: 'Invalid credentials' }),
+        body: JSON.stringify({ code: 'AUTHENTICATION_FAILED' }),
       });
     });
 
@@ -56,19 +56,19 @@ test.describe('Login page', () => {
     // Error message should be visible
     const errorEl = page.locator('[data-testid="login-error"]');
     await expect(errorEl).toBeVisible();
-    await expect(errorEl).toContainText('Invalid credentials');
+    await expect(errorEl).toContainText('Sign in failed. Please check your credentials and try again.');
 
     // Should still be on login page
     await expect(page).toHaveURL(/\/login/);
   });
 
   test('temporaryCredential_promptsPasswordChange', async ({ page }) => {
-    // Intercept and return success with requiresPasswordChange=true
+    // Intercept and return the shared login success contract for a temporary credential.
     await page.route('**/auth/login', (route) => {
       void route.fulfill({
         status: 200,
         contentType: 'application/json',
-        body: JSON.stringify({ ok: true, requiresPasswordChange: true }),
+        body: JSON.stringify({ forcedChangeRequired: true }),
       });
     });
 
@@ -80,7 +80,7 @@ test.describe('Login page', () => {
 
     // Should show the password change prompt
     await expect(page.locator('h1')).toContainText('Change your password');
-    await expect(page.locator('text=temporary credential')).toBeVisible();
+    await expect(page.getByText(/temporary credential/i)).toBeVisible();
   });
 });
 

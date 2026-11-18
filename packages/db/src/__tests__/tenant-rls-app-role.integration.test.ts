@@ -156,7 +156,7 @@ describe('WP1.5 actual restricted-role tenant isolation', () => {
     await Promise.all([db.destroy(), recoveryDb.destroy(), app.end(), admin.end()]);
   }, 30_000);
 
-  it('matches all 57 tables, all 39 PostgreSQL policy expressions, the frozen manifest, and effective grants', async () => {
+  it('matches all migrated tables, all 39 PostgreSQL tenant policy expressions, the frozen manifest, and effective grants', async () => {
     const expectedTables = [...inventory.tables, ...inventory.planned_phase1_tables].map((row) => row.table).sort();
     const actual = await admin.query<{ table_name: string; table_owner: string; relrowsecurity: boolean; relforcerowsecurity: boolean }>(
       `SELECT c.relname AS table_name, pg_get_userbyid(c.relowner) AS table_owner,
@@ -166,7 +166,7 @@ describe('WP1.5 actual restricted-role tenant isolation', () => {
        ORDER BY c.relname`,
     );
     expect(actual.rows.map((row) => row.table_name)).toEqual(expectedTables);
-    expect(actual.rowCount).toBe(57);
+    expect(actual.rowCount).toBe(expectedTables.length);
 
     const policies = new Map([...matrix.tables, ...matrix.planned_phase1_tables].map((row) => [row.table, row]));
     const tenantRows = [...policies.values()].filter((row) => row.classification === 'tenant_scoped');
@@ -348,11 +348,12 @@ describe('WP1.5 actual restricted-role tenant isolation', () => {
       expect(result.rows[0]?.allowed, sequence.sequence_name).toBe(false);
     }
     const functions = await admin.query<{
-      signature: string; is_enqueue: boolean; app_execute: boolean; public_execute: boolean;
+      signature: string; is_enqueue: boolean; is_auth_lookup: boolean; app_execute: boolean; public_execute: boolean;
       owner: string; oid: string; security_definer: boolean; function_settings: string[] | null;
     }>(
       `SELECT format('%I.%I(%s)', n.nspname, p.proname, pg_catalog.oidvectortypes(p.proargtypes)) AS signature,
               p.oid = 'symphony.enqueue_command_outbox_message(uuid, uuid)'::regprocedure AS is_enqueue,
+              p.oid IN ('symphony.lookup_auth_subject(uuid)'::regprocedure, 'symphony.lookup_auth_session(bytea)'::regprocedure) AS is_auth_lookup,
               p.oid::text AS oid,
               has_function_privilege('symphony_app', p.oid, 'EXECUTE') AS app_execute,
               COALESCE((SELECT bool_or(a.grantee=0 AND a.privilege_type='EXECUTE') FROM aclexplode(COALESCE(p.proacl, acldefault('f',p.proowner))) a), false) AS public_execute,
@@ -371,7 +372,19 @@ describe('WP1.5 actual restricted-role tenant isolation', () => {
       function_settings: [`search_path=${manifest.outbox_policy.function.search_path}`],
     });
     expect(enqueue?.signature.replaceAll(/\s+/g, '')).toBe(manifest.outbox_policy.function.signature.replaceAll(/\s+/g, ''));
-    expect(functions.rows.filter((row) => row.app_execute).map((row) => row.oid)).toEqual([enqueue?.oid]);
+    const authLookups = functions.rows.filter((row) => row.is_auth_lookup);
+    expect(authLookups).toHaveLength(2);
+    for (const lookup of authLookups) {
+      expect(lookup).toMatchObject({
+        app_execute: true,
+        public_execute: false,
+        security_definer: true,
+        function_settings: ['search_path=pg_catalog, symphony'],
+      });
+    }
+    expect(functions.rows.filter((row) => row.app_execute).map((row) => row.oid).sort()).toEqual(
+      [enqueue?.oid, ...authLookups.map((row) => row.oid)].sort(),
+    );
     expect(functions.rows.some((row) => row.public_execute)).toBe(false);
     const defaultPrivileges = await admin.query("SELECT 1 FROM pg_default_acl d JOIN pg_roles r ON r.oid=d.defaclrole WHERE r.rolname IN ('symphony_app','symphony_outbox_writer') LIMIT 1");
     expect(defaultPrivileges.rowCount).toBe(0);
