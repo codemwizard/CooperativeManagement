@@ -8,7 +8,7 @@
     "bdd_ui_test": "not_applicable",
     "gate_verified": "passed"
   },
-  "commit": "working-tree",
+  "commit": "7250896fc29b7d40898a0761a227a0d2c6066389",
   "environment": {
     "node": "v26.7.0",
     "npm": "v12.2.0 (elevated CLI)",
@@ -54,9 +54,7 @@
       "No browser login journey or Phase 1 authentication BDD path is claimed."
     ]
   },
-  "limitations": [
-    "This task record is bound to the candidate source commit after it is created; the immutable SHA will be filled from that exact commit before the evidence closure commit."
-  ],
+  "limitations": [],
   "unresolved_decisions": [],
   "reviewer": "Implementation self-review; acceptance evidence was executed locally on the candidate."
 }
