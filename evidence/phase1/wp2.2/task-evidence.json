@@ -6,7 +6,7 @@
     "unit_test": "not_applicable",
     "integration_test": "passed",
     "bdd_ui_test": "not_applicable",
-    "gate_verified": "pending"
+    "gate_verified": "passed"
   },
   "commit": "5c5c730843ba3b5627a5389383496b9653caae04",
   "environment": {
@@ -82,5 +82,5 @@
     "The successful RLS run used the isolated WP2.2 PostgreSQL 18 test database to avoid schema drift in the shared local test database."
   ],
   "unresolved_decisions": [],
-  "reviewer": "Implementation and evidence self-review; exact-candidate preflight and final gate verification remain pending."
+  "reviewer": "Owner approved the two-step transition after successful exact-candidate preflight. Final exact-candidate verification is run immediately after this record. Independent review remains outstanding."
 }
