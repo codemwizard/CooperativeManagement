@@ -15,7 +15,7 @@ dist/assets/index-DjKOmytQ.js   511.06 kB │ gzip: 127.35 kB
 - Using dynamic import() to code-split the application
 - Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
 - Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
-✓ built in 16.45s
+✓ built in 17.50s
 npm notice run symphony-prototype@1.0.0 verify:oracle
 npm notice run node tools/run_python_tool.js tools/reference_oracle.py
 OK: 10 cases x 3 destinations match expected-results.json; data integrity clean.
@@ -33,23 +33,24 @@ npm notice run vitest run
 
  RUN  v2.1.9 C:/Workspace/GitHub/Prototype/artifacts/exact-candidates/wp1.5
 
- ✓ tests/contracts.test.ts (21 tests) 105ms
- ✓ tests/eqs_scoring.test.ts (47 tests) 242ms
- ✓ tests/engine.test.ts (24 tests) 142ms
- ✓ tests/persistence_integrity.test.ts (24 tests) 120ms
- ✓ tests/evidence_transitions.test.ts (12 tests) 52ms
- ✓ tests/promote_security.test.ts (14 tests) 37ms
- ✓ tests/inventory_consistency.test.ts (6 tests) 11ms
- ✓ tests/crypto.test.ts (8 tests) 13ms
- ✓ tests/tooling/phase0_migration_role.test.ts (4 tests) 18ms
+ ✓ tests/contracts.test.ts (21 tests) 124ms
+ ✓ tests/eqs_scoring.test.ts (47 tests) 258ms
+ ✓ tests/persistence_integrity.test.ts (24 tests) 152ms
+ ✓ tests/engine.test.ts (24 tests) 152ms
+ ✓ tests/evidence_transitions.test.ts (12 tests) 58ms
+ ✓ tests/promote_security.test.ts (14 tests) 31ms
+ ✓ tests/inventory_consistency.test.ts (6 tests) 10ms
+ ✓ tests/crypto.test.ts (8 tests) 17ms
+ ✓ tests/tooling/phase0_migration_role.test.ts (4 tests) 23ms
  ✓ tests/assetSummary.test.ts (3 tests) 8ms
- ✓ tests/tooling/phase0_scripts.test.ts (12 tests | 1 skipped) 4642ms
-   ✓ Phase 0 script contracts > proves failure in a mandatory command stops later commands 4623ms
- ✓ tests/tooling/phase1_contracts.test.ts (112 tests) 6758ms
-   ✓ REM-WP0.9 Phase 1 gate contract > proves a failing fixture command prevents later gate commands from running 4633ms
+ ✓ tests/tooling/phase0_scripts.test.ts (12 tests | 1 skipped) 6846ms
+   ✓ Phase 0 script contracts > proves failure in a mandatory command stops later commands 6806ms
+ ✓ tests/tooling/phase1_contracts.test.ts (112 tests) 9303ms
+   ✓ REM-WP0.9 Phase 1 gate contract > proves a failing fixture command prevents later gate commands from running 6691ms
 
  Test Files  12 passed (12)
       Tests  286 passed | 1 skipped (287)
-   Start at  12:21:00
-   Duration  8.75s (transform 1.21s, setup 0ms, collect 3.40s, tests 12.15s, environment 6ms, prepare 3.85s)
+   Start at  12:37:33
+   Duration  11.60s (transform 1.59s, setup 0ms, collect 3.76s, tests 16.98s, environment 4ms, prepare 4.92s)
 
+LEGACY_FLOOR_EXIT=0
