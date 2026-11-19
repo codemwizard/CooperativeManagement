@@ -8,7 +8,7 @@
     "bdd_ui_test": "not_applicable",
     "gate_verified": "passed"
   },
-  "commit": "working-tree",
+  "commit": "15d0ec2d67ae0274a3df522e56be48fb05aa06f5",
   "environment": {
     "node": "v26.7.0",
     "npm": "v12.2.0 (elevated CLI; ordinary shell is denied access to the global npm prefix)",
@@ -52,11 +52,21 @@
       "command": "node --version and elevated npm --version",
       "result": "passed",
       "artifact": "evidence/phase1/wp2.1/pinned-toolchain-rerun.log"
+    },
+    {
+      "command": "WP2.1 authorization matrix verifier and mutation tests rerun on integrated WP1.5+WP2.2 source; policy implementation files unchanged since 15d0ec2",
+      "result": "passed",
+      "artifact": "evidence/phase1/wp2.1/integration-revalidation-matrix.log"
+    },
+    {
+      "command": "WP2.1 policy and capacity unit tests rerun on integrated WP1.5+WP2.2 source; policy implementation files unchanged since 15d0ec2",
+      "result": "passed",
+      "artifact": "evidence/phase1/wp2.1/integration-revalidation-policy-unit.log"
     }
   ],
   "claims": {
     "behavior_proved": "A closed Phase 1 action union and fail-closed runtime validation authorize capacity grant/revocation only for target-organization Chairperson/Vice-Chairperson authority or an active acting-officer delegation for those offices. Assisted enrollers can grant only internal_verifier with an active representative-present session and recorded decision. TA scope mutations require programme_manager role and the target cohort in persisted managed scope. Institutional read-only precedence, malformed/unknown action denial, tenant/organization boundaries, half-open intervals, expiry equality and invalid grant intervals are covered. Capacity revocation emits its event without a historical finding annotation mutation.",
-    "path_proved": "All 22 catalogued actor classes × four Phase 1 actions (88 decisions) pass as pure domain tests, alongside explicit boundary tests. Completeness mutations reject missing, duplicate, unrecognized, untraced rows and missing dimensions. The retained red test directly observed three default-allow failures before the policy engine was replaced. V4 typecheck, architecture and traceability checks pass on this working tree.",
+    "path_proved": "WP2.1 implementation is committed at 15d0ec2d67ae0274a3df522e56be48fb05aa06f5, an ancestor of the WP2.2 integration candidate. The policy implementation and matrix verifier files have no changes between that commit and the WP2.2 merge candidate. The original WP2.1 matrix, focused policy, typecheck, architecture and traceability checks are retained. The matrix verifier/mutation tests and focused policy/capacity unit tests were rerun on the integrated source and retained as integration-revalidation artifacts.",
     "configuration_proved": "Node v26.7.0 was used. `npm.cmd --version` returned 11.19.0 while repository metadata pins npm 12.2.0. No PostgreSQL, API server, database role or key provider is used by this pure policy task.",
     "coverage_limitations": [
       "The pinned npm 12.2.0 CLI was verified and used for the focused policy, typecheck, architecture and trace gates. In this managed shell, ordinary npm invocation still resolves to 11.19.0 because access to the global roaming prefix is denied; elevated invocation resolves to 12.2.0.",
@@ -65,8 +75,8 @@
     ]
   },
   "limitations": [
-    "The task gate is verified on the pinned npm version, but artifacts remain bound to the current uncommitted working tree. Downstream WP2 dependencies remain subject to the task graph.",
-    "All artifacts are bound to the current uncommitted working tree, not an immutable commit."
+    "WP2.1 test, typecheck, architecture and traceability evidence is implementation-focused; it does not claim PostgreSQL/API behavior, BDD product paths, durable authorization commands, or independent review.",
+    "Original WP2.1 logs describe execution on the pre-commit working tree; the implementation files are present in immutable commit 15d0ec2d67ae0274a3df522e56be48fb05aa06f5, and the focused policy checks have been rerun on the integrated source."
   ],
   "unresolved_decisions": [],
   "reviewer": "Implementation self-review. The owner supplied D-17 policy direction; independent task review remains outstanding."
