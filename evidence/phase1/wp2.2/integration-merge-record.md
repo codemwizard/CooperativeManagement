@@ -1,14 +1,15 @@
-# WP1.5 + WP2.2 integration record
+# WP1.5 + WP2.2 integration and verification record
 
 Integration branch: codex/wp1.5-reestablished
-Candidate merge commit: 62443bf2811e8acfcd16e214514c6f95b7d024c6
-First parent (WP1.5 spine): f2ccf236a3150767c1549914ad39b29a5e9850f5
-Second parent (WP2.2 exact branch): b8622228ab4018ed65cfa49100da54205772eeaa
 
-The WP2.2 exact branch was merged with a non-fast-forward merge. Git reported no conflicts. The merged candidate contains migration 0016, the persisted workspace-context contract/repository/API route, WP2.2 integration evidence and the WP1.5 tenant policy/RLS baseline. The separate dirty codex/wp1.5-closeout worktree was not used or modified.
+WP2.2 merge commit: 62443bf2811e8acfcd16e214514c6f95b7d024c6
+- First parent (WP1.5 spine): f2ccf236a3150767c1549914ad39b29a5e9850f5
+- Second parent (WP2.2 exact branch): b8622228ab4018ed65cfa49100da54205772eeaa
 
-WP1.5 is a passing predecessor on this history: its gate record is pinned to 6f145875761a2c356bab790324c8a5615ec03652, an ancestor of this candidate. WP2.1, WP1.1 and WP1.2 predecessor records are also retained on the branch.
+WP2.2 exact integrated source candidate: 5c5c730843ba3b5627a5389383496b9653caae04. WP1.5 gate SHA 6f145875761a2c356bab790324c8a5615ec03652 and WP2.1 implementation SHA 15d0ec2d67ae0274a3df522e56be48fb05aa06f5 are ancestors. The WP2.1 task record now names its immutable implementation SHA; its policy source and matrix-verifier files are unchanged through the integration candidate. Focused matrix/mutation and policy/capacity tests were rerun and retained.
 
-WP2.2 task evidence is rebound to this merge candidate but gate_verified remains pending. Existing WP2.2 test logs were generated on predecessor source candidate 9e9d8ddb529f41258b043c0df217c4beaa58a7f8. The exact-candidate preflight and any required reruns must pass before setting the WP2.2 gate to passed.
+Exact integrated-source checks passed: Fastify/PostgreSQL API 25/25; migration gate 17/17; app-role RLS 5/5 across all 44 manifested PostgreSQL tenant policy expressions; V4 typecheck; architecture (160 modules, 347 dependencies, no violations). RLS ran against isolated PostgreSQL 18 test database symphony_wp22_d5a7a4827b18_test with the intended restricted application role and test-admin setup. npm was v12.2.0. Raw logs are referenced in task-evidence.json.
 
-The merge is local to codex/wp1.5-reestablished. It does not merge to main or alter codex/rem-wp2.2-exact.
+The gate status stays pending until the authoritative exact-candidate preflight passes. Implementation completion, integration-test results and gate verification are recorded separately. No session, CSRF, forced-change, or rate-limit work was performed as part of WP2.2.
+
+The merge is local to codex/wp1.5-reestablished; it has not been pushed or merged into main. The separate dirty WP6.1 worktree was not used.
