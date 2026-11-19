@@ -1,0 +1,7 @@
+Test-Path: C:\Program Files\nodejs\npm.ps1:23
+Line |
+  23 |  if (Test-Path $NPM_PREFIX_NPM_CLI_JS) {
+     |      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     | Access to the path 'C:\Users\User\AppData\Roaming\npm\node_modules\npm\bin\npm-cli.js' is denied.
+
+11.19.0

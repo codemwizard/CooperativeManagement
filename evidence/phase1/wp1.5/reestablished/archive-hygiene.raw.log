@@ -1,0 +1,16 @@
+Test-Path: C:\Program Files\nodejs\npm.ps1:23
+Line |
+  23 |  if (Test-Path $NPM_PREFIX_NPM_CLI_JS) {
+     |      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     | Access to the path 'C:\Users\User\AppData\Roaming\npm\node_modules\npm\bin\npm-cli.js' is denied.
+
+
+> symphony-prototype@1.0.0 verify:archive-hygiene
+> node tools/run_python_tool.js -m unittest tests/tooling/test_archive_hygiene.py && node tools/run_python_tool.js tools/verify_archive_hygiene.py
+
+.........
+----------------------------------------------------------------------
+Ran 9 tests in 1.308s
+
+OK
+PASS: Git index and .env.example contain no prohibited environment or private-key paths.

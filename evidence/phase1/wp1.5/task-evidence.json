@@ -4,69 +4,96 @@
   "status": {
     "implementation": "complete",
     "unit_test": "passed",
-    "integration_test": "passed",
-    "bdd_ui_test": "not_applicable",
-    "gate_verified": "passed"
+    "integration_test": "blocked",
+    "bdd_ui_test": "blocked",
+    "gate_verified": "pending"
   },
-  "commit": "d7fbf5851b11b07b65bde36f062db7b21f487947",
+  "commit": "b572d252dfd6733940011250918631a6c7f57a27",
   "environment": {
     "node": "v26.7.0",
-    "npm": "12.2.0",
-    "postgres": "PostgreSQL 18.0; server_version_num=180000; postgres:18.0-alpine CI service",
-    "database_role": "CI bootstrap administrator; symphony_migrator; symphony_app; symphony_outbox_writer; temporary membership finalized",
-    "data_mode": "test",
+    "npm": "11.19.0 (required by the recorded CI toolchain: 12.2.0)",
+    "postgres": "not run; isolated PostgreSQL service unavailable",
+    "database_role": "not run",
+    "data_mode": "unknown",
     "key_provider": "unknown"
   },
   "commands": [
     {
-      "command": "npm run verify:phase0",
       "result": "passed",
-      "artifact": "evidence/phase1/wp1.5/ci/d7fbf5851b11b07b65bde36f062db7b21f487947/phase0/phase0-gate.raw.log"
+      "artifact": "evidence/phase1/wp1.5/reestablished/npm-version.raw.log",
+      "command": "npm --version"
     },
     {
-      "command": "node tools/bootstrap_wp1_5_database.mjs",
       "result": "passed",
-      "artifact": "evidence/phase1/wp1.5/ci/d7fbf5851b11b07b65bde36f062db7b21f487947/database/role-bootstrap.raw.log"
+      "artifact": "evidence/phase1/wp1.5/reestablished/node-version.raw.log",
+      "command": "node --version"
     },
     {
-      "command": "npm run db:migrate:test",
       "result": "passed",
-      "artifact": "evidence/phase1/wp1.5/ci/d7fbf5851b11b07b65bde36f062db7b21f487947/database/db-migrate.raw.log"
+      "artifact": "evidence/phase1/wp1.5/reestablished/phase1-contract-tests.raw.log",
+      "command": "node node_modules/vitest/vitest.mjs run tests/tooling/phase1_contracts.test.ts"
     },
     {
-      "command": "npm run test:db --workspace @symphony/db",
       "result": "passed",
-      "artifact": "evidence/phase1/wp1.5/ci/d7fbf5851b11b07b65bde36f062db7b21f487947/database/db-integration.raw.log"
+      "artifact": "evidence/phase1/wp1.5/reestablished/phase1-structural-validator.raw.log",
+      "command": "node tools/phase1-contracts.js"
     },
     {
-      "command": "npm run test:bdd:wp1.5",
       "result": "passed",
-      "artifact": "evidence/phase1/wp1.5/ci/d7fbf5851b11b07b65bde36f062db7b21f487947/database/bdd-wp1.5.raw.log"
+      "artifact": "evidence/phase1/wp1.5/reestablished/policy-manifest-unit.raw.log",
+      "command": "npm run test:db --workspace @symphony/db -- src/__tests__/tenant-policy-manifest.test.ts"
     },
     {
-      "command": "node tools/finalize_wp1_5_database.mjs",
       "result": "passed",
-      "artifact": "evidence/phase1/wp1.5/ci/d7fbf5851b11b07b65bde36f062db7b21f487947/database/role-finalizer.raw.log"
+      "artifact": "evidence/phase1/wp1.5/reestablished/archive-hygiene.raw.log",
+      "command": "npm run verify:archive-hygiene"
     },
     {
-      "command": "npm run verify:all",
-      "result": "passed",
-      "artifact": "evidence/phase1/wp1.5/ci/d7fbf5851b11b07b65bde36f062db7b21f487947/legacy/verify-all.raw.log"
+      "result": "blocked",
+      "artifact": "evidence/phase1/wp1.5/reestablished/wp1.5-environment-blocker.md",
+      "command": "node tools/bootstrap_wp1_5_database.mjs"
+    },
+    {
+      "result": "blocked",
+      "artifact": "evidence/phase1/wp1.5/reestablished/wp1.5-environment-blocker.md",
+      "command": "npm run db:migrate:test"
+    },
+    {
+      "result": "blocked",
+      "artifact": "evidence/phase1/wp1.5/reestablished/wp1.5-environment-blocker.md",
+      "command": "npm run test:db --workspace @symphony/db"
+    },
+    {
+      "result": "blocked",
+      "artifact": "evidence/phase1/wp1.5/reestablished/wp1.5-environment-blocker.md",
+      "command": "npm run test:bdd:wp1.5"
+    },
+    {
+      "result": "blocked",
+      "artifact": "evidence/phase1/wp1.5/reestablished/wp1.5-environment-blocker.md",
+      "command": "node tools/finalize_wp1_5_database.mjs"
+    },
+    {
+      "command": "node AJV 2020 validation of evidence/phase1/wp1.5/task-evidence.json against evidence/phase1/task-evidence.schema.json",
+      "artifact": "evidence/phase1/wp1.5/reestablished/task-evidence-schema-validation.raw.log",
+      "result": "passed"
     }
   ],
   "claims": {
-    "behavior_proved": "On the SHA-pinned CI candidate, clean PostgreSQL 18 installation applied migrations 0001-0013; migration integration tests covered replay, 0012-to-0013 upgrade, injected failure rollback and retry; all 11 database test files passed (58 tests), including the 55-table effective privilege/RLS matrix, missing/empty/mismatched tenant scope, cross-tenant reads/writes, pooled context reset, outbox function boundary, append-only rules and REM-WP1.4 inbox grant preservation. BDD-AUD-005 passed 1 scenario/7 steps using the PostgreSQL-backed symphony_app path and denied access to Org B evidence by its known identifier under Org A context. The role finalizer verified temporary migrator membership was revoked. CI-1 through CI-7 regression checks passed in the migration, type/build, toolchain and workflow contract gates.",
-    "path_proved": "GitHub Actions run 43683206104 attempt 1, candidate d7fbf5851b11b07b65bde36f062db7b21f487947. The database job provisioned isolated PostgreSQL service roles, applied migrations, ran the complete @symphony/db suite and tagged REM-WP1.5 BDD, then ran the always() role finalizer. The Phase 0 job and legacy verify-all job also completed successfully. Raw logs and phase0 CI metadata are retained under evidence/phase1/wp1.5/ci/d7fbf5851b11b07b65bde36f062db7b21f487947/.",
-    "configuration_proved": "Node 26.7.0, npm 12.2.0, PostgreSQL 18.0 (server_version_num=180000), isolated symphony_test CI service, DATA_MODE=test, CI bootstrap administrator, separate symphony_migrator and symphony_app identities, and finalizer-verified outbox-writer membership state. No credentials or connection strings are retained.",
+    "behavior_proved": "Against source candidate b572d252dfd6733940011250918631a6c7f57a27, 112 Phase 1 contract tests, 3 WP1.5 policy-manifest oracle tests, and 9 archive-hygiene tests passed. These prove pure oracle, workflow-contract, and archive behavior only; they do not prove PostgreSQL row isolation or effective grants.",
+    "path_proved": "Local test commands ran from the isolated exact source candidate worktree. No hosted CI run or PostgreSQL-backed WP1.5 execution is claimed.",
+    "configuration_proved": "Node v26.7.0; npm 11.19.0. No isolated PostgreSQL service, WP1.5 database-role URLs, or Docker command were available. No credential file was opened.",
     "coverage_limitations": [
-      "The Phase 0 gate's @phase0 BDD selection reported zero scenarios; the project Phase 0 command map documents that no enabled Phase 0 scenarios exist. REM-WP1.5 behavior coverage is separately provided by BDD-AUD-005 (1/1 scenario, 7/7 steps).",
-      "The verify:all legacy E2E suite passed 35/35. REM-WP5.3 API-backed login composition is not a REM-WP1.5 criterion and remains owned by REM-WP5.3.",
-      "Independent review is recorded separately and is not claimed by this implementation evidence. This REM-WP1.5 task closure does not close Phase 1 or authorize REM-WP1.6; its dependency graph remains authoritative."
+      "The current candidate extends the manifest and integration test to 39 tenant policies and additional authentication credential tables/functions; current candidate PostgreSQL catalog/row behavior is unverified.",
+      "Clean install, replay, upgrade, failure rollback/retry, restricted-role integration, outbox boundary, cross-organisation BDD, role finalization, and exact-candidate hosted CI remain unverified.",
+      "The historical d7fb task record is retained separately and applies only to d7fb5851b11b07b65bde36f062db7b21f487947."
     ]
   },
   "limitations": [
-    "This record closes REM-WP1.5 only. It does not claim production readiness, Phase 1 closure, or satisfaction of REM-WP1.6's other dependencies."
+    "Do not interpret implementation complete or unit tests passed as WP1.5 gate closure.",
+    "Update gate_verified to passed only after the full documented acceptance suite succeeds on the exact source candidate and its candidate-specific CI artifacts and checksums verify.",
+    "Required toolchain npm 12.2.0 was not present in this local environment (npm reports 11.19.0)."
   ],
   "unresolved_decisions": [],
-  "reviewer": "Implementation evidence reconciled by Codex from SHA-matched CI artifacts; independent reviewer not claimed."
+  "reviewer": "Local evidence reconciled against source candidate b572d252dfd6733940011250918631a6c7f57a27; no independent review or gate pass claimed."
 }
