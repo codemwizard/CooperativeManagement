@@ -35,7 +35,7 @@ All commands below ran in the isolated candidate worktree. The raw output files 
 | Command | Result | Detail |
 |---|---|---|
 | `node --version` | Pass | `v26.7.0` |
-| `npm --version` | Pass as a version query | `11.19.0`; required recorded workflow toolchain is npm `12.2.0`, so this environment does not qualify the candidate. |
+| `npm --version` | Pass as a version query | Sandbox reports `11.19.0`; the owner-provided interactive PowerShell transcript reports `12.2.0`. In the sandbox, `npm.ps1` cannot access the user-level npm CLI and falls back to the system npm. |
 | `node node_modules/vitest/vitest.mjs run tests/tooling/phase1_contracts.test.ts` | Pass | 112 tests |
 | `node tools/phase1-contracts.js` | Pass | 45-node graph is known/acyclic; structural checks only |
 | `npm run test:db --workspace @symphony/db -- src/__tests__/tenant-policy-manifest.test.ts` | Pass | 3 policy-oracle helper tests; no database assertions |
@@ -57,5 +57,6 @@ All commands below ran in the isolated candidate worktree. The raw output files 
 1. Run the candidate in the approved Linux CI environment with Node `26.7.0` and npm `12.2.0`; provision clean isolated PostgreSQL 18 roles and run the exact CI workflow on the immutable source SHA.
 2. Collect raw logs/artifact bundle, verify checksums, and review actual app-role catalog and row-behavior results, including all 39 policies and authentication function grants.
 3. Reconcile this task record and any review index/dependency records only after every mandatory same-candidate result passes. Until then, `integration_test: blocked`, `bdd_ui_test: blocked`, and `gate_verified: pending` are intentional and accurate.
+
 
 

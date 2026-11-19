@@ -1,4 +1,4 @@
-60cf47d4c1db6dc0d00baf3ae8e97312e762e9eeeaa61704e4e88d38e63d38bb  ../task-evidence.json
+d935c0f1027d7b6edda967348b74d20799d43f5b4a3003c943bf142134b7873f  ../task-evidence.json
 34f693c8dac55c6bb5b9e1bb19d0504e4cb4944ab0c6ccca28170f9513555d36  archive-hygiene.raw.log
 63b758b670354b70c541806e7615afabc7bbcdb932398748bc8c57b1beb74e86  historical-d7-task-evidence.json
 8f1a3ded09481831260e344bd769bf6ef6268dbd6ee488593907de9337314a44  node-version.raw.log
@@ -7,5 +7,5 @@
 8409a245d79c731db26738feb88f1af2e829291d2c57f1a99d6b1216d85920f4  phase1-structural-validator.raw.log
 b95560b4baa8a9c60f32451f98207c5fe38fc4b97a3e5c77f86c5634449865be  policy-manifest-unit.raw.log
 8e18d574a5c3ea482b8d653a642a1941f5efe60f3c4fa275d4a7064e922e7e9a  task-evidence-schema-validation.raw.log
-9d9b4c4417fc953719d07a7a46927b0467c319989d7de875cc205a9ffae6282b  wp1.5-candidate-assessment.md
-18568dae631cc73f27f328f162beb9cd36776642320b5bbbdc2b2180f47d8d24  wp1.5-environment-blocker.md
+202f1a589c2e6af20ea87758352786f044e0a0606ce59717f92458122b793fcc  wp1.5-candidate-assessment.md
+c4a8671a6bb184c577e294396cb97a68f79efdcebfa52eb790293bc6130c8aff  wp1.5-environment-blocker.md

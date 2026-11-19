@@ -11,7 +11,7 @@
   "commit": "b572d252dfd6733940011250918631a6c7f57a27",
   "environment": {
     "node": "v26.7.0",
-    "npm": "11.19.0 (required by the recorded CI toolchain: 12.2.0)",
+    "npm": "Codex sandbox: 11.19.0 via C:\\Program Files\\nodejs npm fallback; owner-reported interactive desktop shell: 12.2.0",
     "postgres": "not run; isolated PostgreSQL service unavailable",
     "database_role": "not run",
     "data_mode": "unknown",
@@ -82,7 +82,7 @@
   "claims": {
     "behavior_proved": "Against source candidate b572d252dfd6733940011250918631a6c7f57a27, 112 Phase 1 contract tests, 3 WP1.5 policy-manifest oracle tests, and 9 archive-hygiene tests passed. These prove pure oracle, workflow-contract, and archive behavior only; they do not prove PostgreSQL row isolation or effective grants.",
     "path_proved": "Local test commands ran from the isolated exact source candidate worktree. No hosted CI run or PostgreSQL-backed WP1.5 execution is claimed.",
-    "configuration_proved": "Node v26.7.0; npm 11.19.0. No isolated PostgreSQL service, WP1.5 database-role URLs, or Docker command were available. No credential file was opened.",
+    "configuration_proved": "Node v26.7.0. The Codex sandbox reports npm 11.19.0 because its PowerShell npm.ps1 cannot access the user-level npm-cli.js under AppData; the owner reports the interactive desktop shell returns npm 12.2.0. No isolated PostgreSQL service or WP1.5 database-role URLs were available. No credential file was opened.",
     "coverage_limitations": [
       "The current candidate extends the manifest and integration test to 39 tenant policies and additional authentication credential tables/functions; current candidate PostgreSQL catalog/row behavior is unverified.",
       "Clean install, replay, upgrade, failure rollback/retry, restricted-role integration, outbox boundary, cross-organisation BDD, role finalization, and exact-candidate hosted CI remain unverified.",
@@ -92,7 +92,7 @@
   "limitations": [
     "Do not interpret implementation complete or unit tests passed as WP1.5 gate closure.",
     "Update gate_verified to passed only after the full documented acceptance suite succeeds on the exact source candidate and its candidate-specific CI artifacts and checksums verify.",
-    "Required toolchain npm 12.2.0 was not present in this local environment (npm reports 11.19.0)."
+    "This sandbox cannot access the user-level npm 12.2.0 installation; the owner-provided interactive PowerShell result reports 12.2.0."
   ],
   "unresolved_decisions": [],
   "reviewer": "Local evidence reconciled against source candidate b572d252dfd6733940011250918631a6c7f57a27; no independent review or gate pass claimed."
