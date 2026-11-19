@@ -1,119 +1,23 @@
 {
   "version": 1,
-  "source": "Root migrations 0001-0012 define the 55-table catalog and pre-REM-WP1.5 RLS baseline. REM-WP1.5 migration 0013 applies the full policy/grant rollout; actual-role verification passed in CI run 43683206104 on candidate d7fbf5851b11b07b65bde36f062db7b21f487947. The rls_current values below intentionally preserve the through-0012 baseline.",
+  "source": "Root migrations 0001-0016 plus the REM-WP2.2 trusted authority resolver policy additions.",
   "tables": [
     {
-      "table": "tenants",
+      "table": "acceptance_policies",
       "classification": "control_plane_restricted",
-      "scope_basis": "Top-level tenant registry; tenant creation/maintenance is privileged.",
+      "scope_basis": "Organization/audience policy with nullable organization_id.",
       "rls_current": false
     },
     {
-      "table": "command_receipts",
+      "table": "aggregate_states",
       "classification": "tenant_scoped",
-      "scope_basis": "Direct tenant_id; immutable idempotency receipt data.",
-      "rls_current": true
+      "scope_basis": "Direct tenant_id; aggregate projection state.",
+      "rls_current": false
     },
     {
-      "table": "domain_events",
+      "table": "appointments",
       "classification": "tenant_scoped",
-      "scope_basis": "Direct tenant_id; append-only business audit.",
-      "rls_current": true
-    },
-    {
-      "table": "event_outbox",
-      "classification": "control_plane_restricted",
-      "scope_basis": "No direct tenant_id; command enqueue is restricted to a tenant-checking function and delivery reads/lifecycle are worker operations.",
-      "rls_current": false
-    },
-    {
-      "table": "capability_registry",
-      "classification": "global_catalogue_read_only",
-      "scope_basis": "Global module capability catalogue.",
-      "rls_current": false
-    },
-    {
-      "table": "users",
-      "classification": "tenant_scoped",
-      "scope_basis": "Direct tenant_id and tenant-local email uniqueness.",
-      "rls_current": false
-    },
-    {
-      "table": "persons",
-      "classification": "tenant_scoped",
-      "scope_basis": "Direct tenant_id; pseudonymous identity shell.",
-      "rls_current": false
-    },
-    {
-      "table": "person_identifiers",
-      "classification": "tenant_scoped",
-      "scope_basis": "Tenant scope inherited through person_id; contains encrypted identifier and blind index.",
-      "rls_current": false
-    },
-    {
-      "table": "person_pii_vault",
-      "classification": "tenant_scoped",
-      "scope_basis": "Tenant scope inherited through person_id; contains encrypted PII.",
-      "rls_current": false
-    },
-    {
-      "table": "consent_records",
-      "classification": "tenant_scoped",
-      "scope_basis": "Tenant scope inherited through person_id; consent and lawful-basis facts.",
-      "rls_current": false
-    },
-    {
-      "table": "platform_roles",
-      "classification": "global_catalogue_read_only",
-      "scope_basis": "Global role definitions; tenant assignments are separate.",
-      "rls_current": false
-    },
-    {
-      "table": "user_role_assignments",
-      "classification": "tenant_scoped",
-      "scope_basis": "Direct tenant_id; role membership is tenant-scoped.",
-      "rls_current": false
-    },
-    {
-      "table": "capacity_grants",
-      "classification": "tenant_scoped",
-      "scope_basis": "Organization/user scope; tenant derived from organization and user.",
-      "rls_current": false
-    },
-    {
-      "table": "delegations",
-      "classification": "tenant_scoped",
-      "scope_basis": "Organization scope; tenant derived from organization and participants.",
-      "rls_current": false
-    },
-    {
-      "table": "authentication_events",
-      "classification": "tenant_scoped",
-      "scope_basis": "Tenant derived through user_id; authentication audit.",
-      "rls_current": false
-    },
-    {
-      "table": "enrolment_sessions",
-      "classification": "tenant_scoped",
-      "scope_basis": "Direct tenant_id and organization scope.",
-      "rls_current": false
-    },
-    {
-      "table": "enroller_assignments",
-      "classification": "control_plane_restricted",
-      "scope_basis": "Platform assignment/scope; no direct tenant_id.",
-      "rls_current": false
-    },
-    {
-      "table": "enforcement_policies",
-      "classification": "control_plane_restricted",
-      "scope_basis": "Organization policy with nullable organization_id; global fallback semantics need an explicit grant boundary.",
-      "rls_current": false
-    },
-    {
-      "table": "duty_matrix_rows",
-      "classification": "control_plane_restricted",
-      "scope_basis": "Organization policy with nullable organization_id; configuration writes must be privileged.",
+      "scope_basis": "Organization-scoped appointment; tenant inherited from organization.",
       "rls_current": false
     },
     {
@@ -123,57 +27,81 @@
       "rls_current": false
     },
     {
-      "table": "precedence_policies",
-      "classification": "control_plane_restricted",
-      "scope_basis": "Organization policy with nullable organization_id and global default.",
+      "table": "authentication_events",
+      "classification": "tenant_scoped",
+      "scope_basis": "Tenant derived through user_id; authentication audit.",
       "rls_current": false
     },
     {
-      "table": "position_combination_rules",
-      "classification": "control_plane_restricted",
-      "scope_basis": "Shared governance policy configuration; not tenant-keyed.",
+      "table": "bylaw_documents",
+      "classification": "tenant_scoped",
+      "scope_basis": "Organization-scoped by-law document.",
       "rls_current": false
     },
     {
-      "table": "retention_policies",
-      "classification": "control_plane_restricted",
-      "scope_basis": "Global retention policy values; changes require controlled review.",
+      "table": "bylaw_provisions",
+      "classification": "tenant_scoped",
+      "scope_basis": "Tenant inherited through bylaw version.",
       "rls_current": false
     },
     {
-      "table": "identity_check_methods",
+      "table": "bylaw_versions",
+      "classification": "tenant_scoped",
+      "scope_basis": "Tenant inherited through bylaw document.",
+      "rls_current": false
+    },
+    {
+      "table": "capability_registry",
       "classification": "global_catalogue_read_only",
-      "scope_basis": "Global list of identity-check methods.",
+      "scope_basis": "Global module capability catalogue.",
       "rls_current": false
     },
     {
-      "table": "membership_rules",
+      "table": "capacity_grants",
+      "classification": "tenant_scoped",
+      "scope_basis": "Organization/user scope; tenant derived from organization and user.",
+      "rls_current": false
+    },
+    {
+      "table": "command_receipts",
+      "classification": "tenant_scoped",
+      "scope_basis": "Direct tenant_id; immutable idempotency receipt data.",
+      "rls_current": true
+    },
+    {
+      "table": "consent_records",
+      "classification": "tenant_scoped",
+      "scope_basis": "Tenant scope inherited through person_id; consent and lawful-basis facts.",
+      "rls_current": false
+    },
+    {
+      "table": "delegations",
+      "classification": "tenant_scoped",
+      "scope_basis": "Organization scope; tenant derived from organization and participants.",
+      "rls_current": false
+    },
+    {
+      "table": "domain_events",
+      "classification": "tenant_scoped",
+      "scope_basis": "Direct tenant_id; append-only business audit.",
+      "rls_current": true
+    },
+    {
+      "table": "duty_matrix_rows",
       "classification": "control_plane_restricted",
-      "scope_basis": "Organization policy with nullable organization_id and global fallback ambiguity.",
+      "scope_basis": "Organization policy with nullable organization_id; configuration writes must be privileged.",
       "rls_current": false
     },
     {
-      "table": "acceptance_policies",
+      "table": "enforcement_policies",
       "classification": "control_plane_restricted",
-      "scope_basis": "Organization/audience policy with nullable organization_id.",
+      "scope_basis": "Organization policy with nullable organization_id; global fallback semantics need an explicit grant boundary.",
       "rls_current": false
     },
     {
-      "table": "organizations",
-      "classification": "tenant_scoped",
-      "scope_basis": "Direct tenant_id column scopes each organization record to one tenant.",
-      "rls_current": false
-    },
-    {
-      "table": "organization_identifiers",
-      "classification": "tenant_scoped",
-      "scope_basis": "Tenant inherited through organization_id; identifier data.",
-      "rls_current": false
-    },
-    {
-      "table": "organization_enrollment",
-      "classification": "tenant_scoped",
-      "scope_basis": "Tenant inherited through organization_id.",
+      "table": "enroller_assignments",
+      "classification": "control_plane_restricted",
+      "scope_basis": "Platform assignment/scope; no direct tenant_id.",
       "rls_current": false
     },
     {
@@ -183,21 +111,15 @@
       "rls_current": false
     },
     {
-      "table": "evidence_items",
+      "table": "enrolment_sessions",
       "classification": "tenant_scoped",
-      "scope_basis": "Cooperative record; tenant relation must be verified from organization/aggregate key.",
+      "scope_basis": "Direct tenant_id and organization scope.",
       "rls_current": false
     },
     {
-      "table": "evidence_versions",
-      "classification": "tenant_scoped",
-      "scope_basis": "Tenant inherited through evidence item; immutable content versions.",
-      "rls_current": false
-    },
-    {
-      "table": "evidence_support_items",
-      "classification": "tenant_scoped",
-      "scope_basis": "Tenant inherited through evidence item/version.",
+      "table": "event_outbox",
+      "classification": "control_plane_restricted",
+      "scope_basis": "No direct tenant_id; command enqueue is restricted to a tenant-checking function and delivery reads/lifecycle are worker operations.",
       "rls_current": false
     },
     {
@@ -207,39 +129,15 @@
       "rls_current": false
     },
     {
-      "table": "record_approvals",
-      "classification": "tenant_scoped",
-      "scope_basis": "Tenant inherited through cooperative record.",
-      "rls_current": false
-    },
-    {
-      "table": "verification_assignments",
-      "classification": "tenant_scoped",
-      "scope_basis": "Tenant inherited through organization and evidence scope.",
-      "rls_current": false
-    },
-    {
-      "table": "verification_findings",
-      "classification": "tenant_scoped",
-      "scope_basis": "Tenant inherited through assignment/evidence; immutable findings.",
-      "rls_current": false
-    },
-    {
-      "table": "platform_checks",
-      "classification": "tenant_scoped",
-      "scope_basis": "Tenant inherited through organization and source record.",
-      "rls_current": false
-    },
-    {
-      "table": "observation_attestations",
-      "classification": "tenant_scoped",
-      "scope_basis": "Tenant inherited through the observed record.",
-      "rls_current": false
-    },
-    {
       "table": "evidence_disputes",
       "classification": "tenant_scoped",
       "scope_basis": "Tenant inherited through evidence item/version.",
+      "rls_current": false
+    },
+    {
+      "table": "evidence_items",
+      "classification": "tenant_scoped",
+      "scope_basis": "Cooperative record; tenant relation must be verified from organization/aggregate key.",
       "rls_current": false
     },
     {
@@ -255,27 +153,27 @@
       "rls_current": false
     },
     {
-      "table": "appointments",
+      "table": "evidence_support_items",
       "classification": "tenant_scoped",
-      "scope_basis": "Organization-scoped appointment; tenant inherited from organization.",
+      "scope_basis": "Tenant inherited through evidence item/version.",
       "rls_current": false
     },
     {
-      "table": "bylaw_documents",
+      "table": "evidence_versions",
       "classification": "tenant_scoped",
-      "scope_basis": "Organization-scoped by-law document.",
+      "scope_basis": "Tenant inherited through evidence item; immutable content versions.",
       "rls_current": false
     },
     {
-      "table": "bylaw_versions",
-      "classification": "tenant_scoped",
-      "scope_basis": "Tenant inherited through bylaw document.",
+      "table": "identity_check_methods",
+      "classification": "global_catalogue_read_only",
+      "scope_basis": "Global list of identity-check methods.",
       "rls_current": false
     },
     {
-      "table": "bylaw_provisions",
+      "table": "institutional_role_assignments",
       "classification": "tenant_scoped",
-      "scope_basis": "Tenant inherited through bylaw version.",
+      "scope_basis": "Tenant-scoped institutional role assignment with same-tenant user and organization foreign keys.",
       "rls_current": false
     },
     {
@@ -285,9 +183,39 @@
       "rls_current": false
     },
     {
-      "table": "requirement_definitions",
+      "table": "meeting_rules",
       "classification": "control_plane_restricted",
-      "scope_basis": "Global legal/requirement catalogue with validation metadata.",
+      "scope_basis": "Organization rule with nullable organization_id; global fallback semantics require review.",
+      "rls_current": false
+    },
+    {
+      "table": "membership_rules",
+      "classification": "control_plane_restricted",
+      "scope_basis": "Organization policy with nullable organization_id and global fallback ambiguity.",
+      "rls_current": false
+    },
+    {
+      "table": "observation_attestations",
+      "classification": "tenant_scoped",
+      "scope_basis": "Tenant inherited through the observed record.",
+      "rls_current": false
+    },
+    {
+      "table": "organization_enrollment",
+      "classification": "tenant_scoped",
+      "scope_basis": "Tenant inherited through organization_id.",
+      "rls_current": false
+    },
+    {
+      "table": "organization_identifiers",
+      "classification": "tenant_scoped",
+      "scope_basis": "Tenant inherited through organization_id; identifier data.",
+      "rls_current": false
+    },
+    {
+      "table": "organization_memberships",
+      "classification": "tenant_scoped",
+      "scope_basis": "Tenant-scoped person membership in an organization with same-tenant person and organization foreign keys.",
       "rls_current": false
     },
     {
@@ -297,15 +225,87 @@
       "rls_current": false
     },
     {
-      "table": "requirement_sources",
-      "classification": "control_plane_restricted",
-      "scope_basis": "Global legal-authority mapping attached to requirement_definitions; the schema has no tenant/organization_requirement FK path. Restricted maintenance and access follow the parent requirement catalogue.",
+      "table": "organizations",
+      "classification": "tenant_scoped",
+      "scope_basis": "Direct tenant_id column scopes each organization record to one tenant.",
       "rls_current": false
     },
     {
-      "table": "meeting_rules",
+      "table": "person_identifiers",
+      "classification": "tenant_scoped",
+      "scope_basis": "Tenant scope inherited through person_id; contains encrypted identifier and blind index.",
+      "rls_current": false
+    },
+    {
+      "table": "person_pii_vault",
+      "classification": "tenant_scoped",
+      "scope_basis": "Tenant scope inherited through person_id; contains encrypted PII.",
+      "rls_current": false
+    },
+    {
+      "table": "persons",
+      "classification": "tenant_scoped",
+      "scope_basis": "Direct tenant_id; pseudonymous identity shell.",
+      "rls_current": false
+    },
+    {
+      "table": "platform_checks",
+      "classification": "tenant_scoped",
+      "scope_basis": "Tenant inherited through organization and source record.",
+      "rls_current": false
+    },
+    {
+      "table": "platform_roles",
+      "classification": "global_catalogue_read_only",
+      "scope_basis": "Global role definitions; tenant assignments are separate.",
+      "rls_current": false
+    },
+    {
+      "table": "position_catalog",
+      "classification": "global_catalogue_read_only",
+      "scope_basis": "Global stable position-code catalogue; contains no person or tenant data.",
+      "rls_current": false
+    },
+    {
+      "table": "position_combination_rules",
       "classification": "control_plane_restricted",
-      "scope_basis": "Organization rule with nullable organization_id; global fallback semantics require review.",
+      "scope_basis": "Shared governance policy configuration; not tenant-keyed.",
+      "rls_current": false
+    },
+    {
+      "table": "precedence_policies",
+      "classification": "control_plane_restricted",
+      "scope_basis": "Organization policy with nullable organization_id and global default.",
+      "rls_current": false
+    },
+    {
+      "table": "programme_manager_scopes",
+      "classification": "tenant_scoped",
+      "scope_basis": "Tenant-scoped programme-manager operation scopes with same-tenant user and target organization foreign keys.",
+      "rls_current": false
+    },
+    {
+      "table": "reconciliation_inbox",
+      "classification": "tenant_scoped",
+      "scope_basis": "Direct tenant_id; encrypted terminal-conflict payload and non-identifying lifecycle metadata.",
+      "rls_current": true
+    },
+    {
+      "table": "record_approvals",
+      "classification": "tenant_scoped",
+      "scope_basis": "Tenant inherited through cooperative record.",
+      "rls_current": false
+    },
+    {
+      "table": "requirement_definitions",
+      "classification": "control_plane_restricted",
+      "scope_basis": "Global legal/requirement catalogue with validation metadata.",
+      "rls_current": false
+    },
+    {
+      "table": "requirement_sources",
+      "classification": "control_plane_restricted",
+      "scope_basis": "Global legal-authority mapping attached to requirement_definitions; the schema has no tenant/organization_requirement FK path. Restricted maintenance and access follow the parent requirement catalogue.",
       "rls_current": false
     },
     {
@@ -315,16 +315,52 @@
       "rls_current": false
     },
     {
-      "table": "aggregate_states",
-      "classification": "tenant_scoped",
-      "scope_basis": "Direct tenant_id; aggregate projection state.",
+      "table": "retention_policies",
+      "classification": "control_plane_restricted",
+      "scope_basis": "Global retention policy values; changes require controlled review.",
       "rls_current": false
     },
     {
-      "table": "reconciliation_inbox",
+      "table": "ta_scope_delegations",
       "classification": "tenant_scoped",
-      "scope_basis": "Direct tenant_id; encrypted terminal-conflict payload and non-identifying lifecycle metadata.",
-      "rls_current": true
+      "scope_basis": "Tenant-scoped TA delegation source with same-tenant manager, delegatee and organization foreign keys.",
+      "rls_current": false
+    },
+    {
+      "table": "tenants",
+      "classification": "control_plane_restricted",
+      "scope_basis": "Top-level tenant registry; tenant creation/maintenance is privileged.",
+      "rls_current": false
+    },
+    {
+      "table": "user_person_links",
+      "classification": "tenant_scoped",
+      "scope_basis": "Tenant-scoped account/person identity link with same-tenant account, person and link-author foreign keys.",
+      "rls_current": false
+    },
+    {
+      "table": "user_role_assignments",
+      "classification": "tenant_scoped",
+      "scope_basis": "Direct tenant_id; role membership is tenant-scoped.",
+      "rls_current": false
+    },
+    {
+      "table": "users",
+      "classification": "tenant_scoped",
+      "scope_basis": "Direct tenant_id and tenant-local email uniqueness.",
+      "rls_current": false
+    },
+    {
+      "table": "verification_assignments",
+      "classification": "tenant_scoped",
+      "scope_basis": "Tenant inherited through organization and evidence scope.",
+      "rls_current": false
+    },
+    {
+      "table": "verification_findings",
+      "classification": "tenant_scoped",
+      "scope_basis": "Tenant inherited through assignment/evidence; immutable findings.",
+      "rls_current": false
     }
   ],
   "planned_phase1_tables": [
@@ -351,7 +387,12 @@
       "classification": "shared_security_store",
       "scope_basis": "Opaque digest-keyed pre-auth and user sessions; tenant rows are context-bound by RLS, while pre-auth rows have no tenant identity.",
       "rls_current": false,
-      "permitted_sql_operations": ["SELECT", "INSERT", "UPDATE", "DELETE"]
+      "permitted_sql_operations": [
+        "SELECT",
+        "INSERT",
+        "UPDATE",
+        "DELETE"
+      ]
     },
     {
       "table": "auth_user_tenant_index",
@@ -364,9 +405,14 @@
       "classification": "shared_security_store",
       "scope_basis": "Shared account and source throttle reservations keyed only by HMAC; raw identifiers and network addresses are not stored.",
       "rls_current": false,
-      "permitted_sql_operations": ["SELECT", "INSERT", "UPDATE", "DELETE"]
+      "permitted_sql_operations": [
+        "SELECT",
+        "INSERT",
+        "UPDATE",
+        "DELETE"
+      ]
     }
   ],
-  "known_gap": "REM-WP1.5's original 55-table scope passed candidate-pinned PostgreSQL 18 CI run 43683206104. REM-WP5.2 migration 0014 adds two tenant-scoped credential tables; REM-WP5.3 migration 0015 adds a shared session store, a private lookup index and a shared HMAC throttle store. Candidate-specific migration and restricted-role validation are required before these additions are considered verified. The original 37 tenant-scoped, 3 read-only catalogue, and 15 control-plane classifications remain intact.",
-  "status": "REM-WP1.5 original scope passed on candidate d7fbf5851b11b07b65bde36f062db7b21f487947, CI run 43683206104; REM-WP5.2 and REM-WP5.3 additions require candidate-specific verification"
+  "known_gap": "Root migrations 0001-0016 plus the REM-WP2.2 trusted authority resolver policy additions.",
+  "status": "WP1.5 original 55-table scope passed on candidate d7fbf5851b11b07b65bde36f062db7b21f487947; later migrations 0014-0016 require candidate-specific verification."
 }

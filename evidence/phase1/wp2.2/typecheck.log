@@ -1,0 +1,28 @@
+
+> symphony-prototype@1.0.0 typecheck:v4
+> npx tsc --build --force packages/domain packages/contracts packages/db packages/testkit && npm run typecheck --workspace @symphony/domain && npm run typecheck --workspace @symphony/contracts && npm run typecheck --workspace @symphony/db && npm run typecheck --workspace @symphony/testkit && npm run typecheck --workspace @symphony/api && npm run typecheck --workspace @symphony/workspace
+
+
+> @symphony/domain@0.1.0 typecheck
+> tsc --noEmit
+
+
+> @symphony/contracts@0.1.0 typecheck
+> tsc --noEmit
+
+
+> @symphony/db@0.1.0 typecheck
+> tsc --noEmit
+
+
+> @symphony/testkit@0.1.0 typecheck
+> tsc --noEmit
+
+
+> @symphony/api@0.1.0 typecheck
+> tsc --noEmit
+
+
+> @symphony/workspace@0.1.0 typecheck
+> tsc --noEmit
+

@@ -4,10 +4,11 @@ import { existsSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import pg from 'pg';
 import { CredentialLifecycleService } from '@symphony/domain/identity/credential-lifecycle';
-import { PostgresCredentialRepository } from '@symphony/db';
+import { PostgresCredentialRepository, PostgresWorkspaceContextRepository } from '@symphony/db';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { createAuthComposition } from '../authentication-composition.js';
 import { buildApiServer } from '../server.js';
+import { createWorkspaceContextRoutes } from '../routes/workspace-context.js';
 
 // These are test credentials only. The dedicated disposable database is dropped
 // after this suite; no local password or database URL is printed or persisted.
@@ -58,6 +59,8 @@ describe.skipIf(!enabled)('WP5.3 Fastify and PostgreSQL integration',()=>{
   let isolatedUrl:string|undefined;
   let tenantId:string|undefined;
   let userId:string|undefined;
+  let organizationId:string|undefined;
+  let personId:string|undefined;
   let hmacKey:Buffer;
   let temporaryCredential:string;
   const profile={runtimeProfile:'test' as const,appEnv:'test',dataMode:'test',publicOrigin:'http://localhost:5174',host:'127.0.0.1',port:3000};
@@ -83,7 +86,7 @@ describe.skipIf(!enabled)('WP5.3 Fastify and PostgreSQL integration',()=>{
     const appUrl=new URL(appBaseUrl);appUrl.pathname=`/${isolatedDatabase}`;
     appPoolA=new pg.Pool({connectionString:appUrl.toString(),max:4});
     appPoolB=new pg.Pool({connectionString:appUrl.toString(),max:4});
-    tenantId=randomUUID();userId=randomUUID();hmacKey=Buffer.alloc(32,0x53);
+    tenantId=randomUUID();userId=randomUUID();organizationId=randomUUID();personId=randomUUID();hmacKey=Buffer.alloc(32,0x53);
     await isolatedAdmin.query('INSERT INTO symphony.tenants(id,name) VALUES($1,$2)',[tenantId,'wp5.3-api-integration']);
     const fixture=await appPoolA.connect();
     try {
@@ -96,6 +99,43 @@ describe.skipIf(!enabled)('WP5.3 Fastify and PostgreSQL integration',()=>{
       await fixture.query('COMMIT');
     } catch(error) { await fixture.query('ROLLBACK').catch(()=>undefined);throw error; }
     finally { fixture.release(); }
+    const unionId=randomUUID();
+    const membershipId=randomUUID();
+    const roleId=randomUUID();
+    const managerScopeId=randomUUID();
+    const taScopeId=randomUUID();
+    const identityAdmin=await isolatedAdmin.connect();
+    try {
+      await identityAdmin.query('BEGIN');
+      await identityAdmin.query('SELECT set_config(\'app.tenant_id\',$1,true)',[tenantId]);
+      await identityAdmin.query('INSERT INTO symphony.persons(id,tenant_id,pseudonym_id) VALUES($1,$2,$3)',[personId,tenantId,`person-${personId}`]);
+      await identityAdmin.query('INSERT INTO symphony.organizations(id,tenant_id,name,organization_kind) VALUES($1,$2,$3,\'cooperative\'),($4,$2,$5,\'union\')',[organizationId,tenantId,'WP2.2 cooperative',unionId,'WP2.2 union']);
+      await identityAdmin.query(`INSERT INTO symphony.user_person_links(tenant_id,user_id,person_id,source_ref,linked_by_user_id)
+        VALUES($1,$2,$3,'integration-fixture',$2)`,[tenantId,userId,personId]);
+      await identityAdmin.query(`INSERT INTO symphony.organization_memberships(id,tenant_id,organization_id,person_id,status,joined_at,source_ref)
+        VALUES($1,$2,$3,$4,'active',clock_timestamp()-interval '1 day','integration-fixture')`,[membershipId,tenantId,organizationId,personId]);
+      await identityAdmin.query(`INSERT INTO symphony.appointments(organization_id,person_id,position_id,started_at,source_ref)
+        VALUES($1,$2,'00000000-0000-4000-8000-000000000003',clock_timestamp()-interval '1 hour','integration-fixture')`,[organizationId,personId]);
+      await identityAdmin.query(`INSERT INTO symphony.appointments(organization_id,person_id,position_id,started_at,ended_at,source_ref)
+        VALUES($1,$2,'00000000-0000-4000-8000-000000000002',clock_timestamp()-interval '2 hours',clock_timestamp()-interval '1 hour','expired-fixture')`,[organizationId,personId]);
+      await identityAdmin.query(`INSERT INTO symphony.capacity_grants(user_id,organization_id,capacity_type,granted_by_user_id,granted_at)
+        VALUES($1,$2,'internal_verifier',$1,clock_timestamp()-interval '1 hour')`,[userId,organizationId]);
+      await identityAdmin.query(`INSERT INTO symphony.capacity_grants(user_id,organization_id,capacity_type,granted_by_user_id,granted_at,revoked_at)
+        VALUES($1,$2,'field_agent',$1,clock_timestamp()-interval '2 hours',clock_timestamp()-interval '1 hour')`,[userId,organizationId]);
+      await identityAdmin.query('INSERT INTO symphony.platform_roles(id,code,name) VALUES($1,\'programme_manager\',\'Programme manager\')',[roleId]);
+      await identityAdmin.query(`INSERT INTO symphony.user_role_assignments(user_id,platform_role_id,tenant_id,granted_at)
+        VALUES($1,$2,$3,clock_timestamp()-interval '1 day')`,[userId,roleId,tenantId]);
+      await identityAdmin.query(`INSERT INTO symphony.programme_manager_scopes(id,tenant_id,programme_manager_user_id,target_organization_id,scope_kind,granted_at,source_ref)
+        VALUES($1,$2,$3,$4,'ta_delegation',clock_timestamp()-interval '1 day','integration-fixture')`,[managerScopeId,tenantId,userId,organizationId]);
+      await identityAdmin.query(`INSERT INTO symphony.institutional_role_assignments(tenant_id,user_id,institution_organization_id,role_code,granted_at,source_ref)
+        VALUES($1,$2,$3,'union_ta',clock_timestamp()-interval '1 day','integration-fixture')`,[tenantId,userId,unionId]);
+      await identityAdmin.query(`INSERT INTO symphony.ta_scope_delegations(id,tenant_id,programme_manager_user_id,union_organization_id,delegatee_user_id,target_organization_id,granted_at,agreement_ref)
+        VALUES($1,$2,$3,$4,$3,$5,clock_timestamp()-interval '1 day','agreement-fixture')`,[taScopeId,tenantId,userId,unionId,organizationId]);
+      await identityAdmin.query(`INSERT INTO symphony.enrolment_sessions(tenant_id,enroller_user_id,organization_id,started_at)
+        VALUES($1,$2,$3,clock_timestamp()-interval '1 hour')`,[tenantId,userId,organizationId]);
+      await identityAdmin.query('COMMIT');
+    } catch(error) { await identityAdmin.query('ROLLBACK').catch(()=>undefined);throw error; }
+    finally { identityAdmin.release(); }
     const credentialService=new CredentialLifecycleService({now:()=>new Date().toISOString()});
     const material=await credentialService.issueTemporaryCredential();temporaryCredential=material.plaintext;
     await new PostgresCredentialRepository(appPoolA).issueTemporaryCredential({
@@ -103,8 +143,10 @@ describe.skipIf(!enabled)('WP5.3 Fastify and PostgreSQL integration',()=>{
     });
     const authA=createAuthComposition({pool:appPoolA,config:profile,throttleHmacKey:hmacKey});
     const authB=createAuthComposition({pool:appPoolB,config:profile,throttleHmacKey:hmacKey});
-    appA=buildApiServer({config:profile,routes:{authentication:authA.authentication,verifyCsrf:authA.verifyCsrf,authorize:authA.authorize,rotateSession:authA.rotateSession}});
-    appB=buildApiServer({config:profile,routes:{authentication:authB.authentication,verifyCsrf:authB.verifyCsrf,authorize:authB.authorize,rotateSession:authB.rotateSession}});
+    const contextA=createWorkspaceContextRoutes(new PostgresWorkspaceContextRepository(appPoolA));
+    const contextB=createWorkspaceContextRoutes(new PostgresWorkspaceContextRepository(appPoolB));
+    appA=buildApiServer({config:profile,routes:{authentication:authA.authentication,verifyCsrf:authA.verifyCsrf,authorize:authA.authorize,rotateSession:authA.rotateSession,workspace:contextA}});
+    appB=buildApiServer({config:profile,routes:{authentication:authB.authentication,verifyCsrf:authB.verifyCsrf,authorize:authB.authorize,rotateSession:authB.rotateSession,workspace:contextB}});
     await Promise.all([appA.ready(),appB.ready()]);
   },60_000);
 
@@ -123,6 +165,7 @@ describe.skipIf(!enabled)('WP5.3 Fastify and PostgreSQL integration',()=>{
     const csrf=await appA.inject({method:'GET',url:'/auth/csrf'});
     const login=await appA.inject({method:'POST',url:'/auth/login',headers:{cookie:cookie(csrf),origin:profile.publicOrigin,'x-csrf-token':csrf.json<{csrfToken:string}>().csrfToken},payload:{userId,credential:temporaryCredential,deviceId:'postgres-browser'}});
     expect(login.statusCode).toBe(200);expect(login.json()).toEqual({forcedChangeRequired:true});
+    expect((await appA.inject({method:'GET',url:'/workspace/context',headers:{cookie:cookie(login)}})).statusCode).toBe(403);
     const eventClient=await isolatedAdmin.connect();
     try {
       await eventClient.query('BEGIN');
@@ -157,6 +200,18 @@ describe.skipIf(!enabled)('WP5.3 Fastify and PostgreSQL integration',()=>{
     const freshCsrf=await appA.inject({method:'GET',url:'/auth/csrf'});
     const freshLogin=await appA.inject({method:'POST',url:'/auth/login',headers:{cookie:cookie(freshCsrf),origin:profile.publicOrigin,'x-csrf-token':freshCsrf.json<{csrfToken:string}>().csrfToken},payload:{userId,credential:newPassword,deviceId:'postgres-browser-2'}});
     expect(freshLogin.statusCode).toBe(200);expect(freshLogin.json()).toEqual({forcedChangeRequired:false});
+    const context=await appA.inject({method:'GET',url:'/workspace/context?userId='+randomUUID(),headers:{cookie:cookie(freshLogin)}});
+    expect(context.statusCode).toBe(200);
+    expect(context.headers['cache-control']).toBe('no-store, private');
+    const facts=context.json<{data:{tenantId:string;userId:string;personId:string;facts:{kind:string;authority:string;organizationId:string|null;scopeOrganizationIds:string[]}[]}}>().data;
+    expect(facts).toMatchObject({tenantId,userId,personId});
+    expect(facts.facts.map((fact)=>`${fact.kind}:${fact.authority}`)).toEqual([
+      'appointment:secretary','capacity:internal_verifier','enrolment:self_enroller','institutional_role:union_ta',
+      'membership:member','platform_role:programme_manager','platform_role:programme_manager_ta_delegation_scope',
+    ]);
+    expect(facts.facts.find((fact)=>fact.kind==='institutional_role')?.scopeOrganizationIds).toEqual([organizationId]);
+    expect(facts.facts.some((fact)=>fact.authority==='vice_chairperson' || fact.authority==='field_agent')).toBe(false);
+    expect(context.body).not.toContain('@example.invalid');
   },60_000);
 
   it('records generic failed attempts from two independent Fastify instances in one shared PostgreSQL throttle store',async()=>{

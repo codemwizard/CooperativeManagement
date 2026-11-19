@@ -5,6 +5,7 @@ import type { ApiRuntimeConfig } from './runtime-config.js';
 export interface ApiRouteComposition {
   readonly authentication?: FastifyPluginAsync;
   readonly commands?: FastifyPluginAsync;
+  readonly workspace?: FastifyPluginAsync;
   /** Session/pre-auth-token validation is supplied by the authentication composition. */
   verifyCsrf?(request: FastifyRequest): Promise<boolean>;
   /** Enforces persisted-session authentication and forced-change route restrictions. */
@@ -136,5 +137,6 @@ export function buildApiServer(options: ApiServerOptions): FastifyInstance {
 
   if (options.routes?.authentication) app.register(options.routes.authentication);
   if (options.routes?.commands) app.register(options.routes.commands);
+  if (options.routes?.workspace) app.register(options.routes.workspace);
   return app;
 }

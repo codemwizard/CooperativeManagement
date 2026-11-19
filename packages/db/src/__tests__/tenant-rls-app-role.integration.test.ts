@@ -156,7 +156,7 @@ describe('WP1.5 actual restricted-role tenant isolation', () => {
     await Promise.all([db.destroy(), recoveryDb.destroy(), app.end(), admin.end()]);
   }, 30_000);
 
-  it('matches all migrated tables, all 39 PostgreSQL tenant policy expressions, the frozen manifest, and effective grants', async () => {
+  it('matches all migrated tables, all 44 PostgreSQL tenant policy expressions, the frozen manifest, and effective grants', async () => {
     const expectedTables = [...inventory.tables, ...inventory.planned_phase1_tables].map((row) => row.table).sort();
     const actual = await admin.query<{ table_name: string; table_owner: string; relrowsecurity: boolean; relforcerowsecurity: boolean }>(
       `SELECT c.relname AS table_name, pg_get_userbyid(c.relowner) AS table_owner,
@@ -170,7 +170,7 @@ describe('WP1.5 actual restricted-role tenant isolation', () => {
 
     const policies = new Map([...matrix.tables, ...matrix.planned_phase1_tables].map((row) => [row.table, row]));
     const tenantRows = [...policies.values()].filter((row) => row.classification === 'tenant_scoped');
-    expect(tenantRows).toHaveLength(39);
+    expect(tenantRows).toHaveLength(44);
     expect(manifest.table_count).toBe(tenantRows.length);
     expect(manifest.required_tenant_scoped_count).toBe(tenantRows.length);
     expect(tenantPolicyTableSetErrors(
@@ -470,7 +470,7 @@ describe('WP1.5 actual restricted-role tenant isolation', () => {
       'state', 'person', 'personIdentifier', 'platformRole', 'roleAssignment', 'event',
       'capacityGrant', 'delegation', 'enrolmentSession', 'approvalPolicy', 'organizationEnrollment',
       'handover', 'evidenceVersion', 'supportItem', 'admission', 'verificationAssignment',
-      'finding', 'requirement', 'requirementLink', 'appointment', 'bylawDocument', 'bylawVersion', 'bylawProvision',
+      'finding', 'userPersonLink', 'requirement', 'requirementLink', 'appointment', 'bylawDocument', 'bylawVersion', 'bylawProvision',
       'temporaryCredential', 'passwordCredential',
     ].map((key) => [key, randomUUID()]));
     const fixtureRows: { table: string; id: string }[] = [];
@@ -540,8 +540,14 @@ describe('WP1.5 actual restricted-role tenant isolation', () => {
         'INSERT INTO symphony.evidence_admissions (id,evidence_version_id,admitted_by_user_id,admission_kind) VALUES ($1,$2,$3,$4)',
         [ids.admission, ids.evidenceVersion, userB, 'claim_admission']);
       await insert('verification_assignments', ids.verificationAssignment!,
-        'INSERT INTO symphony.verification_assignments (id,evidence_item_id,assigned_to_user_id,evidence_version_id) VALUES ($1,$2,$3,$4)',
+        'INSERT INTO symphony.verification_assignments (id,evidence_item_id,assigned_to_user_id,evidence_version_id,completed_at) VALUES ($1,$2,$3,$4,now() - interval \'30 seconds\')',
         [ids.verificationAssignment, itemB, userB, ids.evidenceVersion]);
+      await insert('appointments', ids.appointment!,
+        'INSERT INTO symphony.appointments (id,organization_id,person_id,position_id,started_at,source_ref) VALUES ($1,$2,$3,$4,now() - interval \'1 minute\',$5)',
+        [ids.appointment, organizationB, ids.person, '00000000-0000-4000-8000-000000000003', `wp15-source-${ids.appointment}`]);
+      await insert('user_person_links', ids.userPersonLink!,
+        'INSERT INTO symphony.user_person_links (id,tenant_id,user_id,person_id,linked_at,source_ref,linked_by_user_id) VALUES ($1,$2,$3,$4,now() - interval \'2 minutes\',$5,$3)',
+        [ids.userPersonLink, tenantB, userB, ids.person, `wp15-link-${ids.userPersonLink}`]);
       await insert('verification_findings', ids.finding!,
         'INSERT INTO symphony.verification_findings (id,assignment_id,evidence_version_id,assurance_class,result) VALUES ($1,$2,$3,$4,$5)',
         [ids.finding, ids.verificationAssignment, ids.evidenceVersion, 'wp15_fixture', 'pass']);
@@ -551,9 +557,6 @@ describe('WP1.5 actual restricted-role tenant isolation', () => {
       await insert('evidence_requirement_links', ids.requirementLink!,
         'INSERT INTO symphony.evidence_requirement_links (id,evidence_item_id,requirement_id) VALUES ($1,$2,$3)',
         [ids.requirementLink, itemB, ids.requirement]);
-      await insert('appointments', ids.appointment!,
-        'INSERT INTO symphony.appointments (id,organization_id,person_id,position_id,started_at) VALUES ($1,$2,$3,$4,now())',
-        [ids.appointment, organizationB, ids.person, randomUUID()]);
       await insert('bylaw_documents', ids.bylawDocument!,
         'INSERT INTO symphony.bylaw_documents (id,organization_id) VALUES ($1,$2)',
         [ids.bylawDocument, organizationB]);
