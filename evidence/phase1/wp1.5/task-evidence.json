@@ -6,14 +6,14 @@
     "unit_test": "passed",
     "integration_test": "passed",
     "bdd_ui_test": "passed",
-    "gate_verified": "pending"
+    "gate_verified": "passed"
   },
-  "commit": "8eb49ca4a4707080f216d7c10f4246854e6b4857",
+  "commit": "6f145875761a2c356bab790324c8a5615ec03652",
   "environment": {
     "node": "v26.7.0",
     "npm": "12.2.0",
-    "postgres": "PostgreSQL 18.0; server_version_num=180000; isolated disposable local cluster",
-    "database_role": "postgres admin; symphony_migrator, symphony_app and symphony_outbox_writer; finalizer passed",
+    "postgres": "PostgreSQL 18.0; fresh disposable UTF-8 cluster in OS temp directory; server_version_num=180000",
+    "database_role": "postgres admin; isolated symphony_migrator, symphony_app and symphony_outbox_writer; role finalizer passed",
     "data_mode": "test",
     "key_provider": "unknown"
   },
@@ -72,22 +72,110 @@
       "artifact": "evidence/phase1/wp1.5/reestablished/task-evidence-schema-validation.raw.log",
       "result": "passed",
       "command": "AJV 2020 validate task evidence schema"
+    },
+    {
+      "command": "npm run test:db --workspace @symphony/db using the configured shared test database (diagnostic attempt)",
+      "result": "failed",
+      "artifact": "evidence/phase1/wp1.5/reestablished/candidate-shared-db-suite-failed.raw.log"
+    },
+    {
+      "command": "npm run db:migrate:test after disposable cluster initialization with Windows default WIN1252 (diagnostic attempt)",
+      "result": "failed",
+      "artifact": "evidence/phase1/wp1.5/reestablished/candidate-disposable-db-migrate-win1252-failed.raw.log"
+    },
+    {
+      "command": "npm run db:migrate:test on a fresh disposable UTF-8 PostgreSQL 18 cluster; migrations 0001-0015",
+      "result": "passed",
+      "artifact": "evidence/phase1/wp1.5/reestablished/candidate-merge-db-migrate.raw.log"
+    },
+    {
+      "command": "npm run test:db --workspace @symphony/db on a fresh disposable UTF-8 PostgreSQL 18 cluster (12 files, 65 tests)",
+      "result": "passed",
+      "artifact": "evidence/phase1/wp1.5/reestablished/candidate-merge-postgres-db-suite.raw.log"
+    },
+    {
+      "command": "npm run test:bdd:wp1.5 on a fresh disposable UTF-8 PostgreSQL 18 cluster (BDD-AUD-005)",
+      "result": "passed",
+      "artifact": "evidence/phase1/wp1.5/reestablished/candidate-merge-postgres-bdd.raw.log"
+    },
+    {
+      "command": "npm run verify:phase0 on candidate source tree; exit 0",
+      "result": "passed",
+      "artifact": "evidence/phase1/wp1.5/reestablished/candidate-merge-phase0-gate.raw.log"
+    },
+    {
+      "command": "node tools/finalize_wp1_5_database.mjs on a fresh disposable UTF-8 PostgreSQL 18 cluster",
+      "result": "passed",
+      "artifact": "evidence/phase1/wp1.5/reestablished/candidate-merge-role-finalizer.raw.log"
+    },
+    {
+      "command": "npm run verify:phase1:contracts (112 tests; structural validator)",
+      "result": "passed",
+      "artifact": "evidence/phase1/wp1.5/reestablished/candidate-merge-phase1-contracts.raw.log"
+    },
+    {
+      "command": "npm run test:toolchain (5 tests)",
+      "result": "passed",
+      "artifact": "evidence/phase1/wp1.5/reestablished/candidate-merge-toolchain-tests.raw.log"
+    },
+    {
+      "command": "npm run verify:toolchain",
+      "result": "passed",
+      "artifact": "evidence/phase1/wp1.5/reestablished/candidate-merge-toolchain-verify.raw.log"
+    },
+    {
+      "command": "GitHub Actions run 44575936287 Phase 0 job; exact candidate SHA; success",
+      "result": "passed",
+      "artifact": "evidence/phase1/wp1.5/ci/6f145875761a2c356bab790324c8a5615ec03652/phase0/phase0-ci-evidence.json"
+    },
+    {
+      "command": "GitHub Actions run 44575936287 restricted-role DB integration job; exact candidate SHA; success",
+      "result": "passed",
+      "artifact": "evidence/phase1/wp1.5/ci/6f145875761a2c356bab790324c8a5615ec03652/database/db-integration.raw.log"
+    },
+    {
+      "command": "GitHub Actions run 44575936287 WP1.5 BDD-AUD-005; 1 scenario and 7 steps passed",
+      "result": "passed",
+      "artifact": "evidence/phase1/wp1.5/ci/6f145875761a2c356bab790324c8a5615ec03652/database/bdd-wp1.5.raw.log"
+    },
+    {
+      "command": "GitHub Actions run 44575936287 role finalizer; exact candidate SHA; success",
+      "result": "passed",
+      "artifact": "evidence/phase1/wp1.5/ci/6f145875761a2c356bab790324c8a5615ec03652/database/role-finalizer.raw.log"
+    },
+    {
+      "command": "GitHub Actions retained artifact sizes and local SHA-256 verification",
+      "result": "passed",
+      "artifact": "evidence/phase1/wp1.5/ci/6f145875761a2c356bab790324c8a5615ec03652/provider-artifact-manifest.json"
+    },
+    {
+      "command": "GitHub Actions run 44575936287 separate legacy verify:all job (not WP1.5 acceptance); 33 passed, 2 failed login UI tests",
+      "result": "failed",
+      "artifact": "evidence/phase1/wp1.5/ci/6f145875761a2c356bab790324c8a5615ec03652/legacy/verify-all.raw.log"
+    },
+    {
+      "command": "Verify REM-WP0.3, REM-WP1.2 and REM-WP1.4 passing records and implementation ancestry to candidate",
+      "result": "passed",
+      "artifact": "evidence/phase1/wp1.5/reestablished/predecessor-evidence-checks.raw.log"
     }
   ],
   "claims": {
-    "behavior_proved": "On isolated source candidate 8eb49ca4a4707080f216d7c10f4246854e6b4857, clean PostgreSQL 18 migrations applied 0001-0015. All 12 @symphony/db test files passed (65 tests), including migration clean-install/replay, 0012-to-0013 upgrade rollback/retry, secret redaction, all 39 tenant policy catalog expressions/effective grants, missing/empty/mismatched context, inherited-parent app-role behavior, pool reuse, outbox boundary, and credential/session regressions. WP1.5 BDD-AUD-005 passed 1 scenario/7 steps using the actual restricted app role. The role finalizer verified temporary migration membership removal. Phase 0 component gate and legacy regression floor passed locally.",
-    "path_proved": "Local candidate evidence ran in the clean isolated worktree codex/wp1.5-reestablished at source SHA 8eb49ca4a4707080f216d7c10f4246854e6b4857 against a separately initialized disposable PostgreSQL 18 cluster. Candidate-specific hosted CI has not yet run and is not claimed.",
-    "configuration_proved": "Node v26.7.0; npm 12.2.0; PostgreSQL 18.0 server_version_num=180000; DATA_MODE=test; NODE_ENV=test and SYNTHETIC_ONLY=true for BDD; separate symphony_migrator and symphony_app roles; role finalization verified all temporary memberships removed. Generated passwords remained in an OS temp-only CI environment file and were not printed or committed.",
+    "behavior_proved": "On isolated source candidate 8eb49ca4a4707080f216d7c10f4246854e6b4857, clean PostgreSQL 18 migrations applied 0001-0015. All 12 @symphony/db test files passed (65 tests), including migration clean-install/replay, 0012-to-0013 upgrade rollback/retry, secret redaction, all 39 tenant policy catalog expressions/effective grants, missing/empty/mismatched context, inherited-parent app-role behavior, pool reuse, outbox boundary, and credential/session regressions. WP1.5 BDD-AUD-005 passed 1 scenario/7 steps using the actual restricted app role. The role finalizer verified temporary migration membership removal. Phase 0 component gate and legacy regression floor passed locally. Revalidated after merging origin/main at candidate commit 6f145875761a2c356bab790324c8a5615ec03652: fresh UTF-8 disposable PostgreSQL 18 applied migrations 0001-0015; the @symphony/db suite passed 12/12 files and 65/65 tests; BDD-AUD-005 passed 1/1 scenario and 7/7 steps; npm run verify:phase0 exited 0; final role state passed. The configured shared test database was unsuitable because a later D-18 trigger caused 4/65 test failures; an initial disposable cluster with WIN1252 could not apply UTF-8 migration content. Both diagnostic failures are retained and were superseded by the isolated UTF-8 run. On candidate SHA 6f145875761a2c356bab790324c8a5615ec03652, hosted GitHub Actions run 44575936287 attempt 1 passed the Phase 0 job and restricted-role DB integration/WP1.5 job. The latter applied migrations 0001-0015, passed all 12 DB files/65 tests, passed BDD-AUD-005 (1 scenario/7 steps), and passed the always-run role finalizer. Hosted Phase 0 metadata records Node 26.7.0, npm 12.2.0, PostgreSQL 18.0. Retained artifacts were downloaded, their published byte sizes matched, and local bundle SHA-256 values and extracted file hashes are recorded.",
+    "path_proved": "Local validation and hosted CI ran against implementation candidate SHA 6f145875761a2c356bab790324c8a5615ec03652 after incorporating fetched origin/main SHA 910fc6055c189133643c52812150b04d38bf01f2. GitHub Actions push run 44575936287 attempt 1: https://github.com/codemwizard/CooperativeManagement/actions/runs/44575936287. Phase 0 and restricted-role DB/WP1.5 jobs passed. The independent legacy-e2e job failed separately; its raw log is retained and classified per the authoritative WP1.5 CI plan. Direct predecessors REM-WP0.3, REM-WP1.2 and REM-WP1.4 have passing records in evidence/phase1/tasks.json and their task-evidence.json files; all three recorded implementation SHAs are ancestors of this candidate, as recorded in predecessor-evidence-checks.raw.log.",
+    "configuration_proved": "Local: Node v26.7.0, npm 12.2.0, fresh disposable UTF-8 PostgreSQL 18.0 cluster, DATA_MODE=test, isolated migrator/app/writer roles. Hosted: Node 26.7.0, npm 12.2.0, PostgreSQL 18.0; CI bootstrap and finalizer both passed. No generated credentials were printed or retained.",
     "coverage_limitations": [
-      "Hosted CI for immutable source SHA 8eb49ca4a4707080f216d7c10f4246854e6b4857 and retention/checksum verification of its artifact bundle remain outstanding; gate_verified intentionally remains pending.",
-      "Independent review remains separate governance evidence and is not claimed.",
+      "The overall GitHub Actions workflow conclusion is failure because the separate legacy-e2e job had 2 login UI failures (33 passed); the WP1.5 CI plan explicitly says verify:all browser failures do not establish or negate WP1.5 database acceptance. Do not report full repository CI as green.",
+      "Independent WP1.5 review remains separate governance evidence and is not claimed.",
+      "The candidate contains 18 commits beyond its merge-base with main, including shared work-package history; review/split cumulative scope before merging it into main.",
       "This task does not close Phase 1 or authorize downstream work beyond the dependency graph."
     ]
   },
   "limitations": [
-    "Local exact-candidate PostgreSQL, WP1.5 BDD, Phase 0, build and legacy-floor checks passed; hosted same-SHA CI has not been observed. Do not set gate_verified=passed until its required candidate-specific artifact evidence is obtained and reconciled.",
+    "REM-WP1.5 gate acceptance is passed for candidate 6f145875761a2c356bab790324c8a5615ec03652 based on required hosted Phase 0 and restricted-role DB/WP1.5 checks plus retained checksummed artifacts.",
+    "The workflow overall is red due to tests/workspace/login.spec.ts:19 validCredentials_redirectsToWorkspace and :65 temporaryCredential_promptsPasswordChange. Both failed because /auth/session was proxied to 127.0.0.1:3000 with ECONNREFUSED; this is separate from the WP1.5 gate. Full repository CI is not green.",
+    "Candidate includes 18 commits beyond merge-base with origin/main. The WP1.5 gate pass does not authorize merging the cumulative branch into main without scope review.",
     "Historical d7fb CI artifacts remain unchanged and candidate-specific."
   ],
   "unresolved_decisions": [],
-  "reviewer": "Local candidate evidence reconciled by Codex; no independent review or hosted CI sign-off claimed."
+  "reviewer": "Codex reconciled local and hosted candidate evidence. Independent WP1.5 review remains separate and is not claimed."
 }

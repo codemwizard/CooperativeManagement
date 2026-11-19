@@ -41,3 +41,35 @@ The first exact candidate Phase 0 run reached the legacy-floor build and reporte
 
 No manual dependency override or downstream gate pass is claimed.
 
+
+## Revalidation after incorporating remote main
+
+Candidate commit: 6f145875761a2c356bab790324c8a5615ec03652 (merge of fetched origin/main SHA 910fc6055c189133643c52812150b04d38bf01f2). The working tree outside WP1.5 evidence matches the earlier tested source tree at 8eb49ca4a4707080f216d7c10f4246854e6b4857.
+
+| Check | Result | Evidence |
+|---|---|---|
+| Apply migrations 0001–0015 on fresh disposable PostgreSQL 18 UTF-8 cluster | Passed | candidate-merge-db-migrate.raw.log |
+| Restricted-role PostgreSQL suite | 12/12 files, 65/65 tests passed | candidate-merge-postgres-db-suite.raw.log |
+| WP1.5 BDD-AUD-005 | 1/1 scenario, 7/7 steps passed | candidate-merge-postgres-bdd.raw.log |
+| Phase 0 gate | Exit 0; all constituent checks completed | candidate-merge-phase0-gate.raw.log |
+| Role finalizer | Passed | candidate-merge-role-finalizer.raw.log |
+
+The first attempt against the configured shared test database failed 4/65 database tests because its D-18 trigger reflected later schema state. The next fresh-cluster attempt used Windows default WIN1252 encoding and could not apply migration 0001. Both diagnostic logs are retained; neither is used as acceptance evidence. A fresh UTF-8 PostgreSQL 18 cluster then passed the listed checks. The Phase 0 log includes an esbuild “The build was canceled” line after the accessibility test passed; the overall verifier returned exit 0 and its remaining legacy-floor checks passed.
+
+Gate remains pending: hosted CI for the candidate and hosted artifact retention/checksum reconciliation have not yet occurred. The candidate is 18 commits ahead of the current main merge-base and includes broader shared work-package history; review the full PR scope before merging to main.
+
+## Hosted candidate CI and final WP1.5 gate disposition
+
+Candidate SHA: 6f145875761a2c356bab790324c8a5615ec03652. GitHub Actions run 44575936287, attempt 1, push branch phase/wp1.5-reestablished.
+
+| Required result | Verification | Evidence |
+|---|---|---|
+| Phase 0 job | Passed | evidence/phase1/wp1.5/ci/6f145875761a2c356bab790324c8a5615ec03652/phase0/phase0-ci-evidence.json |
+| Restricted-role DB/WP1.5 job | Passed; 12 files and 65 tests | evidence/phase1/wp1.5/ci/6f145875761a2c356bab790324c8a5615ec03652/database/db-integration.raw.log |
+| WP1.5 cross-organisation BDD-AUD-005 | Passed; 1 scenario and 7 steps | evidence/phase1/wp1.5/ci/6f145875761a2c356bab790324c8a5615ec03652/database/bdd-wp1.5.raw.log |
+| Always-run role finalizer | Passed | evidence/phase1/wp1.5/ci/6f145875761a2c356bab790324c8a5615ec03652/database/role-finalizer.raw.log |
+| Artifact retention and checksums | Three hosted bundles, 90-day retention; download sizes and SHA-256 verified | evidence/phase1/wp1.5/ci/6f145875761a2c356bab790324c8a5615ec03652/provider-artifact-manifest.json and SHA256SUMS.txt |
+
+The overall workflow conclusion is failure because the separate legacy-e2e job failed two tests in tests/workspace/login.spec.ts (33 passed). The Vite proxy could not connect to the absent API server at 127.0.0.1:3000 for /auth/session. The authoritative WP1.5 CI plan says verify:all browser failures are separately reported and do not establish or negate WP1.5 DB acceptance. Therefore REM-WP1.5 gate_verified is passed for this exact candidate, while full repository CI remains red.
+
+The candidate branch includes 18 commits beyond the current main merge-base. The gate result does not authorize merging that cumulative history into main; review/split its broader work-package scope separately.

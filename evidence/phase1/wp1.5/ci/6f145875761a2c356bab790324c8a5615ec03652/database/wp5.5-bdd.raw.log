@@ -1,0 +1,16 @@
+npm notice run symphony-prototype@1.0.0 test:wp5.5
+npm notice run node --env-file-if-exists=.env.local --env-file-if-exists=.env tools/run_wp5_5_live_bdd.mjs
+.env.local not found. Continuing without it.
+.env not found. Continuing without it.
+.env.local not found. Continuing without it.
+.env not found. Continuing without it.
+
+  [32m[1mVITE[22m v5.4.21[39m  [2mready in [0m[1m885[22m[2m[0m ms[22m
+
+  [32m➜[39m  [1mLocal[22m:   [36mhttp://127.0.0.1:[1m5174[22m/[39m
+...............
+
+1 scenario (1 passed)
+15 steps (15 passed)
+0m 1.474s (0m 1.445s executing your code)
+PASS: BDD-ENR-004 executed through workspace, API and PostgreSQL.

@@ -1,0 +1,3 @@
+npm notice run symphony-prototype@1.0.0 verify:toolchain
+npm notice run node tools/verify_toolchain.mjs
+PASS: Node 26.7.0, npm 12.2.0, PostgreSQL 18.0 (package build 18.0-2).

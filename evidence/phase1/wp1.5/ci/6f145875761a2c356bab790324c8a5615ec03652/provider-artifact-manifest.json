@@ -1,0 +1,85 @@
+{
+  "schema_version": 1,
+  "repository": "codemwizard/CooperativeManagement",
+  "workflow": "Symphony Phase 0 Gate",
+  "run_id": 44575936287,
+  "run_attempt": 1,
+  "run_url": "https://github.com/codemwizard/CooperativeManagement/actions/runs/44575936287",
+  "event": "push",
+  "branch": "phase/wp1.5-reestablished",
+  "head_sha": "6f145875761a2c356bab790324c8a5615ec03652",
+  "completed_at": "2026-11-19T17:21:41Z",
+  "overall_conclusion": "failure",
+  "jobs": [
+    {
+      "name": "Reproducible Phase 0 foundation",
+      "conclusion": "success",
+      "evidence": "evidence/phase1/wp1.5/ci/6f145875761a2c356bab790324c8a5615ec03652/phase0/phase0-ci-evidence.json"
+    },
+    {
+      "name": "Restricted-role DB integration and WP1.5 tenant isolation",
+      "conclusion": "success",
+      "evidence": [
+        "evidence/phase1/wp1.5/ci/6f145875761a2c356bab790324c8a5615ec03652/database/db-integration.raw.log",
+        "evidence/phase1/wp1.5/ci/6f145875761a2c356bab790324c8a5615ec03652/database/bdd-wp1.5.raw.log",
+        "evidence/phase1/wp1.5/ci/6f145875761a2c356bab790324c8a5615ec03652/database/role-finalizer.raw.log"
+      ]
+    },
+    {
+      "name": "Existing full legacy E2E suite",
+      "conclusion": "failure",
+      "evidence": "evidence/phase1/wp1.5/ci/6f145875761a2c356bab790324c8a5615ec03652/legacy/verify-all.raw.log",
+      "failed_tests": [
+        "tests/workspace/login.spec.ts:19 validCredentials_redirectsToWorkspace",
+        "tests/workspace/login.spec.ts:65 temporaryCredential_promptsPasswordChange"
+      ],
+      "reason": "The legacy Playwright run had no API server listening at 127.0.0.1:3000; Vite proxy requests to /auth/session failed with ECONNREFUSED. 33 tests passed and 2 failed."
+    }
+  ],
+  "wp1_5_ci_acceptance": {
+    "result": "passed",
+    "basis": "The candidate db-integration job passed clean migration setup, the full actual-role DB suite, BDD-AUD-005, and the always-run role finalizer; the Phase 0 job passed. The authoritative WP1.5 CI plan classifies verify:all browser failures separately and states they do not establish or negate WP1.5 DB acceptance.",
+    "authority": "Implementation-Plan-V4/implementation/WP1.5-CI-REMEDIATION-AND-CLOSEOUT-PLAN.md §6"
+  },
+  "full_repository_ci_green": false,
+  "artifacts": [
+    {
+      "name": "verify-all-evidence-6f145875761a2c356bab790324c8a5615ec03652",
+      "artifact_id": 14557585257,
+      "size_bytes": 4592,
+      "sha256": "ef3d9ea388839c78d90de0b7556f3a053b5acd989e10610671b4074db8491832",
+      "retention_days": 90,
+      "expired": false,
+      "local_evidence": "evidence/phase1/wp1.5/ci/6f145875761a2c356bab790324c8a5615ec03652/legacy/verify-all.raw.log"
+    },
+    {
+      "name": "phase0-evidence-6f145875761a2c356bab790324c8a5615ec03652",
+      "artifact_id": 14557490522,
+      "size_bytes": 13795,
+      "sha256": "fef6ed16bdca6ba407080eb320677581377f04e3276418691e5e95ffdc9d10cc",
+      "retention_days": 90,
+      "expired": false,
+      "local_evidence": [
+        "evidence/phase1/wp1.5/ci/6f145875761a2c356bab790324c8a5615ec03652/phase0/phase0-gate.raw.log",
+        "evidence/phase1/wp1.5/ci/6f145875761a2c356bab790324c8a5615ec03652/phase0/phase0-gate.sanitized.log",
+        "evidence/phase1/wp1.5/ci/6f145875761a2c356bab790324c8a5615ec03652/phase0/phase0-ci-evidence.json"
+      ]
+    },
+    {
+      "name": "wp1.5-db-evidence-6f145875761a2c356bab790324c8a5615ec03652",
+      "artifact_id": 14557486069,
+      "size_bytes": 10835,
+      "sha256": "382022551b9462e0e0de2f11fa63e0f1e2f64ca920490b8d27619b56456a630b",
+      "retention_days": 90,
+      "expired": false,
+      "local_evidence": [
+        "evidence/phase1/wp1.5/ci/6f145875761a2c356bab790324c8a5615ec03652/database"
+      ]
+    }
+  ],
+  "downloaded_bundle_bytes_and_hashes_verified": true,
+  "raw_log_credential_url_scan": {
+    "files_scanned": 12,
+    "credential_url_patterns_found": 0
+  }
+}
