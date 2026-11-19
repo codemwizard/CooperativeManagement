@@ -8,7 +8,7 @@
     "bdd_ui_test": "not_applicable",
     "gate_verified": "pending"
   },
-  "commit": "9e9d8ddb529f41258b043c0df217c4beaa58a7f8",
+  "commit": "62443bf2811e8acfcd16e214514c6f95b7d024c6",
   "environment": {
     "node": "v26.7.0",
     "npm": "v12.2.0 (global npm prefix prepended for this run)",
@@ -47,24 +47,30 @@
       "command": "git diff --check",
       "result": "passed",
       "artifact": "evidence/phase1/wp2.2/diff-check.log"
+    },
+    {
+      "command": "Merge codex/rem-wp2.2-exact onto codex/wp1.5-reestablished; integration candidate 62443bf",
+      "result": "passed",
+      "artifact": "evidence/phase1/wp2.2/integration-merge-record.md"
     }
   ],
   "claims": {
     "behavior_proved": "The authenticated API returns only current persisted, same-tenant identity/membership/appointment/capacity/platform/institutional/delegation/enrolment facts derived from the opaque server session. Person and account identities remain separate. Cooperative membership is independent from office appointments. Current chairperson, vice-chairperson, secretary and treasurer appointments resolve as typed authority facts. Expired appointments and grants are omitted; Union TA scope requires the persisted role, active delegation, still-active programme-manager role and matching persisted manager scope. The API returns no account email or person PII and denies forced-change sessions.",
-    "path_proved": "A real Fastify API integration uses symphony_app against PostgreSQL and asserts session identity cannot be overridden by a userId query parameter. It verifies current persisted identity, membership, appointment, capacity, platform, institutional, delegation and enrolment facts, including expired/revoked filtering and no account email/PII leakage. This evidence is limited to the WP2.2 trusted authority resolver; persona navigation and verified-finding presentation are owned by WP6.1.",
+    "path_proved": "The original WP2.2 API and PostgreSQL evidence was executed on implementation candidate 9e9d8ddb529f41258b043c0df217c4beaa58a7f8. WP2.2 was merged into the WP1.5 integration spine at candidate 62443bf2811e8acfcd16e214514c6f95b7d024c6; its source and retained artifacts are present in that candidate. Exact-candidate closure verification and any required reruns on the merged candidate remain outstanding.",
     "configuration_proved": "Local synthetic test mode only. PostgreSQL is 18.0; resolver operations run as symphony_app in a read-only repeatable-read transaction with transaction-local app.tenant_id. The runtime role has SELECT-only access to the five resolver source tables and the global position catalogue. Fixture setup uses the isolated test administrator path.",
     "coverage_limitations": [
       "WP2.2 is a trusted read model. It does not implement account/person link, membership, appointment, capacity, institutional-role or delegation grant/revoke commands.",
       "Member activity and household data-entry workflows remain unimplemented; their current screens are explicit capability gaps and this task does not add member-data persistence.",
       "Programme-manager projection is the owner-directed interim same-tenant universal read projection. Production multi-party deployment should replace it with explicit organization agreements/scopes.",
       "Union TA scope is persisted as direct cooperative organization IDs because no cohort aggregate/lifecycle exists; cohort command lifecycle is deferred to WP2.3/WP2.4.",
-      "Workspace persona mapping and verified-finding display are separate WP6.1 acceptance and are not claimed as WP2.2 implementation."
+      "Workspace persona mapping and verified-finding display are separate WP6.1 acceptance and are not claimed as WP2.2 implementation.",
+      "This task is rebound to merged candidate 62443bf2811e8acfcd16e214514c6f95b7d024c6; the existing API, migration, RLS, typecheck and architecture logs were generated on predecessor source candidate 9e9d8ddb529f41258b043c0df217c4beaa58a7f8 and are not asserted as rerun on the merged commit."
     ]
   },
   "limitations": [
-    "Implementation and test results are not yet pinned to an immutable candidate commit. Gate verification remains pending until exact-candidate verification succeeds.",
-    "The WP6.1 predecessor is not gate-closed by this record. WP6.1 independently owns persona presentation and verified-item provenance acceptance."
+    "The historical WP2.2 integration, migration, RLS, typecheck and architecture commands passed on source candidate 9e9d8ddb529f41258b043c0df217c4beaa58a7f8. They have not yet been re-executed on merged candidate 62443bf2811e8acfcd16e214514c6f95b7d024c6; gate_verified remains pending.",
+    "WP6.1 persona presentation and verified-finding acceptance remain separately owned and are not claimed as WP2.2 completion."
   ],
   "unresolved_decisions": [],
-  "reviewer": "Implementation self-review; the owner supplied the universal projection direction and the account/person, member, persona and Union-TA scope direction. Independent task review remains outstanding."
+  "reviewer": "WP2.2 candidate merged into the WP1.5 integration spine by Codex; exact merged-candidate gate verification and independent review are not claimed."
 }
