@@ -5,6 +5,8 @@ import { pathToFileURL } from 'node:url';
 import { randomBytes } from 'node:crypto';
 import pg from 'pg';
 import { createAuthComposition } from './authentication-composition.js';
+import { PostgresWorkspaceContextRepository } from '@symphony/db';
+import { createWorkspaceContextRoutes } from './routes/workspace-context.js';
 import { createWriteStream, type WriteStream } from 'node:fs';
 
 /** The runtime profile is checked before Fastify opens the listener. */
@@ -32,11 +34,13 @@ export async function startApi(environment: NodeJS.ProcessEnv = process.env): Pr
   const authEvidenceLogPath = environment['WP5_5_API_LOG_PATH'];
   if (authEvidenceLogPath) authEvidenceLog = createWriteStream(authEvidenceLogPath, { flags: 'a' });
   const auth = createAuthComposition({ pool, config, throttleHmacKey });
+  const workspaceContext = new PostgresWorkspaceContextRepository(pool);
   const app = buildApiServer({
     config,
     routes: {
       authentication: auth.authentication, verifyCsrf: auth.verifyCsrf,
       authorize: auth.authorize, rotateSession: auth.rotateSession,
+      workspace: createWorkspaceContextRoutes(workspaceContext),
     },
     ...(authEvidenceLog ? { logStream: authEvidenceLog } : {}),
     readinessChecks: [{ name: 'postgres-auth', check: auth.healthCheck }],

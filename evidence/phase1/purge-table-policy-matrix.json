@@ -55,6 +55,11 @@
     "organization_enrollment",
     "organization_identifiers",
     "organization_requirements",
+    "institutional_role_assignments",
+    "organization_memberships",
+    "programme_manager_scopes",
+    "ta_scope_delegations",
+    "user_person_links",
     "person_identifiers",
     "person_pii_vault",
     "persons",
@@ -231,6 +236,31 @@
       "predicate": "TRUE only after DB marker/profile/role guard passes"
     },
     {
+      "table": "institutional_role_assignments",
+      "disposition": "delete_all_rows_in_marked_isolated_test_database",
+      "predicate": "TRUE only after DB marker/profile/role guard passes"
+    },
+    {
+      "table": "organization_memberships",
+      "disposition": "delete_all_rows_in_marked_isolated_test_database",
+      "predicate": "TRUE only after DB marker/profile/role guard passes"
+    },
+    {
+      "table": "programme_manager_scopes",
+      "disposition": "delete_all_rows_in_marked_isolated_test_database",
+      "predicate": "TRUE only after DB marker/profile/role guard passes"
+    },
+    {
+      "table": "ta_scope_delegations",
+      "disposition": "delete_all_rows_in_marked_isolated_test_database",
+      "predicate": "TRUE only after DB marker/profile/role guard passes"
+    },
+    {
+      "table": "user_person_links",
+      "disposition": "delete_all_rows_in_marked_isolated_test_database",
+      "predicate": "TRUE only after DB marker/profile/role guard passes"
+    },
+    {
       "table": "person_identifiers",
       "disposition": "delete_all_rows_in_marked_isolated_test_database",
       "predicate": "TRUE only after DB marker/profile/role guard passes"
@@ -326,6 +356,7 @@
     "identity_check_methods",
     "legal_sources",
     "platform_roles",
+    "position_catalog",
     "position_combination_rules",
     "retention_policies"
   ],
