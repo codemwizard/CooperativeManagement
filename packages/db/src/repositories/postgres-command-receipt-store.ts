@@ -8,7 +8,7 @@ import type { PostgresCommandTransactionContext } from './postgres-repository.js
 export class PostgresCommandReceiptStore implements CommandReceiptStore {
   private readonly schema: ReturnType<typeof createCommandReceiptSchema>;
 
-  constructor(private readonly resultDataSchemas: CommandResultDataSchemas) {
+  constructor(resultDataSchemas: CommandResultDataSchemas) {
     this.schema = createCommandReceiptSchema(resultDataSchemas);
   }
 

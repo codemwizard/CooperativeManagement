@@ -2,7 +2,7 @@ import { createHmac, randomUUID } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import pg from 'pg';
 import AxeBuilder from '@axe-core/playwright';
-import { expect, test, type BrowserContext, type Page } from '@playwright/test';
+import { expect, test, type Page } from '@playwright/test';
 import { CredentialLifecycleService } from '@symphony/domain/identity/credential-lifecycle';
 import { PostgresCredentialRepository } from '@symphony/db';
 
