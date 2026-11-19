@@ -1,0 +1,25 @@
+npm notice run symphony-prototype@1.0.0 verify:phase1:contracts
+npm notice run npm run test:phase1:contracts && node tools/phase1-contracts.js
+npm notice run symphony-prototype@1.0.0 test:phase1:contracts
+npm notice run npx vitest run tests/tooling/phase1_contracts.test.ts
+npm notice run symphony-prototype@1.0.0 npx
+npm notice run vitest run tests/tooling/phase1_contracts.test.ts
+
+ RUN  v2.1.9 C:/Workspace/GitHub/Prototype/artifacts/exact-candidates/wp1.5
+
+ ✓ tests/tooling/phase1_contracts.test.ts (112 tests) 4682ms
+   ✓ REM-WP0.9 Phase 1 gate contract > proves a failing fixture command prevents later gate commands from running 3435ms
+
+ Test Files  1 passed (1)
+      Tests  112 passed (112)
+   Start at  12:27:15
+   Duration  7.62s (transform 683ms, setup 0ms, collect 1.42s, tests 4.68s, environment 0ms, prepare 983ms)
+
+Phase 1 REM-WP0 contract artifacts are structurally valid.
+Dependency graph: 45 task nodes; all edges are known, justified and acyclic.
+Phase 1 gate manifest: all mandatory commands and BDD scenario source IDs resolve.
+Runtime mode contract: 4 allowed profiles; every other pair is rejected.
+Tenant inventory: 54 baseline + 6 planned table(s) (60 migration tables); 3 baseline tables currently have ENABLE+FORCE RLS.
+REM-WP0.13 is CLOSED (owner approval and candidate pass recorded).
+Project owner: signed; independent reviewer: identified; Phase 1 task authorization and sequencing are governed by the decision register and dependency graph.
+This validates the gate structure only; it does not claim REM-WP0 acceptance or Phase 1 product behavior.

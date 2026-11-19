@@ -4,96 +4,90 @@
   "status": {
     "implementation": "complete",
     "unit_test": "passed",
-    "integration_test": "blocked",
-    "bdd_ui_test": "blocked",
+    "integration_test": "passed",
+    "bdd_ui_test": "passed",
     "gate_verified": "pending"
   },
-  "commit": "b572d252dfd6733940011250918631a6c7f57a27",
+  "commit": "8eb49ca4a4707080f216d7c10f4246854e6b4857",
   "environment": {
     "node": "v26.7.0",
-    "npm": "Codex sandbox: 11.19.0 via C:\\Program Files\\nodejs npm fallback; owner-reported interactive desktop shell: 12.2.0",
-    "postgres": "not run; isolated PostgreSQL service unavailable",
-    "database_role": "not run",
-    "data_mode": "unknown",
+    "npm": "12.2.0",
+    "postgres": "PostgreSQL 18.0; server_version_num=180000; isolated disposable local cluster",
+    "database_role": "postgres admin; symphony_migrator, symphony_app and symphony_outbox_writer; finalizer passed",
+    "data_mode": "test",
     "key_provider": "unknown"
   },
   "commands": [
     {
+      "artifact": "evidence/phase1/wp1.5/reestablished/candidate-postgres-role-state.json",
       "result": "passed",
-      "artifact": "evidence/phase1/wp1.5/reestablished/npm-version.raw.log",
-      "command": "npm --version"
+      "command": "node tools/bootstrap_wp1_5_database.mjs (disposable PostgreSQL 18 roles provisioned; final role attributes retained)"
     },
     {
+      "artifact": "evidence/phase1/wp1.5/reestablished/candidate-postgres-db-migrate.raw.log",
       "result": "passed",
-      "artifact": "evidence/phase1/wp1.5/reestablished/node-version.raw.log",
-      "command": "node --version"
+      "command": "npm run db:migrate:test (clean install migrations 0001-0015)"
     },
     {
+      "artifact": "evidence/phase1/wp1.5/reestablished/candidate-postgres-db-suite-final.raw.log",
       "result": "passed",
-      "artifact": "evidence/phase1/wp1.5/reestablished/phase1-contract-tests.raw.log",
-      "command": "node node_modules/vitest/vitest.mjs run tests/tooling/phase1_contracts.test.ts"
+      "command": "npm run test:db --workspace @symphony/db (12 files, 65 tests)"
     },
     {
+      "artifact": "evidence/phase1/wp1.5/reestablished/candidate-postgres-bdd.raw.log",
       "result": "passed",
-      "artifact": "evidence/phase1/wp1.5/reestablished/phase1-structural-validator.raw.log",
-      "command": "node tools/phase1-contracts.js"
+      "command": "npm run test:bdd:wp1.5 (BDD-AUD-005; 1 scenario, 7 steps)"
     },
     {
+      "artifact": "evidence/phase1/wp1.5/reestablished/candidate-postgres-role-finalizer.raw.log",
       "result": "passed",
-      "artifact": "evidence/phase1/wp1.5/reestablished/policy-manifest-unit.raw.log",
-      "command": "npm run test:db --workspace @symphony/db -- src/__tests__/tenant-policy-manifest.test.ts"
-    },
-    {
-      "result": "passed",
-      "artifact": "evidence/phase1/wp1.5/reestablished/archive-hygiene.raw.log",
-      "command": "npm run verify:archive-hygiene"
-    },
-    {
-      "result": "blocked",
-      "artifact": "evidence/phase1/wp1.5/reestablished/wp1.5-environment-blocker.md",
-      "command": "node tools/bootstrap_wp1_5_database.mjs"
-    },
-    {
-      "result": "blocked",
-      "artifact": "evidence/phase1/wp1.5/reestablished/wp1.5-environment-blocker.md",
-      "command": "npm run db:migrate:test"
-    },
-    {
-      "result": "blocked",
-      "artifact": "evidence/phase1/wp1.5/reestablished/wp1.5-environment-blocker.md",
-      "command": "npm run test:db --workspace @symphony/db"
-    },
-    {
-      "result": "blocked",
-      "artifact": "evidence/phase1/wp1.5/reestablished/wp1.5-environment-blocker.md",
-      "command": "npm run test:bdd:wp1.5"
-    },
-    {
-      "result": "blocked",
-      "artifact": "evidence/phase1/wp1.5/reestablished/wp1.5-environment-blocker.md",
       "command": "node tools/finalize_wp1_5_database.mjs"
     },
     {
-      "command": "node AJV 2020 validation of evidence/phase1/wp1.5/task-evidence.json against evidence/phase1/task-evidence.schema.json",
+      "artifact": "evidence/phase1/wp1.5/reestablished/candidate-phase0-gate-exit.raw.log",
+      "result": "passed",
+      "command": "npm run verify:phase0 (exact source candidate; exit 0)"
+    },
+    {
+      "artifact": "evidence/phase1/wp1.5/reestablished/candidate-legacy-floor.raw.log",
+      "result": "passed",
+      "command": "npm run verify:legacy-floor (exit 0)"
+    },
+    {
+      "artifact": "evidence/phase1/wp1.5/reestablished/candidate-build-fix-check.raw.log",
+      "result": "passed",
+      "command": "npm run build"
+    },
+    {
+      "artifact": "evidence/phase1/wp1.5/reestablished/candidate-phase1-contracts-final.raw.log",
+      "result": "passed",
+      "command": "npm run verify:phase1:contracts (112 tests)"
+    },
+    {
+      "artifact": "evidence/phase1/wp1.5/reestablished/phase1-structural-validator.raw.log",
+      "result": "passed",
+      "command": "node tools/phase1-contracts.js"
+    },
+    {
       "artifact": "evidence/phase1/wp1.5/reestablished/task-evidence-schema-validation.raw.log",
-      "result": "passed"
+      "result": "passed",
+      "command": "AJV 2020 validate task evidence schema"
     }
   ],
   "claims": {
-    "behavior_proved": "Against source candidate b572d252dfd6733940011250918631a6c7f57a27, 112 Phase 1 contract tests, 3 WP1.5 policy-manifest oracle tests, and 9 archive-hygiene tests passed. These prove pure oracle, workflow-contract, and archive behavior only; they do not prove PostgreSQL row isolation or effective grants.",
-    "path_proved": "Local test commands ran from the isolated exact source candidate worktree. No hosted CI run or PostgreSQL-backed WP1.5 execution is claimed.",
-    "configuration_proved": "Node v26.7.0. The Codex sandbox reports npm 11.19.0 because its PowerShell npm.ps1 cannot access the user-level npm-cli.js under AppData; the owner reports the interactive desktop shell returns npm 12.2.0. No isolated PostgreSQL service or WP1.5 database-role URLs were available. No credential file was opened.",
+    "behavior_proved": "On isolated source candidate 8eb49ca4a4707080f216d7c10f4246854e6b4857, clean PostgreSQL 18 migrations applied 0001-0015. All 12 @symphony/db test files passed (65 tests), including migration clean-install/replay, 0012-to-0013 upgrade rollback/retry, secret redaction, all 39 tenant policy catalog expressions/effective grants, missing/empty/mismatched context, inherited-parent app-role behavior, pool reuse, outbox boundary, and credential/session regressions. WP1.5 BDD-AUD-005 passed 1 scenario/7 steps using the actual restricted app role. The role finalizer verified temporary migration membership removal. Phase 0 component gate and legacy regression floor passed locally.",
+    "path_proved": "Local candidate evidence ran in the clean isolated worktree codex/wp1.5-reestablished at source SHA 8eb49ca4a4707080f216d7c10f4246854e6b4857 against a separately initialized disposable PostgreSQL 18 cluster. Candidate-specific hosted CI has not yet run and is not claimed.",
+    "configuration_proved": "Node v26.7.0; npm 12.2.0; PostgreSQL 18.0 server_version_num=180000; DATA_MODE=test; NODE_ENV=test and SYNTHETIC_ONLY=true for BDD; separate symphony_migrator and symphony_app roles; role finalization verified all temporary memberships removed. Generated passwords remained in an OS temp-only CI environment file and were not printed or committed.",
     "coverage_limitations": [
-      "The current candidate extends the manifest and integration test to 39 tenant policies and additional authentication credential tables/functions; current candidate PostgreSQL catalog/row behavior is unverified.",
-      "Clean install, replay, upgrade, failure rollback/retry, restricted-role integration, outbox boundary, cross-organisation BDD, role finalization, and exact-candidate hosted CI remain unverified.",
-      "The historical d7fb task record is retained separately and applies only to d7fb5851b11b07b65bde36f062db7b21f487947."
+      "Hosted CI for immutable source SHA 8eb49ca4a4707080f216d7c10f4246854e6b4857 and retention/checksum verification of its artifact bundle remain outstanding; gate_verified intentionally remains pending.",
+      "Independent review remains separate governance evidence and is not claimed.",
+      "This task does not close Phase 1 or authorize downstream work beyond the dependency graph."
     ]
   },
   "limitations": [
-    "Do not interpret implementation complete or unit tests passed as WP1.5 gate closure.",
-    "Update gate_verified to passed only after the full documented acceptance suite succeeds on the exact source candidate and its candidate-specific CI artifacts and checksums verify.",
-    "This sandbox cannot access the user-level npm 12.2.0 installation; the owner-provided interactive PowerShell result reports 12.2.0."
+    "Local exact-candidate PostgreSQL, WP1.5 BDD, Phase 0, build and legacy-floor checks passed; hosted same-SHA CI has not been observed. Do not set gate_verified=passed until its required candidate-specific artifact evidence is obtained and reconciled.",
+    "Historical d7fb CI artifacts remain unchanged and candidate-specific."
   ],
   "unresolved_decisions": [],
-  "reviewer": "Local evidence reconciled against source candidate b572d252dfd6733940011250918631a6c7f57a27; no independent review or gate pass claimed."
+  "reviewer": "Local candidate evidence reconciled by Codex; no independent review or hosted CI sign-off claimed."
 }

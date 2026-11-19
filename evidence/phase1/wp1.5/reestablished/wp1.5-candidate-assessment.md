@@ -1,62 +1,43 @@
-# WP1.5 evidence re-establishment assessment
+# WP1.5 candidate closure assessment
 
-**Assessment date:** 2026-11-19 (local runner)
-**Exact source candidate:** `b572d252dfd6733940011250918631a6c7f57a27` (`codex/wp1.5-reestablished`)
-**Disposition:** Evidence re-established for local checks; WP1.5 is **not closed**. The candidate-specific PostgreSQL and hosted CI gates could not run in this environment. The task record was rebound to this source SHA with integration/BDD blocked and gate pending. No PASS is inferred from the historical d7fb record.
+**Assessment date:** 2026-11-19
+**Exact source candidate:** `8eb49ca4a4707080f216d7c10f4246854e6b4857` on isolated branch `codex/wp1.5-reestablished`.
+**Current evidence commit before this reconciliation:** `dc34ae46e8f8fe091712ae84c381d236fb073d97`.
+**Disposition:** Local WP1.5 acceptance and Phase 0 regression checks pass on the exact source candidate. Gate verification remains pending only for candidate-specific hosted CI/artifact evidence and its final reconciliation. The old d7fb SHA is unrecoverable by owner direction; its evidence remains historical and unchanged.
 
-## Candidate and predecessor checks
+## Candidate/predecessor and environment
 
-- Source candidate is a clean reachable commit isolated from the dirty WP6.1 working copy. No WP6.1 uncommitted changes were copied into this worktree.
-- Historical candidate `d7fbf5851b11b07b65bde36f062db7b21f487947` is treated as unrecoverable per owner direction. Its retained CI artifacts are historical and remain candidate-specific.
-- The reconciled task record validates against `evidence/phase1/task-evidence.schema.json`; output is retained at `reestablished/task-evidence-schema-validation.raw.log`.
-- `REM-WP0.3`, `REM-WP1.2`, `REM-WP1.3`, and `REM-WP1.4` evidence records name full SHAs that are ancestors of this candidate. WP1.2 and WP1.4 records say `gate_verified: passed`; WP0.3 is recorded in `evidence/phase1/tasks.json`; WP1.3 is recorded in `evidence/phase1/wp1.3/task-evidence.json` and pins to `fb3d4f2cf6b1023cca5e90f2768783c892c96d13`.
-- Comparing the WP1.5 closeout implementation baseline at `fb3d4f2cf6b1023cca5e90f2768783c892c96d13` with this candidate shows subsequent WP1.5-relevant changes: policy/table coverage grew to 39 tenant policies; the restricted-role suite now covers additional credential tables and authentication lookup function grants; the CI job gained WP5.4/WP5.5/WP6.1 acceptance steps. Those additions require current-candidate PostgreSQL/CI evidence; earlier 37-policy DB logs do not satisfy them.
+- Source candidate was created in an isolated worktree; the active dirty WP6.1 main checkout was not copied or modified by candidate source work.
+- `REM-WP0.3`, `REM-WP1.2`, `REM-WP1.3`, and `REM-WP1.4` source SHAs are ancestors of the candidate. Their task records remain the predecessor evidence sources.
+- A disposable local PostgreSQL 18.0 cluster was initialized in the OS temp directory, then bootstrapped through `node tools/bootstrap_wp1_5_database.mjs`. It applied migrations 0001–0015. PostgreSQL evidence confirms 39 tenant policy expressions, matching this source candidate's frozen manifest, and uses separate `symphony_migrator`, `symphony_app`, and `symphony_outbox_writer` roles.
+- The sanitized database/role record `candidate-postgres-role-state.json` contains no URLs or passwords. The finalizer revoked temporary role membership; app, migrator and writer roles satisfy the no-superuser/no-inherit/no-membership attributes.
+- Toolchain gate reports Node 26.7.0, npm 12.2.0, PostgreSQL 18.0.
 
-## Acceptance checklist
+## Acceptance reconciliation
 
-| Acceptance criterion | Evidence on record | Result | Remaining limitation |
+| Criterion | Evidence | Result | Remaining limitation |
 |---|---|---|---|
-| Keep local environment files ignored/unmodified and out of evidence | No environment file was opened or changed during this work; see candidate status and this report | Partial | Full ignored-file inventory must be verified in the approved CI/workflow without reading secret contents. |
-| Archive builder and independent verifier reject unsafe paths and retain safe files | `reestablished/archive-hygiene.raw.log` (9 tests and standalone verifier pass) | Pass (local) | Run again under required pinned toolchain and retain candidate CI artifact. |
-| Compare all 39 live tenant policy definitions to frozen manifest | `reestablished/policy-manifest-unit.raw.log` (3 pure oracle tests pass); manifest `evidence/phase1/wp1.5-tenant-policy-manifest.json` | Partial | Live PostgreSQL catalog comparison not run. |
-| Exercise every distinct inherited-parent path with app-role fixtures | `packages/db/src/__tests__/tenant-rls-app-role.integration.test.ts` | Pending | Current candidate actual-role fixture run required. |
-| Prove missing/empty tenant context and pool reuse fail closed | Same integration test; previous candidate logs only | Pending | Re-run against current candidate on isolated PostgreSQL 18. |
-| Prove event_outbox RLS, exact writer function/ACL, and direct app-role denial | Same integration test and migration `0013_tenant_rls_app_role.sql` | Pending | Current candidate catalog and behavior run required. |
-| Pin WP1.3 evidence to exact source SHA | `evidence/phase1/wp1.3/task-evidence.json` pins full SHA `fb3d4f2cf6b1023cca5e90f2768783c892c96d13`; predecessor commit is an ancestor | Pass (record check) | This does not replace WP1.5 candidate CI. |
-| Preserve failures through workflow pipelines | `reestablished/phase1-contract-tests.raw.log` (112 tests pass); `reestablished/phase1-structural-validator.raw.log` | Pass (local) | Hosted workflow must run on an immutable pushed candidate. |
-| Clean install, replay, upgrade, failure rollback/retry, restricted-role DB, BDD, and required CI jobs on one candidate | `reestablished/wp1.5-environment-blocker.md`; workflow `.github/workflows/ci.yml` defines the required jobs | Blocked | No Docker command, no WP1.5 role URL variables, and no isolated PostgreSQL 18 service were available. No hosted run/artifact bundle for `b572d252...` exists in this workspace. |
-| Candidate logs, metadata, checksums agree; historical d7 artifacts unchanged | `reestablished/*`; `reestablished/historical-d7-task-evidence.json` preserves prior record | Partial | Local checksums are generated with this evidence commit; candidate-specific CI logs/checksums still required. |
-| Predecessor/task graph/evidence state reconcile; WP1.6 stays gated | `evidence/phase1/task-dependencies.yml`, `tasks.json`, WP1.2/WP1.3/WP1.4 records, and this pending WP1.5 record | Partial | WP1.5 must remain gate-pending until current candidate checks pass; verify no downstream record claims it as passing. |
+| Environment files remain private and excluded from evidence | `set-env.ps1` was dot-sourced; secret values were never printed. `candidate-phase0-gate-exact.raw.log` includes archive hygiene and repository file scan. | Pass locally | No environment values are retained. |
+| Archive builder + independent verifier reject unsafe paths and retain safe files | `candidate-phase0-gate-exact.raw.log`; 9 archive tests and standalone verifier passed. | Pass | Hosted candidate job remains pending. |
+| Live tenant policies match frozen manifest; effective grants correct | `candidate-postgres-db-suite-final.raw.log`; WP1.5 actual-role suite reports all 39 policies and effective grants matched. | Pass locally | Hosted same-SHA rerun pending. |
+| Every distinct inherited-parent path and missing/empty/mismatched scope tested under app role | Same DB log; all five WP1.5 actual-role tests passed, including unfiltered parent-chain checks and pooled transaction-local context. | Pass locally | Hosted same-SHA rerun pending. |
+| Event outbox RLS/writer ACL and denied direct app access | Same DB log; test verifies outbox boundary and atomic command path. | Pass locally | Hosted same-SHA rerun pending. |
+| WP1.3 exact SHA and predecessor evidence | `evidence/phase1/wp1.3/task-evidence.json` pins `fb3d4f2cf6b1023cca5e90f2768783c892c96d13`, an ancestor of source candidate. | Pass (predecessor record) | This is separate predecessor evidence. |
+| Workflow failure propagation and Phase 1 structure | `candidate-phase1-contracts-final.raw.log`, `phase1-structural-validator.raw.log`; 112 tests and structural graph validation passed. | Pass locally | Candidate-specific hosted CI pending. |
+| Clean install, replay, 0012→0013 upgrade, migration rollback/retry | `candidate-postgres-db-migrate.raw.log` and `candidate-postgres-db-suite-final.raw.log`; migrations 0001–0015 applied; all 65 DB tests passed across 12 files. | Pass locally | Hosted same-SHA rerun pending. |
+| Restricted-role DB suite, cross-organisation BDD, final role state | `candidate-postgres-db-suite-final.raw.log`, `candidate-postgres-bdd.raw.log` (1/1 scenario, 7/7 steps), `candidate-postgres-role-finalizer.raw.log`, `candidate-postgres-role-state.json`. | Pass locally | Hosted artifact bundle pending. |
+| Phase 0 and legacy regression gates | `candidate-phase0-gate-exit.raw.log` records `PHASE0_EXIT=0`; `candidate-legacy-floor.raw.log` records `LEGACY_FLOOR_EXIT=0`; accessibility passed 1/1 and legacy test suite 286 passed/1 skipped. | Pass locally | Hosted candidate run pending. |
+| Candidate artifacts/checksums and task status align | `task-evidence.json` is rebound to `8eb49ca...`; checksums in `SHA256SUMS.txt`; evidence schema validator. | Pass locally | Recompute manifest after this report’s final edit/commit. Hosted run ID, raw logs, and artifact checksums remain outstanding. |
 
-## Fresh local verification
+## Candidate source fixes made
 
-All commands below ran in the isolated candidate worktree. The raw output files are under `evidence/phase1/wp1.5/reestablished/`.
+The first exact candidate Phase 0 run reached the legacy-floor build and reported three unused declarations. Three minimal fixes were made and committed as source candidate `8eb49ca4a4707080f216d7c10f4246854e6b4857`: remove unused `BrowserContext` type import from `tests/workspace/login-api.spec.ts`; stop storing the already-consumed `resultDataSchemas` constructor parameter as a property in `packages/db/src/repositories/postgres-command-receipt-store.ts`; mark the unused first `PostgresRepository` constructor parameter `_db` in `packages/db/src/repositories/postgres-repository.ts`. Runtime behavior did not change. `npm run build` and `npm run verify:legacy-floor` then passed.
 
-| Command | Result | Detail |
-|---|---|---|
-| `node --version` | Pass | `v26.7.0` |
-| `npm --version` | Pass as a version query | Sandbox reports `11.19.0`; the owner-provided interactive PowerShell transcript reports `12.2.0`. In the sandbox, `npm.ps1` cannot access the user-level npm CLI and falls back to the system npm. |
-| `node node_modules/vitest/vitest.mjs run tests/tooling/phase1_contracts.test.ts` | Pass | 112 tests |
-| `node tools/phase1-contracts.js` | Pass | 45-node graph is known/acyclic; structural checks only |
-| `npm run test:db --workspace @symphony/db -- src/__tests__/tenant-policy-manifest.test.ts` | Pass | 3 policy-oracle helper tests; no database assertions |
-| `npm run verify:archive-hygiene` | Pass | 9 tests and independent repository verifier |
+## Remaining to finish this stage
 
-## Exact documents governing this disposition
+1. Push/source candidate `8eb49ca4a4707080f216d7c10f4246854e6b4857` to the authorized CI trigger (or obtain its CI run through the project’s established process).
+2. Retain the exact-SHA Phase 0 and WP1.5 DB CI jobs/artifacts. Confirm run SHA, job outcomes, raw logs, and SHA256 checksums; preserve previous d7fb artifacts unchanged.
+3. Reconcile task evidence with hosted run ID/attempt and verified artifact checksums. Only then change `gate_verified` from `pending` to `passed` and synchronize status summaries/dependency records if required.
 
-1. `Implementation-Plan-V4/implementation/PHASE-1-REMEDIATION-PLAN-v2.md` — WP1.5 place in task order and requirement to bind CI evidence to the exact candidate.
-2. `docs/phase1/TENANT_ISOLATION_CONTRACT.md` — accepted tenant/RLS contract and current catalog boundaries.
-3. `evidence/phase1/task-dependencies.yml` — WP1.5 predecessor edges and downstream gate dependencies.
-4. `evidence/phase1/task-evidence.schema.json` — task evidence schema and status constraints.
-5. `evidence/phase1/wp1.5/task-evidence.json` — now records this candidate and pending gate; `reestablished/historical-d7-task-evidence.json` preserves the superseded SHA-bound record.
-6. `evidence/phase1/wp1.5-tenant-policy-manifest.json`, `evidence/phase1/tenant-table-inventory.json`, and `evidence/phase1/tenant-table-policy-matrix.json` — policy oracle inputs.
-7. `packages/db/src/__tests__/tenant-rls-app-role.integration.test.ts`, `packages/db/src/__tests__/tenant-policy-manifest.test.ts`, `migrations/0013_tenant_rls_app_role.sql`, and `.github/workflows/ci.yml` — executable proof and CI path.
-8. `Implementation-Plan-V4/implementation/WP1.5-FINAL-CLOSEOUT-IMPLEMENTATION-PLAN.md` — detailed FC0–FC4 and 11-item closeout checklist retained in history at `fb3d4f2cf6b1023cca5e90f2768783c892c96d13`; it is not present in the current candidate tree. Its criteria are summarized above, not silently treated as a current live verifier.
-
-## Smallest next actions
-
-1. Run the candidate in the approved Linux CI environment with Node `26.7.0` and npm `12.2.0`; provision clean isolated PostgreSQL 18 roles and run the exact CI workflow on the immutable source SHA.
-2. Collect raw logs/artifact bundle, verify checksums, and review actual app-role catalog and row-behavior results, including all 39 policies and authentication function grants.
-3. Reconcile this task record and any review index/dependency records only after every mandatory same-candidate result passes. Until then, `integration_test: blocked`, `bdd_ui_test: blocked`, and `gate_verified: pending` are intentional and accurate.
-
-
+No manual dependency override or downstream gate pass is claimed.
 

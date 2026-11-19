@@ -1,13 +1,5 @@
-# WP1.5 local verification blocker
+# Remaining WP1.5 gate evidence
 
-The following required current-candidate checks were not run:
+Local exact-source acceptance has passed for source SHA `8eb49ca4a4707080f216d7c10f4246854e6b4857`: isolated PostgreSQL 18 migration and actual-role DB suite, WP1.5 BDD-AUD-005, role finalizer, Phase 0 gate, and legacy floor. The exact logs and sanitized role metadata are adjacent to this file.
 
-- `node tools/bootstrap_wp1_5_database.mjs`
-- `npm run db:migrate:test`
-- `npm run test:db --workspace @symphony/db`
-- `npm run test:bdd:wp1.5`
-- `node tools/finalize_wp1_5_database.mjs`
-- The candidate-bound GitHub Actions workflow and its uploaded artifact verification.
-
-The Codex sandbox reports npm `11.19.0` because its PowerShell shim cannot access the user-level npm CLI under AppData; the owner reports the interactive desktop shell returns `12.2.0`. This sandbox-specific npm result is not evidence that the desktop lacks npm 12.2.0. `Get-Command docker` returned no command. The process environment did not contain `PHASE1_TEST_ADMIN_DATABASE_URL`, `PHASE1_TEST_MIGRATOR_DATABASE_URL`, or `PHASE1_TEST_APP_DATABASE_URL`. No `.env` content or credentials were opened. Without a provisioned isolated PostgreSQL 18 service and required identities, the actual role/RLS, migration, outbox and BDD claims cannot be verified here. This is an environment blocker, not a passing result or a failure of the product behavior.
-
+The only acceptance evidence still outstanding is the candidate-specific hosted CI run/artifact bundle for this immutable source SHA (including run/attempt identity and verified checksums), then task-record/status reconciliation. Until that evidence is retained, `gate_verified` remains pending.

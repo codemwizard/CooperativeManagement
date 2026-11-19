@@ -1,0 +1,99 @@
+{
+  "schema_version": 1,
+  "task_id": "REM-WP1.5",
+  "status": {
+    "implementation": "complete",
+    "unit_test": "passed",
+    "integration_test": "blocked",
+    "bdd_ui_test": "blocked",
+    "gate_verified": "pending"
+  },
+  "commit": "b572d252dfd6733940011250918631a6c7f57a27",
+  "environment": {
+    "node": "v26.7.0",
+    "npm": "Codex sandbox: 11.19.0 via C:\\Program Files\\nodejs npm fallback; owner-reported interactive desktop shell: 12.2.0",
+    "postgres": "not run; isolated PostgreSQL service unavailable",
+    "database_role": "not run",
+    "data_mode": "unknown",
+    "key_provider": "unknown"
+  },
+  "commands": [
+    {
+      "result": "passed",
+      "artifact": "evidence/phase1/wp1.5/reestablished/npm-version.raw.log",
+      "command": "npm --version"
+    },
+    {
+      "result": "passed",
+      "artifact": "evidence/phase1/wp1.5/reestablished/node-version.raw.log",
+      "command": "node --version"
+    },
+    {
+      "result": "passed",
+      "artifact": "evidence/phase1/wp1.5/reestablished/phase1-contract-tests.raw.log",
+      "command": "node node_modules/vitest/vitest.mjs run tests/tooling/phase1_contracts.test.ts"
+    },
+    {
+      "result": "passed",
+      "artifact": "evidence/phase1/wp1.5/reestablished/phase1-structural-validator.raw.log",
+      "command": "node tools/phase1-contracts.js"
+    },
+    {
+      "result": "passed",
+      "artifact": "evidence/phase1/wp1.5/reestablished/policy-manifest-unit.raw.log",
+      "command": "npm run test:db --workspace @symphony/db -- src/__tests__/tenant-policy-manifest.test.ts"
+    },
+    {
+      "result": "passed",
+      "artifact": "evidence/phase1/wp1.5/reestablished/archive-hygiene.raw.log",
+      "command": "npm run verify:archive-hygiene"
+    },
+    {
+      "result": "blocked",
+      "artifact": "evidence/phase1/wp1.5/reestablished/wp1.5-environment-blocker.md",
+      "command": "node tools/bootstrap_wp1_5_database.mjs"
+    },
+    {
+      "result": "blocked",
+      "artifact": "evidence/phase1/wp1.5/reestablished/wp1.5-environment-blocker.md",
+      "command": "npm run db:migrate:test"
+    },
+    {
+      "result": "blocked",
+      "artifact": "evidence/phase1/wp1.5/reestablished/wp1.5-environment-blocker.md",
+      "command": "npm run test:db --workspace @symphony/db"
+    },
+    {
+      "result": "blocked",
+      "artifact": "evidence/phase1/wp1.5/reestablished/wp1.5-environment-blocker.md",
+      "command": "npm run test:bdd:wp1.5"
+    },
+    {
+      "result": "blocked",
+      "artifact": "evidence/phase1/wp1.5/reestablished/wp1.5-environment-blocker.md",
+      "command": "node tools/finalize_wp1_5_database.mjs"
+    },
+    {
+      "command": "node AJV 2020 validation of evidence/phase1/wp1.5/task-evidence.json against evidence/phase1/task-evidence.schema.json",
+      "artifact": "evidence/phase1/wp1.5/reestablished/task-evidence-schema-validation.raw.log",
+      "result": "passed"
+    }
+  ],
+  "claims": {
+    "behavior_proved": "Against source candidate b572d252dfd6733940011250918631a6c7f57a27, 112 Phase 1 contract tests, 3 WP1.5 policy-manifest oracle tests, and 9 archive-hygiene tests passed. These prove pure oracle, workflow-contract, and archive behavior only; they do not prove PostgreSQL row isolation or effective grants.",
+    "path_proved": "Local test commands ran from the isolated exact source candidate worktree. No hosted CI run or PostgreSQL-backed WP1.5 execution is claimed.",
+    "configuration_proved": "Node v26.7.0. The Codex sandbox reports npm 11.19.0 because its PowerShell npm.ps1 cannot access the user-level npm-cli.js under AppData; the owner reports the interactive desktop shell returns npm 12.2.0. No isolated PostgreSQL service or WP1.5 database-role URLs were available. No credential file was opened.",
+    "coverage_limitations": [
+      "The current candidate extends the manifest and integration test to 39 tenant policies and additional authentication credential tables/functions; current candidate PostgreSQL catalog/row behavior is unverified.",
+      "Clean install, replay, upgrade, failure rollback/retry, restricted-role integration, outbox boundary, cross-organisation BDD, role finalization, and exact-candidate hosted CI remain unverified.",
+      "The historical d7fb task record is retained separately and applies only to d7fb5851b11b07b65bde36f062db7b21f487947."
+    ]
+  },
+  "limitations": [
+    "Do not interpret implementation complete or unit tests passed as WP1.5 gate closure.",
+    "Update gate_verified to passed only after the full documented acceptance suite succeeds on the exact source candidate and its candidate-specific CI artifacts and checksums verify.",
+    "This sandbox cannot access the user-level npm 12.2.0 installation; the owner-provided interactive PowerShell result reports 12.2.0."
+  ],
+  "unresolved_decisions": [],
+  "reviewer": "Local evidence reconciled against source candidate b572d252dfd6733940011250918631a6c7f57a27; no independent review or gate pass claimed."
+}

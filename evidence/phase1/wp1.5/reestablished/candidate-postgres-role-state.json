@@ -1,0 +1,44 @@
+{
+  "database": "symphony_test",
+  "server_version_num": "180000",
+  "migrations": {
+    "count": 15,
+    "first": "0001_kernel.sql",
+    "last": "0015_auth_sessions_and_throttling.sql"
+  },
+  "roles": [
+    {
+      "rolname": "symphony_app",
+      "rolcanlogin": true,
+      "rolsuper": false,
+      "rolcreatedb": false,
+      "rolcreaterole": false,
+      "rolinherit": false,
+      "rolbypassrls": false,
+      "inherits_role": false,
+      "has_members": false
+    },
+    {
+      "rolname": "symphony_migrator",
+      "rolcanlogin": true,
+      "rolsuper": false,
+      "rolcreatedb": false,
+      "rolcreaterole": false,
+      "rolinherit": false,
+      "rolbypassrls": false,
+      "inherits_role": false,
+      "has_members": false
+    },
+    {
+      "rolname": "symphony_outbox_writer",
+      "rolcanlogin": false,
+      "rolsuper": false,
+      "rolcreatedb": false,
+      "rolcreaterole": false,
+      "rolinherit": false,
+      "rolbypassrls": false,
+      "inherits_role": false,
+      "has_members": false
+    }
+  ]
+}

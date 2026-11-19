@@ -1,0 +1,9 @@
+npm notice run symphony-prototype@1.0.0 test:bdd:wp1.5
+npm notice run cross-env NODE_OPTIONS=--import=tsx npx cucumber-js --config cucumber.cjs --profile default --tags "@BDD-AUD-005 and not @wip"
+npm notice run symphony-prototype@1.0.0 npx
+npm notice run cucumber-js --config cucumber.cjs --profile default --tags @BDD-AUD-005 and not @wip
+.......
+
+1 scenario (1 passed)
+7 steps (7 passed)
+0m 0.361s (0m 0.324s executing your code)
