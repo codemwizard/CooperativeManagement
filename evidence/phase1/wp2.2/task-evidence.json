@@ -62,6 +62,11 @@
       "command": "Merge codex/rem-wp2.2-exact onto codex/wp1.5-reestablished; no conflicts; merge commit 62443bf2811e8acfcd16e214514c6f95b7d024c6",
       "result": "passed",
       "artifact": "evidence/phase1/wp2.2/integration-merge-record.md"
+    },
+    {
+      "command": "node tools/verify_wp2_2_closure.mjs 5c5c730843ba3b5627a5389383496b9653caae04 (final exact-candidate closure verification)",
+      "result": "passed",
+      "artifact": "evidence/phase1/wp2.2/closure-verification.log"
     }
   ],
   "claims": {
@@ -82,5 +87,5 @@
     "The successful RLS run used the isolated WP2.2 PostgreSQL 18 test database to avoid schema drift in the shared local test database."
   ],
   "unresolved_decisions": [],
-  "reviewer": "Owner approved the two-step transition after successful exact-candidate preflight. Final exact-candidate verification is run immediately after this record. Independent review remains outstanding."
+  "reviewer": "Owner approved the preflight-backed two-step transition. The authoritative final exact-candidate verifier passed; independent review remains outstanding."
 }
