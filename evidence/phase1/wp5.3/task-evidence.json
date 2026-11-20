@@ -8,7 +8,7 @@
     "bdd_ui_test": "not_applicable",
     "gate_verified": "pending"
   },
-  "commit": "working-tree",
+  "commit": "f7d062980391d60cfbb29fc59e22db4736dba299",
   "environment": {
     "node": "v26.7.0",
     "npm": "v12.2.0 (global npm prefix prepended for this run)",
@@ -47,6 +47,11 @@
       "command": "git diff --check",
       "result": "passed",
       "artifact": "evidence/phase1/wp5.3/diff-check.log"
+    },
+    {
+      "command": "npm.cmd --version (pinned CLI)",
+      "result": "passed",
+      "artifact": "evidence/phase1/wp5.3/npm-version.log"
     }
   ],
   "claims": {
@@ -75,5 +80,10 @@
       "scope": "Mapped authentication BDD and regression gate against the implemented browser path.",
       "acceptance_evidence": "The exact frozen authentication BDD tags pass through the live browser, API, session and PostgreSQL test path."
     }
-  ]
+  ],
+  "candidate": {
+    "status": "immutable implementation candidate",
+    "head_commit_before_implementation": "d9a8f47ed278918b507b1776b0bb9d426da37c1a",
+    "implementation_commit": "f7d062980391d60cfbb29fc59e22db4736dba299"
+  }
 }
