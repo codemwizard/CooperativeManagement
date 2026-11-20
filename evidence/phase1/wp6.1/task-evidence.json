@@ -8,7 +8,7 @@
     "bdd_ui_test": "passed",
     "gate_verified": "pending"
   },
-  "commit": "8182c5036a944c2411beccf91db2a35540bfd2b1",
+  "commit": "c3f4af5ed20ac6922e0dbcd46a12e263fd5b0406",
   "environment": {
     "node": "v26.7.0",
     "npm": "12.2.0",
@@ -79,12 +79,12 @@
       "artifact": "evidence/phase1/wp6.1/cucumber-run.log"
     },
     {
-      "command": "node tools/verify_wp6_1_closure.mjs 8182c5036a944c2411beccf91db2a35540bfd2b1 --preflight",
+      "command": "node tools/verify_wp6_1_closure.mjs c3f4af5ed20ac6922e0dbcd46a12e263fd5b0406 --preflight",
       "result": "passed",
       "artifact": "evidence/phase1/wp6.1/closure-preflight.log"
     },
     {
-      "command": "node tools/verify_wp6_1_closure.mjs 8182c5036a944c2411beccf91db2a35540bfd2b1",
+      "command": "node tools/verify_wp6_1_closure.mjs c3f4af5ed20ac6922e0dbcd46a12e263fd5b0406",
       "result": "passed",
       "artifact": "evidence/phase1/wp6.1/closure-final.log"
     },
