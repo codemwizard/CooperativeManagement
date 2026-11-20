@@ -52,6 +52,11 @@
       "command": "npm.cmd --version (pinned CLI)",
       "result": "passed",
       "artifact": "evidence/phase1/wp5.3/npm-version.log"
+    },
+    {
+      "command": "node tools/verify_wp5_3_closure.mjs 6ba1885035b330122570bf4602d88bcd19f73fc1 --preflight",
+      "result": "passed",
+      "artifact": "evidence/phase1/wp5.3/closure-preflight.log"
     }
   ],
   "claims": {
