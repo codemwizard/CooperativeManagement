@@ -6,7 +6,7 @@
     "unit_test": "passed",
     "integration_test": "passed",
     "bdd_ui_test": "not_applicable",
-    "gate_verified": "pending"
+    "gate_verified": "passed"
   },
   "commit": "1b195317eaa342c91efabb2f987bb6b87daaec6c",
   "candidate": {
@@ -78,7 +78,7 @@
     }
   },
   "limitations": [
-    "The WP2.6 candidate verifier preflight and final gate verification remain to be run against this exact candidate.",
+    "Exact-candidate preflight passed; final exact-candidate verification remains to be run.",
     "Capacity and delegation application-role DML remains denied until REM-WP2.3 defines, registers and validates supported mutation writers."
   ],
   "unresolved_decisions": [],
