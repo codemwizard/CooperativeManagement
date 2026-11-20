@@ -57,6 +57,11 @@
       "command": "node tools/verify_wp5_3_closure.mjs 6ba1885035b330122570bf4602d88bcd19f73fc1 --preflight",
       "result": "passed",
       "artifact": "evidence/phase1/wp5.3/closure-preflight.log"
+    },
+    {
+      "command": "node tools/verify_wp5_3_closure.mjs 6ba1885035b330122570bf4602d88bcd19f73fc1",
+      "result": "passed",
+      "artifact": "evidence/phase1/wp5.3/closure-final.log"
     }
   ],
   "claims": {
