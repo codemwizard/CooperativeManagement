@@ -47,6 +47,11 @@
       "command": "npm run typecheck:v4",
       "result": "passed",
       "artifact": "evidence/phase1/wp2.6/local/2026-11-20/typecheck-v4.raw.log"
+    },
+    {
+      "result": "passed",
+      "command": "node tools/verify_wp2_6_closure.mjs 1b195317eaa342c91efabb2f987bb6b87daaec6c --preflight",
+      "artifact": "evidence/phase1/wp2.6/local/2026-11-20/preflight.raw.log"
     }
   ],
   "claims": {
