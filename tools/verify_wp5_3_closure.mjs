@@ -64,7 +64,7 @@ for (const command of evidence.commands) {
 const raw = async (name) => readFile(`evidence/phase1/wp5.3/${name}`, 'utf8');
 assert.match(await raw('api-tests.log'), /25 passed/);
 assert.match(await raw('api-tests.log'), /WP5\.3 Fastify and PostgreSQL integration/);
-assert.match(await raw('postgres-migration-tests.log'), /17 passed/);
+assert.match(await raw('postgresql-migration-tests.log'), /17 passed/);
 assert.match(await raw('typecheck-v4.log'), /typecheck:v4/);
 assert.match(await raw('architecture-check.log'), /no dependency violations found/i);
 assert.match(await raw('phase1-contracts.log'), /112 tests/);
