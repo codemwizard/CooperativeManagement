@@ -82,6 +82,11 @@
       "command": "node tools/verify_wp6_1_closure.mjs 8182c5036a944c2411beccf91db2a35540bfd2b1 --preflight",
       "result": "passed",
       "artifact": "evidence/phase1/wp6.1/closure-preflight.log"
+    },
+    {
+      "command": "node tools/verify_wp6_1_closure.mjs 8182c5036a944c2411beccf91db2a35540bfd2b1",
+      "result": "passed",
+      "artifact": "evidence/phase1/wp6.1/closure-final.log"
     }
   ],
   "claims": {
@@ -113,7 +118,7 @@
       "/coop/:cooperativeId/capability-gaps"
     ],
       "coverage_limitations": [
-      "This record distinguishes implementation and focused acceptance from exact-candidate gate verification; gate_verified remains pending until both exact-candidate verifier modes pass.",
+      "This record distinguishes implementation and focused acceptance from exact-candidate gate verification; both exact-candidate verifier modes passed and are retained below.",
       "The fixture seeds synthetic verified findings administratively; a product finding-authoring/write lifecycle is not implemented or claimed by WP6.1.",
       "The /coop/:cooperativeId shell and finding projection enforce current persisted context/tenant scope; unrelated tenant-specific directory and other business-record workflows remain outside this task.",
       "Member activity/household persistence, authority grant/revoke lifecycle and a first-class cohort lifecycle remain the explicit WP2.2 limitations.",
@@ -122,7 +127,7 @@
     ]
   },
   "limitations": [
-    "The implementation and focused tests pass, but gate_verified remains pending until the exact immutable candidate has a successful preflight and final WP6.1 verification.",
+    "WP6.1 exact-candidate preflight and final verification passed; origin CI on the pushed feature branch remains a downstream confirmation.",
     "No production deployment, public-record classification/fee workflow, tenant-specific directory data, member activity/household persistence, authority mutation lifecycle, cohort lifecycle, or general finding-authoring flow is claimed."
   ],
   "unresolved_decisions": [],
