@@ -8,7 +8,7 @@
     "bdd_ui_test": "passed",
     "gate_verified": "pending"
   },
-  "commit": "c3f4af5ed20ac6922e0dbcd46a12e263fd5b0406",
+  "commit": "0f6bb5cbe91eb7b7f7795b3be3ceb1f9357c799a",
   "environment": {
     "node": "v26.7.0",
     "npm": "12.2.0",
@@ -79,12 +79,12 @@
       "artifact": "evidence/phase1/wp6.1/cucumber-run.log"
     },
     {
-      "command": "node tools/verify_wp6_1_closure.mjs <review-fix-candidate> --preflight",
+      "command": "node tools/verify_wp6_1_closure.mjs 0f6bb5cbe91eb7b7f7795b3be3ceb1f9357c799a --preflight",
       "result": "passed",
       "artifact": "evidence/phase1/wp6.1/closure-preflight.log"
     },
     {
-      "command": "node tools/verify_wp6_1_closure.mjs <review-fix-candidate>",
+      "command": "node tools/verify_wp6_1_closure.mjs 0f6bb5cbe91eb7b7f7795b3be3ceb1f9357c799a",
       "result": "passed",
       "artifact": "evidence/phase1/wp6.1/closure-final.log"
     },
@@ -133,7 +133,7 @@
     ]
   },
   "limitations": [
-    "The prior WP6.1 candidate passed exact-candidate preflight and final verification. These review fixes require a new immutable candidate and fresh preflight/final verification before the gate is restored.",
+    "WP6.1 candidate 0f6bb5cbe91eb7b7f7795b3be3ceb1f9357c799a requires fresh exact-candidate preflight and final verification; gate status remains pending until those pass.",
     "No production deployment, public-record classification/fee workflow, tenant-specific directory data, member activity/household persistence, authority mutation lifecycle, cohort lifecycle, or general finding-authoring flow is claimed.",
     "The Phase 1 aggregate BDD gate remains open outside WP6.1; see the exact scenario results in claims.coverage_limitations."
   ],
