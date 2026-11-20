@@ -59,15 +59,15 @@
     ],
     "predecessors": {
       "REM-WP0.4": {
-        "result": "passed; authority dependency inventory and revocation serialization contract are candidate-bound and an ancestor of WP2.6 candidate",
+        "result": "passed",
         "artifact": "evidence/phase1/tasks.json"
       },
       "REM-WP2.1": {
-        "result": "passed; policy matrix implementation and evidence candidate are an ancestor of WP2.6 candidate",
+        "result": "passed",
         "artifact": "evidence/phase1/wp2.1/task-evidence.json"
       },
       "REM-WP2.2": {
-        "result": "passed; trusted authority implementation and exact-candidate verifier record are an ancestor of WP2.6 candidate",
+        "result": "passed",
         "artifact": "evidence/phase1/wp2.2/task-evidence.json"
       }
     }
