@@ -16,6 +16,7 @@ export type { EstablishPasswordInput, IssueTemporaryCredentialInput, TemporaryCr
 export { PostgresAuthSessionRepository } from './repositories/postgres-auth-session-repository.js';
 export type { AuthSessionRow, AuthSubject, LoginAttemptReservation } from './repositories/postgres-auth-session-repository.js';
 export { PostgresWorkspaceContextRepository } from './repositories/postgres-workspace-context-repository.js';
+export { PostgresVerifiedFindingRepository } from './repositories/postgres-verified-finding-repository.js';
 export type { WorkspaceAuthorityFact, WorkspaceContextFacts } from './repositories/postgres-workspace-context-repository.js';
 
 // DB types (Phase 1 — WP-1.3)

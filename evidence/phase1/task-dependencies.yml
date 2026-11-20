@@ -514,10 +514,14 @@
       "title": "Real routes and accessible shell",
       "source": "Implementation-Plan-V4/implementation/PHASE-1-REMEDIATION-PLAN-v2.md",
       "depends_on": [
-        "REM-WP0.9"
+        "REM-WP0.9",
+        "REM-WP2.2",
+        "REM-WP5.3"
       ],
       "edge_reasons": {
-        "REM-WP0.9": "Workspace acceptance uses the frozen route and accessibility scenario contracts."
+        "REM-WP0.9": "Workspace acceptance uses the frozen route and accessibility scenario contracts.",
+        "REM-WP2.2": "BDD-UXW-001 navigation persona and organization context must be projected from trusted persisted actor, membership and authority resolution; WP6.1 cannot create a competing authority source or trust client claims.",
+        "REM-WP5.3": "Authenticated browser-to-API acceptance requires persisted-session middleware and session-derived identity; a client-created principal, test-only identity or WP5.4 login UI cannot substitute for this boundary."
       }
     },
     "REM-WP6.2": {

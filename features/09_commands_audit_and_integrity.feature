@@ -47,7 +47,7 @@ Feature: Commands, audit trail and integrity
     When the Secretary in "Org A" requests an item identifier from "Org B"
     Then the response is "not found"
 
-  @REQ-AUD-005 @BDD-AUD-007 @hard @wip
+  @REQ-AUD-005 @BDD-AUD-007 @hard
   Scenario: UI telemetry is not the business audit log
     When the user clicks around the workspace with telemetry enabled
     Then the domain event store contains no UI interaction events
@@ -103,7 +103,7 @@ Feature: Commands, audit trail and integrity
     Then the server uses the stored user, capacities and appointments
     And the forged header has no effect
 
-  @REQ-ENR-008 @BDD-AUD-015 @hard @wip
+  @REQ-ENR-008 @BDD-AUD-015 @hard
   Scenario: Events keep occurred_at separate from recorded_at
     Given a command captured offline two days ago and synced now
     Then the event shows occurred_at two days ago and recorded_at now

@@ -614,6 +614,14 @@ describe('Phase 1 BDD discovery', () => {
     const mapping = readJson('evidence/phase1/bdd-work-package-map.json');
     const graph = readJson('evidence/phase1/task-dependencies.yml');
     expect(validateBddOwnerMap(mapping, manifest, graph)).toEqual([]);
+    const owners = new Map(mapping.scenarios.map((scenario: { id: string; owner_tasks: string[] }) => [scenario.id, scenario.owner_tasks]));
+    for (const id of ['BDD-UXW-001', 'BDD-UXW-002', 'BDD-UXW-003', 'BDD-UXW-004']) {
+      expect(owners.get(id)).toContain('REM-WP6.1');
+    }
+    for (const id of ['BDD-UXW-005', 'BDD-UXW-009', 'BDD-UXW-013']) {
+      expect(owners.get(id)).toEqual(['REM-WP6.3']);
+    }
+    expect(owners.get('BDD-PRV-008')).toEqual(['REM-WP3.3', 'REM-WP6.3']);
   });
 
   it('fails closed if a frozen scenario is omitted or its owner is not in the task graph', () => {
@@ -680,7 +688,7 @@ describe('REM-WP0.3 migrated table inventory', () => {
       .map((name) => readFileSync(path.join(migrationDirectory, name), 'utf8'));
     expect(validateTenantTableInventory(inventory, migrations)).toEqual([]);
     expect(inventory.tables.length).toBeGreaterThan(40);
-    expect(inventory.tables.filter((table: { rls_current: boolean }) => table.rls_current).map((table: { table: string }) => table.table).sort()).toEqual(['command_receipts', 'domain_events', 'reconciliation_inbox']);
+    expect(inventory.tables.filter((table: { rls_current: boolean }) => table.rls_current).map((table: { table: string }) => table.table).sort()).toEqual(['command_receipts', 'domain_events', 'reconciliation_inbox', 'verification_finding_attributions']);
   });
 
   it('defines a least-privilege RLS/grant policy for every migrated table and keeps baseline inventory distinct from REM-WP1.5 deployment proof', () => {

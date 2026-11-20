@@ -71,6 +71,7 @@
     "password_credentials",
     "temporary_credentials",
     "user_role_assignments",
+    "verification_finding_attributions",
     "verification_findings",
     "verification_assignments",
     "evidence_versions",
@@ -312,6 +313,11 @@
     },
     {
       "table": "user_role_assignments",
+      "disposition": "delete_all_rows_in_marked_isolated_test_database",
+      "predicate": "TRUE only after DB marker/profile/role guard passes"
+    },
+    {
+      "table": "verification_finding_attributions",
       "disposition": "delete_all_rows_in_marked_isolated_test_database",
       "predicate": "TRUE only after DB marker/profile/role guard passes"
     },

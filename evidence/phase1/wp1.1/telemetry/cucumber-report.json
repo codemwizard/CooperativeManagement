@@ -1,0 +1,143 @@
+[
+  {
+    "description": "  Every write is a command that commits state, event and outbox atomically, is idempotent,\n  detects stale writes, isolates tenants and never trusts the client for standing or authority.",
+    "elements": [
+      {
+        "description": "",
+        "id": "commands,-audit-trail-and-integrity;ui-telemetry-is-not-the-business-audit-log",
+        "keyword": "Scenario",
+        "line": 51,
+        "name": "UI telemetry is not the business audit log",
+        "steps": [
+          {
+            "result": {
+              "status": "passed",
+              "duration": 574013700
+            },
+            "keyword": "Before",
+            "hidden": true
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 866700
+            },
+            "arguments": [],
+            "keyword": "Given ",
+            "line": 7,
+            "name": "two organisations \"Org A\" and \"Org B\"",
+            "match": {
+              "location": "packages\\testkit\\src\\step-definitions\\kernel-steps.ts:324"
+            }
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 518300
+            },
+            "arguments": [],
+            "keyword": "And ",
+            "line": 8,
+            "name": "an authenticated Secretary in \"Org A\"",
+            "match": {
+              "location": "packages\\testkit\\src\\step-definitions\\kernel-steps.ts:334"
+            }
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 1177103399
+            },
+            "arguments": [],
+            "keyword": "When ",
+            "line": 52,
+            "name": "the user clicks around the workspace with telemetry enabled",
+            "match": {
+              "location": "packages\\testkit\\src\\step-definitions\\workspace-live-steps.ts:23"
+            }
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 280600
+            },
+            "arguments": [],
+            "keyword": "Then ",
+            "line": 53,
+            "name": "the domain event store contains no UI interaction events",
+            "match": {
+              "location": "packages\\testkit\\src\\step-definitions\\workspace-live-steps.ts:48"
+            }
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 2575399
+            },
+            "arguments": [],
+            "keyword": "And ",
+            "line": 54,
+            "name": "the telemetry stream contains no personal data",
+            "match": {
+              "location": "packages\\testkit\\src\\step-definitions\\workspace-live-steps.ts:54"
+            }
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 97778900
+            },
+            "keyword": "After",
+            "hidden": true
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 357199
+            },
+            "keyword": "After",
+            "hidden": true
+          }
+        ],
+        "tags": [
+          {
+            "name": "@phase1",
+            "line": 1
+          },
+          {
+            "name": "@area-AUD",
+            "line": 1
+          },
+          {
+            "name": "@REQ-AUD-005",
+            "line": 50
+          },
+          {
+            "name": "@BDD-AUD-007",
+            "line": 50
+          },
+          {
+            "name": "@hard",
+            "line": 50
+          }
+        ],
+        "type": "scenario"
+      }
+    ],
+    "id": "commands,-audit-trail-and-integrity",
+    "line": 2,
+    "keyword": "Feature",
+    "name": "Commands, audit trail and integrity",
+    "tags": [
+      {
+        "name": "@phase1",
+        "line": 1
+      },
+      {
+        "name": "@area-AUD",
+        "line": 1
+      }
+    ],
+    "uri": "features\\09_commands_audit_and_integrity.feature"
+  }
+]

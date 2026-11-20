@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "source": "Root migrations 0001-0016 plus the REM-WP2.2 trusted authority resolver policy additions.",
+  "source": "evidence/phase1/tenant-table-inventory.json checked against root migrations 0001-0018; migration 0018 normalizes the finding-attribution policies to the Phase 1 admission/scope pattern.",
   "owner_decision": "D-03 strict tenant RLS and restricted role approved by explicit user direction 2026-11-07",
   "roles": {
     "application": "symphony_app (provisioned on local symphony_phase1_test; original 55-table WP1.5 matrix and ephemeral CI bootstrap/finalizer verified in CI run 43683206104 on candidate d7fbf5851b11b07b65bde36f062db7b21f487947; WP2.2 migration 0016 adds six physical tables and has separate candidate-bound app-role evidence)",
@@ -1185,6 +1185,24 @@
       "status": "REM-WP1.5 applied and verified this approved table grant/policy row under the actual restricted symphony_app role in CI run 43683206104; the raw full-suite result is retained in the candidate evidence directory."
     },
     {
+      "table": "verification_finding_attributions",
+      "classification": "tenant_scoped",
+      "scope_basis": "Finding-time verifier snapshot; tenant inherited through finding, assignment, evidence item, and organization.",
+      "scope_resolution": "Resolve tenant through finding -> assignment -> evidence item -> organization.",
+      "ordinary_runtime_role": "symphony_app",
+      "permitted_sql_operations": [
+        "SELECT",
+        "INSERT"
+      ],
+      "delete_grant": false,
+      "required_rls": "ENABLE+FORCE",
+      "current_rls_enabled_and_forced": true,
+      "explicit_tenant_predicate": true,
+      "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
+      "access_policy": "Finding attribution rows are visible and insertable only when their finding resolves through assignment/evidence to the active tenant. Snapshot trigger validates the official appointment source; UPDATE and DELETE are prohibited.",
+      "status": "REM-WP6.1 migrations 0017-0018 declare ENABLE+FORCE RLS and the tenant predicate; candidate-specific restricted-role verification is pending."
+    },
+    {
       "table": "verification_findings",
       "classification": "tenant_scoped",
       "scope_basis": "Tenant inherited through assignment/evidence; immutable findings.",
@@ -1216,7 +1234,7 @@
       "update_with_check",
       "mismatch_fixture_and_test"
     ],
-    "tenant_scoped_table_count": 44,
-    "rule": "The executable candidate expressions are in the REM-WP1.5 manifest and migrations 0013-0016. The original 37 tenant policies were verified in the historical PostgreSQL 18.0 candidate; later additions require task-specific restricted-role evidence. scope_resolution prose alone does not qualify."
+    "tenant_scoped_table_count": 45,
+    "rule": "The executable candidate expressions are in the REM-WP1.5 manifest and migrations 0013-0017. The original 37 tenant policies were verified in the historical PostgreSQL 18.0 candidate; later additions require task-specific restricted-role evidence. scope_resolution prose alone does not qualify."
   }
 }

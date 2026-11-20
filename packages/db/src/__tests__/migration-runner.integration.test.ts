@@ -17,7 +17,9 @@ import { PostgresAuthSessionRepository } from '../repositories/postgres-auth-ses
 
 const migrationBaseUrl = process.env['MIGRATION_TEST_DATABASE_URL'];
 const adminDatabaseUrl = process.env['PHASE1_TEST_ADMIN_DATABASE_URL'];
+const appDatabaseBaseUrl = process.env['PHASE1_TEST_APP_DATABASE_URL'];
 let testDatabaseUrl: string | undefined;
+let appTestDatabaseUrl: string | undefined;
 let isolatedDatabaseName: string | undefined;
 const runnerPath = fileURLToPath(new URL('../migrate.ts', import.meta.url));
 const migrationDirectory = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../../../migrations');
@@ -78,11 +80,15 @@ describe.skipIf(!migrationBaseUrl || !adminDatabaseUrl || process.env['DATA_MODE
     let pool: pg.Pool;
 
     beforeAll(async () => {
-      if (!migrationBaseUrl || !adminDatabaseUrl) {
-        throw new Error('Migration integration tests require separate migration and administrator test URLs.');
+      if (!migrationBaseUrl || !adminDatabaseUrl || !appDatabaseBaseUrl) {
+        throw new Error('Migration integration tests require separate migration, app-role and administrator test URLs.');
       }
       const admin = new pg.Client({ connectionString: adminDatabaseUrl });
       const migrationBase = new URL(migrationBaseUrl);
+      const migrationRole = decodeURIComponent(migrationBase.username);
+      if (!/^[A-Za-z_][A-Za-z0-9_]*$/.test(migrationRole)) {
+        throw new Error('Migration integration URL must identify a simple PostgreSQL role name.');
+      }
       const sourceDatabase = decodeURIComponent(migrationBase.pathname.replace(/^\//, ''));
       if (!sourceDatabase.endsWith('_test')) {
         throw new Error('Refusing destructive migration setup: use DATA_MODE=test and a *_test database.');
@@ -106,9 +112,15 @@ describe.skipIf(!migrationBaseUrl || !adminDatabaseUrl || process.env['DATA_MODE
         isolatedDatabaseName = `symphony_migration_${randomUUID().replaceAll('-', '').slice(0, 20)}_test`;
         const quotedDatabase = `"${isolatedDatabaseName.replaceAll('"', '""')}"`;
         await admin.query(`CREATE DATABASE ${quotedDatabase}`);
-        const isolatedUrl = new URL(adminDatabaseUrl);
+        const quotedMigrationRole = `"${migrationRole.replaceAll('"', '""')}"`;
+        await admin.query(`GRANT CONNECT, CREATE ON DATABASE ${quotedDatabase} TO ${quotedMigrationRole}`);
+        await admin.query(`GRANT CONNECT ON DATABASE ${quotedDatabase} TO symphony_app`);
+        const isolatedUrl = new URL(migrationBaseUrl);
         isolatedUrl.pathname = `/${isolatedDatabaseName}`;
         testDatabaseUrl = isolatedUrl.toString();
+        const isolatedAppUrl = new URL(appDatabaseBaseUrl);
+        isolatedAppUrl.pathname = `/${isolatedDatabaseName}`;
+        appTestDatabaseUrl = isolatedAppUrl.toString();
       } finally {
         await admin.end();
       }
@@ -198,8 +210,9 @@ describe.skipIf(!migrationBaseUrl || !adminDatabaseUrl || process.env['DATA_MODE
       });
 
       const roleCapabilities = await pool.query<{ migrator_can_set_writer: boolean; app_can_set_writer: boolean }>(
-        `SELECT pg_catalog.pg_has_role('symphony_migrator', 'symphony_outbox_writer', 'SET') AS migrator_can_set_writer,
+        `SELECT pg_catalog.pg_has_role($1::name, 'symphony_outbox_writer', 'SET') AS migrator_can_set_writer,
                 pg_catalog.pg_has_role('symphony_app', 'symphony_outbox_writer', 'SET') AS app_can_set_writer`,
+        [decodeURIComponent(new URL(migrationBaseUrl!).username)],
       );
       expect(roleCapabilities.rows).toEqual([{ migrator_can_set_writer: true, app_can_set_writer: false }]);
     }, 90_000);
@@ -208,11 +221,14 @@ describe.skipIf(!migrationBaseUrl || !adminDatabaseUrl || process.env['DATA_MODE
       const upgradeDatabaseName = `symphony_wp15_upgrade_${randomUUID().replaceAll('-', '').slice(0, 16)}_test`;
       const quotedDatabase = `"${upgradeDatabaseName.replaceAll('"', '""')}"`;
       const admin = new pg.Client({ connectionString: adminDatabaseUrl });
+      const migrationRole = decodeURIComponent(new URL(migrationBaseUrl!).username);
+      if (!/^[A-Za-z_][A-Za-z0-9_]*$/.test(migrationRole)) throw new Error('Migration URL role name is invalid.');
       await admin.connect();
       let client: pg.Client | undefined;
       try {
         await admin.query(`CREATE DATABASE ${quotedDatabase}`);
-        await admin.query(`GRANT CONNECT, CREATE ON DATABASE ${quotedDatabase} TO symphony_migrator`);
+        const quotedMigrationRole = `"${migrationRole.replaceAll('"', '""')}"`;
+        await admin.query(`GRANT CONNECT, CREATE ON DATABASE ${quotedDatabase} TO ${quotedMigrationRole}`);
 
         const upgradeUrl = new URL(migrationBaseUrl!);
         upgradeUrl.pathname = `/${upgradeDatabaseName}`;
@@ -591,6 +607,8 @@ describe.skipIf(!migrationBaseUrl || !adminDatabaseUrl || process.env['DATA_MODE
 
     it('proves secret redaction while atomically consuming temporary credentials and establishing permanent passwords', async () => {
       const repository = new PostgresCredentialRepository(pool);
+      if (!appTestDatabaseUrl) throw new Error('The isolated app-role database URL was not initialized.');
+      const appRolePool = new pg.Pool({ connectionString: appTestDatabaseUrl, max: 1 });
       const service = new CredentialLifecycleService({ now: () => new Date().toISOString() });
       const tenantId = randomUUID();
       const primaryUser = randomUUID();
@@ -639,7 +657,7 @@ describe.skipIf(!migrationBaseUrl || !adminDatabaseUrl || process.env['DATA_MODE
         const currentTemporary = await repository.findCurrentTemporaryCredential(tenantId, primaryUser);
         expect(currentTemporary).toMatchObject({ id: storedTemporary.id, consumedAt: null, revokedAt: null });
         expect(currentTemporary!.secretHash).toMatch(/^\$argon2id\$v=19\$m=19456,t=2,p=1\$/);
-        const lookupClient = await pool.connect();
+        const lookupClient = await appRolePool.connect();
         try {
           await lookupClient.query('BEGIN');
           await lookupClient.query('SET LOCAL ROLE symphony_app');
@@ -697,12 +715,25 @@ describe.skipIf(!migrationBaseUrl || !adminDatabaseUrl || process.env['DATA_MODE
         expect(await service.verifyPermanentPassword(losingPasswordCanary, establishedHash!)).toBe(false);
         expect(await service.verifyPermanentPassword(wrongPasswordCanary, establishedHash!)).toBe(false);
 
-        const persistedTemporary = await pool.query<{ secret_hash: string }>(
-          'SELECT secret_hash FROM symphony.temporary_credentials WHERE id=$1', [storedTemporary.id],
-        );
-        const persistedPermanent = await pool.query<{ secret_hash: string }>(
-          'SELECT secret_hash FROM symphony.password_credentials WHERE tenant_id=$1 AND user_id=$2', [tenantId, primaryUser],
-        );
+        const persistenceClient = await appRolePool.connect();
+        let persistedTemporary: { rows: { secret_hash: string }[] };
+        let persistedPermanent: { rows: { secret_hash: string }[] };
+        try {
+          await persistenceClient.query('BEGIN');
+          await persistenceClient.query("SELECT set_config('app.tenant_id', $1, true)", [tenantId]);
+          persistedTemporary = await persistenceClient.query<{ secret_hash: string }>(
+            'SELECT secret_hash FROM symphony.temporary_credentials WHERE id=$1', [storedTemporary.id],
+          );
+          persistedPermanent = await persistenceClient.query<{ secret_hash: string }>(
+            'SELECT secret_hash FROM symphony.password_credentials WHERE tenant_id=$1 AND user_id=$2', [tenantId, primaryUser],
+          );
+          await persistenceClient.query('COMMIT');
+        } catch (error) {
+          await persistenceClient.query('ROLLBACK').catch(() => undefined);
+          throw error;
+        } finally {
+          persistenceClient.release();
+        }
         expect(persistedTemporary.rows).toHaveLength(1);
         expect(persistedPermanent.rows).toHaveLength(1);
         expect(persistedTemporary.rows[0]!.secret_hash).toMatch(/^\$argon2id\$v=19\$m=19456,t=2,p=1\$/);
@@ -715,7 +746,7 @@ describe.skipIf(!migrationBaseUrl || !adminDatabaseUrl || process.env['DATA_MODE
           expect(persistedText).not.toContain(canary);
         }
 
-        const scopedClient = await pool.connect();
+        const scopedClient = await appRolePool.connect();
         try {
           await scopedClient.query('BEGIN');
           await scopedClient.query('SET LOCAL ROLE symphony_app');
@@ -766,10 +797,21 @@ describe.skipIf(!migrationBaseUrl || !adminDatabaseUrl || process.env['DATA_MODE
           credentialId: rollbackTemporary.credentialId, tenantId, userId: rollbackUser, secretHash: rollbackTemporary.hash,
         });
         const existingPassword = await service.hashPermanentPassword('first permanent password phrase');
-        await pool.query(
-          'INSERT INTO symphony.password_credentials (tenant_id,user_id,secret_hash) VALUES ($1,$2,$3)',
-          [tenantId, rollbackUser, existingPassword],
-        );
+        const passwordFixture = await pool.connect();
+        try {
+          await passwordFixture.query('BEGIN');
+          await passwordFixture.query("SELECT set_config('app.tenant_id', $1, true)", [tenantId]);
+          await passwordFixture.query(
+            'INSERT INTO symphony.password_credentials (tenant_id,user_id,secret_hash) VALUES ($1,$2,$3)',
+            [tenantId, rollbackUser, existingPassword],
+          );
+          await passwordFixture.query('COMMIT');
+        } catch (error) {
+          await passwordFixture.query('ROLLBACK').catch(() => undefined);
+          throw error;
+        } finally {
+          passwordFixture.release();
+        }
         await expect(repository.establishPermanentPassword({
           tenantId,
           userId: rollbackUser,
@@ -808,6 +850,7 @@ describe.skipIf(!migrationBaseUrl || !adminDatabaseUrl || process.env['DATA_MODE
           boundaryClient.release();
         }
       } finally {
+        await appRolePool.end();
         const cleanup = await pool.connect();
         try {
           await cleanup.query('BEGIN');
@@ -816,6 +859,7 @@ describe.skipIf(!migrationBaseUrl || !adminDatabaseUrl || process.env['DATA_MODE
           await cleanup.query('DELETE FROM symphony.password_credentials WHERE tenant_id=$1', [tenantId]);
           await cleanup.query('DELETE FROM symphony.users WHERE tenant_id=$1', [tenantId]);
           await cleanup.query('DELETE FROM symphony.tenants WHERE id=$1', [tenantId]);
+          await cleanup.query("SELECT set_config('app.tenant_id', $1, true)", [foreignTenantId]);
           await cleanup.query('DELETE FROM symphony.users WHERE tenant_id=$1', [foreignTenantId]);
           await cleanup.query('DELETE FROM symphony.tenants WHERE id=$1', [foreignTenantId]);
           await cleanup.query('COMMIT');
@@ -874,8 +918,9 @@ describe.skipIf(!migrationBaseUrl || !adminDatabaseUrl || process.env['DATA_MODE
       const tenantId = randomUUID();
       const userId = randomUUID();
       const tempId = randomUUID();
-      const repoOnePool = new pg.Pool({ connectionString: testDatabaseUrl, max: 1 });
-      const repoTwoPool = new pg.Pool({ connectionString: testDatabaseUrl, max: 1 });
+      if (!appTestDatabaseUrl) throw new Error('The isolated app-role database URL was not initialized.');
+      const repoOnePool = new pg.Pool({ connectionString: appTestDatabaseUrl, max: 1 });
+      const repoTwoPool = new pg.Pool({ connectionString: appTestDatabaseUrl, max: 1 });
       const repoOne = new PostgresAuthSessionRepository(repoOnePool);
       const repoTwo = new PostgresAuthSessionRepository(repoTwoPool);
       const rawTemporary = `WP53_TEMP_${randomUUID()}`;

@@ -1,0 +1,23 @@
+{"level":30,"time":1795180608080,"pid":4696,"hostname":"DESKTOP-VV0116A","msg":"Server listening at http://127.0.0.1:3001"}
+{"level":30,"time":1795180608271,"pid":4696,"hostname":"DESKTOP-VV0116A","reqId":"req-1","req":{"method":"GET","url":"/health/live","host":"127.0.0.1:3001","remoteAddress":"127.0.0.1","remotePort":57933},"msg":"incoming request"}
+{"level":30,"time":1795180608282,"pid":4696,"hostname":"DESKTOP-VV0116A","reqId":"req-1","res":{"statusCode":200},"responseTime":10.015599999999722,"msg":"request completed"}
+{"level":30,"time":1795180614943,"pid":4696,"hostname":"DESKTOP-VV0116A","reqId":"req-2","req":{"method":"GET","url":"/auth/session","host":"127.0.0.1:5176","remoteAddress":"127.0.0.1","remotePort":57944},"msg":"incoming request"}
+{"level":30,"time":1795180614945,"pid":4696,"hostname":"DESKTOP-VV0116A","reqId":"req-2","res":{"statusCode":401},"responseTime":1.7309000000004744,"msg":"request completed"}
+{"level":30,"time":1795180614946,"pid":4696,"hostname":"DESKTOP-VV0116A","reqId":"req-3","req":{"method":"GET","url":"/auth/session","host":"127.0.0.1:5176","remoteAddress":"127.0.0.1","remotePort":57945},"msg":"incoming request"}
+{"level":30,"time":1795180614947,"pid":4696,"hostname":"DESKTOP-VV0116A","reqId":"req-3","res":{"statusCode":401},"responseTime":0.7299000000002707,"msg":"request completed"}
+{"level":30,"time":1795180615109,"pid":4696,"hostname":"DESKTOP-VV0116A","reqId":"req-4","req":{"method":"GET","url":"/auth/csrf","host":"127.0.0.1:5176","remoteAddress":"127.0.0.1","remotePort":57946},"msg":"incoming request"}
+{"level":30,"time":1795180615210,"pid":4696,"hostname":"DESKTOP-VV0116A","reqId":"req-4","res":{"statusCode":200},"responseTime":101.14320000000043,"msg":"request completed"}
+{"level":30,"time":1795180615217,"pid":4696,"hostname":"DESKTOP-VV0116A","reqId":"req-5","req":{"method":"POST","url":"/auth/login","host":"127.0.0.1:5176","remoteAddress":"127.0.0.1","remotePort":57949},"msg":"incoming request"}
+{"level":30,"time":1795180615334,"pid":4696,"hostname":"DESKTOP-VV0116A","reqId":"req-5","res":{"statusCode":200},"responseTime":116.18990000000122,"msg":"request completed"}
+{"level":30,"time":1795180615344,"pid":4696,"hostname":"DESKTOP-VV0116A","reqId":"req-6","req":{"method":"GET","url":"/auth/session","host":"127.0.0.1:5176","remoteAddress":"127.0.0.1","remotePort":57950},"msg":"incoming request"}
+{"level":30,"time":1795180615347,"pid":4696,"hostname":"DESKTOP-VV0116A","reqId":"req-7","req":{"method":"GET","url":"/auth/session","host":"127.0.0.1:5176","remoteAddress":"127.0.0.1","remotePort":57951},"msg":"incoming request"}
+{"level":30,"time":1795180615364,"pid":4696,"hostname":"DESKTOP-VV0116A","reqId":"req-6","res":{"statusCode":200},"responseTime":19.96349999999984,"msg":"request completed"}
+{"level":30,"time":1795180615444,"pid":4696,"hostname":"DESKTOP-VV0116A","reqId":"req-7","res":{"statusCode":200},"responseTime":96.47339999999895,"msg":"request completed"}
+{"level":30,"time":1795180615456,"pid":4696,"hostname":"DESKTOP-VV0116A","reqId":"req-8","req":{"method":"GET","url":"/workspace/context","host":"127.0.0.1:5176","remoteAddress":"127.0.0.1","remotePort":57955},"msg":"incoming request"}
+{"level":30,"time":1795180615457,"pid":4696,"hostname":"DESKTOP-VV0116A","reqId":"req-9","req":{"method":"GET","url":"/workspace/context","host":"127.0.0.1:5176","remoteAddress":"127.0.0.1","remotePort":57956},"msg":"incoming request"}
+{"level":30,"time":1795180615572,"pid":4696,"hostname":"DESKTOP-VV0116A","reqId":"req-9","res":{"statusCode":200},"responseTime":114.98599999999897,"msg":"request completed"}
+{"level":30,"time":1795180615575,"pid":4696,"hostname":"DESKTOP-VV0116A","reqId":"req-8","res":{"statusCode":200},"responseTime":118.4947000000011,"msg":"request completed"}
+{"level":30,"time":1795180615733,"pid":4696,"hostname":"DESKTOP-VV0116A","reqId":"req-a","req":{"method":"GET","url":"/workspace/verified-findings?organizationId=6708a66f-b0d4-47d0-964b-b349ec3e9f9a","host":"127.0.0.1:5176","remoteAddress":"127.0.0.1","remotePort":57958},"msg":"incoming request"}
+{"level":30,"time":1795180615740,"pid":4696,"hostname":"DESKTOP-VV0116A","reqId":"req-b","req":{"method":"GET","url":"/workspace/verified-findings?organizationId=6708a66f-b0d4-47d0-964b-b349ec3e9f9a","host":"127.0.0.1:5176","remoteAddress":"127.0.0.1","remotePort":57960},"msg":"incoming request"}
+{"level":30,"time":1795180615878,"pid":4696,"hostname":"DESKTOP-VV0116A","reqId":"req-b","res":{"statusCode":200},"responseTime":137.7415000000001,"msg":"request completed"}
+{"level":30,"time":1795180615887,"pid":4696,"hostname":"DESKTOP-VV0116A","reqId":"req-a","res":{"statusCode":200},"responseTime":153.2584999999999,"msg":"request completed"}

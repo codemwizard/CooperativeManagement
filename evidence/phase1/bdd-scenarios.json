@@ -160,7 +160,7 @@
     {
       "id": "BDD-UXW-001",
       "feature": "features/10_workspace_and_capabilities.feature",
-      "proves": "Persona navigation exposes URL-addressable workspace routes."
+      "proves": "Persisted session authority maps to fixed URL-addressable Cooperative member, Chairperson, Vice-Chairperson, Secretary, Treasurer, internal verifier, programme manager, Union TA and self-enroller workflow navigation; no client-selected persona grants authority."
     },
     {
       "id": "BDD-UXW-002",

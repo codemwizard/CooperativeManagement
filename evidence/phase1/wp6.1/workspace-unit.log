@@ -1,0 +1,20 @@
+npm notice run symphony-prototype@1.0.0 test:workspace
+npm notice run npm run test:unit --workspace @symphony/workspace
+npm notice run @symphony/workspace@0.1.0 test:unit
+npm notice run vitest run --reporter=verbose
+
+ RUN  v2.1.9 C:/Workspace/GitHub/Prototype/apps/workspace
+
+ ✓ src/__tests__/presenter.test.ts > presenterTest_noSnakeCaseInOutput > evidence presenter output contains no snake_case (underscore) text
+ ✓ src/__tests__/presenter.test.ts > presenterTest_noSnakeCaseInOutput > requirement presenter output contains no snake_case (underscore) text
+ ✓ src/__tests__/presenter.test.ts > presenterTest_noBannedWords > no output contains the word "compliant"
+ ✓ src/__tests__/presenter.test.ts > presenterTest_noBannedWords > no output contains "certified" without an authority qualifier
+ ✓ src/__tests__/presenter.test.ts > presenterTest_noBannedWords > no output contains a bare "Verified" (title-case, without scope/verifier)
+ ✓ src/__tests__/presenter.test.ts > workspace context selection > restores a programme manager selected at the workspace root from the URL
+ ✓ src/__tests__/presenter.test.ts > workspace context selection > selects an authorized cooperative at its root even when it is not the first context
+ ✓ src/__tests__/presenter.test.ts > workspace context selection > does not restore a URL context that is outside the requested cooperative scope
+
+ Test Files  1 passed (1)
+      Tests  8 passed (8)
+   Start at  06:51:23
+   Duration  6.37s (transform 159ms, setup 0ms, collect 162ms, tests 12ms, environment 5.35s, prepare 387ms)

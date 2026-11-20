@@ -8,9 +8,11 @@
 import React from 'react';
 
 interface OrgHeaderProps {
-  readonly orgName: string;
-  readonly enrolmentStatus: string;
-  readonly pipelineStage: string;
+  /** Supplied only from a trusted workspace context; omitted while unresolved. */
+  readonly orgName?: string;
+  readonly enrolmentStatus?: string;
+  readonly pipelineStage?: string;
+  readonly provenanceButtonRef?: React.RefObject<HTMLButtonElement>;
   readonly onOpenProvenance: () => void;
 }
 
@@ -18,25 +20,31 @@ export function OrgHeader({
   orgName,
   enrolmentStatus,
   pipelineStage,
+  provenanceButtonRef,
   onOpenProvenance,
 }: OrgHeaderProps): React.ReactElement {
   return (
     <header style={styles.header} role="banner">
       <div style={styles.left}>
-        <span style={styles.orgName}>{orgName}</span>
-        <span style={styles.divider} aria-hidden="true">|</span>
-        <span style={styles.meta}>
-          <span style={styles.label}>Enrolment:</span>{' '}
-          {enrolmentStatus}
-        </span>
-        <span style={styles.divider} aria-hidden="true">|</span>
-        <span style={styles.meta}>
-          <span style={styles.label}>Stage:</span>{' '}
-          {pipelineStage}
-        </span>
+        {orgName && <span style={styles.orgName}>{orgName}</span>}
+        {orgName && (enrolmentStatus || pipelineStage) && <span style={styles.divider} aria-hidden="true">|</span>}
+        {enrolmentStatus && (
+          <span style={styles.meta}>
+            <span style={styles.label}>Enrolment:</span>{' '}
+            {enrolmentStatus}
+          </span>
+        )}
+        {enrolmentStatus && pipelineStage && <span style={styles.divider} aria-hidden="true">|</span>}
+        {pipelineStage && (
+          <span style={styles.meta}>
+            <span style={styles.label}>Stage:</span>{' '}
+            {pipelineStage}
+          </span>
+        )}
       </div>
       <div style={styles.right}>
         <button
+          ref={provenanceButtonRef}
           type="button"
           style={styles.provenanceBtn}
           onClick={onOpenProvenance}

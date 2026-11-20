@@ -22,6 +22,16 @@
       }
     },
     "commit": { "type": "string", "pattern": "^(?:[0-9a-f]{40}|working-tree)$" },
+    "candidate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "head_commit_before_implementation", "implementation_commit"],
+      "properties": {
+        "status": { "const": "immutable implementation candidate" },
+        "head_commit_before_implementation": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
+        "implementation_commit": { "type": "string", "pattern": "^[0-9a-f]{40}$" }
+      }
+    },
     "environment": {
       "type": "object",
       "additionalProperties": false,
@@ -42,7 +52,7 @@
         "additionalProperties": false,
         "required": ["command", "result", "artifact"],
         "properties": {
-          "command": { "type": "string", "minLength": 1, "maxLength": 240 },
+          "command": { "type": "string", "minLength": 1, "maxLength": 1024 },
           "result": { "enum": ["passed", "failed", "blocked", "not_run"] },
           "artifact": { "type": "string", "pattern": "^(?!/)(?![A-Za-z]:)(?!.*(?:^|/)\\.{1,2}(?:/|$))[A-Za-z0-9_.-]+(?:/[A-Za-z0-9_.-]+)*$" }
         }
@@ -68,7 +78,7 @@
               "additionalProperties": false,
               "required": ["command", "result", "artifact"],
               "properties": {
-                "command": { "type": "string", "minLength": 1, "maxLength": 240 },
+                "command": { "type": "string", "minLength": 1, "maxLength": 1024 },
                 "result": { "enum": ["passed", "failed", "blocked", "not_run"] },
                 "artifact": { "type": "string", "pattern": "^(?!/)(?![A-Za-z]:)(?!.*(?:^|/)\\.{1,2}(?:/|$))[A-Za-z0-9_.-]+(?:/[A-Za-z0-9_.-]+)*$" }
               }
@@ -106,7 +116,48 @@
         "behavior_proved": { "type": "string", "minLength": 1 },
         "path_proved": { "type": "string", "minLength": 1 },
         "configuration_proved": { "type": "string", "minLength": 1 },
-        "coverage_limitations": { "type": "array", "items": { "type": "string" } }
+        "coverage_limitations": { "type": "array", "items": { "type": "string" } },
+        "password_blocklist": {
+          "type": "object", "additionalProperties": false,
+          "required": ["version", "source", "source_nonempty_entries", "normalized_unique_entries", "source_sha256", "runtime_data_sha256", "provenance_and_rebuild", "runtime_lookup"],
+          "properties": {
+            "version": { "type": "string" }, "source": { "type": "string" },
+            "source_nonempty_entries": { "type": "integer", "minimum": 0 },
+            "normalized_unique_entries": { "type": "integer", "minimum": 0 },
+            "source_sha256": { "type": "string", "pattern": "^[A-Fa-f0-9]{64}$" },
+            "runtime_data_sha256": { "type": "string", "pattern": "^[A-Fa-f0-9]{64}$" },
+            "provenance_and_rebuild": { "type": "string" }, "runtime_lookup": { "const": "none" }
+          }
+        },
+        "argon2id_qualification": {
+          "type": "object", "additionalProperties": false,
+          "required": ["profile", "approval", "result", "qualification_limit"],
+          "properties": {
+            "profile": { "type": "string" }, "approval": { "type": "string" },
+            "result": {
+              "type": "object", "additionalProperties": false,
+              "required": ["verifications", "per_second", "p50_ms", "p95_ms", "p99_ms", "max_ms"],
+              "properties": {
+                "verifications": { "type": "integer", "minimum": 0 },
+                "per_second": { "type": "number", "minimum": 0 },
+                "p50_ms": { "type": "number", "minimum": 0 }, "p95_ms": { "type": "number", "minimum": 0 },
+                "p99_ms": { "type": "number", "minimum": 0 }, "max_ms": { "type": "number", "minimum": 0 }
+              }
+            },
+            "qualification_limit": { "type": "string" }
+          }
+        },
+        "predecessors": {
+          "type": "object", "additionalProperties": false,
+          "patternProperties": {
+            "^REM-WP[0-9]+(?:\\.[0-9]+)?$": { "$ref": "#/$defs/predecessor" }
+          }
+        },
+        "route_inventory": {
+          "description": "Explicit route patterns exercised by a live UI acceptance task.",
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        }
       }
     },
     "limitations": { "type": "array", "items": { "type": "string" } },
@@ -128,7 +179,12 @@
     }
   },
   "$defs": {
-    "verification": { "enum": ["passed", "failed", "pending", "blocked", "not_applicable"] }
+    "verification": { "enum": ["passed", "failed", "pending", "blocked", "not_applicable"] },
+    "predecessor": {
+      "type": "object", "additionalProperties": false,
+      "required": ["result", "artifact"],
+      "properties": { "result": { "type": "string" }, "artifact": { "type": "string" } }
+    }
   },
   "allOf": [
     {

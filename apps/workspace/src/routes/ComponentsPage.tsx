@@ -4,7 +4,7 @@ import '../styles/workspace-accessibility.css';
 
 const tokens = [
   ['Brand', '--color-brand-500', '#009b87'],
-  ['Verified status', '--color-status-verified', '#0a6640'],
+  ['Cooperative verification status', '--color-status-verified', '#0a6640'],
   ['Pending status', '--color-status-pending', '#7a4f00'],
   ['Rejected status', '--color-status-rejected', '#8b0000'],
 ] as const;

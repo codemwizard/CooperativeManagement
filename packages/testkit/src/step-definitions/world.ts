@@ -9,6 +9,7 @@
 
 import { setWorldConstructor } from '@cucumber/cucumber';
 import type { CommandResult } from '@symphony/domain';
+import type { Browser, BrowserContext, Page } from '@playwright/test';
 
 export interface Actor {
   userId: string;
@@ -17,6 +18,16 @@ export interface Actor {
 }
 
 export class SymphonyWorld {
+  /** Live browser state is populated only by the dedicated WP6.1 Cucumber profile. */
+  browser?: Browser;
+  browserContext?: BrowserContext;
+  page?: Page;
+  baseUrl?: string;
+  organizationId?: string;
+  visitedRouteTexts: string[] = [];
+  routeFocusResults: boolean[] = [];
+  activePersona?: string;
+
   /** Named organisations registered in this scenario */
   organisations: Record<string, { id: string; tenantId: string }> = {};
 
