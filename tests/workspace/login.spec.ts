@@ -16,13 +16,29 @@ import { test, expect } from '@playwright/test';
 const BASE = 'http://127.0.0.1:5174';
 
 test.describe('Login page', () => {
+  test.beforeEach(async ({ page }) => {
+    // These legacy UI-flow tests mock authentication responses and do not start
+    // the API server. Keep the page's initial session check and CSRF bootstrap
+    // inside that same mocked boundary so Vite never proxies them to port 3000.
+    await page.route('**/auth/session', async (route) => route.fulfill({
+      status: 401,
+      contentType: 'application/json',
+      body: JSON.stringify({ code: 'UNAUTHENTICATED' }),
+    }));
+    await page.route('**/auth/csrf', async (route) => route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({ csrfToken: 'test-csrf-token-1234567890123456' }),
+    }));
+  });
+
   test('validCredentials_redirectsToWorkspace', async ({ page }) => {
     // Intercept the login API call and return success
     await page.route('**/auth/login', (route) => {
       void route.fulfill({
         status: 200,
         contentType: 'application/json',
-        body: JSON.stringify({ ok: true, requiresPasswordChange: false }),
+        body: JSON.stringify({ forcedChangeRequired: false }),
       });
     });
 
@@ -43,7 +59,7 @@ test.describe('Login page', () => {
       void route.fulfill({
         status: 401,
         contentType: 'application/json',
-        body: JSON.stringify({ ok: false, detail: 'Invalid credentials' }),
+        body: JSON.stringify({ code: 'AUTHENTICATION_FAILED' }),
       });
     });
 
@@ -56,19 +72,19 @@ test.describe('Login page', () => {
     // Error message should be visible
     const errorEl = page.locator('[data-testid="login-error"]');
     await expect(errorEl).toBeVisible();
-    await expect(errorEl).toContainText('Invalid credentials');
+    await expect(errorEl).toContainText('Sign in failed. Please check your credentials and try again.');
 
     // Should still be on login page
     await expect(page).toHaveURL(/\/login/);
   });
 
   test('temporaryCredential_promptsPasswordChange', async ({ page }) => {
-    // Intercept and return success with requiresPasswordChange=true
+    // Intercept and return the shared login success contract for a temporary credential.
     await page.route('**/auth/login', (route) => {
       void route.fulfill({
         status: 200,
         contentType: 'application/json',
-        body: JSON.stringify({ ok: true, requiresPasswordChange: true }),
+        body: JSON.stringify({ forcedChangeRequired: true }),
       });
     });
 
@@ -80,7 +96,7 @@ test.describe('Login page', () => {
 
     // Should show the password change prompt
     await expect(page.locator('h1')).toContainText('Change your password');
-    await expect(page.locator('text=temporary credential')).toBeVisible();
+    await expect(page.getByText('Your account uses a temporary credential. Set a new password before continuing.')).toBeVisible();
   });
 });
 

@@ -1,0 +1,13 @@
+
+> symphony-prototype@1.0.0 build:workspace
+> cd apps/workspace && npx tsc --noEmit && npx vite build
+
+vite v5.4.21 building for production...
+transforming...
+✓ 59 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                   0.40 kB │ gzip:  0.27 kB
+dist/assets/index-BfCH4f9w.css    5.93 kB │ gzip:  1.95 kB
+dist/assets/index-BXmLe-65.js   241.58 kB │ gzip: 72.56 kB
+✓ built in 30.01s

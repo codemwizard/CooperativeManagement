@@ -1,0 +1,7 @@
+npm notice run symphony-prototype@1.0.0 db:migrate:test
+npm notice run node --import tsx packages/db/src/migrate.ts
+Running migrations from: C:\Workspace\GitHub\Prototype\artifacts\exact-candidates\wp1.5\migrations
+Schema: symphony
+
+Migration runner failed: Migration 0001_kernel.sql failed; transaction rolled back.
+Cause: character with byte sequence 0xe2 0x94 0x80 in encoding "UTF8" has no equivalent in encoding "WIN1252"

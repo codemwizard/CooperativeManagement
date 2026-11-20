@@ -1,9 +1,9 @@
 {
   "version": 1,
-  "source": "evidence/phase1/tenant-table-inventory.json checked against every root migration",
+  "source": "Root migrations 0001-0016 plus the REM-WP2.2 trusted authority resolver policy additions.",
   "owner_decision": "D-03 strict tenant RLS and restricted role approved by explicit user direction 2026-11-07",
   "roles": {
-    "application": "symphony_app (provisioned on local symphony_phase1_test; complete 55-table matrix and ephemeral CI bootstrap/finalizer verified in CI run 43683206104 on candidate d7fbf5851b11b07b65bde36f062db7b21f487947)",
+    "application": "symphony_app (provisioned on local symphony_phase1_test; original 55-table WP1.5 matrix and ephemeral CI bootstrap/finalizer verified in CI run 43683206104 on candidate d7fbf5851b11b07b65bde36f062db7b21f487947; WP2.2 migration 0016 adds six physical tables and has separate candidate-bound app-role evidence)",
     "migration": "symphony_migrator (ephemeral CI migration identity; clean install, replay/upgrade/failure checks passed in run 43683206104)",
     "purge": "separate dedicated purge identity, no ordinary application inheritance"
   },
@@ -13,7 +13,7 @@
     "Every tenant-scoped query uses both RLS and an explicit server-derived tenant predicate.",
     "Global catalogues are SELECT-only for ordinary app role.",
     "Control-plane tables have no ordinary app-role grants; operation-specific grants require a named command, service identity, and audit behavior.",
-    "The rls_current and current_rls_enabled_and_forced fields preserve the pre-WP1.5 through-0012 baseline (three tenant tables had ENABLE+FORCE at that snapshot). Migration 0013 and the complete effective policy/grant matrix were verified under restricted CI roles in run 43683206104; see the WP1.5 candidate evidence record."
+    "The rls_current and current_rls_enabled_and_forced fields preserve the pre-REM-WP1.5 through-0012 baseline (three tenant tables had ENABLE+FORCE at that snapshot). Migration 0013 and the complete effective policy/grant matrix were verified under restricted CI roles in run 43683206104; see the REM-WP1.5 candidate evidence record."
   ],
   "planned_phase1_tables": [
     {
@@ -31,14 +31,107 @@
       "explicit_tenant_predicate": true,
       "tenant_context": "SET LOCAL app.tenant_id only from authenticated server context; insert policy binds tenant_id to that context.",
       "access_policy": "Append-only authenticated command-denial observation only. No SELECT, UPDATE or DELETE for ordinary app role. Unauthenticated authentication attempts use WP5's separate security audit path. Audit failure cannot authorize a command or create a business receipt.",
-      "status": "Created by WP1.2 migration 0010_security_attempts.sql; WP1.5 migration 0013 applies ENABLE+FORCE RLS and the INSERT-only policy/grant. The full matrix and effective application privileges passed under ephemeral CI roles in run 43683206104."
+      "status": "Created by REM-WP1.2 migration 0010_security_attempts.sql; REM-WP1.5 migration 0013 applies ENABLE+FORCE RLS and the INSERT-only policy/grant. The full matrix and effective application privileges passed under ephemeral CI roles in run 43683206104."
+    },
+    {
+      "table": "temporary_credentials",
+      "classification": "tenant_scoped",
+      "scope_basis": "Direct tenant_id and composite same-tenant user foreign key.",
+      "scope_resolution": "row.tenant_id matches transaction-local authenticated tenant context; composite foreign key binds user_id to that tenant.",
+      "ordinary_runtime_role": "symphony_app",
+      "permitted_sql_operations": [
+        "SELECT",
+        "INSERT",
+        "UPDATE"
+      ],
+      "delete_grant": false,
+      "required_rls": "ENABLE+FORCE",
+      "current_rls_enabled_and_forced": true,
+      "explicit_tenant_predicate": true,
+      "tenant_context": "SET LOCAL app.tenant_id only from authenticated server context; credential rows are tenant-bound.",
+      "access_policy": "Temporary credential hashes are readable and mutable only within the authenticated user's tenant; no ordinary app-role DELETE.",
+      "status": "REM-WP5.2 migration 0014 defines the table policy and exact app-role grant; candidate verification is pending."
+    },
+    {
+      "table": "password_credentials",
+      "classification": "tenant_scoped",
+      "scope_basis": "Direct tenant_id and composite same-tenant user foreign key.",
+      "scope_resolution": "row.tenant_id matches transaction-local authenticated tenant context; composite foreign key binds user_id to that tenant.",
+      "ordinary_runtime_role": "symphony_app",
+      "permitted_sql_operations": [
+        "SELECT",
+        "INSERT",
+        "UPDATE"
+      ],
+      "delete_grant": false,
+      "required_rls": "ENABLE+FORCE",
+      "current_rls_enabled_and_forced": true,
+      "explicit_tenant_predicate": true,
+      "tenant_context": "SET LOCAL app.tenant_id only from authenticated server context; credential rows are tenant-bound.",
+      "access_policy": "Permanent password hashes are readable and mutable only within the authenticated user's tenant; no ordinary app-role DELETE.",
+      "status": "REM-WP5.2 migration 0014 defines the table policy and exact app-role grant; candidate verification is pending."
+    },
+    {
+      "table": "auth_sessions",
+      "classification": "shared_security_store",
+      "scope_basis": "Opaque digest-keyed pre-auth and user sessions; user sessions are tenant-bound and pre-auth rows have no identity.",
+      "scope_resolution": "Session reads use the hash-only SECURITY DEFINER lookup; tenant-bound mutations execute with transaction-local app.tenant_id and explicit tenant predicates.",
+      "ordinary_runtime_role": "symphony_app",
+      "permitted_sql_operations": [
+        "SELECT",
+        "INSERT",
+        "UPDATE",
+        "DELETE"
+      ],
+      "delete_grant": false,
+      "required_rls": "ENABLED tenant predicates; FORCE not used because pre-auth rows have no tenant context",
+      "current_rls_enabled_and_forced": false,
+      "explicit_tenant_predicate": true,
+      "tenant_context": "Authenticated tenant is set locally for user-session writes; pre-auth rows are opaque token-hash keyed and have no user identity.",
+      "access_policy": "The session store contains only random token and CSRF digests plus opaque identity/lifecycle metadata. Application access is limited to the session repository and bounded by explicit tenant predicates for authenticated sessions.",
+      "status": "REM-WP5.3 migration 0015; candidate-specific restricted-role verification pending."
+    },
+    {
+      "table": "auth_user_tenant_index",
+      "classification": "control_plane_restricted",
+      "scope_basis": "Private UUID-to-tenant routing index read only by the narrow security-definer login lookup; never exposed to the application role.",
+      "scope_resolution": "not_applicable",
+      "ordinary_runtime_role": "no ordinary application grant",
+      "permitted_sql_operations": [],
+      "delete_grant": false,
+      "required_rls": "review_based_on_scope",
+      "current_rls_enabled_and_forced": false,
+      "explicit_tenant_predicate": false,
+      "tenant_context": "Only the user-row trigger and SECURITY DEFINER lookup access this private index.",
+      "access_policy": "No ordinary runtime table grants; direct cross-tenant identity routing remains inaccessible to symphony_app.",
+      "status": "REM-WP5.3 migration 0015; candidate-specific security-definer and restricted-role verification pending."
+    },
+    {
+      "table": "auth_attempt_events",
+      "classification": "shared_security_store",
+      "scope_basis": "Global account and trusted-source throttle history contains HMACs rather than raw account identifiers or source addresses.",
+      "scope_resolution": "not_applicable",
+      "ordinary_runtime_role": "symphony_app",
+      "permitted_sql_operations": [
+        "SELECT",
+        "INSERT",
+        "UPDATE",
+        "DELETE"
+      ],
+      "delete_grant": false,
+      "required_rls": "shared atomic security store; no tenant RLS",
+      "current_rls_enabled_and_forced": false,
+      "explicit_tenant_predicate": false,
+      "tenant_context": "Cross-tenant global login protection; access is through the repository's advisory-locked, bounded transaction operations.",
+      "access_policy": "Contains only HMAC account/source keys and bounded state/timestamps. It enables atomic shared limits across API instances and is not a general audit log.",
+      "status": "REM-WP5.3 migration 0015; candidate-specific restricted-role verification pending."
     }
   ],
   "tables": [
     {
-      "table": "tenants",
+      "table": "acceptance_policies",
       "classification": "control_plane_restricted",
-      "scope_basis": "Top-level tenant registry; tenant creation/maintenance is privileged.",
+      "scope_basis": "Organization/audience policy with nullable organization_id.",
       "scope_resolution": "not_applicable",
       "ordinary_runtime_role": "no ordinary application grant",
       "permitted_sql_operations": [],
@@ -48,7 +141,176 @@
       "explicit_tenant_predicate": false,
       "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
       "access_policy": "No ordinary runtime-role access. A separately named operation-specific service grant and audit contract must be mapped before implementation.",
-      "status": "WP1.5 applied and verified this approved table grant/policy row under the actual restricted symphony_app role in CI run 43683206104; the raw full-suite result is retained in the candidate evidence directory."
+      "status": "REM-WP1.5 applied and verified this approved table grant/policy row under the actual restricted symphony_app role in CI run 43683206104; the raw full-suite result is retained in the candidate evidence directory."
+    },
+    {
+      "table": "aggregate_states",
+      "classification": "tenant_scoped",
+      "scope_basis": "Direct tenant_id; aggregate projection state.",
+      "scope_resolution": "row.tenant_id matches transaction-local authenticated tenant context",
+      "ordinary_runtime_role": "symphony_app",
+      "permitted_sql_operations": [
+        "SELECT",
+        "INSERT",
+        "UPDATE"
+      ],
+      "delete_grant": false,
+      "required_rls": "ENABLE+FORCE",
+      "current_rls_enabled_and_forced": false,
+      "explicit_tenant_predicate": true,
+      "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
+      "access_policy": "Tenant context is transaction-local, derived only from authenticated server context; every query also includes an explicit tenant predicate.",
+      "status": "REM-WP1.5 applied and verified this approved table grant/policy row under the actual restricted symphony_app role in CI run 43683206104; the raw full-suite result is retained in the candidate evidence directory."
+    },
+    {
+      "table": "appointments",
+      "classification": "tenant_scoped",
+      "scope_basis": "Organization-scoped appointment; tenant inherited from organization.",
+      "scope_resolution": "Resolve tenant through declared parent relation: Organization-scoped appointment; tenant inherited from organization.",
+      "ordinary_runtime_role": "symphony_app",
+      "permitted_sql_operations": [
+        "SELECT",
+        "INSERT",
+        "UPDATE"
+      ],
+      "delete_grant": false,
+      "required_rls": "ENABLE+FORCE",
+      "current_rls_enabled_and_forced": false,
+      "explicit_tenant_predicate": true,
+      "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
+      "access_policy": "Tenant context is transaction-local, derived only from authenticated server context; every query also includes an explicit tenant predicate.",
+      "status": "REM-WP1.5 applied and verified this approved table grant/policy row under the actual restricted symphony_app role in CI run 43683206104; the raw full-suite result is retained in the candidate evidence directory."
+    },
+    {
+      "table": "approval_policies",
+      "classification": "tenant_scoped",
+      "scope_basis": "Organization policy; tenant derived from organization_id.",
+      "scope_resolution": "Resolve tenant through declared parent relation: Organization policy; tenant derived from organization_id.",
+      "ordinary_runtime_role": "symphony_app",
+      "permitted_sql_operations": [
+        "SELECT",
+        "INSERT",
+        "UPDATE"
+      ],
+      "delete_grant": false,
+      "required_rls": "ENABLE+FORCE",
+      "current_rls_enabled_and_forced": false,
+      "explicit_tenant_predicate": true,
+      "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
+      "access_policy": "Tenant context is transaction-local, derived only from authenticated server context; every query also includes an explicit tenant predicate.",
+      "status": "REM-WP1.5 applied and verified this approved table grant/policy row under the actual restricted symphony_app role in CI run 43683206104; the raw full-suite result is retained in the candidate evidence directory."
+    },
+    {
+      "table": "authentication_events",
+      "classification": "tenant_scoped",
+      "scope_basis": "Tenant derived through user_id; authentication audit.",
+      "scope_resolution": "Resolve tenant through declared parent relation: Tenant derived through user_id; authentication audit.",
+      "ordinary_runtime_role": "symphony_app",
+      "permitted_sql_operations": [
+        "SELECT",
+        "INSERT",
+        "UPDATE"
+      ],
+      "delete_grant": false,
+      "required_rls": "ENABLE+FORCE",
+      "current_rls_enabled_and_forced": false,
+      "explicit_tenant_predicate": true,
+      "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
+      "access_policy": "Tenant context is transaction-local, derived only from authenticated server context; every query also includes an explicit tenant predicate.",
+      "status": "REM-WP1.5 applied and verified this approved table grant/policy row under the actual restricted symphony_app role in CI run 43683206104; the raw full-suite result is retained in the candidate evidence directory."
+    },
+    {
+      "table": "bylaw_documents",
+      "classification": "tenant_scoped",
+      "scope_basis": "Organization-scoped by-law document.",
+      "scope_resolution": "Resolve tenant through declared parent relation: Organization-scoped by-law document.",
+      "ordinary_runtime_role": "symphony_app",
+      "permitted_sql_operations": [
+        "SELECT",
+        "INSERT",
+        "UPDATE"
+      ],
+      "delete_grant": false,
+      "required_rls": "ENABLE+FORCE",
+      "current_rls_enabled_and_forced": false,
+      "explicit_tenant_predicate": true,
+      "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
+      "access_policy": "Tenant context is transaction-local, derived only from authenticated server context; every query also includes an explicit tenant predicate.",
+      "status": "REM-WP1.5 applied and verified this approved table grant/policy row under the actual restricted symphony_app role in CI run 43683206104; the raw full-suite result is retained in the candidate evidence directory."
+    },
+    {
+      "table": "bylaw_provisions",
+      "classification": "tenant_scoped",
+      "scope_basis": "Tenant inherited through bylaw version.",
+      "scope_resolution": "Resolve tenant through declared parent relation: Tenant inherited through bylaw version.",
+      "ordinary_runtime_role": "symphony_app",
+      "permitted_sql_operations": [
+        "SELECT",
+        "INSERT",
+        "UPDATE"
+      ],
+      "delete_grant": false,
+      "required_rls": "ENABLE+FORCE",
+      "current_rls_enabled_and_forced": false,
+      "explicit_tenant_predicate": true,
+      "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
+      "access_policy": "Tenant context is transaction-local, derived only from authenticated server context; every query also includes an explicit tenant predicate.",
+      "status": "REM-WP1.5 applied and verified this approved table grant/policy row under the actual restricted symphony_app role in CI run 43683206104; the raw full-suite result is retained in the candidate evidence directory."
+    },
+    {
+      "table": "bylaw_versions",
+      "classification": "tenant_scoped",
+      "scope_basis": "Tenant inherited through bylaw document.",
+      "scope_resolution": "Resolve tenant through declared parent relation: Tenant inherited through bylaw document.",
+      "ordinary_runtime_role": "symphony_app",
+      "permitted_sql_operations": [
+        "SELECT",
+        "INSERT",
+        "UPDATE"
+      ],
+      "delete_grant": false,
+      "required_rls": "ENABLE+FORCE",
+      "current_rls_enabled_and_forced": false,
+      "explicit_tenant_predicate": true,
+      "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
+      "access_policy": "Tenant context is transaction-local, derived only from authenticated server context; every query also includes an explicit tenant predicate.",
+      "status": "REM-WP1.5 applied and verified this approved table grant/policy row under the actual restricted symphony_app role in CI run 43683206104; the raw full-suite result is retained in the candidate evidence directory."
+    },
+    {
+      "table": "capability_registry",
+      "classification": "global_catalogue_read_only",
+      "scope_basis": "Global module capability catalogue.",
+      "scope_resolution": "not_applicable",
+      "ordinary_runtime_role": "symphony_app",
+      "permitted_sql_operations": [
+        "SELECT"
+      ],
+      "delete_grant": false,
+      "required_rls": "not_applicable_global",
+      "current_rls_enabled_and_forced": false,
+      "explicit_tenant_predicate": false,
+      "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
+      "access_policy": "No tenant policy; ordinary runtime role receives SELECT only.",
+      "status": "REM-WP1.5 applied and verified this approved table grant/policy row under the actual restricted symphony_app role in CI run 43683206104; the raw full-suite result is retained in the candidate evidence directory."
+    },
+    {
+      "table": "capacity_grants",
+      "classification": "tenant_scoped",
+      "scope_basis": "Organization/user scope; tenant derived from organization and user.",
+      "scope_resolution": "Resolve tenant through declared parent relation: Organization/user scope; tenant derived from organization and user.",
+      "ordinary_runtime_role": "symphony_app",
+      "permitted_sql_operations": [
+        "SELECT",
+        "INSERT",
+        "UPDATE"
+      ],
+      "delete_grant": false,
+      "required_rls": "ENABLE+FORCE",
+      "current_rls_enabled_and_forced": false,
+      "explicit_tenant_predicate": true,
+      "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
+      "access_policy": "Tenant context is transaction-local, derived only from authenticated server context; every query also includes an explicit tenant predicate.",
+      "status": "REM-WP1.5 applied and verified this approved table grant/policy row under the actual restricted symphony_app role in CI run 43683206104; the raw full-suite result is retained in the candidate evidence directory."
     },
     {
       "table": "command_receipts",
@@ -66,13 +328,13 @@
       "explicit_tenant_predicate": true,
       "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
       "access_policy": "Complete receipt rows are inserted once and immutable after commit. Tenant context is transaction-local, derived only from authenticated server context; every query also includes an explicit tenant predicate.",
-      "status": "WP1.5 applied and verified this approved table grant/policy row under the actual restricted symphony_app role in CI run 43683206104; the raw full-suite result is retained in the candidate evidence directory."
+      "status": "REM-WP1.5 applied and verified this approved table grant/policy row under the actual restricted symphony_app role in CI run 43683206104; the raw full-suite result is retained in the candidate evidence directory."
     },
     {
-      "table": "reconciliation_inbox",
+      "table": "consent_records",
       "classification": "tenant_scoped",
-      "scope_basis": "Direct tenant_id; encrypted terminal-conflict payload and non-identifying lifecycle metadata.",
-      "scope_resolution": "row.tenant_id must equal transaction-local app.tenant_id; all repository operations also include explicit tenant_id predicate.",
+      "scope_basis": "Tenant scope inherited through person_id; consent and lawful-basis facts.",
+      "scope_resolution": "Resolve tenant through declared parent relation: Tenant scope inherited through person_id; consent and lawful-basis facts.",
       "ordinary_runtime_role": "symphony_app",
       "permitted_sql_operations": [
         "SELECT",
@@ -81,11 +343,30 @@
       ],
       "delete_grant": false,
       "required_rls": "ENABLE+FORCE",
-      "current_rls_enabled_and_forced": true,
+      "current_rls_enabled_and_forced": false,
       "explicit_tenant_predicate": true,
-      "tenant_context": "SET LOCAL app.tenant_id only from authenticated server context; policy binds tenant_id to that context.",
-      "access_policy": "Read only authorized tenant reconciliation records; insert only terminal conflict records; update lifecycle or clear expired ciphertext. No ordinary application DELETE.",
-      "status": "Created by WP1.4 migration 0012_reconciliation_inbox.sql with ENABLE+FORCE RLS. WP1.4 proves the scoped symphony_app inbox boundary; WP1.5 migration 0013 preserves SELECT/INSERT/UPDATE and no-DELETE, verified within the full-matrix actual-role CI suite in run 43683206104."
+      "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
+      "access_policy": "Tenant context is transaction-local, derived only from authenticated server context; every query also includes an explicit tenant predicate.",
+      "status": "REM-WP1.5 applied and verified this approved table grant/policy row under the actual restricted symphony_app role in CI run 43683206104; the raw full-suite result is retained in the candidate evidence directory."
+    },
+    {
+      "table": "delegations",
+      "classification": "tenant_scoped",
+      "scope_basis": "Organization scope; tenant derived from organization and participants.",
+      "scope_resolution": "Resolve tenant through declared parent relation: Organization scope; tenant derived from organization and participants.",
+      "ordinary_runtime_role": "symphony_app",
+      "permitted_sql_operations": [
+        "SELECT",
+        "INSERT",
+        "UPDATE"
+      ],
+      "delete_grant": false,
+      "required_rls": "ENABLE+FORCE",
+      "current_rls_enabled_and_forced": false,
+      "explicit_tenant_predicate": true,
+      "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
+      "access_policy": "Tenant context is transaction-local, derived only from authenticated server context; every query also includes an explicit tenant predicate.",
+      "status": "REM-WP1.5 applied and verified this approved table grant/policy row under the actual restricted symphony_app role in CI run 43683206104; the raw full-suite result is retained in the candidate evidence directory."
     },
     {
       "table": "domain_events",
@@ -103,7 +384,90 @@
       "explicit_tenant_predicate": true,
       "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
       "access_policy": "Append-only event rows are inserted and never updated or deleted. Tenant context is transaction-local, derived only from authenticated server context; every query also includes an explicit tenant predicate.",
-      "status": "WP1.5 applied and verified this approved table grant/policy row under the actual restricted symphony_app role in CI run 43683206104; the raw full-suite result is retained in the candidate evidence directory."
+      "status": "REM-WP1.5 applied and verified this approved table grant/policy row under the actual restricted symphony_app role in CI run 43683206104; the raw full-suite result is retained in the candidate evidence directory."
+    },
+    {
+      "table": "duty_matrix_rows",
+      "classification": "control_plane_restricted",
+      "scope_basis": "Organization policy with nullable organization_id; configuration writes must be privileged.",
+      "scope_resolution": "not_applicable",
+      "ordinary_runtime_role": "no ordinary application grant",
+      "permitted_sql_operations": [],
+      "delete_grant": false,
+      "required_rls": "review_based_on_scope",
+      "current_rls_enabled_and_forced": false,
+      "explicit_tenant_predicate": false,
+      "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
+      "access_policy": "No ordinary runtime-role access. A separately named operation-specific service grant and audit contract must be mapped before implementation.",
+      "status": "REM-WP1.5 applied and verified this approved table grant/policy row under the actual restricted symphony_app role in CI run 43683206104; the raw full-suite result is retained in the candidate evidence directory."
+    },
+    {
+      "table": "enforcement_policies",
+      "classification": "control_plane_restricted",
+      "scope_basis": "Organization policy with nullable organization_id; global fallback semantics need an explicit grant boundary.",
+      "scope_resolution": "not_applicable",
+      "ordinary_runtime_role": "no ordinary application grant",
+      "permitted_sql_operations": [],
+      "delete_grant": false,
+      "required_rls": "review_based_on_scope",
+      "current_rls_enabled_and_forced": false,
+      "explicit_tenant_predicate": false,
+      "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
+      "access_policy": "No ordinary runtime-role access. A separately named operation-specific service grant and audit contract must be mapped before implementation.",
+      "status": "REM-WP1.5 applied and verified this approved table grant/policy row under the actual restricted symphony_app role in CI run 43683206104; the raw full-suite result is retained in the candidate evidence directory."
+    },
+    {
+      "table": "enroller_assignments",
+      "classification": "control_plane_restricted",
+      "scope_basis": "Platform assignment/scope; no direct tenant_id.",
+      "scope_resolution": "not_applicable",
+      "ordinary_runtime_role": "no ordinary application grant",
+      "permitted_sql_operations": [],
+      "delete_grant": false,
+      "required_rls": "review_based_on_scope",
+      "current_rls_enabled_and_forced": false,
+      "explicit_tenant_predicate": false,
+      "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
+      "access_policy": "No ordinary runtime-role access. A separately named operation-specific service grant and audit contract must be mapped before implementation.",
+      "status": "REM-WP1.5 applied and verified this approved table grant/policy row under the actual restricted symphony_app role in CI run 43683206104; the raw full-suite result is retained in the candidate evidence directory."
+    },
+    {
+      "table": "enrolment_handovers",
+      "classification": "tenant_scoped",
+      "scope_basis": "Tenant inherited through organization_id.",
+      "scope_resolution": "Resolve tenant through declared parent relation: Tenant inherited through organization_id.",
+      "ordinary_runtime_role": "symphony_app",
+      "permitted_sql_operations": [
+        "SELECT",
+        "INSERT",
+        "UPDATE"
+      ],
+      "delete_grant": false,
+      "required_rls": "ENABLE+FORCE",
+      "current_rls_enabled_and_forced": false,
+      "explicit_tenant_predicate": true,
+      "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
+      "access_policy": "Tenant context is transaction-local, derived only from authenticated server context; every query also includes an explicit tenant predicate.",
+      "status": "REM-WP1.5 applied and verified this approved table grant/policy row under the actual restricted symphony_app role in CI run 43683206104; the raw full-suite result is retained in the candidate evidence directory."
+    },
+    {
+      "table": "enrolment_sessions",
+      "classification": "tenant_scoped",
+      "scope_basis": "Direct tenant_id and organization scope.",
+      "scope_resolution": "row.tenant_id matches transaction-local authenticated tenant context",
+      "ordinary_runtime_role": "symphony_app",
+      "permitted_sql_operations": [
+        "SELECT",
+        "INSERT",
+        "UPDATE"
+      ],
+      "delete_grant": false,
+      "required_rls": "ENABLE+FORCE",
+      "current_rls_enabled_and_forced": false,
+      "explicit_tenant_predicate": true,
+      "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
+      "access_policy": "Tenant context is transaction-local, derived only from authenticated server context; every query also includes an explicit tenant predicate.",
+      "status": "REM-WP1.5 applied and verified this approved table grant/policy row under the actual restricted symphony_app role in CI run 43683206104; the raw full-suite result is retained in the candidate evidence directory."
     },
     {
       "table": "event_outbox",
@@ -132,520 +496,7 @@
         }
       ],
       "access_policy": "Keep the table unavailable to the ordinary application role. Migration 0013 routes command-path inserts through the named constrained function, verified for same-transaction event/outbox writes under the real application role. Delivery reads and lifecycle updates remain worker-only and require their own future identity/interface.",
-      "status": "WP1.5 migration 0013 installs the constrained outbox function; the CI actual-role suite proves its tenant scope and that ordinary application table grants remain empty."
-    },
-    {
-      "table": "capability_registry",
-      "classification": "global_catalogue_read_only",
-      "scope_basis": "Global module capability catalogue.",
-      "scope_resolution": "not_applicable",
-      "ordinary_runtime_role": "symphony_app",
-      "permitted_sql_operations": [
-        "SELECT"
-      ],
-      "delete_grant": false,
-      "required_rls": "not_applicable_global",
-      "current_rls_enabled_and_forced": false,
-      "explicit_tenant_predicate": false,
-      "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
-      "access_policy": "No tenant policy; ordinary runtime role receives SELECT only.",
-      "status": "WP1.5 applied and verified this approved table grant/policy row under the actual restricted symphony_app role in CI run 43683206104; the raw full-suite result is retained in the candidate evidence directory."
-    },
-    {
-      "table": "users",
-      "classification": "tenant_scoped",
-      "scope_basis": "Direct tenant_id and tenant-local email uniqueness.",
-      "scope_resolution": "row.tenant_id matches transaction-local authenticated tenant context",
-      "ordinary_runtime_role": "symphony_app",
-      "permitted_sql_operations": [
-        "SELECT",
-        "INSERT",
-        "UPDATE"
-      ],
-      "delete_grant": false,
-      "required_rls": "ENABLE+FORCE",
-      "current_rls_enabled_and_forced": false,
-      "explicit_tenant_predicate": true,
-      "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
-      "access_policy": "Tenant context is transaction-local, derived only from authenticated server context; every query also includes an explicit tenant predicate.",
-      "status": "WP1.5 applied and verified this approved table grant/policy row under the actual restricted symphony_app role in CI run 43683206104; the raw full-suite result is retained in the candidate evidence directory."
-    },
-    {
-      "table": "persons",
-      "classification": "tenant_scoped",
-      "scope_basis": "Direct tenant_id; pseudonymous identity shell.",
-      "scope_resolution": "row.tenant_id matches transaction-local authenticated tenant context",
-      "ordinary_runtime_role": "symphony_app",
-      "permitted_sql_operations": [
-        "SELECT",
-        "INSERT",
-        "UPDATE"
-      ],
-      "delete_grant": false,
-      "required_rls": "ENABLE+FORCE",
-      "current_rls_enabled_and_forced": false,
-      "explicit_tenant_predicate": true,
-      "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
-      "access_policy": "Tenant context is transaction-local, derived only from authenticated server context; every query also includes an explicit tenant predicate.",
-      "status": "WP1.5 applied and verified this approved table grant/policy row under the actual restricted symphony_app role in CI run 43683206104; the raw full-suite result is retained in the candidate evidence directory."
-    },
-    {
-      "table": "person_identifiers",
-      "classification": "tenant_scoped",
-      "scope_basis": "Tenant scope inherited through person_id; contains encrypted identifier and blind index.",
-      "scope_resolution": "Resolve tenant through declared parent relation: Tenant scope inherited through person_id; contains encrypted identifier and blind index.",
-      "ordinary_runtime_role": "symphony_app",
-      "permitted_sql_operations": [
-        "SELECT",
-        "INSERT",
-        "UPDATE"
-      ],
-      "delete_grant": false,
-      "required_rls": "ENABLE+FORCE",
-      "current_rls_enabled_and_forced": false,
-      "explicit_tenant_predicate": true,
-      "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
-      "access_policy": "Tenant context is transaction-local, derived only from authenticated server context; every query also includes an explicit tenant predicate.",
-      "status": "WP1.5 applied and verified this approved table grant/policy row under the actual restricted symphony_app role in CI run 43683206104; the raw full-suite result is retained in the candidate evidence directory."
-    },
-    {
-      "table": "person_pii_vault",
-      "classification": "tenant_scoped",
-      "scope_basis": "Tenant scope inherited through person_id; contains encrypted PII.",
-      "scope_resolution": "Resolve tenant through declared parent relation: Tenant scope inherited through person_id; contains encrypted PII.",
-      "ordinary_runtime_role": "symphony_app",
-      "permitted_sql_operations": [
-        "SELECT",
-        "INSERT",
-        "UPDATE"
-      ],
-      "delete_grant": false,
-      "required_rls": "ENABLE+FORCE",
-      "current_rls_enabled_and_forced": false,
-      "explicit_tenant_predicate": true,
-      "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
-      "access_policy": "Tenant context is transaction-local, derived only from authenticated server context; every query also includes an explicit tenant predicate.",
-      "status": "WP1.5 applied and verified this approved table grant/policy row under the actual restricted symphony_app role in CI run 43683206104; the raw full-suite result is retained in the candidate evidence directory."
-    },
-    {
-      "table": "consent_records",
-      "classification": "tenant_scoped",
-      "scope_basis": "Tenant scope inherited through person_id; consent and lawful-basis facts.",
-      "scope_resolution": "Resolve tenant through declared parent relation: Tenant scope inherited through person_id; consent and lawful-basis facts.",
-      "ordinary_runtime_role": "symphony_app",
-      "permitted_sql_operations": [
-        "SELECT",
-        "INSERT",
-        "UPDATE"
-      ],
-      "delete_grant": false,
-      "required_rls": "ENABLE+FORCE",
-      "current_rls_enabled_and_forced": false,
-      "explicit_tenant_predicate": true,
-      "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
-      "access_policy": "Tenant context is transaction-local, derived only from authenticated server context; every query also includes an explicit tenant predicate.",
-      "status": "WP1.5 applied and verified this approved table grant/policy row under the actual restricted symphony_app role in CI run 43683206104; the raw full-suite result is retained in the candidate evidence directory."
-    },
-    {
-      "table": "platform_roles",
-      "classification": "global_catalogue_read_only",
-      "scope_basis": "Global role definitions; tenant assignments are separate.",
-      "scope_resolution": "not_applicable",
-      "ordinary_runtime_role": "symphony_app",
-      "permitted_sql_operations": [
-        "SELECT"
-      ],
-      "delete_grant": false,
-      "required_rls": "not_applicable_global",
-      "current_rls_enabled_and_forced": false,
-      "explicit_tenant_predicate": false,
-      "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
-      "access_policy": "No tenant policy; ordinary runtime role receives SELECT only.",
-      "status": "WP1.5 applied and verified this approved table grant/policy row under the actual restricted symphony_app role in CI run 43683206104; the raw full-suite result is retained in the candidate evidence directory."
-    },
-    {
-      "table": "user_role_assignments",
-      "classification": "tenant_scoped",
-      "scope_basis": "Direct tenant_id; role membership is tenant-scoped.",
-      "scope_resolution": "row.tenant_id matches transaction-local authenticated tenant context",
-      "ordinary_runtime_role": "symphony_app",
-      "permitted_sql_operations": [
-        "SELECT",
-        "INSERT",
-        "UPDATE"
-      ],
-      "delete_grant": false,
-      "required_rls": "ENABLE+FORCE",
-      "current_rls_enabled_and_forced": false,
-      "explicit_tenant_predicate": true,
-      "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
-      "access_policy": "Tenant context is transaction-local, derived only from authenticated server context; every query also includes an explicit tenant predicate.",
-      "status": "WP1.5 applied and verified this approved table grant/policy row under the actual restricted symphony_app role in CI run 43683206104; the raw full-suite result is retained in the candidate evidence directory."
-    },
-    {
-      "table": "capacity_grants",
-      "classification": "tenant_scoped",
-      "scope_basis": "Organization/user scope; tenant derived from organization and user.",
-      "scope_resolution": "Resolve tenant through declared parent relation: Organization/user scope; tenant derived from organization and user.",
-      "ordinary_runtime_role": "symphony_app",
-      "permitted_sql_operations": [
-        "SELECT",
-        "INSERT",
-        "UPDATE"
-      ],
-      "delete_grant": false,
-      "required_rls": "ENABLE+FORCE",
-      "current_rls_enabled_and_forced": false,
-      "explicit_tenant_predicate": true,
-      "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
-      "access_policy": "Tenant context is transaction-local, derived only from authenticated server context; every query also includes an explicit tenant predicate.",
-      "status": "WP1.5 applied and verified this approved table grant/policy row under the actual restricted symphony_app role in CI run 43683206104; the raw full-suite result is retained in the candidate evidence directory."
-    },
-    {
-      "table": "delegations",
-      "classification": "tenant_scoped",
-      "scope_basis": "Organization scope; tenant derived from organization and participants.",
-      "scope_resolution": "Resolve tenant through declared parent relation: Organization scope; tenant derived from organization and participants.",
-      "ordinary_runtime_role": "symphony_app",
-      "permitted_sql_operations": [
-        "SELECT",
-        "INSERT",
-        "UPDATE"
-      ],
-      "delete_grant": false,
-      "required_rls": "ENABLE+FORCE",
-      "current_rls_enabled_and_forced": false,
-      "explicit_tenant_predicate": true,
-      "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
-      "access_policy": "Tenant context is transaction-local, derived only from authenticated server context; every query also includes an explicit tenant predicate.",
-      "status": "WP1.5 applied and verified this approved table grant/policy row under the actual restricted symphony_app role in CI run 43683206104; the raw full-suite result is retained in the candidate evidence directory."
-    },
-    {
-      "table": "authentication_events",
-      "classification": "tenant_scoped",
-      "scope_basis": "Tenant derived through user_id; authentication audit.",
-      "scope_resolution": "Resolve tenant through declared parent relation: Tenant derived through user_id; authentication audit.",
-      "ordinary_runtime_role": "symphony_app",
-      "permitted_sql_operations": [
-        "SELECT",
-        "INSERT",
-        "UPDATE"
-      ],
-      "delete_grant": false,
-      "required_rls": "ENABLE+FORCE",
-      "current_rls_enabled_and_forced": false,
-      "explicit_tenant_predicate": true,
-      "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
-      "access_policy": "Tenant context is transaction-local, derived only from authenticated server context; every query also includes an explicit tenant predicate.",
-      "status": "WP1.5 applied and verified this approved table grant/policy row under the actual restricted symphony_app role in CI run 43683206104; the raw full-suite result is retained in the candidate evidence directory."
-    },
-    {
-      "table": "enrolment_sessions",
-      "classification": "tenant_scoped",
-      "scope_basis": "Direct tenant_id and organization scope.",
-      "scope_resolution": "row.tenant_id matches transaction-local authenticated tenant context",
-      "ordinary_runtime_role": "symphony_app",
-      "permitted_sql_operations": [
-        "SELECT",
-        "INSERT",
-        "UPDATE"
-      ],
-      "delete_grant": false,
-      "required_rls": "ENABLE+FORCE",
-      "current_rls_enabled_and_forced": false,
-      "explicit_tenant_predicate": true,
-      "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
-      "access_policy": "Tenant context is transaction-local, derived only from authenticated server context; every query also includes an explicit tenant predicate.",
-      "status": "WP1.5 applied and verified this approved table grant/policy row under the actual restricted symphony_app role in CI run 43683206104; the raw full-suite result is retained in the candidate evidence directory."
-    },
-    {
-      "table": "enroller_assignments",
-      "classification": "control_plane_restricted",
-      "scope_basis": "Platform assignment/scope; no direct tenant_id.",
-      "scope_resolution": "not_applicable",
-      "ordinary_runtime_role": "no ordinary application grant",
-      "permitted_sql_operations": [],
-      "delete_grant": false,
-      "required_rls": "review_based_on_scope",
-      "current_rls_enabled_and_forced": false,
-      "explicit_tenant_predicate": false,
-      "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
-      "access_policy": "No ordinary runtime-role access. A separately named operation-specific service grant and audit contract must be mapped before implementation.",
-      "status": "WP1.5 applied and verified this approved table grant/policy row under the actual restricted symphony_app role in CI run 43683206104; the raw full-suite result is retained in the candidate evidence directory."
-    },
-    {
-      "table": "enforcement_policies",
-      "classification": "control_plane_restricted",
-      "scope_basis": "Organization policy with nullable organization_id; global fallback semantics need an explicit grant boundary.",
-      "scope_resolution": "not_applicable",
-      "ordinary_runtime_role": "no ordinary application grant",
-      "permitted_sql_operations": [],
-      "delete_grant": false,
-      "required_rls": "review_based_on_scope",
-      "current_rls_enabled_and_forced": false,
-      "explicit_tenant_predicate": false,
-      "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
-      "access_policy": "No ordinary runtime-role access. A separately named operation-specific service grant and audit contract must be mapped before implementation.",
-      "status": "WP1.5 applied and verified this approved table grant/policy row under the actual restricted symphony_app role in CI run 43683206104; the raw full-suite result is retained in the candidate evidence directory."
-    },
-    {
-      "table": "duty_matrix_rows",
-      "classification": "control_plane_restricted",
-      "scope_basis": "Organization policy with nullable organization_id; configuration writes must be privileged.",
-      "scope_resolution": "not_applicable",
-      "ordinary_runtime_role": "no ordinary application grant",
-      "permitted_sql_operations": [],
-      "delete_grant": false,
-      "required_rls": "review_based_on_scope",
-      "current_rls_enabled_and_forced": false,
-      "explicit_tenant_predicate": false,
-      "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
-      "access_policy": "No ordinary runtime-role access. A separately named operation-specific service grant and audit contract must be mapped before implementation.",
-      "status": "WP1.5 applied and verified this approved table grant/policy row under the actual restricted symphony_app role in CI run 43683206104; the raw full-suite result is retained in the candidate evidence directory."
-    },
-    {
-      "table": "approval_policies",
-      "classification": "tenant_scoped",
-      "scope_basis": "Organization policy; tenant derived from organization_id.",
-      "scope_resolution": "Resolve tenant through declared parent relation: Organization policy; tenant derived from organization_id.",
-      "ordinary_runtime_role": "symphony_app",
-      "permitted_sql_operations": [
-        "SELECT",
-        "INSERT",
-        "UPDATE"
-      ],
-      "delete_grant": false,
-      "required_rls": "ENABLE+FORCE",
-      "current_rls_enabled_and_forced": false,
-      "explicit_tenant_predicate": true,
-      "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
-      "access_policy": "Tenant context is transaction-local, derived only from authenticated server context; every query also includes an explicit tenant predicate.",
-      "status": "WP1.5 applied and verified this approved table grant/policy row under the actual restricted symphony_app role in CI run 43683206104; the raw full-suite result is retained in the candidate evidence directory."
-    },
-    {
-      "table": "precedence_policies",
-      "classification": "control_plane_restricted",
-      "scope_basis": "Organization policy with nullable organization_id and global default.",
-      "scope_resolution": "not_applicable",
-      "ordinary_runtime_role": "no ordinary application grant",
-      "permitted_sql_operations": [],
-      "delete_grant": false,
-      "required_rls": "review_based_on_scope",
-      "current_rls_enabled_and_forced": false,
-      "explicit_tenant_predicate": false,
-      "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
-      "access_policy": "No ordinary runtime-role access. A separately named operation-specific service grant and audit contract must be mapped before implementation.",
-      "status": "WP1.5 applied and verified this approved table grant/policy row under the actual restricted symphony_app role in CI run 43683206104; the raw full-suite result is retained in the candidate evidence directory."
-    },
-    {
-      "table": "position_combination_rules",
-      "classification": "control_plane_restricted",
-      "scope_basis": "Shared governance policy configuration; not tenant-keyed.",
-      "scope_resolution": "not_applicable",
-      "ordinary_runtime_role": "no ordinary application grant",
-      "permitted_sql_operations": [],
-      "delete_grant": false,
-      "required_rls": "review_based_on_scope",
-      "current_rls_enabled_and_forced": false,
-      "explicit_tenant_predicate": false,
-      "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
-      "access_policy": "No ordinary runtime-role access. A separately named operation-specific service grant and audit contract must be mapped before implementation.",
-      "status": "WP1.5 applied and verified this approved table grant/policy row under the actual restricted symphony_app role in CI run 43683206104; the raw full-suite result is retained in the candidate evidence directory."
-    },
-    {
-      "table": "retention_policies",
-      "classification": "control_plane_restricted",
-      "scope_basis": "Global retention policy values; changes require controlled review.",
-      "scope_resolution": "not_applicable",
-      "ordinary_runtime_role": "no ordinary application grant",
-      "permitted_sql_operations": [],
-      "delete_grant": false,
-      "required_rls": "review_based_on_scope",
-      "current_rls_enabled_and_forced": false,
-      "explicit_tenant_predicate": false,
-      "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
-      "access_policy": "No ordinary runtime-role access. A separately named operation-specific service grant and audit contract must be mapped before implementation.",
-      "status": "WP1.5 applied and verified this approved table grant/policy row under the actual restricted symphony_app role in CI run 43683206104; the raw full-suite result is retained in the candidate evidence directory."
-    },
-    {
-      "table": "identity_check_methods",
-      "classification": "global_catalogue_read_only",
-      "scope_basis": "Global list of identity-check methods.",
-      "scope_resolution": "not_applicable",
-      "ordinary_runtime_role": "symphony_app",
-      "permitted_sql_operations": [
-        "SELECT"
-      ],
-      "delete_grant": false,
-      "required_rls": "not_applicable_global",
-      "current_rls_enabled_and_forced": false,
-      "explicit_tenant_predicate": false,
-      "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
-      "access_policy": "No tenant policy; ordinary runtime role receives SELECT only.",
-      "status": "WP1.5 applied and verified this approved table grant/policy row under the actual restricted symphony_app role in CI run 43683206104; the raw full-suite result is retained in the candidate evidence directory."
-    },
-    {
-      "table": "membership_rules",
-      "classification": "control_plane_restricted",
-      "scope_basis": "Organization policy with nullable organization_id and global fallback ambiguity.",
-      "scope_resolution": "not_applicable",
-      "ordinary_runtime_role": "no ordinary application grant",
-      "permitted_sql_operations": [],
-      "delete_grant": false,
-      "required_rls": "review_based_on_scope",
-      "current_rls_enabled_and_forced": false,
-      "explicit_tenant_predicate": false,
-      "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
-      "access_policy": "No ordinary runtime-role access. A separately named operation-specific service grant and audit contract must be mapped before implementation.",
-      "status": "WP1.5 applied and verified this approved table grant/policy row under the actual restricted symphony_app role in CI run 43683206104; the raw full-suite result is retained in the candidate evidence directory."
-    },
-    {
-      "table": "acceptance_policies",
-      "classification": "control_plane_restricted",
-      "scope_basis": "Organization/audience policy with nullable organization_id.",
-      "scope_resolution": "not_applicable",
-      "ordinary_runtime_role": "no ordinary application grant",
-      "permitted_sql_operations": [],
-      "delete_grant": false,
-      "required_rls": "review_based_on_scope",
-      "current_rls_enabled_and_forced": false,
-      "explicit_tenant_predicate": false,
-      "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
-      "access_policy": "No ordinary runtime-role access. A separately named operation-specific service grant and audit contract must be mapped before implementation.",
-      "status": "WP1.5 applied and verified this approved table grant/policy row under the actual restricted symphony_app role in CI run 43683206104; the raw full-suite result is retained in the candidate evidence directory."
-    },
-    {
-      "table": "organizations",
-      "classification": "tenant_scoped",
-      "scope_basis": "Direct tenant_id column scopes each organization record to one tenant.",
-      "scope_resolution": "row.tenant_id matches transaction-local authenticated tenant context",
-      "ordinary_runtime_role": "symphony_app",
-      "permitted_sql_operations": [
-        "SELECT",
-        "INSERT",
-        "UPDATE"
-      ],
-      "delete_grant": false,
-      "required_rls": "ENABLE+FORCE",
-      "current_rls_enabled_and_forced": false,
-      "explicit_tenant_predicate": true,
-      "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
-      "access_policy": "Tenant context is transaction-local, derived only from authenticated server context; every query also includes an explicit tenant predicate.",
-      "status": "WP1.5 applied and verified this approved table grant/policy row under the actual restricted symphony_app role in CI run 43683206104; the raw full-suite result is retained in the candidate evidence directory."
-    },
-    {
-      "table": "organization_identifiers",
-      "classification": "tenant_scoped",
-      "scope_basis": "Tenant inherited through organization_id; identifier data.",
-      "scope_resolution": "Resolve tenant through declared parent relation: Tenant inherited through organization_id; identifier data.",
-      "ordinary_runtime_role": "symphony_app",
-      "permitted_sql_operations": [
-        "SELECT",
-        "INSERT",
-        "UPDATE"
-      ],
-      "delete_grant": false,
-      "required_rls": "ENABLE+FORCE",
-      "current_rls_enabled_and_forced": false,
-      "explicit_tenant_predicate": true,
-      "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
-      "access_policy": "Tenant context is transaction-local, derived only from authenticated server context; every query also includes an explicit tenant predicate.",
-      "status": "WP1.5 applied and verified this approved table grant/policy row under the actual restricted symphony_app role in CI run 43683206104; the raw full-suite result is retained in the candidate evidence directory."
-    },
-    {
-      "table": "organization_enrollment",
-      "classification": "tenant_scoped",
-      "scope_basis": "Tenant inherited through organization_id.",
-      "scope_resolution": "Resolve tenant through declared parent relation: Tenant inherited through organization_id.",
-      "ordinary_runtime_role": "symphony_app",
-      "permitted_sql_operations": [
-        "SELECT",
-        "INSERT",
-        "UPDATE"
-      ],
-      "delete_grant": false,
-      "required_rls": "ENABLE+FORCE",
-      "current_rls_enabled_and_forced": false,
-      "explicit_tenant_predicate": true,
-      "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
-      "access_policy": "Tenant context is transaction-local, derived only from authenticated server context; every query also includes an explicit tenant predicate.",
-      "status": "WP1.5 applied and verified this approved table grant/policy row under the actual restricted symphony_app role in CI run 43683206104; the raw full-suite result is retained in the candidate evidence directory."
-    },
-    {
-      "table": "enrolment_handovers",
-      "classification": "tenant_scoped",
-      "scope_basis": "Tenant inherited through organization_id.",
-      "scope_resolution": "Resolve tenant through declared parent relation: Tenant inherited through organization_id.",
-      "ordinary_runtime_role": "symphony_app",
-      "permitted_sql_operations": [
-        "SELECT",
-        "INSERT",
-        "UPDATE"
-      ],
-      "delete_grant": false,
-      "required_rls": "ENABLE+FORCE",
-      "current_rls_enabled_and_forced": false,
-      "explicit_tenant_predicate": true,
-      "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
-      "access_policy": "Tenant context is transaction-local, derived only from authenticated server context; every query also includes an explicit tenant predicate.",
-      "status": "WP1.5 applied and verified this approved table grant/policy row under the actual restricted symphony_app role in CI run 43683206104; the raw full-suite result is retained in the candidate evidence directory."
-    },
-    {
-      "table": "evidence_items",
-      "classification": "tenant_scoped",
-      "scope_basis": "Cooperative record; tenant relation must be verified from organization/aggregate key.",
-      "scope_resolution": "Resolve tenant through declared parent relation: Cooperative record; tenant relation must be verified from organization/aggregate key.",
-      "ordinary_runtime_role": "symphony_app",
-      "permitted_sql_operations": [
-        "SELECT",
-        "INSERT",
-        "UPDATE"
-      ],
-      "delete_grant": false,
-      "required_rls": "ENABLE+FORCE",
-      "current_rls_enabled_and_forced": false,
-      "explicit_tenant_predicate": true,
-      "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
-      "access_policy": "Tenant context is transaction-local, derived only from authenticated server context; every query also includes an explicit tenant predicate.",
-      "status": "WP1.5 applied and verified this approved table grant/policy row under the actual restricted symphony_app role in CI run 43683206104; the raw full-suite result is retained in the candidate evidence directory."
-    },
-    {
-      "table": "evidence_versions",
-      "classification": "tenant_scoped",
-      "scope_basis": "Tenant inherited through evidence item; immutable content versions.",
-      "scope_resolution": "Resolve tenant through declared parent relation: Tenant inherited through evidence item; immutable content versions.",
-      "ordinary_runtime_role": "symphony_app",
-      "permitted_sql_operations": [
-        "SELECT",
-        "INSERT",
-        "UPDATE"
-      ],
-      "delete_grant": false,
-      "required_rls": "ENABLE+FORCE",
-      "current_rls_enabled_and_forced": false,
-      "explicit_tenant_predicate": true,
-      "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
-      "access_policy": "Tenant context is transaction-local, derived only from authenticated server context; every query also includes an explicit tenant predicate.",
-      "status": "WP1.5 applied and verified this approved table grant/policy row under the actual restricted symphony_app role in CI run 43683206104; the raw full-suite result is retained in the candidate evidence directory."
-    },
-    {
-      "table": "evidence_support_items",
-      "classification": "tenant_scoped",
-      "scope_basis": "Tenant inherited through evidence item/version.",
-      "scope_resolution": "Resolve tenant through declared parent relation: Tenant inherited through evidence item/version.",
-      "ordinary_runtime_role": "symphony_app",
-      "permitted_sql_operations": [
-        "SELECT",
-        "INSERT",
-        "UPDATE"
-      ],
-      "delete_grant": false,
-      "required_rls": "ENABLE+FORCE",
-      "current_rls_enabled_and_forced": false,
-      "explicit_tenant_predicate": true,
-      "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
-      "access_policy": "Tenant context is transaction-local, derived only from authenticated server context; every query also includes an explicit tenant predicate.",
-      "status": "WP1.5 applied and verified this approved table grant/policy row under the actual restricted symphony_app role in CI run 43683206104; the raw full-suite result is retained in the candidate evidence directory."
+      "status": "REM-WP1.5 migration 0013 installs the constrained outbox function; the CI actual-role suite proves its tenant scope and that ordinary application table grants remain empty."
     },
     {
       "table": "evidence_admissions",
@@ -664,102 +515,7 @@
       "explicit_tenant_predicate": true,
       "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
       "access_policy": "Tenant context is transaction-local, derived only from authenticated server context; every query also includes an explicit tenant predicate.",
-      "status": "WP1.5 applied and verified this approved table grant/policy row under the actual restricted symphony_app role in CI run 43683206104; the raw full-suite result is retained in the candidate evidence directory."
-    },
-    {
-      "table": "record_approvals",
-      "classification": "tenant_scoped",
-      "scope_basis": "Tenant inherited through cooperative record.",
-      "scope_resolution": "Resolve tenant through declared parent relation: Tenant inherited through cooperative record.",
-      "ordinary_runtime_role": "symphony_app",
-      "permitted_sql_operations": [
-        "SELECT",
-        "INSERT",
-        "UPDATE"
-      ],
-      "delete_grant": false,
-      "required_rls": "ENABLE+FORCE",
-      "current_rls_enabled_and_forced": false,
-      "explicit_tenant_predicate": true,
-      "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
-      "access_policy": "Tenant context is transaction-local, derived only from authenticated server context; every query also includes an explicit tenant predicate.",
-      "status": "WP1.5 applied and verified this approved table grant/policy row under the actual restricted symphony_app role in CI run 43683206104; the raw full-suite result is retained in the candidate evidence directory."
-    },
-    {
-      "table": "verification_assignments",
-      "classification": "tenant_scoped",
-      "scope_basis": "Tenant inherited through organization and evidence scope.",
-      "scope_resolution": "Resolve tenant through declared parent relation: Tenant inherited through organization and evidence scope.",
-      "ordinary_runtime_role": "symphony_app",
-      "permitted_sql_operations": [
-        "SELECT",
-        "INSERT",
-        "UPDATE"
-      ],
-      "delete_grant": false,
-      "required_rls": "ENABLE+FORCE",
-      "current_rls_enabled_and_forced": false,
-      "explicit_tenant_predicate": true,
-      "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
-      "access_policy": "Tenant context is transaction-local, derived only from authenticated server context; every query also includes an explicit tenant predicate.",
-      "status": "WP1.5 applied and verified this approved table grant/policy row under the actual restricted symphony_app role in CI run 43683206104; the raw full-suite result is retained in the candidate evidence directory."
-    },
-    {
-      "table": "verification_findings",
-      "classification": "tenant_scoped",
-      "scope_basis": "Tenant inherited through assignment/evidence; immutable findings.",
-      "scope_resolution": "Resolve tenant through declared parent relation: Tenant inherited through assignment/evidence; immutable findings.",
-      "ordinary_runtime_role": "symphony_app",
-      "permitted_sql_operations": [
-        "SELECT",
-        "INSERT",
-        "UPDATE"
-      ],
-      "delete_grant": false,
-      "required_rls": "ENABLE+FORCE",
-      "current_rls_enabled_and_forced": false,
-      "explicit_tenant_predicate": true,
-      "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
-      "access_policy": "Tenant context is transaction-local, derived only from authenticated server context; every query also includes an explicit tenant predicate.",
-      "status": "WP1.5 applied and verified this approved table grant/policy row under the actual restricted symphony_app role in CI run 43683206104; the raw full-suite result is retained in the candidate evidence directory."
-    },
-    {
-      "table": "platform_checks",
-      "classification": "tenant_scoped",
-      "scope_basis": "Tenant inherited through organization and source record.",
-      "scope_resolution": "Resolve tenant through declared parent relation: Tenant inherited through organization and source record.",
-      "ordinary_runtime_role": "symphony_app",
-      "permitted_sql_operations": [
-        "SELECT",
-        "INSERT",
-        "UPDATE"
-      ],
-      "delete_grant": false,
-      "required_rls": "ENABLE+FORCE",
-      "current_rls_enabled_and_forced": false,
-      "explicit_tenant_predicate": true,
-      "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
-      "access_policy": "Tenant context is transaction-local, derived only from authenticated server context; every query also includes an explicit tenant predicate.",
-      "status": "WP1.5 applied and verified this approved table grant/policy row under the actual restricted symphony_app role in CI run 43683206104; the raw full-suite result is retained in the candidate evidence directory."
-    },
-    {
-      "table": "observation_attestations",
-      "classification": "tenant_scoped",
-      "scope_basis": "Tenant inherited through the observed record.",
-      "scope_resolution": "Resolve tenant through declared parent relation: Tenant inherited through the observed record.",
-      "ordinary_runtime_role": "symphony_app",
-      "permitted_sql_operations": [
-        "SELECT",
-        "INSERT",
-        "UPDATE"
-      ],
-      "delete_grant": false,
-      "required_rls": "ENABLE+FORCE",
-      "current_rls_enabled_and_forced": false,
-      "explicit_tenant_predicate": true,
-      "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
-      "access_policy": "Tenant context is transaction-local, derived only from authenticated server context; every query also includes an explicit tenant predicate.",
-      "status": "WP1.5 applied and verified this approved table grant/policy row under the actual restricted symphony_app role in CI run 43683206104; the raw full-suite result is retained in the candidate evidence directory."
+      "status": "REM-WP1.5 applied and verified this approved table grant/policy row under the actual restricted symphony_app role in CI run 43683206104; the raw full-suite result is retained in the candidate evidence directory."
     },
     {
       "table": "evidence_disputes",
@@ -778,7 +534,26 @@
       "explicit_tenant_predicate": true,
       "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
       "access_policy": "Tenant context is transaction-local, derived only from authenticated server context; every query also includes an explicit tenant predicate.",
-      "status": "WP1.5 applied and verified this approved table grant/policy row under the actual restricted symphony_app role in CI run 43683206104; the raw full-suite result is retained in the candidate evidence directory."
+      "status": "REM-WP1.5 applied and verified this approved table grant/policy row under the actual restricted symphony_app role in CI run 43683206104; the raw full-suite result is retained in the candidate evidence directory."
+    },
+    {
+      "table": "evidence_items",
+      "classification": "tenant_scoped",
+      "scope_basis": "Cooperative record; tenant relation must be verified from organization/aggregate key.",
+      "scope_resolution": "Resolve tenant through declared parent relation: Cooperative record; tenant relation must be verified from organization/aggregate key.",
+      "ordinary_runtime_role": "symphony_app",
+      "permitted_sql_operations": [
+        "SELECT",
+        "INSERT",
+        "UPDATE"
+      ],
+      "delete_grant": false,
+      "required_rls": "ENABLE+FORCE",
+      "current_rls_enabled_and_forced": false,
+      "explicit_tenant_predicate": true,
+      "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
+      "access_policy": "Tenant context is transaction-local, derived only from authenticated server context; every query also includes an explicit tenant predicate.",
+      "status": "REM-WP1.5 applied and verified this approved table grant/policy row under the actual restricted symphony_app role in CI run 43683206104; the raw full-suite result is retained in the candidate evidence directory."
     },
     {
       "table": "evidence_relationships",
@@ -797,7 +572,7 @@
       "explicit_tenant_predicate": true,
       "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
       "access_policy": "Tenant context is transaction-local, derived only from authenticated server context; every query also includes an explicit tenant predicate.",
-      "status": "WP1.5 applied and verified this approved table grant/policy row under the actual restricted symphony_app role in CI run 43683206104; the raw full-suite result is retained in the candidate evidence directory."
+      "status": "REM-WP1.5 applied and verified this approved table grant/policy row under the actual restricted symphony_app role in CI run 43683206104; the raw full-suite result is retained in the candidate evidence directory."
     },
     {
       "table": "evidence_requirement_links",
@@ -816,13 +591,13 @@
       "explicit_tenant_predicate": true,
       "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
       "access_policy": "Tenant context is transaction-local, derived only from authenticated server context; every query also includes an explicit tenant predicate.",
-      "status": "WP1.5 applied and verified this approved table grant/policy row under the actual restricted symphony_app role in CI run 43683206104; the raw full-suite result is retained in the candidate evidence directory."
+      "status": "REM-WP1.5 applied and verified this approved table grant/policy row under the actual restricted symphony_app role in CI run 43683206104; the raw full-suite result is retained in the candidate evidence directory."
     },
     {
-      "table": "appointments",
+      "table": "evidence_support_items",
       "classification": "tenant_scoped",
-      "scope_basis": "Organization-scoped appointment; tenant inherited from organization.",
-      "scope_resolution": "Resolve tenant through declared parent relation: Organization-scoped appointment; tenant inherited from organization.",
+      "scope_basis": "Tenant inherited through evidence item/version.",
+      "scope_resolution": "Resolve tenant through declared parent relation: Tenant inherited through evidence item/version.",
       "ordinary_runtime_role": "symphony_app",
       "permitted_sql_operations": [
         "SELECT",
@@ -835,13 +610,13 @@
       "explicit_tenant_predicate": true,
       "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
       "access_policy": "Tenant context is transaction-local, derived only from authenticated server context; every query also includes an explicit tenant predicate.",
-      "status": "WP1.5 applied and verified this approved table grant/policy row under the actual restricted symphony_app role in CI run 43683206104; the raw full-suite result is retained in the candidate evidence directory."
+      "status": "REM-WP1.5 applied and verified this approved table grant/policy row under the actual restricted symphony_app role in CI run 43683206104; the raw full-suite result is retained in the candidate evidence directory."
     },
     {
-      "table": "bylaw_documents",
+      "table": "evidence_versions",
       "classification": "tenant_scoped",
-      "scope_basis": "Organization-scoped by-law document.",
-      "scope_resolution": "Resolve tenant through declared parent relation: Organization-scoped by-law document.",
+      "scope_basis": "Tenant inherited through evidence item; immutable content versions.",
+      "scope_resolution": "Resolve tenant through declared parent relation: Tenant inherited through evidence item; immutable content versions.",
       "ordinary_runtime_role": "symphony_app",
       "permitted_sql_operations": [
         "SELECT",
@@ -854,45 +629,41 @@
       "explicit_tenant_predicate": true,
       "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
       "access_policy": "Tenant context is transaction-local, derived only from authenticated server context; every query also includes an explicit tenant predicate.",
-      "status": "WP1.5 applied and verified this approved table grant/policy row under the actual restricted symphony_app role in CI run 43683206104; the raw full-suite result is retained in the candidate evidence directory."
+      "status": "REM-WP1.5 applied and verified this approved table grant/policy row under the actual restricted symphony_app role in CI run 43683206104; the raw full-suite result is retained in the candidate evidence directory."
     },
     {
-      "table": "bylaw_versions",
-      "classification": "tenant_scoped",
-      "scope_basis": "Tenant inherited through bylaw document.",
-      "scope_resolution": "Resolve tenant through declared parent relation: Tenant inherited through bylaw document.",
+      "table": "identity_check_methods",
+      "classification": "global_catalogue_read_only",
+      "scope_basis": "Global list of identity-check methods.",
+      "scope_resolution": "not_applicable",
       "ordinary_runtime_role": "symphony_app",
       "permitted_sql_operations": [
-        "SELECT",
-        "INSERT",
-        "UPDATE"
+        "SELECT"
+      ],
+      "delete_grant": false,
+      "required_rls": "not_applicable_global",
+      "current_rls_enabled_and_forced": false,
+      "explicit_tenant_predicate": false,
+      "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
+      "access_policy": "No tenant policy; ordinary runtime role receives SELECT only.",
+      "status": "REM-WP1.5 applied and verified this approved table grant/policy row under the actual restricted symphony_app role in CI run 43683206104; the raw full-suite result is retained in the candidate evidence directory."
+    },
+    {
+      "table": "institutional_role_assignments",
+      "classification": "tenant_scoped",
+      "scope_basis": "Tenant-scoped institutional role assignment with same-tenant user and organization foreign keys.",
+      "scope_resolution": "row.tenant_id matches transaction-local authenticated tenant context",
+      "ordinary_runtime_role": "symphony_app",
+      "permitted_sql_operations": [
+        "SELECT"
       ],
       "delete_grant": false,
       "required_rls": "ENABLE+FORCE",
       "current_rls_enabled_and_forced": false,
       "explicit_tenant_predicate": true,
       "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
-      "access_policy": "Tenant context is transaction-local, derived only from authenticated server context; every query also includes an explicit tenant predicate.",
-      "status": "WP1.5 applied and verified this approved table grant/policy row under the actual restricted symphony_app role in CI run 43683206104; the raw full-suite result is retained in the candidate evidence directory."
-    },
-    {
-      "table": "bylaw_provisions",
-      "classification": "tenant_scoped",
-      "scope_basis": "Tenant inherited through bylaw version.",
-      "scope_resolution": "Resolve tenant through declared parent relation: Tenant inherited through bylaw version.",
-      "ordinary_runtime_role": "symphony_app",
-      "permitted_sql_operations": [
-        "SELECT",
-        "INSERT",
-        "UPDATE"
-      ],
-      "delete_grant": false,
-      "required_rls": "ENABLE+FORCE",
-      "current_rls_enabled_and_forced": false,
-      "explicit_tenant_predicate": true,
-      "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
-      "access_policy": "Tenant context is transaction-local, derived only from authenticated server context; every query also includes an explicit tenant predicate.",
-      "status": "WP1.5 applied and verified this approved table grant/policy row under the actual restricted symphony_app role in CI run 43683206104; the raw full-suite result is retained in the candidate evidence directory."
+      "access_policy": "WP2.2 resolver may read only; source mutations require their owning grant/identity lifecycle command.",
+      "status": "Migration 0016 applies ENABLE+FORCE RLS and actual-role SELECT-only access; REM-WP2.2 candidate verification required."
     },
     {
       "table": "legal_sources",
@@ -907,12 +678,12 @@
       "explicit_tenant_predicate": false,
       "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
       "access_policy": "No ordinary runtime-role access. A separately named operation-specific service grant and audit contract must be mapped before implementation.",
-      "status": "WP1.5 applied and verified this approved table grant/policy row under the actual restricted symphony_app role in CI run 43683206104; the raw full-suite result is retained in the candidate evidence directory."
+      "status": "REM-WP1.5 applied and verified this approved table grant/policy row under the actual restricted symphony_app role in CI run 43683206104; the raw full-suite result is retained in the candidate evidence directory."
     },
     {
-      "table": "requirement_definitions",
+      "table": "meeting_rules",
       "classification": "control_plane_restricted",
-      "scope_basis": "Global legal/requirement catalogue with validation metadata.",
+      "scope_basis": "Organization rule with nullable organization_id; global fallback semantics require review.",
       "scope_resolution": "not_applicable",
       "ordinary_runtime_role": "no ordinary application grant",
       "permitted_sql_operations": [],
@@ -922,7 +693,96 @@
       "explicit_tenant_predicate": false,
       "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
       "access_policy": "No ordinary runtime-role access. A separately named operation-specific service grant and audit contract must be mapped before implementation.",
-      "status": "WP1.5 applied and verified this approved table grant/policy row under the actual restricted symphony_app role in CI run 43683206104; the raw full-suite result is retained in the candidate evidence directory."
+      "status": "REM-WP1.5 applied and verified this approved table grant/policy row under the actual restricted symphony_app role in CI run 43683206104; the raw full-suite result is retained in the candidate evidence directory."
+    },
+    {
+      "table": "membership_rules",
+      "classification": "control_plane_restricted",
+      "scope_basis": "Organization policy with nullable organization_id and global fallback ambiguity.",
+      "scope_resolution": "not_applicable",
+      "ordinary_runtime_role": "no ordinary application grant",
+      "permitted_sql_operations": [],
+      "delete_grant": false,
+      "required_rls": "review_based_on_scope",
+      "current_rls_enabled_and_forced": false,
+      "explicit_tenant_predicate": false,
+      "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
+      "access_policy": "No ordinary runtime-role access. A separately named operation-specific service grant and audit contract must be mapped before implementation.",
+      "status": "REM-WP1.5 applied and verified this approved table grant/policy row under the actual restricted symphony_app role in CI run 43683206104; the raw full-suite result is retained in the candidate evidence directory."
+    },
+    {
+      "table": "observation_attestations",
+      "classification": "tenant_scoped",
+      "scope_basis": "Tenant inherited through the observed record.",
+      "scope_resolution": "Resolve tenant through declared parent relation: Tenant inherited through the observed record.",
+      "ordinary_runtime_role": "symphony_app",
+      "permitted_sql_operations": [
+        "SELECT",
+        "INSERT",
+        "UPDATE"
+      ],
+      "delete_grant": false,
+      "required_rls": "ENABLE+FORCE",
+      "current_rls_enabled_and_forced": false,
+      "explicit_tenant_predicate": true,
+      "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
+      "access_policy": "Tenant context is transaction-local, derived only from authenticated server context; every query also includes an explicit tenant predicate.",
+      "status": "REM-WP1.5 applied and verified this approved table grant/policy row under the actual restricted symphony_app role in CI run 43683206104; the raw full-suite result is retained in the candidate evidence directory."
+    },
+    {
+      "table": "organization_enrollment",
+      "classification": "tenant_scoped",
+      "scope_basis": "Tenant inherited through organization_id.",
+      "scope_resolution": "Resolve tenant through declared parent relation: Tenant inherited through organization_id.",
+      "ordinary_runtime_role": "symphony_app",
+      "permitted_sql_operations": [
+        "SELECT",
+        "INSERT",
+        "UPDATE"
+      ],
+      "delete_grant": false,
+      "required_rls": "ENABLE+FORCE",
+      "current_rls_enabled_and_forced": false,
+      "explicit_tenant_predicate": true,
+      "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
+      "access_policy": "Tenant context is transaction-local, derived only from authenticated server context; every query also includes an explicit tenant predicate.",
+      "status": "REM-WP1.5 applied and verified this approved table grant/policy row under the actual restricted symphony_app role in CI run 43683206104; the raw full-suite result is retained in the candidate evidence directory."
+    },
+    {
+      "table": "organization_identifiers",
+      "classification": "tenant_scoped",
+      "scope_basis": "Tenant inherited through organization_id; identifier data.",
+      "scope_resolution": "Resolve tenant through declared parent relation: Tenant inherited through organization_id; identifier data.",
+      "ordinary_runtime_role": "symphony_app",
+      "permitted_sql_operations": [
+        "SELECT",
+        "INSERT",
+        "UPDATE"
+      ],
+      "delete_grant": false,
+      "required_rls": "ENABLE+FORCE",
+      "current_rls_enabled_and_forced": false,
+      "explicit_tenant_predicate": true,
+      "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
+      "access_policy": "Tenant context is transaction-local, derived only from authenticated server context; every query also includes an explicit tenant predicate.",
+      "status": "REM-WP1.5 applied and verified this approved table grant/policy row under the actual restricted symphony_app role in CI run 43683206104; the raw full-suite result is retained in the candidate evidence directory."
+    },
+    {
+      "table": "organization_memberships",
+      "classification": "tenant_scoped",
+      "scope_basis": "Tenant-scoped person membership in an organization with same-tenant person and organization foreign keys.",
+      "scope_resolution": "row.tenant_id matches transaction-local authenticated tenant context",
+      "ordinary_runtime_role": "symphony_app",
+      "permitted_sql_operations": [
+        "SELECT"
+      ],
+      "delete_grant": false,
+      "required_rls": "ENABLE+FORCE",
+      "current_rls_enabled_and_forced": false,
+      "explicit_tenant_predicate": true,
+      "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
+      "access_policy": "WP2.2 resolver may read only; source mutations require their owning grant/identity lifecycle command.",
+      "status": "Migration 0016 applies ENABLE+FORCE RLS and actual-role SELECT-only access; REM-WP2.2 candidate verification required."
     },
     {
       "table": "organization_requirements",
@@ -941,7 +801,237 @@
       "explicit_tenant_predicate": true,
       "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
       "access_policy": "Tenant context is transaction-local, derived only from authenticated server context; every query also includes an explicit tenant predicate.",
-      "status": "WP1.5 applied and verified this approved table grant/policy row under the actual restricted symphony_app role in CI run 43683206104; the raw full-suite result is retained in the candidate evidence directory."
+      "status": "REM-WP1.5 applied and verified this approved table grant/policy row under the actual restricted symphony_app role in CI run 43683206104; the raw full-suite result is retained in the candidate evidence directory."
+    },
+    {
+      "table": "organizations",
+      "classification": "tenant_scoped",
+      "scope_basis": "Direct tenant_id column scopes each organization record to one tenant.",
+      "scope_resolution": "row.tenant_id matches transaction-local authenticated tenant context",
+      "ordinary_runtime_role": "symphony_app",
+      "permitted_sql_operations": [
+        "SELECT",
+        "INSERT",
+        "UPDATE"
+      ],
+      "delete_grant": false,
+      "required_rls": "ENABLE+FORCE",
+      "current_rls_enabled_and_forced": false,
+      "explicit_tenant_predicate": true,
+      "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
+      "access_policy": "Tenant context is transaction-local, derived only from authenticated server context; every query also includes an explicit tenant predicate.",
+      "status": "REM-WP1.5 applied and verified this approved table grant/policy row under the actual restricted symphony_app role in CI run 43683206104; the raw full-suite result is retained in the candidate evidence directory."
+    },
+    {
+      "table": "person_identifiers",
+      "classification": "tenant_scoped",
+      "scope_basis": "Tenant scope inherited through person_id; contains encrypted identifier and blind index.",
+      "scope_resolution": "Resolve tenant through declared parent relation: Tenant scope inherited through person_id; contains encrypted identifier and blind index.",
+      "ordinary_runtime_role": "symphony_app",
+      "permitted_sql_operations": [
+        "SELECT",
+        "INSERT",
+        "UPDATE"
+      ],
+      "delete_grant": false,
+      "required_rls": "ENABLE+FORCE",
+      "current_rls_enabled_and_forced": false,
+      "explicit_tenant_predicate": true,
+      "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
+      "access_policy": "Tenant context is transaction-local, derived only from authenticated server context; every query also includes an explicit tenant predicate.",
+      "status": "REM-WP1.5 applied and verified this approved table grant/policy row under the actual restricted symphony_app role in CI run 43683206104; the raw full-suite result is retained in the candidate evidence directory."
+    },
+    {
+      "table": "person_pii_vault",
+      "classification": "tenant_scoped",
+      "scope_basis": "Tenant scope inherited through person_id; contains encrypted PII.",
+      "scope_resolution": "Resolve tenant through declared parent relation: Tenant scope inherited through person_id; contains encrypted PII.",
+      "ordinary_runtime_role": "symphony_app",
+      "permitted_sql_operations": [
+        "SELECT",
+        "INSERT",
+        "UPDATE"
+      ],
+      "delete_grant": false,
+      "required_rls": "ENABLE+FORCE",
+      "current_rls_enabled_and_forced": false,
+      "explicit_tenant_predicate": true,
+      "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
+      "access_policy": "Tenant context is transaction-local, derived only from authenticated server context; every query also includes an explicit tenant predicate.",
+      "status": "REM-WP1.5 applied and verified this approved table grant/policy row under the actual restricted symphony_app role in CI run 43683206104; the raw full-suite result is retained in the candidate evidence directory."
+    },
+    {
+      "table": "persons",
+      "classification": "tenant_scoped",
+      "scope_basis": "Direct tenant_id; pseudonymous identity shell.",
+      "scope_resolution": "row.tenant_id matches transaction-local authenticated tenant context",
+      "ordinary_runtime_role": "symphony_app",
+      "permitted_sql_operations": [
+        "SELECT",
+        "INSERT",
+        "UPDATE"
+      ],
+      "delete_grant": false,
+      "required_rls": "ENABLE+FORCE",
+      "current_rls_enabled_and_forced": false,
+      "explicit_tenant_predicate": true,
+      "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
+      "access_policy": "Tenant context is transaction-local, derived only from authenticated server context; every query also includes an explicit tenant predicate.",
+      "status": "REM-WP1.5 applied and verified this approved table grant/policy row under the actual restricted symphony_app role in CI run 43683206104; the raw full-suite result is retained in the candidate evidence directory."
+    },
+    {
+      "table": "platform_checks",
+      "classification": "tenant_scoped",
+      "scope_basis": "Tenant inherited through organization and source record.",
+      "scope_resolution": "Resolve tenant through declared parent relation: Tenant inherited through organization and source record.",
+      "ordinary_runtime_role": "symphony_app",
+      "permitted_sql_operations": [
+        "SELECT",
+        "INSERT",
+        "UPDATE"
+      ],
+      "delete_grant": false,
+      "required_rls": "ENABLE+FORCE",
+      "current_rls_enabled_and_forced": false,
+      "explicit_tenant_predicate": true,
+      "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
+      "access_policy": "Tenant context is transaction-local, derived only from authenticated server context; every query also includes an explicit tenant predicate.",
+      "status": "REM-WP1.5 applied and verified this approved table grant/policy row under the actual restricted symphony_app role in CI run 43683206104; the raw full-suite result is retained in the candidate evidence directory."
+    },
+    {
+      "table": "platform_roles",
+      "classification": "global_catalogue_read_only",
+      "scope_basis": "Global role definitions; tenant assignments are separate.",
+      "scope_resolution": "not_applicable",
+      "ordinary_runtime_role": "symphony_app",
+      "permitted_sql_operations": [
+        "SELECT"
+      ],
+      "delete_grant": false,
+      "required_rls": "not_applicable_global",
+      "current_rls_enabled_and_forced": false,
+      "explicit_tenant_predicate": false,
+      "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
+      "access_policy": "No tenant policy; ordinary runtime role receives SELECT only.",
+      "status": "REM-WP1.5 applied and verified this approved table grant/policy row under the actual restricted symphony_app role in CI run 43683206104; the raw full-suite result is retained in the candidate evidence directory."
+    },
+    {
+      "table": "position_catalog",
+      "classification": "global_catalogue_read_only",
+      "scope_basis": "Global stable position-code catalogue; contains no person or tenant data.",
+      "rls_current": false,
+      "scope_resolution": "not_applicable",
+      "ordinary_runtime_role": "symphony_app",
+      "permitted_sql_operations": [
+        "SELECT"
+      ],
+      "delete_grant": false,
+      "required_rls": "not_applicable_global",
+      "current_rls_enabled_and_forced": false,
+      "explicit_tenant_predicate": false,
+      "tenant_context": "No tenant predicate; catalogue codes are global and contain no personal data.",
+      "access_policy": "Migration 0016 grants SELECT only to symphony_app.",
+      "status": "Migration 0016 position catalogue is global and SELECT-only; candidate verification required."
+    },
+    {
+      "table": "position_combination_rules",
+      "classification": "control_plane_restricted",
+      "scope_basis": "Shared governance policy configuration; not tenant-keyed.",
+      "scope_resolution": "not_applicable",
+      "ordinary_runtime_role": "no ordinary application grant",
+      "permitted_sql_operations": [],
+      "delete_grant": false,
+      "required_rls": "review_based_on_scope",
+      "current_rls_enabled_and_forced": false,
+      "explicit_tenant_predicate": false,
+      "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
+      "access_policy": "No ordinary runtime-role access. A separately named operation-specific service grant and audit contract must be mapped before implementation.",
+      "status": "REM-WP1.5 applied and verified this approved table grant/policy row under the actual restricted symphony_app role in CI run 43683206104; the raw full-suite result is retained in the candidate evidence directory."
+    },
+    {
+      "table": "precedence_policies",
+      "classification": "control_plane_restricted",
+      "scope_basis": "Organization policy with nullable organization_id and global default.",
+      "scope_resolution": "not_applicable",
+      "ordinary_runtime_role": "no ordinary application grant",
+      "permitted_sql_operations": [],
+      "delete_grant": false,
+      "required_rls": "review_based_on_scope",
+      "current_rls_enabled_and_forced": false,
+      "explicit_tenant_predicate": false,
+      "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
+      "access_policy": "No ordinary runtime-role access. A separately named operation-specific service grant and audit contract must be mapped before implementation.",
+      "status": "REM-WP1.5 applied and verified this approved table grant/policy row under the actual restricted symphony_app role in CI run 43683206104; the raw full-suite result is retained in the candidate evidence directory."
+    },
+    {
+      "table": "programme_manager_scopes",
+      "classification": "tenant_scoped",
+      "scope_basis": "Tenant-scoped programme-manager operation scopes with same-tenant user and target organization foreign keys.",
+      "scope_resolution": "row.tenant_id matches transaction-local authenticated tenant context",
+      "ordinary_runtime_role": "symphony_app",
+      "permitted_sql_operations": [
+        "SELECT"
+      ],
+      "delete_grant": false,
+      "required_rls": "ENABLE+FORCE",
+      "current_rls_enabled_and_forced": false,
+      "explicit_tenant_predicate": true,
+      "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
+      "access_policy": "WP2.2 resolver may read only; source mutations require their owning grant/identity lifecycle command.",
+      "status": "Migration 0016 applies ENABLE+FORCE RLS and actual-role SELECT-only access; REM-WP2.2 candidate verification required."
+    },
+    {
+      "table": "reconciliation_inbox",
+      "classification": "tenant_scoped",
+      "scope_basis": "Direct tenant_id; encrypted terminal-conflict payload and non-identifying lifecycle metadata.",
+      "scope_resolution": "row.tenant_id must equal transaction-local app.tenant_id; all repository operations also include explicit tenant_id predicate.",
+      "ordinary_runtime_role": "symphony_app",
+      "permitted_sql_operations": [
+        "SELECT",
+        "INSERT",
+        "UPDATE"
+      ],
+      "delete_grant": false,
+      "required_rls": "ENABLE+FORCE",
+      "current_rls_enabled_and_forced": true,
+      "explicit_tenant_predicate": true,
+      "tenant_context": "SET LOCAL app.tenant_id only from authenticated server context; policy binds tenant_id to that context.",
+      "access_policy": "Read only authorized tenant reconciliation records; insert only terminal conflict records; update lifecycle or clear expired ciphertext. No ordinary application DELETE.",
+      "status": "Created by REM-WP1.4 migration 0012_reconciliation_inbox.sql with ENABLE+FORCE RLS. REM-WP1.4 proves the scoped symphony_app inbox boundary; REM-WP1.5 migration 0013 preserves SELECT/INSERT/UPDATE and no-DELETE, verified within the full-matrix actual-role CI suite in run 43683206104."
+    },
+    {
+      "table": "record_approvals",
+      "classification": "tenant_scoped",
+      "scope_basis": "Tenant inherited through cooperative record.",
+      "scope_resolution": "Resolve tenant through declared parent relation: Tenant inherited through cooperative record.",
+      "ordinary_runtime_role": "symphony_app",
+      "permitted_sql_operations": [
+        "SELECT",
+        "INSERT",
+        "UPDATE"
+      ],
+      "delete_grant": false,
+      "required_rls": "ENABLE+FORCE",
+      "current_rls_enabled_and_forced": false,
+      "explicit_tenant_predicate": true,
+      "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
+      "access_policy": "Tenant context is transaction-local, derived only from authenticated server context; every query also includes an explicit tenant predicate.",
+      "status": "REM-WP1.5 applied and verified this approved table grant/policy row under the actual restricted symphony_app role in CI run 43683206104; the raw full-suite result is retained in the candidate evidence directory."
+    },
+    {
+      "table": "requirement_definitions",
+      "classification": "control_plane_restricted",
+      "scope_basis": "Global legal/requirement catalogue with validation metadata.",
+      "scope_resolution": "not_applicable",
+      "ordinary_runtime_role": "no ordinary application grant",
+      "permitted_sql_operations": [],
+      "delete_grant": false,
+      "required_rls": "review_based_on_scope",
+      "current_rls_enabled_and_forced": false,
+      "explicit_tenant_predicate": false,
+      "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
+      "access_policy": "No ordinary runtime-role access. A separately named operation-specific service grant and audit contract must be mapped before implementation.",
+      "status": "REM-WP1.5 applied and verified this approved table grant/policy row under the actual restricted symphony_app role in CI run 43683206104; the raw full-suite result is retained in the candidate evidence directory."
     },
     {
       "table": "requirement_sources",
@@ -956,22 +1046,7 @@
       "explicit_tenant_predicate": false,
       "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
       "access_policy": "No ordinary runtime table access. This maps global requirement definitions to global legal sources and cannot be assigned a tenant from its FK graph.",
-      "status": "WP1.5 schema audit correction: requirement_sources references requirement_definitions, not organization_requirements; no ordinary app grant until a tenant-owned requirement-source model is separately specified."
-    },
-    {
-      "table": "meeting_rules",
-      "classification": "control_plane_restricted",
-      "scope_basis": "Organization rule with nullable organization_id; global fallback semantics require review.",
-      "scope_resolution": "not_applicable",
-      "ordinary_runtime_role": "no ordinary application grant",
-      "permitted_sql_operations": [],
-      "delete_grant": false,
-      "required_rls": "review_based_on_scope",
-      "current_rls_enabled_and_forced": false,
-      "explicit_tenant_predicate": false,
-      "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
-      "access_policy": "No ordinary runtime-role access. A separately named operation-specific service grant and audit contract must be mapped before implementation.",
-      "status": "WP1.5 applied and verified this approved table grant/policy row under the actual restricted symphony_app role in CI run 43683206104; the raw full-suite result is retained in the candidate evidence directory."
+      "status": "REM-WP1.5 schema audit correction: requirement_sources references requirement_definitions, not organization_requirements; no ordinary app grant until a tenant-owned requirement-source model is separately specified."
     },
     {
       "table": "resolution_class_rules",
@@ -986,12 +1061,76 @@
       "explicit_tenant_predicate": false,
       "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
       "access_policy": "No ordinary runtime-role access. A separately named operation-specific service grant and audit contract must be mapped before implementation.",
-      "status": "WP1.5 applied and verified this approved table grant/policy row under the actual restricted symphony_app role in CI run 43683206104; the raw full-suite result is retained in the candidate evidence directory."
+      "status": "REM-WP1.5 applied and verified this approved table grant/policy row under the actual restricted symphony_app role in CI run 43683206104; the raw full-suite result is retained in the candidate evidence directory."
     },
     {
-      "table": "aggregate_states",
+      "table": "retention_policies",
+      "classification": "control_plane_restricted",
+      "scope_basis": "Global retention policy values; changes require controlled review.",
+      "scope_resolution": "not_applicable",
+      "ordinary_runtime_role": "no ordinary application grant",
+      "permitted_sql_operations": [],
+      "delete_grant": false,
+      "required_rls": "review_based_on_scope",
+      "current_rls_enabled_and_forced": false,
+      "explicit_tenant_predicate": false,
+      "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
+      "access_policy": "No ordinary runtime-role access. A separately named operation-specific service grant and audit contract must be mapped before implementation.",
+      "status": "REM-WP1.5 applied and verified this approved table grant/policy row under the actual restricted symphony_app role in CI run 43683206104; the raw full-suite result is retained in the candidate evidence directory."
+    },
+    {
+      "table": "ta_scope_delegations",
       "classification": "tenant_scoped",
-      "scope_basis": "Direct tenant_id; aggregate projection state.",
+      "scope_basis": "Tenant-scoped TA delegation source with same-tenant manager, delegatee and organization foreign keys.",
+      "scope_resolution": "row.tenant_id matches transaction-local authenticated tenant context",
+      "ordinary_runtime_role": "symphony_app",
+      "permitted_sql_operations": [
+        "SELECT"
+      ],
+      "delete_grant": false,
+      "required_rls": "ENABLE+FORCE",
+      "current_rls_enabled_and_forced": false,
+      "explicit_tenant_predicate": true,
+      "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
+      "access_policy": "WP2.2 resolver may read only; source mutations require their owning grant/identity lifecycle command.",
+      "status": "Migration 0016 applies ENABLE+FORCE RLS and actual-role SELECT-only access; REM-WP2.2 candidate verification required."
+    },
+    {
+      "table": "tenants",
+      "classification": "control_plane_restricted",
+      "scope_basis": "Top-level tenant registry; tenant creation/maintenance is privileged.",
+      "scope_resolution": "not_applicable",
+      "ordinary_runtime_role": "no ordinary application grant",
+      "permitted_sql_operations": [],
+      "delete_grant": false,
+      "required_rls": "review_based_on_scope",
+      "current_rls_enabled_and_forced": false,
+      "explicit_tenant_predicate": false,
+      "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
+      "access_policy": "No ordinary runtime-role access. A separately named operation-specific service grant and audit contract must be mapped before implementation.",
+      "status": "REM-WP1.5 applied and verified this approved table grant/policy row under the actual restricted symphony_app role in CI run 43683206104; the raw full-suite result is retained in the candidate evidence directory."
+    },
+    {
+      "table": "user_person_links",
+      "classification": "tenant_scoped",
+      "scope_basis": "Tenant-scoped account/person identity link with same-tenant account, person and link-author foreign keys.",
+      "scope_resolution": "row.tenant_id matches transaction-local authenticated tenant context",
+      "ordinary_runtime_role": "symphony_app",
+      "permitted_sql_operations": [
+        "SELECT"
+      ],
+      "delete_grant": false,
+      "required_rls": "ENABLE+FORCE",
+      "current_rls_enabled_and_forced": false,
+      "explicit_tenant_predicate": true,
+      "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
+      "access_policy": "WP2.2 resolver may read only; source mutations require their owning grant/identity lifecycle command.",
+      "status": "Migration 0016 applies ENABLE+FORCE RLS and actual-role SELECT-only access; REM-WP2.2 candidate verification required."
+    },
+    {
+      "table": "user_role_assignments",
+      "classification": "tenant_scoped",
+      "scope_basis": "Direct tenant_id; role membership is tenant-scoped.",
       "scope_resolution": "row.tenant_id matches transaction-local authenticated tenant context",
       "ordinary_runtime_role": "symphony_app",
       "permitted_sql_operations": [
@@ -1005,7 +1144,64 @@
       "explicit_tenant_predicate": true,
       "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
       "access_policy": "Tenant context is transaction-local, derived only from authenticated server context; every query also includes an explicit tenant predicate.",
-      "status": "WP1.5 applied and verified this approved table grant/policy row under the actual restricted symphony_app role in CI run 43683206104; the raw full-suite result is retained in the candidate evidence directory."
+      "status": "REM-WP1.5 applied and verified this approved table grant/policy row under the actual restricted symphony_app role in CI run 43683206104; the raw full-suite result is retained in the candidate evidence directory."
+    },
+    {
+      "table": "users",
+      "classification": "tenant_scoped",
+      "scope_basis": "Direct tenant_id and tenant-local email uniqueness.",
+      "scope_resolution": "row.tenant_id matches transaction-local authenticated tenant context",
+      "ordinary_runtime_role": "symphony_app",
+      "permitted_sql_operations": [
+        "SELECT",
+        "INSERT",
+        "UPDATE"
+      ],
+      "delete_grant": false,
+      "required_rls": "ENABLE+FORCE",
+      "current_rls_enabled_and_forced": false,
+      "explicit_tenant_predicate": true,
+      "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
+      "access_policy": "Tenant context is transaction-local, derived only from authenticated server context; every query also includes an explicit tenant predicate.",
+      "status": "REM-WP1.5 applied and verified this approved table grant/policy row under the actual restricted symphony_app role in CI run 43683206104; the raw full-suite result is retained in the candidate evidence directory."
+    },
+    {
+      "table": "verification_assignments",
+      "classification": "tenant_scoped",
+      "scope_basis": "Tenant inherited through organization and evidence scope.",
+      "scope_resolution": "Resolve tenant through declared parent relation: Tenant inherited through organization and evidence scope.",
+      "ordinary_runtime_role": "symphony_app",
+      "permitted_sql_operations": [
+        "SELECT",
+        "INSERT",
+        "UPDATE"
+      ],
+      "delete_grant": false,
+      "required_rls": "ENABLE+FORCE",
+      "current_rls_enabled_and_forced": false,
+      "explicit_tenant_predicate": true,
+      "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
+      "access_policy": "Tenant context is transaction-local, derived only from authenticated server context; every query also includes an explicit tenant predicate.",
+      "status": "REM-WP1.5 applied and verified this approved table grant/policy row under the actual restricted symphony_app role in CI run 43683206104; the raw full-suite result is retained in the candidate evidence directory."
+    },
+    {
+      "table": "verification_findings",
+      "classification": "tenant_scoped",
+      "scope_basis": "Tenant inherited through assignment/evidence; immutable findings.",
+      "scope_resolution": "Resolve tenant through declared parent relation: Tenant inherited through assignment/evidence; immutable findings.",
+      "ordinary_runtime_role": "symphony_app",
+      "permitted_sql_operations": [
+        "SELECT",
+        "INSERT",
+        "UPDATE"
+      ],
+      "delete_grant": false,
+      "required_rls": "ENABLE+FORCE",
+      "current_rls_enabled_and_forced": false,
+      "explicit_tenant_predicate": true,
+      "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
+      "access_policy": "Tenant context is transaction-local, derived only from authenticated server context; every query also includes an explicit tenant predicate.",
+      "status": "REM-WP1.5 applied and verified this approved table grant/policy row under the actual restricted symphony_app role in CI run 43683206104; the raw full-suite result is retained in the candidate evidence directory."
     }
   ],
   "policy_specification": {
@@ -1020,7 +1216,7 @@
       "update_with_check",
       "mismatch_fixture_and_test"
     ],
-    "tenant_scoped_table_count": 37,
-    "rule": "The executable candidate expressions are in the WP1.5 manifest and migration 0013. Each inherited path was checked against root migration DDL and the live PostgreSQL 18.0 FK catalog. scope_resolution prose alone does not qualify. Integration tests must prove missing and mismatched parent behavior before this candidate is accepted."
+    "tenant_scoped_table_count": 44,
+    "rule": "The executable candidate expressions are in the REM-WP1.5 manifest and migrations 0013-0016. The original 37 tenant policies were verified in the historical PostgreSQL 18.0 candidate; later additions require task-specific restricted-role evidence. scope_resolution prose alone does not qualify."
   }
 }

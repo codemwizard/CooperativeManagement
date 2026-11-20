@@ -1,4 +1,4 @@
-# WP0.8 credential-expiry boundary TDD
+# REM-WP0.8 credential-expiry boundary TDD
 
 - Requirement: temporary credential expires exactly 72 hours after server-side issuance; source `03-specification-delta.md` §3.1 and ENR-010.
 - Test: `packages/domain/src/identity/__tests__/auth.test.ts`, `temporaryCredential_expiresAtExact72HourBoundary`.

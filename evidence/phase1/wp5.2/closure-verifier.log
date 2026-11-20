@@ -1,0 +1,5 @@
+PASS REM-WP5.2 candidate 7003723da67057bac110b5e364fdadddee6c6785; evidence HEAD f85b183f6543b0e64c8dfbceb4d03d08d9fa8458.
+PASS WP5.1 and WP1.2 predecessor evidence; all direct graph dependencies of WP5.1/WP5.2 and WP5.3 entry are immutable passing ancestors.
+PASS 17 retained command artifacts exist and are tracked at evidence HEAD.
+PASS blocklist phase1-ncsc-top100k-v1: 97746 entries; source/data SHA-256 match manifest.
+PASS approved interim Argon2id qualification: 8 concurrent workers, 60 seconds, all verifications under one second.

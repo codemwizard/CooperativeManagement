@@ -1,0 +1,122 @@
+{
+  "contract": "phase1-authorization-policy-matrix-v1",
+  "status": "frozen",
+  "owner_ruling": {
+    "id": "D-17",
+    "date": "2026-11-17",
+    "capacity_rule": "Chairperson or Vice-Chairperson for the target organization may grant or revoke any Phase 1 capacity; an active acting_officer delegation for either position may act within that organization.",
+    "assisted_enrolment_exception": "A platform_enroller may grant only internal_verifier during an active assisted-enrolment session when the representative is present and their decision is recorded.",
+    "ta_scope_rule": "A programme_manager may grant or revoke TA scope only for a cohort in that manager's persisted scope."
+  },
+  "sources": {
+    "server_authorization": "03-specification-delta.md §9 REQ-AUD-008",
+    "hard_invariants": "03-specification-delta.md §10 INV-001, INV-002, INV-021, INV-024",
+    "default_catalogue": "03-specification-delta.md §2.1",
+    "ifv_grant": "03-specification-delta.md §2.2 IFV-3",
+    "capacity_scope": "DECISIONS.md ADR-010; 03-specification-delta.md §2.2 IFV-2",
+    "ta_scope": "DECISIONS.md ADR-020 and O-6",
+    "owner_authority": "Implementation-Plan-V4/02-decision-register.md §7.6 D-17"
+  },
+  "capacity_types": ["internal_verifier", "field_agent", "delegate", "acting_officer"],
+  "actor_classes": [
+    { "id": "platform_admin", "kind": "platform_role" },
+    { "id": "platform_enroller", "kind": "platform_role" },
+    { "id": "self_enroller", "kind": "enrolment_actor" },
+    { "id": "chairperson", "kind": "position" },
+    { "id": "vice_chairperson", "kind": "position" },
+    { "id": "secretary", "kind": "position" },
+    { "id": "treasurer", "kind": "position" },
+    { "id": "director", "kind": "position" },
+    { "id": "committee_chair", "kind": "position" },
+    { "id": "committee_member", "kind": "position" },
+    { "id": "member", "kind": "membership" },
+    { "id": "internal_verifier", "kind": "capacity" },
+    { "id": "field_agent", "kind": "capacity" },
+    { "id": "delegate", "kind": "capacity" },
+    { "id": "acting_officer", "kind": "capacity" },
+    { "id": "programme_manager", "kind": "platform_role" },
+    { "id": "ta", "kind": "institutional_role" },
+    { "id": "pfi_analyst", "kind": "institutional_role" },
+    { "id": "pfi_credit", "kind": "institutional_role" },
+    { "id": "fund_manager", "kind": "institutional_role" },
+    { "id": "external_verifier", "kind": "institutional_role" },
+    { "id": "union_ta", "kind": "institutional_role" }
+  ],
+  "actions": [
+    {
+      "id": "capacity.grant",
+      "resource": "organization_capacity",
+      "parameters": ["capacityType", "granteeUserId", "activeFrom", "activeTo"],
+      "allowed_actor_classes": ["chairperson", "vice_chairperson"],
+      "conditional_actor_classes": {
+        "acting_officer": "Active delegation names chairperson or vice_chairperson and matches target organization.",
+        "platform_enroller": "capacityType is internal_verifier and an active assisted-enrolment session records representative presence and grant decision for the target organization."
+      },
+      "denied_actor_classes": ["platform_admin", "self_enroller", "secretary", "treasurer", "director", "committee_chair", "committee_member", "member", "internal_verifier", "field_agent", "delegate", "programme_manager", "ta", "pfi_analyst", "pfi_credit", "fund_manager", "external_verifier", "union_ta"],
+      "source_refs": ["D-17", "IFV-3", "INV-001", "INV-024", "REQ-AUD-008"]
+    },
+    {
+      "id": "capacity.revoke",
+      "resource": "organization_capacity",
+      "parameters": ["capacityType", "granteeUserId"],
+      "allowed_actor_classes": ["chairperson", "vice_chairperson"],
+      "conditional_actor_classes": {
+        "acting_officer": "Active delegation names chairperson or vice_chairperson and matches target organization."
+      },
+      "denied_actor_classes": ["platform_admin", "platform_enroller", "self_enroller", "secretary", "treasurer", "director", "committee_chair", "committee_member", "member", "internal_verifier", "field_agent", "delegate", "programme_manager", "ta", "pfi_analyst", "pfi_credit", "fund_manager", "external_verifier", "union_ta"],
+      "source_refs": ["D-17", "IFV-3", "INV-001", "INV-024", "REQ-AUD-008"]
+    },
+    {
+      "id": "ta_scope.grant",
+      "resource": "cohort_ta_delegation",
+      "parameters": ["delegateeUserId", "cohortId", "activeFrom", "activeTo"],
+      "allowed_actor_classes": ["programme_manager"],
+      "conditional_actor_classes": {},
+      "denied_actor_classes": ["platform_admin", "platform_enroller", "self_enroller", "chairperson", "vice_chairperson", "secretary", "treasurer", "director", "committee_chair", "committee_member", "member", "internal_verifier", "field_agent", "delegate", "acting_officer", "ta", "pfi_analyst", "pfi_credit", "fund_manager", "external_verifier", "union_ta"],
+      "source_refs": ["D-17", "ADR-020", "O-6", "REQ-AUD-008"]
+    },
+    {
+      "id": "ta_scope.revoke",
+      "resource": "cohort_ta_delegation",
+      "parameters": ["delegateeUserId", "cohortId"],
+      "allowed_actor_classes": ["programme_manager"],
+      "conditional_actor_classes": {},
+      "denied_actor_classes": ["platform_admin", "platform_enroller", "self_enroller", "chairperson", "vice_chairperson", "secretary", "treasurer", "director", "committee_chair", "committee_member", "member", "internal_verifier", "field_agent", "delegate", "acting_officer", "ta", "pfi_analyst", "pfi_credit", "fund_manager", "external_verifier", "union_ta"],
+      "source_refs": ["D-17", "ADR-020", "O-6", "REQ-AUD-008"]
+    }
+  ],
+  "precedence": [
+    "Malformed action, target, actor, timestamp, or authority evidence denies.",
+    "Unknown action or parameter values deny.",
+    "Institutional read-only role denies before action-specific authority is considered.",
+    "Tenant and resource scope must match before appointment, capacity, delegation, or role rules can allow.",
+    "Only then apply the action's explicit authority rule; governance advisory/warning modes cannot override an authorization denial."
+  ],
+  "temporal_semantics": {
+    "active_interval": "activeFrom <= now < activeTo",
+    "grant_interval": "activeFrom < activeTo and activeTo > now",
+    "equality_at_expiry": "denied",
+    "revocation": "A revoked authority is represented by its effective end time; at the end-time equality the authority is inactive."
+  },
+  "required_boundary_dimensions": [
+    "unknown_action_denies",
+    "malformed_or_unknown_parameter_denies",
+    "missing_or_contradictory_authority_denies",
+    "tenant_mismatch_denies",
+    "same_tenant_wrong_organization_denies",
+    "wrong_or_missing_cohort_scope_denies",
+    "authority_before_active_from_denies",
+    "authority_at_active_from_allows_when_other_conditions_pass",
+    "authority_before_active_to_allows_when_other_conditions_pass",
+    "authority_at_active_to_denies",
+    "revoked_authority_denies_after_effective_time",
+    "institutional_read_only_precedence_denies",
+    "invalid_grant_interval_denies",
+    "assisted_enroller_requires_active_session_presence_and_recorded_decision"
+  ],
+  "phase2_exclusions": [
+    { "id": "RecordFinding", "reason": "IFV finding workflow and person-based conflicts remain original Phase 2 Feature 05." },
+    { "id": "IFV self-verification conflict", "reason": "Person/account linkage is not a Phase 1 authority dependency." },
+    { "id": "historical finding annotation", "reason": "Revocation preserves historical findings; no Phase 2 annotation workflow is added." }
+  ]
+}

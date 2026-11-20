@@ -1,0 +1,15 @@
+npm notice run symphony-prototype@1.0.0 test:toolchain
+npm notice run node --test tests/tooling/verify_toolchain.test.mjs
+✔ accepts a fully aligned local and CI matrix (13.9586ms)
+✔ rejects global npm installation in the CI helper (2.8772ms)
+✔ reports mismatched declarations and actual runtime versions (0.6708ms)
+✔ rejects an npm compatibility range when the project requires an exact runtime pin (0.4922ms)
+✔ rejects floating major-only and mismatched minor PostgreSQL image tags (5.6924ms)
+ℹ tests 5
+ℹ suites 0
+ℹ pass 5
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 249.1534

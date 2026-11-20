@@ -1,0 +1,22 @@
+Test-Path: C:\Program Files\nodejs\npm.ps1:23
+Line |
+  23 |  if (Test-Path $NPM_PREFIX_NPM_CLI_JS) {
+     |      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     | Access to the path 'C:\Users\User\AppData\Roaming\npm\node_modules\npm\bin\npm-cli.js' is denied.
+
+
+> @symphony/db@0.1.0 test:db
+> vitest run --reporter=verbose src/__tests__/tenant-policy-manifest.test.ts
+
+
+ RUN  v2.1.9 C:/Workspace/GitHub/Prototype/artifacts/exact-candidates/wp1.5/packages/db
+
+ ✓ src/__tests__/tenant-policy-manifest.test.ts > WP1.5 tenant policy manifest oracle helpers > canonicalizes only PostgreSQL deparser whitespace and the target relation name
+ ✓ src/__tests__/tenant-policy-manifest.test.ts > WP1.5 tenant policy manifest oracle helpers > does not normalize a changed tenant setting, operator, or parent relationship
+ ✓ src/__tests__/tenant-policy-manifest.test.ts > WP1.5 tenant policy manifest oracle helpers > requires exact table-set equality and identifies missing, unexpected, and duplicate tables
+
+ Test Files  1 passed (1)
+      Tests  3 passed (3)
+   Start at  10:38:24
+   Duration  483ms (transform 60ms, setup 0ms, collect 65ms, tests 20ms, environment 0ms, prepare 144ms)
+

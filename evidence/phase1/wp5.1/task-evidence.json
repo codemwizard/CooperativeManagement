@@ -1,0 +1,60 @@
+{
+  "schema_version": 1,
+  "task_id": "REM-WP5.1",
+  "status": {
+    "implementation": "complete",
+    "unit_test": "passed",
+    "integration_test": "passed",
+    "bdd_ui_test": "not_applicable",
+    "gate_verified": "passed"
+  },
+  "commit": "7003723da67057bac110b5e364fdadddee6c6785",
+  "environment": {
+    "node": "v26.7.0",
+    "npm": "v12.2.0 (elevated CLI)",
+    "postgres": "not used by WP5.1 API contract tests",
+    "database_role": "not applicable",
+    "data_mode": "test",
+    "key_provider": "unknown"
+  },
+  "commands": [
+    {
+      "command": "npm run test:api",
+      "result": "passed",
+      "artifact": "evidence/phase1/wp5.1/api-contract-tests.log"
+    },
+    {
+      "command": "npm run typecheck:v4",
+      "result": "passed",
+      "artifact": "evidence/phase1/wp5.1/typecheck-v4.log"
+    },
+    {
+      "command": "npm run verify:arch",
+      "result": "passed",
+      "artifact": "evidence/phase1/wp5.1/architecture-check.log"
+    },
+    {
+      "command": "npm run verify:toolchain",
+      "result": "passed",
+      "artifact": "evidence/phase1/wp5.1/toolchain-verify.log"
+    },
+    {
+      "command": "npm run verify:phase1:contracts",
+      "result": "passed",
+      "artifact": "evidence/phase1/wp5.1/phase1-contracts.log"
+    }
+  ],
+  "claims": {
+    "behavior_proved": "Shared login/change-password request schemas reject unknown fields and enforce the approved Unicode code-point bounds. The real API entrypoint launches from the tested process, serves health liveness and remains unready until route composition, dependency checks and public origin are present. Contract/API tests prove invalid profiles fail closed, malformed and oversized payloads return stable errors, unsafe requests require Origin and a successful CSRF verifier, unexpected details are not disclosed, and application logs omit unique credential/password canaries.",
+    "path_proved": "The real apps/api/src/main.ts process was started by the API suite and its live and readiness endpoints were exercised over a TCP listener. The complete API suite passed 21 tests; V4 workspace typecheck, architecture, toolchain and Phase 1 contract validation passed. The implementation is the shared schema/server-composition foundation specified by REM-WP5.1.",
+    "configuration_proved": "Node v26.7.0 and npm v12.2.0. Runtime profile validation covers test/development/staging/production profile tuples before the listener opens. WP5.1 API contract tests do not connect to PostgreSQL or claim persisted authentication behavior.",
+    "coverage_limitations": [
+      "The shipped entrypoint remains unready until downstream authentication/command routes and readiness dependencies are composed; this record does not claim authentication readiness.",
+      "Persisted credentials, sessions, CSRF token storage, forced-change authorization and shared-store throttling are not claimed here; they belong to REM-WP5.2/REM-WP5.3.",
+      "No browser login journey or Phase 1 authentication BDD path is claimed."
+    ]
+  },
+  "limitations": [],
+  "unresolved_decisions": [],
+  "reviewer": "Implementation self-review; acceptance evidence was executed locally on the candidate."
+}

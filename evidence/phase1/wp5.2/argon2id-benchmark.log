@@ -1,0 +1,10 @@
+Candidate: uncommitted working tree, 2026-11-18
+Runtime: Node v26.7.0; npm v12.2.0; local Windows workstation
+Command: npm exec -- tsx tools/benchmark_argon2_wp5_2.ts
+Result: PASS; verification valid for every sample.
+Profile: Argon2id m=19456 KiB, t=2, p=1.
+
+Five serial verification samples: 32.53, 36.18, 33.30, 33.51, 32.92 ms. Median 33.30 ms; maximum 36.18 ms.
+Concurrent batches: 2 verifications completed in 45.06 ms wall time (max individual 44.83 ms); 4 in 116.12 ms (max individual 115.44 ms); 8 in 183.92 ms (max individual 171.90 ms).
+
+All measured operations were below the contract's one-second per-verification target on this local candidate. This is a local baseline, not a production expected-load acceptance result because the deployment hardware and expected authentication concurrency profile are not specified here.

@@ -1,0 +1,4 @@
+candidate=6f145875761a2c356bab790324c8a5615ec03652
+REM-WP0.3 commit=f1fa5f9413747c0ac3cbd73413179101d33f653e gate=passed evidence=evidence/phase1/tasks.json ancestor=true
+REM-WP1.2 commit=29317ff15dbb8010aa8768bb9ae451b54476875d gate=passed evidence=evidence/phase1/wp1.2/task-evidence.json ancestor=true
+REM-WP1.4 commit=2df9151dd5b04d2b17245cd16bceb79db38a0183 gate=passed evidence=evidence/phase1/wp1.4/task-evidence.json ancestor=true

@@ -1,7 +1,7 @@
 {
-  "version": 1,
+  "version": 2,
   "source": "evidence/phase1/bdd-scenarios.json plus canonical Implementation-Plan-V4/features/*.feature tags",
-  "rule": "Frozen IDs remain mandatory; this map assigns the correct product path and owner without claiming the unimplemented behavior is a WP0 failure.",
+  "rule": "Frozen IDs remain mandatory; this map assigns the correct product path and owner without claiming the unimplemented behavior is a REM-WP0 failure.",
   "scenarios": [
     {
       "id": "BDD-ENR-004",
@@ -11,10 +11,11 @@
       ],
       "scenario": "Temporary credentials are single use, expire and force a change",
       "owner_tasks": [
-        "WP5.1",
-        "WP5.4"
+        "REM-WP5.1",
+        "REM-WP5.4",
+        "REM-WP5.5"
       ],
-      "required_path": "PostgreSQL-backed API plus browser-to-API; no auth-route interception",
+      "required_path": "PostgreSQL-backed API plus real browser-to-workspace-to-API flow; no auth-route interception; exact execution owned by REM-WP5.5",
       "assertion_rule": "Execute this exact tagged scenario with observable assertions on the specified product path; no mock, @wip, skip, tag removal, zero-step pass, or in-memory substitute.",
       "phase0_status": "mapped_and_deferred_to_owner_task"
     },
@@ -26,7 +27,7 @@
       ],
       "scenario": "Consent is required before personal data is entered",
       "owner_tasks": [
-        "WP3.3"
+        "REM-WP3.3"
       ],
       "required_path": "privacy persistence API plus PostgreSQL; demonstrate consent/retention state transitions",
       "assertion_rule": "Execute this exact tagged scenario with observable assertions on the specified product path; no mock, @wip, skip, tag removal, zero-step pass, or in-memory substitute.",
@@ -40,7 +41,7 @@
       ],
       "scenario": "Withdrawal of consent flags the record and starts the retention clock",
       "owner_tasks": [
-        "WP3.3"
+        "REM-WP3.3"
       ],
       "required_path": "privacy persistence API plus PostgreSQL; demonstrate consent/retention state transitions",
       "assertion_rule": "Execute this exact tagged scenario with observable assertions on the specified product path; no mock, @wip, skip, tag removal, zero-step pass, or in-memory substitute.",
@@ -55,7 +56,7 @@
       ],
       "scenario": "Identifiers are encrypted and duplicates are found by blind index",
       "owner_tasks": [
-        "WP3.2"
+        "REM-WP3.2"
       ],
       "required_path": "identifier crypto domain/API plus PostgreSQL storage and duplicate-review assertions",
       "assertion_rule": "Execute this exact tagged scenario with observable assertions on the specified product path; no mock, @wip, skip, tag removal, zero-step pass, or in-memory substitute.",
@@ -69,7 +70,7 @@
       ],
       "scenario": "Members without an NRC use fallback identifiers",
       "owner_tasks": [
-        "WP3.2"
+        "REM-WP3.2"
       ],
       "required_path": "identifier crypto domain/API plus PostgreSQL storage and duplicate-review assertions",
       "assertion_rule": "Execute this exact tagged scenario with observable assertions on the specified product path; no mock, @wip, skip, tag removal, zero-step pass, or in-memory substitute.",
@@ -83,8 +84,8 @@
       ],
       "scenario": "Role-based masking of member identifiers",
       "owner_tasks": [
-        "WP3.3",
-        "WP6.3"
+        "REM-WP3.3",
+        "REM-WP6.3"
       ],
       "required_path": "API response audience canaries plus rendered audience views",
       "assertion_rule": "Execute this exact tagged scenario with observable assertions on the specified product path; no mock, @wip, skip, tag removal, zero-step pass, or in-memory substitute.",
@@ -98,7 +99,7 @@
       ],
       "scenario": "Events and logs carry no personal data",
       "owner_tasks": [
-        "WP3.1"
+        "REM-WP3.1"
       ],
       "required_path": "real event/log serialization path with NRC-shaped canaries",
       "assertion_rule": "Execute this exact tagged scenario with observable assertions on the specified product path; no mock, @wip, skip, tag removal, zero-step pass, or in-memory substitute.",
@@ -113,8 +114,8 @@
       ],
       "scenario": "Retention crypto-shreds personal data but keeps pseudonymised transaction facts",
       "owner_tasks": [
-        "WP3.4",
-        "WP3.3"
+        "REM-WP3.4",
+        "REM-WP3.3"
       ],
       "required_path": "retention/key-provider lifecycle integration with persistent pseudonymous transaction fact",
       "assertion_rule": "Execute this exact tagged scenario with observable assertions on the specified product path; no mock, @wip, skip, tag removal, zero-step pass, or in-memory substitute.",
@@ -128,7 +129,7 @@
       ],
       "scenario": "A member may inspect the register read-only",
       "owner_tasks": [
-        "WP6.1"
+        "REM-WP6.1"
       ],
       "required_path": "browser-to-API route with observable assertions",
       "assertion_rule": "Execute this exact tagged scenario with observable assertions on the specified product path; no mock, @wip, skip, tag removal, zero-step pass, or in-memory substitute.",
@@ -143,7 +144,7 @@
       ],
       "scenario": "Test mode accepts only the synthetic identifier pattern",
       "owner_tasks": [
-        "WP3.1"
+        "REM-WP3.1"
       ],
       "required_path": "test-profile domain/API validation of synthetic identifier patterns",
       "assertion_rule": "Execute this exact tagged scenario with observable assertions on the specified product path; no mock, @wip, skip, tag removal, zero-step pass, or in-memory substitute.",
@@ -157,7 +158,7 @@
       ],
       "scenario": "Real mode refuses to start outside an approved residency region",
       "owner_tasks": [
-        "WP3.5"
+        "REM-WP3.5"
       ],
       "required_path": "actual application startup composition rejects unapproved residency before readiness",
       "assertion_rule": "Execute this exact tagged scenario with observable assertions on the specified product path; no mock, @wip, skip, tag removal, zero-step pass, or in-memory substitute.",
@@ -171,8 +172,8 @@
       ],
       "scenario": "Purge-to-seed removes tenant data and restores the seed set",
       "owner_tasks": [
-        "WP4.1",
-        "WP4.2"
+        "REM-WP4.1",
+        "REM-WP4.2"
       ],
       "required_path": "disposable PostgreSQL purge command, allowlist, deterministic reseed and durable audit",
       "assertion_rule": "Execute this exact tagged scenario with observable assertions on the specified product path; no mock, @wip, skip, tag removal, zero-step pass, or in-memory substitute.",
@@ -186,8 +187,8 @@
       ],
       "scenario": "Statutory register fields rest on legal obligation, not consent",
       "owner_tasks": [
-        "WP3.3",
-        "WP6.3"
+        "REM-WP3.3",
+        "REM-WP6.3"
       ],
       "required_path": "API/data-minimization contract plus browser inspection route and privacy-safe audit",
       "assertion_rule": "Execute this exact tagged scenario with observable assertions on the specified product path; no mock, @wip, skip, tag removal, zero-step pass, or in-memory substitute.",
@@ -202,8 +203,8 @@
       ],
       "scenario": "Public inspection on payment of the prescribed fee shows only statutory fields (Act s.21, s.28)",
       "owner_tasks": [
-        "WP3.3",
-        "WP6.3"
+        "REM-WP3.3",
+        "REM-WP6.3"
       ],
       "required_path": "API/data-minimization contract plus browser inspection route and privacy-safe audit",
       "assertion_rule": "Execute this exact tagged scenario with observable assertions on the specified product path; no mock, @wip, skip, tag removal, zero-step pass, or in-memory substitute.",
@@ -217,8 +218,8 @@
       ],
       "scenario": "A member inspects free of charge and sees the same statutory fields",
       "owner_tasks": [
-        "WP3.3",
-        "WP6.3"
+        "REM-WP3.3",
+        "REM-WP6.3"
       ],
       "required_path": "API/data-minimization contract plus browser inspection route and privacy-safe audit",
       "assertion_rule": "Execute this exact tagged scenario with observable assertions on the specified product path; no mock, @wip, skip, tag removal, zero-step pass, or in-memory substitute.",
@@ -232,8 +233,8 @@
       ],
       "scenario": "Inspection of by-laws and regulations needs no personal data",
       "owner_tasks": [
-        "WP3.3",
-        "WP6.3"
+        "REM-WP3.3",
+        "REM-WP6.3"
       ],
       "required_path": "API/data-minimization contract plus browser inspection route and privacy-safe audit",
       "assertion_rule": "Execute this exact tagged scenario with observable assertions on the specified product path; no mock, @wip, skip, tag removal, zero-step pass, or in-memory substitute.",
@@ -247,8 +248,8 @@
       ],
       "scenario": "An individual member's accounts need that member's written consent (Act s.59(2))",
       "owner_tasks": [
-        "WP3.3",
-        "WP6.3"
+        "REM-WP3.3",
+        "REM-WP6.3"
       ],
       "required_path": "API/data-minimization contract plus browser inspection route and privacy-safe audit",
       "assertion_rule": "Execute this exact tagged scenario with observable assertions on the specified product path; no mock, @wip, skip, tag removal, zero-step pass, or in-memory substitute.",
@@ -263,8 +264,8 @@
       ],
       "scenario": "Union TA sees assigned cohorts and capability gaps but no member PII",
       "owner_tasks": [
-        "WP2.2",
-        "WP2.3"
+        "REM-WP2.2",
+        "REM-WP2.3"
       ],
       "required_path": "trusted delegated-scope API composition with full response canaries",
       "assertion_rule": "Execute this exact tagged scenario with observable assertions on the specified product path; no mock, @wip, skip, tag removal, zero-step pass, or in-memory substitute.",
@@ -278,8 +279,8 @@
       ],
       "scenario": "Delegation is a chain and can be revoked",
       "owner_tasks": [
-        "WP2.3",
-        "WP2.4"
+        "REM-WP2.3",
+        "REM-WP2.4"
       ],
       "required_path": "persisted delegation grant/revoke with both authorization serial orders and immutable audit",
       "assertion_rule": "Execute this exact tagged scenario with observable assertions on the specified product path; no mock, @wip, skip, tag removal, zero-step pass, or in-memory substitute.",
@@ -293,7 +294,7 @@
       ],
       "scenario": "State, event and outbox commit together or not at all",
       "owner_tasks": [
-        "WP1.2"
+        "REM-WP1.2"
       ],
       "required_path": "PostgreSQL transaction adapter with state/event/outbox/receipt rollback assertions",
       "assertion_rule": "Execute this exact tagged scenario with observable assertions on the specified product path; no mock, @wip, skip, tag removal, zero-step pass, or in-memory substitute.",
@@ -307,10 +308,10 @@
       ],
       "scenario": "The same command id with the same payload returns the original result",
       "owner_tasks": [
-        "WP1.3",
-        "WP1.6"
+        "REM-WP1.3",
+        "REM-WP1.6"
       ],
-      "required_path": "WP1.3 proves PostgreSQL receipt contention/replay and actor/semantic-envelope binding; WP1.6 proves the same behavior through the composed HTTP API.",
+      "required_path": "REM-WP1.3 proves PostgreSQL receipt contention/replay and actor/semantic-envelope binding; REM-WP1.6 proves the same behavior through the composed HTTP API.",
       "assertion_rule": "Execute this exact tagged scenario with observable assertions on the specified product path; no mock, @wip, skip, tag removal, zero-step pass, or in-memory substitute.",
       "phase0_status": "mapped_and_deferred_to_owner_task"
     },
@@ -322,10 +323,10 @@
       ],
       "scenario": "The same command id with a different payload is rejected",
       "owner_tasks": [
-        "WP1.3",
-        "WP1.6"
+        "REM-WP1.3",
+        "REM-WP1.6"
       ],
-      "required_path": "WP1.3 proves PostgreSQL receipt contention/replay and actor/semantic-envelope binding; WP1.6 proves the same behavior through the composed HTTP API.",
+      "required_path": "REM-WP1.3 proves PostgreSQL receipt contention/replay and actor/semantic-envelope binding; REM-WP1.6 proves the same behavior through the composed HTTP API.",
       "assertion_rule": "Execute this exact tagged scenario with observable assertions on the specified product path; no mock, @wip, skip, tag removal, zero-step pass, or in-memory substitute.",
       "phase0_status": "mapped_and_deferred_to_owner_task"
     },
@@ -337,10 +338,10 @@
       ],
       "scenario": "A stale expected version is rejected and both inputs are preserved",
       "owner_tasks": [
-        "WP1.4",
-        "WP1.7"
+        "REM-WP1.4",
+        "REM-WP1.7"
       ],
-      "required_path": "encrypted reconciliation persistence under the application role (WP1.4), then current persisted-actor/officer authorization and access/retention checks (WP1.7)",
+      "required_path": "encrypted reconciliation persistence under the application role (REM-WP1.4), then current persisted-actor/officer authorization and access/retention checks (REM-WP1.7)",
       "assertion_rule": "Execute this exact tagged scenario with observable assertions on the specified product path; no mock, @wip, skip, tag removal, zero-step pass, or in-memory substitute.",
       "phase0_status": "mapped_and_deferred_to_owner_task"
     },
@@ -352,7 +353,7 @@
       ],
       "scenario": "A command cannot touch another organisation",
       "owner_tasks": [
-        "WP1.5"
+        "REM-WP1.5"
       ],
       "required_path": "PostgreSQL least-privilege role, RLS and explicit tenant-filter tests",
       "assertion_rule": "Execute this exact tagged scenario with observable assertions on the specified product path; no mock, @wip, skip, tag removal, zero-step pass, or in-memory substitute.",
@@ -366,7 +367,7 @@
       ],
       "scenario": "Cross-organisation reads return nothing",
       "owner_tasks": [
-        "WP1.5"
+        "REM-WP1.5"
       ],
       "required_path": "PostgreSQL least-privilege role, RLS and explicit tenant-filter tests",
       "assertion_rule": "Execute this exact tagged scenario with observable assertions on the specified product path; no mock, @wip, skip, tag removal, zero-step pass, or in-memory substitute.",
@@ -380,8 +381,8 @@
       ],
       "scenario": "UI telemetry is not the business audit log",
       "owner_tasks": [
-        "WP1.1",
-        "WP6.1"
+        "REM-WP1.1",
+        "REM-WP6.1"
       ],
       "required_path": "business audit/event sink and separate UI telemetry path",
       "assertion_rule": "Execute this exact tagged scenario with observable assertions on the specified product path; no mock, @wip, skip, tag removal, zero-step pass, or in-memory substitute.",
@@ -395,8 +396,8 @@
       ],
       "scenario": "Read-only institutions cannot mutate cooperative source records",
       "owner_tasks": [
-        "WP2.1",
-        "WP2.2"
+        "REM-WP2.1",
+        "REM-WP2.2"
       ],
       "required_path": "default-deny policy/domain plus trusted API composition and forged-claim tests",
       "assertion_rule": "Execute this exact tagged scenario with observable assertions on the specified product path; no mock, @wip, skip, tag removal, zero-step pass, or in-memory substitute.",
@@ -410,8 +411,8 @@
       ],
       "scenario": "The client cannot set verified, authority or approval states",
       "owner_tasks": [
-        "WP2.1",
-        "WP2.2"
+        "REM-WP2.1",
+        "REM-WP2.2"
       ],
       "required_path": "default-deny policy/domain plus trusted API composition and forged-claim tests",
       "assertion_rule": "Execute this exact tagged scenario with observable assertions on the specified product path; no mock, @wip, skip, tag removal, zero-step pass, or in-memory substitute.",
@@ -425,7 +426,7 @@
       ],
       "scenario": "Events are append-only",
       "owner_tasks": [
-        "WP1.5"
+        "REM-WP1.5"
       ],
       "required_path": "PostgreSQL append-only privilege/trigger boundary against runtime role",
       "assertion_rule": "Execute this exact tagged scenario with observable assertions on the specified product path; no mock, @wip, skip, tag removal, zero-step pass, or in-memory substitute.",
@@ -435,14 +436,15 @@
       "id": "BDD-AUD-014",
       "feature": "features/09_commands_audit_and_integrity.feature",
       "requirements": [
-        "REQ-AUD-002"
+        "REQ-AUD-008"
       ],
       "scenario": "Authorisation is enforced on the server for every command",
       "owner_tasks": [
-        "WP2.1",
-        "WP2.2"
+        "REM-WP2.1",
+        "REM-WP2.2",
+        "REM-WP1.6"
       ],
-      "required_path": "default-deny policy/domain plus trusted API composition and forged-claim tests",
+      "required_path": "default-deny pure policy (REM-WP2.1), trusted persisted actor construction (REM-WP2.2), and the actual POST /commands HTTP composition (REM-WP1.6), with forged-claim tests",
       "assertion_rule": "Execute this exact tagged scenario with observable assertions on the specified product path; no mock, @wip, skip, tag removal, zero-step pass, or in-memory substitute.",
       "phase0_status": "mapped_and_deferred_to_owner_task"
     },
@@ -454,23 +456,9 @@
       ],
       "scenario": "Events keep occurred_at separate from recorded_at",
       "owner_tasks": [
-        "WP1.1"
+        "REM-WP1.1"
       ],
       "required_path": "versioned command envelope with client occurredAt attribution and server-generated transaction-start recorded_at semantics",
-      "assertion_rule": "Execute this exact tagged scenario with observable assertions on the specified product path; no mock, @wip, skip, tag removal, zero-step pass, or in-memory substitute.",
-      "phase0_status": "mapped_and_deferred_to_owner_task"
-    },
-    {
-      "id": "BDD-AUD-016",
-      "feature": "features/09_commands_audit_and_integrity.feature",
-      "requirements": [
-        "REQ-AUD-001"
-      ],
-      "scenario": "Validation runs are immutable",
-      "owner_tasks": [
-        "WP1.6"
-      ],
-      "required_path": "command execution and immutable rule-version snapshot integration path",
       "assertion_rule": "Execute this exact tagged scenario with observable assertions on the specified product path; no mock, @wip, skip, tag removal, zero-step pass, or in-memory substitute.",
       "phase0_status": "mapped_and_deferred_to_owner_task"
     },
@@ -482,7 +470,7 @@
       ],
       "scenario": "Navigation is scoped to the persona and every screen has a URL",
       "owner_tasks": [
-        "WP6.1"
+        "REM-WP6.1"
       ],
       "required_path": "browser-to-API route with observable assertions",
       "assertion_rule": "Execute this exact tagged scenario with observable assertions on the specified product path; no mock, @wip, skip, tag removal, zero-step pass, or in-memory substitute.",
@@ -496,7 +484,7 @@
       ],
       "scenario": "Route changes move focus and survive reload",
       "owner_tasks": [
-        "WP6.1"
+        "REM-WP6.1"
       ],
       "required_path": "browser-to-API route with observable assertions",
       "assertion_rule": "Execute this exact tagged scenario with observable assertions on the specified product path; no mock, @wip, skip, tag removal, zero-step pass, or in-memory substitute.",
@@ -510,7 +498,7 @@
       ],
       "scenario": "No enum text reaches the user",
       "owner_tasks": [
-        "WP6.1"
+        "REM-WP6.1"
       ],
       "required_path": "browser-to-API route with observable assertions",
       "assertion_rule": "Execute this exact tagged scenario with observable assertions on the specified product path; no mock, @wip, skip, tag removal, zero-step pass, or in-memory substitute.",
@@ -524,7 +512,7 @@
       ],
       "scenario": "Verified chips carry scope, verifier, version and class",
       "owner_tasks": [
-        "WP6.1"
+        "REM-WP6.1"
       ],
       "required_path": "browser-to-API route with observable assertions",
       "assertion_rule": "Execute this exact tagged scenario with observable assertions on the specified product path; no mock, @wip, skip, tag removal, zero-step pass, or in-memory substitute.",
@@ -538,7 +526,7 @@
       ],
       "scenario": "The status strip uses shape, colour and text together",
       "owner_tasks": [
-        "WP6.1"
+        "REM-WP6.1"
       ],
       "required_path": "browser-to-API route with observable assertions",
       "assertion_rule": "Execute this exact tagged scenario with observable assertions on the specified product path; no mock, @wip, skip, tag removal, zero-step pass, or in-memory substitute.",
@@ -552,7 +540,7 @@
       ],
       "scenario": "Blocked actions explain themselves in text and are announced",
       "owner_tasks": [
-        "WP6.1"
+        "REM-WP6.1"
       ],
       "required_path": "browser-to-API route with observable assertions",
       "assertion_rule": "Execute this exact tagged scenario with observable assertions on the specified product path; no mock, @wip, skip, tag removal, zero-step pass, or in-memory substitute.",
@@ -566,7 +554,7 @@
       ],
       "scenario": "Demo tooling is separate from product screens",
       "owner_tasks": [
-        "WP6.2"
+        "REM-WP6.2"
       ],
       "required_path": "served demo workspace with synthetic tenant, confirmation and non-demo exclusion",
       "assertion_rule": "Execute this exact tagged scenario with observable assertions on the specified product path; no mock, @wip, skip, tag removal, zero-step pass, or in-memory substitute.",
@@ -580,7 +568,7 @@
       ],
       "scenario": "Seed values are never presented as real",
       "owner_tasks": [
-        "WP6.2"
+        "REM-WP6.2"
       ],
       "required_path": "served demo workspace with synthetic tenant, confirmation and non-demo exclusion",
       "assertion_rule": "Execute this exact tagged scenario with observable assertions on the specified product path; no mock, @wip, skip, tag removal, zero-step pass, or in-memory substitute.",
@@ -594,7 +582,7 @@
       ],
       "scenario": "The provenance drawer is accessible and complete",
       "owner_tasks": [
-        "WP6.1"
+        "REM-WP6.1"
       ],
       "required_path": "browser-to-API route with observable assertions",
       "assertion_rule": "Execute this exact tagged scenario with observable assertions on the specified product path; no mock, @wip, skip, tag removal, zero-step pass, or in-memory substitute.",
@@ -608,11 +596,18 @@
       ],
       "scenario": "Audience-relative wording is shown to institutions",
       "owner_tasks": [
-        "WP6.3"
+        "REM-WP6.3"
       ],
       "required_path": "rendered institutional presenter copy and scope disclaimer assertions",
       "assertion_rule": "Execute this exact tagged scenario with observable assertions on the specified product path; no mock, @wip, skip, tag removal, zero-step pass, or in-memory substitute.",
       "phase0_status": "mapped_and_deferred_to_owner_task"
+    }
+  ],
+  "amendments": [
+    {
+      "decision_id": "D-13",
+      "scenario_id": "BDD-AUD-016",
+      "disposition": "Moved to evidence/phase6/bdd-work-package-map.json; excluded from Phase 1 task ownership."
     }
   ]
 }

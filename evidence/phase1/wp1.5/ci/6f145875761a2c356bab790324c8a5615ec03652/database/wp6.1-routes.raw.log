@@ -1,0 +1,20 @@
+npm notice run symphony-prototype@1.0.0 test:wp6.1
+npm notice run node --env-file-if-exists=.env.local --env-file-if-exists=.env tools/run_wp6_1_routes.mjs
+.env.local not found. Continuing without it.
+.env not found. Continuing without it.
+.env.local not found. Continuing without it.
+.env not found. Continuing without it.
+
+  [32m[1mVITE[22m v5.4.21[39m  [2mready in [0m[1m203[22m[2m[0m ms[22m
+
+  [32m➜[39m  [1mLocal[22m:   [36mhttp://127.0.0.1:[1m5175[22m/[39m
+
+Running 3 tests using 1 worker
+
+WP6.1 route list: /components, /login, /workspace/overview, /workspace/identity, /workspace/enrolment, /workspace/bylaws, /workspace/governance, /workspace/people, /workspace/meetings, /workspace/committees, /workspace/audit, /workspace/evidence, /workspace/findings
+WP6.1 served routes exercised: /components, /login, /workspace/overview, /workspace/identity, /workspace/enrolment, /workspace/bylaws, /workspace/governance, /workspace/people, /workspace/meetings, /workspace/committees, /workspace/audit, /workspace/evidence, /workspace/findings, /coop/org-1/evidence?filter=open&sort=severity
+  ✓  1 tests/workspace/routes.spec.ts:71:1 › served component, login and workspace routes have titles, landmarks and keyboard route focus (3.5s)
+  ✓  2 tests/workspace/routes.spec.ts:127:1 › workspace route rejects an unauthenticated browser session (307ms)
+  ✓  3 tests/workspace/routes.spec.ts:133:1 › provenance dialog has an accessible name, contains keyboard focus and restores its trigger on Escape (1.2s)
+
+  3 passed (6.2s)

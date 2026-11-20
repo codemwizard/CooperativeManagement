@@ -1,0 +1,39 @@
+Test-Path: C:\Program Files\nodejs\npm.ps1:23
+Line |
+  23 |  if (Test-Path $NPM_PREFIX_NPM_CLI_JS) {
+     |      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     | Access to the path 'C:\Users\User\AppData\Roaming\npm\node_modules\npm\bin\npm-cli.js' is denied.
+
+
+> symphony-prototype@1.0.0 test:wp5.5
+> node --env-file-if-exists=.env.local --env-file-if-exists=.env tools/run_wp5_5_live_bdd.mjs
+
+error when starting dev server:
+Error: Port 5174 is already in use
+    at Server.onError (C:\Workspace\GitHub\Prototype\node_modules\vite\dist\node\chunks\dep-BK3b2jBa.js:45596:18)
+    at Server.emit (node:events:514:20)
+    at emitErrorNT (node:net:2412:8)
+    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)
+node:net:2324
+    const ex = new UVExceptionWithHostPort(err, 'listen', address, port);
+               ^
+
+Error: listen EADDRINUSE: address already in use 127.0.0.1:3000
+    at Server.setupListenHandle [as _listen2] (node:net:2324:16)
+    at listenInCluster (node:net:2433:12)
+    at node:net:2662:7
+    at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+  code: 'EADDRINUSE',
+  errno: -4091,
+  syscall: 'listen',
+  address: '127.0.0.1',
+  port: 3000
+}
+
+Node.js v26.7.0
+...............
+
+1 scenario (1 passed)
+15 steps (15 passed)
+0m 4.406s (0m 4.342s executing your code)
+PASS: BDD-ENR-004 executed through workspace, API and PostgreSQL.

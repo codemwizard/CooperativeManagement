@@ -1,6 +1,6 @@
 {
-  "version": 1,
-  "decision": "D-10 approved by explicit owner direction 2026-11-07; password complexity and numeric rate-delay parameters remain WP5 implementation inputs because the supplied sources do not provide them.",
+  "version": 2,
+  "decision": "D-10 session policy approved 2026-11-07; D-14 password, hashing and rate-limit policy approved by owner 2026-11-17. D-14 is normative for REM-WP5.",
   "session": {
     "representation": "opaque server-side session; browser receives no bearer token in JSON, URL or persistent storage",
     "cookie": { "httpOnly": true, "secure": true, "sameSite": "Lax", "path": "/" },
@@ -28,7 +28,32 @@
     { "method": "POST", "path": "/commands" },
     { "method": "DELETE", "path": "/anything" }
   ],
-  "rate_limit": { "dimensions": ["account", "source"], "behavior": "progressive delay", "failure_response": "generic", "permanent_lockout": false, "numeric_parameters": "not specified in supplied source; must be sourced before WP5 completes" },
-  "password_policy": { "rule": "not specified in supplied source; must be sourced before WP5 completes" },
-  "runtime_evidence_owner": "WP5.1-WP5.5; WP0 tests pure policy and boundaries only"
+  "rate_limit": {
+    "dimensions": ["account", "trusted_source"],
+    "window_seconds": 900,
+    "threshold_failures_without_added_delay": 5,
+    "delay_seconds_after_five_prior_failures": [1, 2, 4, 8, 16, 32],
+    "maximum_delay_seconds": 32,
+    "delay_combination": "calculate account and trusted-source delay independently and apply the greater active delay, not the sum",
+    "apply_before_credential_verification": true,
+    "same_behavior_when_account_unknown": true,
+    "successful_login_resets": "account history only",
+    "failure_expiry": "each failure ages out exactly 900 seconds after occurrence",
+    "failure_response": "generic",
+    "permanent_lockout": false,
+    "source_resolution": "socket peer unless explicitly trusted proxy configuration resolves it; never trust arbitrary forwarding headers",
+    "storage": "shared atomic store across API instances; no process-local-only counters"
+  },
+  "password_policy": {
+    "minimum_unicode_code_points": 12,
+    "maximum_unicode_code_points": 1024,
+    "allow_spaces_unicode_and_long_passphrases": true,
+    "composition_rules": "none",
+    "trim_normalize_or_truncate": false,
+    "verify_entire_supplied_password": true,
+    "compromised_password_check": "versioned local blocklist; no external candidate-password lookup",
+    "hash": { "algorithm": "Argon2id", "memory_kib": 19456, "iterations": 2, "parallelism": 1, "unique_random_salt_per_credential": true, "encoded_versioned_parameters": true, "verification_target_ms": 1000 },
+    "standards_note": "12-code-point minimum is below NIST SP 800-63B-4 single-factor SHALL minimum of 15; no NIST minimum-length conformance claim"
+  },
+  "runtime_evidence_owner": "REM-WP5.1-REM-WP5.5; REM-WP0 tests pure policy and boundaries only"
 }

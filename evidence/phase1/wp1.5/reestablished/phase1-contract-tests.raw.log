@@ -1,0 +1,13 @@
+
+ RUN  v2.1.9 C:/Workspace/GitHub/Prototype/artifacts/exact-candidates/wp1.5
+
+(node:10720) [DEP0190] DeprecationWarning: Passing args to a child process with shell option true can lead to security vulnerabilities, as the arguments are not escaped, only concatenated.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+ ✓ tests/tooling/phase1_contracts.test.ts (112 tests) 3987ms
+   ✓ REM-WP0.9 Phase 1 gate contract > proves a failing fixture command prevents later gate commands from running 3074ms
+
+ Test Files  1 passed (1)
+      Tests  112 passed (112)
+   Start at  10:37:56
+   Duration  5.07s (transform 181ms, setup 0ms, collect 404ms, tests 3.99s, environment 0ms, prepare 238ms)
+

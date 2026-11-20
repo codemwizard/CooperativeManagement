@@ -1,0 +1,91 @@
+{
+  "schema_version": 1,
+  "task_id": "REM-WP2.2",
+  "status": {
+    "implementation": "complete",
+    "unit_test": "not_applicable",
+    "integration_test": "passed",
+    "bdd_ui_test": "not_applicable",
+    "gate_verified": "passed"
+  },
+  "commit": "5c5c730843ba3b5627a5389383496b9653caae04",
+  "environment": {
+    "node": "v26.7.0",
+    "npm": "v12.2.0",
+    "postgres": "PostgreSQL 18.0; isolated WP2.2 test database symphony_wp22_d5a7a4827b18_test",
+    "database_role": "symphony_app for tenant RLS/app-role assertions; test-admin/migration roles for isolated migration/API fixtures",
+    "data_mode": "test",
+    "key_provider": "local-test"
+  },
+  "commands": [
+    {
+      "command": "npm.cmd run test:api --workspace @symphony/api (Fastify and PostgreSQL integration; 25 tests passed)",
+      "result": "passed",
+      "artifact": "evidence/phase1/wp2.2/api-integration-merged.log"
+    },
+    {
+      "command": "npm.cmd run test:db:migrations (PostgreSQL 18 migration gate; 17 tests passed)",
+      "result": "passed",
+      "artifact": "evidence/phase1/wp2.2/postgres-migration-merged.log"
+    },
+    {
+      "command": "npm.cmd exec --workspace @symphony/db -- vitest run src/__tests__/tenant-rls-app-role.integration.test.ts --reporter=verbose; PHASE1_TEST_* and MIGRATION_TEST_DATABASE_URL set to isolated symphony_wp22_d5a7a4827b18_test; 5 tests and all 44 policy expressions passed",
+      "result": "passed",
+      "artifact": "evidence/phase1/wp2.2/tenant-rls-merged.log"
+    },
+    {
+      "command": "npm.cmd run typecheck:v4",
+      "result": "passed",
+      "artifact": "evidence/phase1/wp2.2/typecheck-merged.log"
+    },
+    {
+      "command": "npm.cmd run verify:arch (160 modules, 347 dependencies; no violations)",
+      "result": "passed",
+      "artifact": "evidence/phase1/wp2.2/architecture-merged.log"
+    },
+    {
+      "command": "npm.cmd run verify:wp2.1:matrix (matrix and mutation tests)",
+      "result": "passed",
+      "artifact": "evidence/phase1/wp2.1/integration-revalidation-matrix.log"
+    },
+    {
+      "command": "npm.cmd run test:unit --workspace @symphony/domain -- src/authz/__tests__/policy.test.ts src/authz/__tests__/policy-matrix.test.ts src/authz/__tests__/capacity-service.test.ts (105 passed)",
+      "result": "passed",
+      "artifact": "evidence/phase1/wp2.1/integration-revalidation-policy-unit.log"
+    },
+    {
+      "command": "git diff --cached --check (staged exact-candidate evidence)",
+      "result": "passed",
+      "artifact": "evidence/phase1/wp2.2/diff-check-integrated.log"
+    },
+    {
+      "command": "Merge codex/rem-wp2.2-exact onto codex/wp1.5-reestablished; no conflicts; merge commit 62443bf2811e8acfcd16e214514c6f95b7d024c6",
+      "result": "passed",
+      "artifact": "evidence/phase1/wp2.2/integration-merge-record.md"
+    },
+    {
+      "command": "node tools/verify_wp2_2_closure.mjs 5c5c730843ba3b5627a5389383496b9653caae04 (final exact-candidate closure verification)",
+      "result": "passed",
+      "artifact": "evidence/phase1/wp2.2/closure-verification.log"
+    }
+  ],
+  "claims": {
+    "behavior_proved": "The authenticated API returns only current persisted, same-tenant identity/membership/appointment/capacity/platform/institutional/delegation/enrolment facts derived from the opaque server session. Person and account identities remain separate. Cooperative membership is independent from office appointments. Current chairperson, vice-chairperson, secretary and treasurer appointments resolve as typed authority facts. Expired appointments and grants are omitted; Union TA scope requires the persisted role, active delegation, still-active programme-manager role and matching persisted manager scope. The API returns no account email or person PII and denies forced-change sessions.",
+    "path_proved": "The WP2.2 source was merged onto the WP1.5 integration spine at 62443bf2811e8acfcd16e214514c6f95b7d024c6. The integrated source tree was exercised with Fastify/PostgreSQL API tests (25/25), PostgreSQL migration tests (17/17), restricted app-role tenant RLS (5/5; all 44 policy expressions), typecheck and architecture checks. Those source files are unchanged in candidate 5c5c730843ba3b5627a5389383496b9653caae04; that candidate adds the raw test artifacts and immutable WP2.1 predecessor record. WP1.5 gate SHA 6f145875761a2c356bab790324c8a5615ec03652 and WP2.1 implementation SHA 15d0ec2d67ae0274a3df522e56be48fb05aa06f5 are ancestors of the candidate. The exact-candidate preflight remains pending.",
+    "configuration_proved": "Local synthetic test mode only. PostgreSQL is 18.0; resolver operations run as symphony_app in a read-only repeatable-read transaction with transaction-local app.tenant_id. The runtime role has SELECT-only access to the five resolver source tables and the global position catalogue. Fixture setup uses the isolated test administrator path.",
+    "coverage_limitations": [
+      "WP2.2 is a trusted read model. It does not implement account/person link, membership, appointment, capacity, institutional-role or delegation grant/revoke commands.",
+      "Member activity and household data-entry workflows remain unimplemented; their current screens are explicit capability gaps and this task does not add member-data persistence.",
+      "Programme-manager projection is the owner-directed interim same-tenant universal read projection. Production multi-party deployment should replace it with explicit organization agreements/scopes.",
+      "Union TA scope is persisted as direct cooperative organization IDs because no cohort aggregate/lifecycle exists; cohort command lifecycle is deferred to WP2.3/WP2.4.",
+      "Workspace persona mapping and verified-finding display are separate WP6.1 acceptance and are not claimed as WP2.2 implementation."
+    ]
+  },
+  "limitations": [
+    "The WP2.2 API, migration, restricted-role RLS, typecheck and architecture checks passed against the integrated source tree; the immutable candidate contains those artifacts and no post-run application or schema source changes. The final exact-candidate verifier remains the gate authority.",
+    "WP6.1 persona presentation and verified-finding acceptance remain separately owned and are not claimed as WP2.2 completion.",
+    "The successful RLS run used the isolated WP2.2 PostgreSQL 18 test database to avoid schema drift in the shared local test database."
+  ],
+  "unresolved_decisions": [],
+  "reviewer": "Owner approved the preflight-backed two-step transition. The authoritative final exact-candidate verifier passed; independent review remains outstanding."
+}

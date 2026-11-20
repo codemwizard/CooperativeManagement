@@ -156,7 +156,7 @@ describe('WP1.5 actual restricted-role tenant isolation', () => {
     await Promise.all([db.destroy(), recoveryDb.destroy(), app.end(), admin.end()]);
   }, 30_000);
 
-  it('matches all 55 tables, all 37 PostgreSQL policy expressions, the frozen manifest, and effective grants', async () => {
+  it('matches all migrated tables, all 44 PostgreSQL tenant policy expressions, the frozen manifest, and effective grants', async () => {
     const expectedTables = [...inventory.tables, ...inventory.planned_phase1_tables].map((row) => row.table).sort();
     const actual = await admin.query<{ table_name: string; table_owner: string; relrowsecurity: boolean; relforcerowsecurity: boolean }>(
       `SELECT c.relname AS table_name, pg_get_userbyid(c.relowner) AS table_owner,
@@ -166,11 +166,11 @@ describe('WP1.5 actual restricted-role tenant isolation', () => {
        ORDER BY c.relname`,
     );
     expect(actual.rows.map((row) => row.table_name)).toEqual(expectedTables);
-    expect(actual.rowCount).toBe(55);
+    expect(actual.rowCount).toBe(expectedTables.length);
 
     const policies = new Map([...matrix.tables, ...matrix.planned_phase1_tables].map((row) => [row.table, row]));
     const tenantRows = [...policies.values()].filter((row) => row.classification === 'tenant_scoped');
-    expect(tenantRows).toHaveLength(37);
+    expect(tenantRows).toHaveLength(44);
     expect(manifest.table_count).toBe(tenantRows.length);
     expect(manifest.required_tenant_scoped_count).toBe(tenantRows.length);
     expect(tenantPolicyTableSetErrors(
@@ -348,11 +348,12 @@ describe('WP1.5 actual restricted-role tenant isolation', () => {
       expect(result.rows[0]?.allowed, sequence.sequence_name).toBe(false);
     }
     const functions = await admin.query<{
-      signature: string; is_enqueue: boolean; app_execute: boolean; public_execute: boolean;
+      signature: string; is_enqueue: boolean; is_auth_lookup: boolean; app_execute: boolean; public_execute: boolean;
       owner: string; oid: string; security_definer: boolean; function_settings: string[] | null;
     }>(
       `SELECT format('%I.%I(%s)', n.nspname, p.proname, pg_catalog.oidvectortypes(p.proargtypes)) AS signature,
               p.oid = 'symphony.enqueue_command_outbox_message(uuid, uuid)'::regprocedure AS is_enqueue,
+              p.oid IN ('symphony.lookup_auth_subject(uuid)'::regprocedure, 'symphony.lookup_auth_session(bytea)'::regprocedure) AS is_auth_lookup,
               p.oid::text AS oid,
               has_function_privilege('symphony_app', p.oid, 'EXECUTE') AS app_execute,
               COALESCE((SELECT bool_or(a.grantee=0 AND a.privilege_type='EXECUTE') FROM aclexplode(COALESCE(p.proacl, acldefault('f',p.proowner))) a), false) AS public_execute,
@@ -371,7 +372,19 @@ describe('WP1.5 actual restricted-role tenant isolation', () => {
       function_settings: [`search_path=${manifest.outbox_policy.function.search_path}`],
     });
     expect(enqueue?.signature.replaceAll(/\s+/g, '')).toBe(manifest.outbox_policy.function.signature.replaceAll(/\s+/g, ''));
-    expect(functions.rows.filter((row) => row.app_execute).map((row) => row.oid)).toEqual([enqueue?.oid]);
+    const authLookups = functions.rows.filter((row) => row.is_auth_lookup);
+    expect(authLookups).toHaveLength(2);
+    for (const lookup of authLookups) {
+      expect(lookup).toMatchObject({
+        app_execute: true,
+        public_execute: false,
+        security_definer: true,
+        function_settings: ['search_path=pg_catalog, symphony'],
+      });
+    }
+    expect(functions.rows.filter((row) => row.app_execute).map((row) => row.oid).sort()).toEqual(
+      [enqueue?.oid, ...authLookups.map((row) => row.oid)].sort(),
+    );
     expect(functions.rows.some((row) => row.public_execute)).toBe(false);
     const defaultPrivileges = await admin.query("SELECT 1 FROM pg_default_acl d JOIN pg_roles r ON r.oid=d.defaclrole WHERE r.rolname IN ('symphony_app','symphony_outbox_writer') LIMIT 1");
     expect(defaultPrivileges.rowCount).toBe(0);
@@ -457,7 +470,8 @@ describe('WP1.5 actual restricted-role tenant isolation', () => {
       'state', 'person', 'personIdentifier', 'platformRole', 'roleAssignment', 'event',
       'capacityGrant', 'delegation', 'enrolmentSession', 'approvalPolicy', 'organizationEnrollment',
       'handover', 'evidenceVersion', 'supportItem', 'admission', 'verificationAssignment',
-      'finding', 'requirement', 'requirementLink', 'appointment', 'bylawDocument', 'bylawVersion', 'bylawProvision',
+      'finding', 'userPersonLink', 'requirement', 'requirementLink', 'appointment', 'bylawDocument', 'bylawVersion', 'bylawProvision',
+      'temporaryCredential', 'passwordCredential',
     ].map((key) => [key, randomUUID()]));
     const fixtureRows: { table: string; id: string }[] = [];
     const insert = async (table: string, id: string, statement: string, values: unknown[]) => {
@@ -486,6 +500,14 @@ describe('WP1.5 actual restricted-role tenant isolation', () => {
       await insert('authentication_events', authenticationEventId,
         'INSERT INTO symphony.authentication_events (id, user_id, method, result) VALUES ($1,$2,$3,$4)',
         [authenticationEventId, userB, 'wp15-fixture', 'success']);
+      await insert('temporary_credentials', ids.temporaryCredential!,
+        `WITH issuance AS (SELECT clock_timestamp() AS issued_at)
+         INSERT INTO symphony.temporary_credentials (id,tenant_id,user_id,secret_hash,issued_at,expires_at)
+         SELECT $1,$2,$3,$4,issued_at,issued_at + INTERVAL '72 hours' FROM issuance`,
+        [ids.temporaryCredential, tenantB, userB, '$argon2id$v=19$m=19456,t=2,p=1$YWJj$YWJj']);
+      await insert('password_credentials', ids.passwordCredential!,
+        'INSERT INTO symphony.password_credentials (id,tenant_id,user_id,secret_hash) VALUES ($1,$2,$3,$4)',
+        [ids.passwordCredential, tenantB, userB, '$argon2id$v=19$m=19456,t=2,p=1$YWJj$YWJj']);
       await insert('domain_events', ids.event!,
         `INSERT INTO symphony.domain_events (id, tenant_id, aggregate_id, aggregate_type, event_type, occurred_at, sequence)
          VALUES ($1,$2,$3,$4,$5,now(),1)`,
@@ -518,8 +540,14 @@ describe('WP1.5 actual restricted-role tenant isolation', () => {
         'INSERT INTO symphony.evidence_admissions (id,evidence_version_id,admitted_by_user_id,admission_kind) VALUES ($1,$2,$3,$4)',
         [ids.admission, ids.evidenceVersion, userB, 'claim_admission']);
       await insert('verification_assignments', ids.verificationAssignment!,
-        'INSERT INTO symphony.verification_assignments (id,evidence_item_id,assigned_to_user_id,evidence_version_id) VALUES ($1,$2,$3,$4)',
+        'INSERT INTO symphony.verification_assignments (id,evidence_item_id,assigned_to_user_id,evidence_version_id,completed_at) VALUES ($1,$2,$3,$4,now() - interval \'30 seconds\')',
         [ids.verificationAssignment, itemB, userB, ids.evidenceVersion]);
+      await insert('appointments', ids.appointment!,
+        'INSERT INTO symphony.appointments (id,organization_id,person_id,position_id,started_at,source_ref) VALUES ($1,$2,$3,$4,now() - interval \'1 minute\',$5)',
+        [ids.appointment, organizationB, ids.person, '00000000-0000-4000-8000-000000000003', `wp15-source-${ids.appointment}`]);
+      await insert('user_person_links', ids.userPersonLink!,
+        'INSERT INTO symphony.user_person_links (id,tenant_id,user_id,person_id,linked_at,source_ref,linked_by_user_id) VALUES ($1,$2,$3,$4,now() - interval \'2 minutes\',$5,$3)',
+        [ids.userPersonLink, tenantB, userB, ids.person, `wp15-link-${ids.userPersonLink}`]);
       await insert('verification_findings', ids.finding!,
         'INSERT INTO symphony.verification_findings (id,assignment_id,evidence_version_id,assurance_class,result) VALUES ($1,$2,$3,$4,$5)',
         [ids.finding, ids.verificationAssignment, ids.evidenceVersion, 'wp15_fixture', 'pass']);
@@ -529,9 +557,6 @@ describe('WP1.5 actual restricted-role tenant isolation', () => {
       await insert('evidence_requirement_links', ids.requirementLink!,
         'INSERT INTO symphony.evidence_requirement_links (id,evidence_item_id,requirement_id) VALUES ($1,$2,$3)',
         [ids.requirementLink, itemB, ids.requirement]);
-      await insert('appointments', ids.appointment!,
-        'INSERT INTO symphony.appointments (id,organization_id,person_id,position_id,started_at) VALUES ($1,$2,$3,$4,now())',
-        [ids.appointment, organizationB, ids.person, randomUUID()]);
       await insert('bylaw_documents', ids.bylawDocument!,
         'INSERT INTO symphony.bylaw_documents (id,organization_id) VALUES ($1,$2)',
         [ids.bylawDocument, organizationB]);
@@ -544,6 +569,8 @@ describe('WP1.5 actual restricted-role tenant isolation', () => {
 
       const relationshipCoverage: { table: string; parentTables: string[]; id: string }[] = [
         { table: 'aggregate_states', parentTables: [], id: ids.state! },
+        { table: 'temporary_credentials', parentTables: [], id: ids.temporaryCredential! },
+        { table: 'password_credentials', parentTables: [], id: ids.passwordCredential! },
         { table: 'person_identifiers', parentTables: ['persons'], id: ids.personIdentifier! },
         { table: 'user_role_assignments', parentTables: ['users'], id: ids.roleAssignment! },
         { table: 'authentication_events', parentTables: ['users'], id: fixtureRows.find((row) => row.table === 'authentication_events')!.id },

@@ -143,6 +143,10 @@ Eligible-population snapshot and the rule snapshot used are stored at meeting ti
 
 Every command carries: `command_id` (idempotency key), `organization_id`, `actor_user_id`, `occurred_at`, `device_id`, `expected_version`, `correlation_id`, payload. Same id + same payload returns the stored result; same id + different payload is rejected. A stale `expected_version` is rejected and **both inputs are preserved** for reconciliation. State, event and outbox rows commit in one transaction. Command families are those in spec §13 plus: `GrantCapacity`, `RevokeCapacity`, `StartEnrolmentSession`, `RecordPlatformCheck`, `RecordConsent`, `WithdrawConsent`, `SetEnforcementMode`, `ConfigureRecordClassPolicy`, `ConfigurePrecedencePolicy`, `ConfirmMeetingRule`, `DelegateTaScope`.
 
+**REQ-AUD-007 — Validation-run rule snapshot immutability:** each validation run records the exact rule-set version used at execution. Later rule-set changes create a new version and must not alter any prior run or its findings. This requirement implements HARD invariant INV-017. The owner confirmed D-13 Option A on 2026-11-17: the product capability and BDD-AUD-016 acceptance belong to original Phase 6 WP6.2, as specified in `06-phased-plan.md`.
+
+**REQ-AUD-008 — Server-authoritative command authorization:** every command is authorized on the server from the authenticated account and current persisted authority scoped to its tenant and target organization. Client-supplied role, capacity, appointment, delegation or approval claims do not grant authority. Unknown or malformed actions and missing or contradictory trusted authority deny. This requirement governs BDD-AUD-014; API-path evidence is owned by REM-WP1.6 with policy and trusted-authority evidence from REM-WP2.1 and REM-WP2.2.
+
 ## 10. Invariant classification
 
 HARD never varies. POLICY follows enforcement mode (default advisory). "Gate" = blocking by design (a defined transition).

@@ -33,7 +33,7 @@ export class PostgresRepository<TAggregate extends AggregateRoot>
   implements Repository<TAggregate>
 {
   constructor(
-    private readonly db: Kysely<SymphonyDatabase>,
+    _db: Kysely<SymphonyDatabase>,
     private readonly aggregateType: string,
   ) {}
 

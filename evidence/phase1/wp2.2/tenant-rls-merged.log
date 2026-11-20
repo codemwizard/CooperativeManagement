@@ -1,0 +1,15 @@
+npm notice run symphony-prototype@1.0.0 npx
+npm notice run vitest run src/__tests__/tenant-rls-app-role.integration.test.ts --reporter=verbose
+
+ RUN  v2.1.9 C:/Workspace/GitHub/Prototype/artifacts/exact-candidates/wp1.5/packages/db
+
+ ✓ src/__tests__/tenant-rls-app-role.integration.test.ts > WP1.5 actual restricted-role tenant isolation > matches all migrated tables, all 44 PostgreSQL tenant policy expressions, the frozen manifest, and effective grants 1051ms
+ ✓ src/__tests__/tenant-rls-app-role.integration.test.ts > WP1.5 actual restricted-role tenant isolation > fails closed for missing, empty, mismatched, and cross-tenant inherited scopes 640ms
+ ✓ src/__tests__/tenant-rls-app-role.integration.test.ts > WP1.5 actual restricted-role tenant isolation > uses unfiltered app-role reads to cover every distinct manifested tenant-parent chain 412ms
+ ✓ src/__tests__/tenant-rls-app-role.integration.test.ts > WP1.5 actual restricted-role tenant isolation > keeps app.tenant_id transaction-local across pool reuse and rollback
+ ✓ src/__tests__/tenant-rls-app-role.integration.test.ts > WP1.5 actual restricted-role tenant isolation > denies direct outbox access and keeps command event/outbox writes atomic through the real repository adapter
+
+ Test Files  1 passed (1)
+      Tests  5 passed (5)
+   Start at  21:38:03
+   Duration  4.33s (transform 312ms, setup 0ms, collect 1.12s, tests 2.62s, environment 0ms, prepare 243ms)

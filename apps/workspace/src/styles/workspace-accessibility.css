@@ -1,0 +1,39 @@
+:where(a, button, input, select, textarea, [tabindex]):focus-visible {
+  outline: 3px solid #005fcc;
+  outline-offset: 3px;
+}
+
+.workspace-skip-link {
+  position: absolute;
+  z-index: 1000;
+  top: 0.5rem;
+  left: 0.5rem;
+  padding: 0.75rem 1rem;
+  transform: translateY(-160%);
+  background: #fff;
+  color: #172b4d;
+  border: 2px solid #005fcc;
+  border-radius: 0.25rem;
+}
+
+.workspace-skip-link:focus {
+  transform: translateY(0);
+}
+
+.components-page {
+  max-width: 58rem;
+  margin: 0 auto;
+  padding: 2rem;
+  color: #212529;
+  font-family: Inter, 'Segoe UI', system-ui, sans-serif;
+  line-height: 1.6;
+}
+
+.components-page h1 { font-size: 1.875rem; line-height: 1.2; }
+.components-page h2 { margin-top: 2rem; border-bottom: 1px solid #adb5bd; padding-bottom: 0.5rem; }
+.components-list { padding-left: 1.5rem; }
+.components-list li { margin-bottom: 0.35rem; }
+.components-badge { display: inline-block; padding: 0.2rem 0.65rem; border-radius: 999px; font-size: 0.8rem; font-weight: 600; }
+.components-phase { background: #e8ecf5; color: #2c3e6b; }
+.components-pending { background: #fff8e1; color: #634000; }
+.components-swatch { display: inline-block; width: 1rem; height: 1rem; border: 1px solid #495057; border-radius: 0.2rem; vertical-align: -0.15rem; margin-right: 0.5rem; }

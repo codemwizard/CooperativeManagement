@@ -1,0 +1,15 @@
+{
+  "gate": "phase0",
+  "status": "PASS",
+  "commit": "a0ac90e5b40f7601d80e8d8dbef6de6f49f57e81",
+  "runId": "44263687227",
+  "runAttempt": "1",
+  "node": "26.7.0",
+  "npm": "12.2.0",
+  "postgresServerVersion": "18.0",
+  "requiredGateCommand": "npm run verify:phase0",
+  "bddScenarios": 0,
+  "migrationFilesApplied": [],
+  "testSummaries": [],
+  "generatedAt": "2026-11-18T08:05:19.827Z"
+}

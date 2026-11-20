@@ -111,8 +111,20 @@ jobs:
         run: node tools/bootstrap_wp1_5_database.mjs 2>&1 | tee artifacts/role-bootstrap.raw.log
       - name: Apply migrations from an empty database
         run: npm run db:migrate:test 2>&1 | tee artifacts/db-migrate.raw.log
+      - name: Install Chromium for real authentication browser acceptance
+        run: npx playwright install --with-deps chromium
       - name: Run actual-role DB integration checks
         run: npm run test:db --workspace @symphony/db 2>&1 | tee artifacts/db-integration.raw.log
+      - name: Run WP5.4 workspace login/password flow against PostgreSQL
+        run: npm run test:login:api 2>&1 | tee artifacts/wp5.4-browser.raw.log
+      - name: Run WP5.5 frozen temporary-credential BDD through the real stack
+        env:
+          WP5_5_ARTIFACT_DIR: artifacts/wp5.5
+        run: npm run test:wp5.5 2>&1 | tee artifacts/wp5.5-bdd.raw.log
+      - name: Run WP6.1 served workspace routes and accessibility acceptance
+        env:
+          WP6_1_ARTIFACT_DIR: artifacts/wp6.1
+        run: npm run test:wp6.1 2>&1 | tee artifacts/wp6.1-routes.raw.log
       - name: Run WP1.5 cross-organisation PostgreSQL BDD
         run: npm run test:bdd:wp1.5 2>&1 | tee artifacts/bdd-wp1.5.raw.log
       - name: Revoke temporary migration membership and verify final role attributes
@@ -123,7 +135,11 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: wp1.5-db-evidence-${{ github.sha }}
-          path: artifacts/*.raw.log
+          path: |
+            artifacts/*.raw.log
+            artifacts/wp5.4/*
+            artifacts/wp5.5/*
+            artifacts/wp6.1/*
           if-no-files-found: warn
           retention-days: 90
 

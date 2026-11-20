@@ -1,0 +1,37 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://symphony.example/contracts/phase1/workspace-context-v1.schema.json",
+  "title": "Trusted workspace context facts",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["tenantId", "userId", "resolvedAt", "personId", "facts"],
+  "properties": {
+    "tenantId": { "type": "string", "format": "uuid" },
+    "userId": { "type": "string", "format": "uuid" },
+    "resolvedAt": { "type": "string", "format": "date-time" },
+    "personId": { "type": ["string", "null"], "format": "uuid" },
+    "facts": { "type": "array", "items": { "$ref": "#/$defs/fact" } }
+  },
+  "$defs": {
+    "fact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sourceId", "kind", "authority", "organizationId", "organizationName", "organizationKind", "personId", "membershipId", "scopeOrganizationIds", "scopeMode", "sourceRef", "effectiveAt", "expiresAt"],
+      "properties": {
+        "sourceId": { "type": "string", "format": "uuid" },
+        "kind": { "enum": ["membership", "appointment", "capacity", "platform_role", "institutional_role", "enrolment"] },
+        "authority": { "enum": ["member", "chairperson", "vice_chairperson", "secretary", "treasurer", "director", "committee_chair", "committee_member", "internal_verifier", "field_agent", "delegate", "acting_officer", "programme_manager", "programme_manager_ta_delegation_scope", "union_ta", "self_enroller"] },
+        "organizationId": { "type": ["string", "null"], "format": "uuid" },
+        "organizationName": { "type": ["string", "null"], "minLength": 1, "maxLength": 240 },
+        "organizationKind": { "enum": ["cooperative", "union", "federation", null] },
+        "personId": { "type": ["string", "null"], "format": "uuid" },
+        "membershipId": { "type": ["string", "null"], "format": "uuid" },
+        "scopeOrganizationIds": { "type": "array", "items": { "type": "string", "format": "uuid" } },
+        "scopeMode": { "enum": ["organization", "tenant_organization_projections", "delegated_organizations", "enrolment"] },
+        "sourceRef": { "type": ["string", "null"], "maxLength": 500 },
+        "effectiveAt": { "type": "string", "format": "date-time" },
+        "expiresAt": { "type": ["string", "null"], "format": "date-time" }
+      }
+    }
+  }
+}

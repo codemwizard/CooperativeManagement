@@ -12,7 +12,7 @@ const temporaryDirectory = mkdtempSync(path.join(os.tmpdir(), 'symphony-phase1-b
 const reportPath = path.join(temporaryDirectory, 'cucumber.json');
 const cucumberCli = path.join(root, 'node_modules/@cucumber/cucumber/bin/cucumber.js');
 const scenarioIds = manifest.scenarios.map((scenario) => `@${scenario.id}`);
-const tagExpression = `(${scenarioIds.join(' or ')}) and not @wip`;
+const tagExpression = `(${scenarioIds.join(' or ')}) and not @wip and not @phase6`;
 
 try {
   const result = spawnSync(process.execPath, [

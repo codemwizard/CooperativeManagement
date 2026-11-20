@@ -1,0 +1,60 @@
+npm notice run symphony-prototype@1.0.0 test:api
+npm notice run npm run test:api --workspace @symphony/api
+npm notice run @symphony/api@0.1.0 test:api
+npm notice run vitest run --reporter=verbose
+
+ RUN  v2.1.9 C:/Workspace/GitHub/Prototype/apps/api
+
+ ✓ src/__tests__/server-composition.test.ts > shared authentication contracts > rejects unknown login fields and accepts the shared request shape
+ ✓ src/__tests__/server-composition.test.ts > shared authentication contracts > measures password length in Unicode code points without trimming
+ ✓ src/__tests__/outbox-worker.test.ts > OutboxWorker > undeliveredRecord_isPolled
+ ✓ src/__tests__/outbox-worker.test.ts > OutboxWorker > undeliveredRecord_isPolled 787ms
+ ✓ src/__tests__/outbox-worker.test.ts > OutboxWorker > deliveredRecord_isNotReturned
+ ✓ src/__tests__/outbox-worker.test.ts > OutboxWorker > deliveredRecord_isNotReturned
+ ✓ src/__tests__/auth-routes.test.ts > POST /auth/login > validTempCredential_returns200WithoutBearerToken 3428ms
+ ✓ src/__tests__/auth-routes.test.ts > POST /auth/login > expiredCredential_returnsGenericAuthenticationFailure 309ms
+ ✓ src/__tests__/masking-serialiser.test.ts > maskMemberRecord > unionRole_response_containsNoPII
+ ✓ src/__tests__/masking-serialiser.test.ts > maskMemberRecord > institutionalRole_response_containsNoPII
+ ✓ src/__tests__/masking-serialiser.test.ts > maskMemberRecord > cooperativeOfficer_response_containsOwnData
+ ✓ src/__tests__/masking-serialiser.test.ts > maskMemberRecord > publicInspection_showsOnlyStatutoryFields
+ ✓ src/__tests__/masking-serialiser.test.ts > scrubNrcFromString > removes NRC pattern from log strings
+ ✓ src/__tests__/auth-routes.test.ts > POST /auth/login > sameCredentialTwice_secondCallUsesGenericAuthenticationFailure 851ms
+ ✓ src/__tests__/server-composition.test.ts > API runtime profile and listener composition > starts the shipped entrypoint only after profile validation and keeps the real process unready
+ ✓ src/__tests__/auth-routes.test.ts > POST /auth/login > responseBody_containsNoNrcPattern 779ms
+ ✓ src/__tests__/auth-routes.test.ts > POST /auth/login > unknownUser_usesGenericAuthenticationError
+{"level":30,"time":1794980324393,"pid":26672,"hostname":"DESKTOP-VV0116A","msg":"Server listening at http://127.0.0.1:53273"}
+ ✓ src/__tests__/server-composition.test.ts > API runtime profile and listener composition > starts the shipped entrypoint only after profile validation and keeps the real process unready 5682ms
+ ✓ src/__tests__/server-composition.test.ts > API runtime profile and listener composition > fails closed when the profile is missing or contradicts APP_ENV/DATA_MODE
+{"level":30,"time":1794980324434,"pid":26672,"hostname":"DESKTOP-VV0116A","reqId":"req-1","req":{"method":"GET","url":"/health/live","host":"127.0.0.1:53273","remoteAddress":"127.0.0.1","remotePort":53274},"msg":"incoming request"}
+{"level":30,"time":1794980324444,"pid":26672,"hostname":"DESKTOP-VV0116A","reqId":"req-1","res":{"statusCode":200},"responseTime":8.368000000000393,"msg":"request completed"}
+{"level":30,"time":1794980324450,"pid":26672,"hostname":"DESKTOP-VV0116A","reqId":"req-2","req":{"method":"GET","url":"/health/ready","host":"127.0.0.1:53273","remoteAddress":"127.0.0.1","remotePort":53275},"msg":"incoming request"}
+{"level":30,"time":1794980324452,"pid":26672,"hostname":"DESKTOP-VV0116A","reqId":"req-2","res":{"statusCode":503},"responseTime":1.2780000000002474,"msg":"request completed"}
+{"level":30,"time":1794980324467,"pid":26672,"hostname":"DESKTOP-VV0116A","msg":"Server listening at http://127.0.0.1:53276"}
+ ✓ src/__tests__/server-composition.test.ts > API runtime profile and listener composition > serves health from a real listener and stays unready until required routes and checks exist 783ms
+{"level":30,"time":1794980324506,"pid":26672,"hostname":"DESKTOP-VV0116A","reqId":"req-1","req":{"method":"GET","url":"/health/live","host":"127.0.0.1:53276","remoteAddress":"127.0.0.1","remotePort":53277},"msg":"incoming request"}
+{"level":30,"time":1794980324507,"pid":26672,"hostname":"DESKTOP-VV0116A","reqId":"req-1","res":{"statusCode":415},"responseTime":0.7865000000001601,"msg":"request completed"}
+{"level":30,"time":1794980324513,"pid":26672,"hostname":"DESKTOP-VV0116A","reqId":"req-2","req":{"method":"POST","url":"/unknown","host":"127.0.0.1:53276","remoteAddress":"127.0.0.1","remotePort":53278},"msg":"incoming request"}
+{"level":30,"time":1794980324514,"pid":26672,"hostname":"DESKTOP-VV0116A","reqId":"req-2","res":{"statusCode":403},"responseTime":1.0234000000000378,"msg":"request completed"}
+{"level":30,"time":1794980324517,"pid":26672,"hostname":"DESKTOP-VV0116A","reqId":"req-3","req":{"method":"POST","url":"/unknown","host":"127.0.0.1:53276","remoteAddress":"127.0.0.1","remotePort":53277},"msg":"incoming request"}
+{"level":30,"time":1794980324518,"pid":26672,"hostname":"DESKTOP-VV0116A","reqId":"req-3","res":{"statusCode":403},"responseTime":0.906699999999546,"msg":"request completed"}
+{"level":30,"time":1794980324625,"pid":26672,"hostname":"DESKTOP-VV0116A","msg":"Server listening at http://127.0.0.1:53279"}
+ ✓ src/__tests__/server-composition.test.ts > API runtime profile and listener composition > rejects unsupported encodings and unsafe requests without the configured Origin and CSRF token
+{"level":30,"time":1794980324631,"pid":26672,"hostname":"DESKTOP-VV0116A","reqId":"req-1","req":{"method":"GET","url":"/health/ready","host":"127.0.0.1:53279","remoteAddress":"127.0.0.1","remotePort":53280},"msg":"incoming request"}
+{"level":30,"time":1794980324632,"pid":26672,"hostname":"DESKTOP-VV0116A","reqId":"req-1","res":{"statusCode":200},"responseTime":0.5946000000003551,"msg":"request completed"}
+{"level":30,"time":1794980324650,"pid":26672,"hostname":"DESKTOP-VV0116A","reqId":"req-2","req":{"method":"POST","url":"/strict","host":"127.0.0.1:53279","remoteAddress":"127.0.0.1","remotePort":53281},"msg":"incoming request"}
+{"level":30,"time":1794980324655,"pid":26672,"hostname":"DESKTOP-VV0116A","reqId":"req-2","res":{"statusCode":400},"responseTime":4.551900000000387,"msg":"request completed"}
+{"level":30,"time":1794980324666,"pid":26672,"hostname":"DESKTOP-VV0116A","reqId":"req-3","req":{"method":"POST","url":"/strict","host":"127.0.0.1:53279","remoteAddress":"127.0.0.1","remotePort":53280},"msg":"incoming request"}
+{"level":30,"time":1794980324674,"pid":26672,"hostname":"DESKTOP-VV0116A","reqId":"req-3","res":{"statusCode":400},"responseTime":7.788099999999758,"msg":"request completed"}
+{"level":30,"time":1794980324695,"pid":26672,"hostname":"DESKTOP-VV0116A","reqId":"req-4","req":{"method":"POST","url":"/strict","host":"127.0.0.1:53279","remoteAddress":"127.0.0.1","remotePort":53281},"msg":"incoming request"}
+{"level":30,"time":1794980324696,"pid":26672,"hostname":"DESKTOP-VV0116A","reqId":"req-4","res":{"statusCode":413},"responseTime":1.2435000000004948,"msg":"request completed"}
+{"level":30,"time":1794980324703,"pid":26672,"hostname":"DESKTOP-VV0116A","reqId":"req-5","req":{"method":"GET","url":"/failure","host":"127.0.0.1:53279","remoteAddress":"127.0.0.1","remotePort":53282},"msg":"incoming request"}
+{"level":30,"time":1794980324704,"pid":26672,"hostname":"DESKTOP-VV0116A","reqId":"req-5","res":{"statusCode":500},"responseTime":1.102600000000166,"msg":"request completed"}
+ ✓ src/__tests__/server-composition.test.ts > API runtime profile and listener composition > maps malformed requests and unexpected errors to stable non-disclosing responses
+ ✓ src/__tests__/server-composition.test.ts > API authentication log redaction > does not emit unique credential and password canaries in application logs
+ ✓ src/__tests__/auth-routes.test.ts > POST /auth/change-password legacy adapter > stores a permanent password separately without issuing a temporary credential 672ms
+
+ Test Files  4 passed (4)
+      Tests  21 passed (21)
+   Start at  07:38:32
+   Duration  11.96s (transform 5.55s, setup 0ms, collect 13.95s, tests 13.93s, environment 1ms, prepare 2.07s)
+

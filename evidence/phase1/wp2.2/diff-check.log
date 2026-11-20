@@ -1,0 +1,8 @@
+warning: in the working copy of 'apps/api/src/__tests__/auth-session-postgres.integration.test.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'apps/api/src/main.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'apps/api/src/server.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'evidence/phase1/purge-table-policy-matrix.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'evidence/phase1/tenant-table-inventory.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'evidence/phase1/tenant-table-policy-matrix.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'evidence/phase1/wp1.5-tenant-policy-manifest.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'packages/contracts/src/index.ts', LF will be replaced by CRLF the next time Git touches it

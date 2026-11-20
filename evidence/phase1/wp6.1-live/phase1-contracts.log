@@ -1,0 +1,15 @@
+
+> symphony-prototype@1.0.0 test:phase1:contracts
+> npx vitest run tests/tooling/phase1_contracts.test.ts
+
+
+ RUN  v2.1.9 C:/Workspace/GitHub/Prototype
+
+ ✓ tests/tooling/phase1_contracts.test.ts (112 tests) 22509ms
+   ✓ REM-WP0.9 Phase 1 gate contract > proves a failing fixture command prevents later gate commands from running 19862ms
+
+ Test Files  1 passed (1)
+      Tests  112 passed (112)
+   Start at  15:52:12
+   Duration  25.41s (transform 924ms, setup 0ms, collect 1.47s, tests 22.51s, environment 1ms, prepare 689ms)
+

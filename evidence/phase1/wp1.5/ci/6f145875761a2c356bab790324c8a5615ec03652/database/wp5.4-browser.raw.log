@@ -1,0 +1,17 @@
+npm notice run symphony-prototype@1.0.0 test:login:api
+npm notice run node --env-file-if-exists=.env.local --env-file-if-exists=.env tools/run_wp5_4_browser.mjs
+.env.local not found. Continuing without it.
+.env not found. Continuing without it.
+.env.local not found. Continuing without it.
+.env not found. Continuing without it.
+
+  [32m[1mVITE[22m v5.4.21[39m  [2mready in [0m[1m221[22m[2m[0m ms[22m
+
+  [32m➜[39m  [1mLocal[22m:   [36mhttp://127.0.0.1:[1m5174[22m/[39m
+
+Running 2 tests using 1 worker
+
+  ✓  1 tests/workspace/login-api.spec.ts:73:1 › temporary login requires password change, revokes its session, then fresh login survives refresh (2.2s)
+  ✓  2 tests/workspace/login-api.spec.ts:138:1 › unknown accounts show a non-enumerating failure through the real API (397ms)
+
+  2 passed (4.3s)

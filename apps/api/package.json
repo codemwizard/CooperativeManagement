@@ -10,7 +10,7 @@
     "./serialisers/masking-serialiser": "./src/serialisers/masking-serialiser.ts"
   },
   "scripts": {
-    "dev": "node --loader ts-node/esm src/server.ts",
+    "dev": "node --env-file-if-exists=../../.env.local --env-file-if-exists=../../.env --import tsx src/main.ts",
     "typecheck": "tsc --noEmit",
     "test:api": "vitest run --reporter=verbose"
   },
@@ -19,10 +19,12 @@
     "@symphony/db": "*",
     "@symphony/contracts": "*",
     "fastify": "^5.1.0",
+    "pg": "^8.13.0",
     "zod": "^3.23.8"
   },
   "devDependencies": {
     "@types/node": "^20.14.0",
+    "tsx": "^4.23.15",
     "typescript": "^5.5.3",
     "vitest": "^2.1.1"
   }

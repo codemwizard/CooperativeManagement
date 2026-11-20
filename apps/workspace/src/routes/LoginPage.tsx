@@ -1,229 +1,160 @@
-/**
- * apps/workspace/src/routes/LoginPage.tsx
- *
- * Login page — email/userId + password form.
- * On success: redirects to /workspace.
- * On failure: shows error message.
- * On temporary credential: prompts password change.
- * WP-1.9.5
- */
-
-import React, { FormEvent, useState } from 'react';
+import React, { FormEvent, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { AuthenticationApiError, changePassword, login, readSession } from '../api/auth-client.js';
+import '../styles/auth.css';
 
-type LoginState = 'idle' | 'loading' | 'error' | 'change-password';
-
-interface LoginError {
-  readonly message: string;
-}
+type LoginState = 'checking-session' | 'idle' | 'loading' | 'error' | 'change-password' | 'password-updated';
 
 export function LoginPage(): React.ReactElement {
   const navigate = useNavigate();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [state, setState] = useState<LoginState>('idle');
-  const [error, setError] = useState<LoginError | null>(null);
+  const [userId, setUserId] = useState('');
+  const [credential, setCredential] = useState('');
+  const [currentCredential, setCurrentCredential] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [state, setState] = useState<LoginState>('checking-session');
+  const [error, setError] = useState<string | null>(null);
 
-  async function handleSubmit(e: FormEvent<HTMLFormElement>): Promise<void> {
-    e.preventDefault();
+  useEffect(() => {
+    const title = state === 'change-password' ? 'Change password'
+      : state === 'password-updated' ? 'Password updated' : 'Sign in';
+    document.title = `${title} | Symphony Workspace`;
+  }, [state]);
+  useEffect(() => {
+    if (state === 'idle' || state === 'change-password' || state === 'password-updated') {
+      document.querySelector<HTMLElement>('#main-content h1')?.focus({ preventScroll: true });
+    }
+  }, [state]);
+
+  useEffect(() => {
+    let active = true;
+    void readSession().then((session) => {
+      if (!active) return;
+      if (session.forcedChangeRequired) setState('change-password');
+      else navigate('/workspace', { replace: true });
+    }).catch(() => {
+      if (active) setState('idle');
+    });
+    return () => { active = false; };
+  }, [navigate]);
+
+  async function handleLogin(event: FormEvent<HTMLFormElement>): Promise<void> {
+    event.preventDefault();
     setState('loading');
     setError(null);
-
     try {
-      const res = await fetch('/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
-      });
-
-      if (res.ok) {
-        const body = (await res.json()) as { requiresPasswordChange?: boolean };
-        if (body.requiresPasswordChange) {
-          setState('change-password');
-        } else {
-          navigate('/workspace', { replace: true });
-        }
-        return;
+      const result = await login({ userId, credential, deviceId: crypto.randomUUID() });
+      if (result.forcedChangeRequired) {
+        setCurrentCredential(credential);
+        setCredential('');
+        setState('change-password');
+      } else {
+        setCredential('');
+        navigate('/workspace', { replace: true });
       }
-
-      // Handle error responses
-      let detail = 'Sign in failed. Please check your credentials and try again.';
-      try {
-        const body = (await res.json()) as { detail?: string };
-        if (typeof body.detail === 'string' && body.detail.length > 0) {
-          detail = body.detail;
-        }
-      } catch {
-        // ignore parse error
-      }
-
+    } catch (cause) {
       setState('error');
-      setError({ message: detail });
-    } catch {
-      setState('error');
-      setError({ message: 'Unable to connect. Please try again.' });
+      setError(cause instanceof AuthenticationApiError && cause.status === 0
+        ? 'Unable to connect. Please try again.'
+        : 'Sign in failed. Please check your credentials and try again.');
     }
   }
 
-  if (state === 'change-password') {
+  async function handlePasswordChange(event: FormEvent<HTMLFormElement>): Promise<void> {
+    event.preventDefault();
+    setError(null);
+    if (Array.from(newPassword).length < 12 || Array.from(newPassword).length > 1024) {
+      setError('Choose a password between 12 and 1024 characters.');
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      setError('The new passwords do not match.');
+      return;
+    }
+    setState('loading');
+    try {
+      await changePassword({ currentCredential, newPassword });
+      setCurrentCredential('');
+      setNewPassword('');
+      setConfirmPassword('');
+      setState('password-updated');
+    } catch (cause) {
+      setState('change-password');
+      if (cause instanceof AuthenticationApiError && cause.code === 'INVALID_REQUEST') {
+        setError('The new password is not accepted. Check the password requirements and try again.');
+      } else {
+        setError('Password could not be changed. Sign in again and retry.');
+      }
+    }
+  }
+
+  if (state === 'checking-session') {
+    return <main id="main-content" aria-busy="true"><a className="workspace-skip-link" href="#main-content">Skip to main content</a><p role="status">Checking your session…</p></main>;
+  }
+
+  if (state === 'password-updated') {
     return (
-      <main id="main-content" style={styles.page}>
-        <div style={styles.card}>
-          <h1 style={styles.heading}>Change your password</h1>
-          <p style={styles.info}>
-            Your account uses a temporary credential. You must set a new password before
-            continuing.
-          </p>
-          <p>
-            <a href="/auth/change-password" style={styles.link}>
-              Set new password
-            </a>
-          </p>
-        </div>
+      <main id="main-content" className="auth-page">
+        <a className="workspace-skip-link" href="#main-content">Skip to main content</a>
+        <section className="auth-card" aria-labelledby="password-updated-heading">
+          <h1 id="password-updated-heading" tabIndex={-1}>Password updated</h1>
+          <p>Your password was changed. Sign in with your new password to continue.</p>
+          <button type="button" onClick={() => { setState('idle'); setUserId(''); }}>
+            Return to sign in
+          </button>
+        </section>
+      </main>
+    );
+  }
+
+  if (state === 'change-password' || (state === 'loading' && currentCredential)) {
+    return (
+      <main id="main-content" className="auth-page">
+        <a className="workspace-skip-link" href="#main-content">Skip to main content</a>
+        <section className="auth-card" aria-labelledby="change-password-heading">
+          <h1 id="change-password-heading" tabIndex={-1}>Change your password</h1>
+          <p>Your account uses a temporary credential. Set a new password before continuing.</p>
+          {error && <div role="alert" aria-live="assertive">{error}</div>}
+          <form onSubmit={(event) => { void handlePasswordChange(event); }} aria-busy={state === 'loading'}>
+            <label htmlFor="current-credential">Current temporary credential</label>
+            <input id="current-credential" type="password" autoComplete="current-password" required
+              value={currentCredential} onChange={(event) => setCurrentCredential(event.target.value)} />
+            <label htmlFor="new-password">New password</label>
+            <input id="new-password" type="password" autoComplete="new-password" required
+              minLength={12} maxLength={1024} value={newPassword}
+              onChange={(event) => setNewPassword(event.target.value)} />
+            <p id="password-requirement">Use 12 to 1024 characters. Spaces and passphrases are allowed.</p>
+            <label htmlFor="confirm-password">Confirm new password</label>
+            <input id="confirm-password" type="password" autoComplete="new-password" required
+              minLength={12} maxLength={1024} value={confirmPassword}
+              onChange={(event) => setConfirmPassword(event.target.value)} />
+            <button type="submit" disabled={state === 'loading'} aria-busy={state === 'loading'}>
+              {state === 'loading' ? 'Updating password…' : 'Update password'}
+            </button>
+          </form>
+        </section>
       </main>
     );
   }
 
   return (
-    <main id="main-content" style={styles.page}>
-      <div style={styles.card}>
-        <h1 style={styles.heading}>Sign in to Symphony</h1>
-
-        {state === 'error' && error && (
-          <div
-            role="alert"
-            aria-live="assertive"
-            style={styles.errorBox}
-            data-testid="login-error"
-          >
-            {error.message}
-          </div>
-        )}
-
-        <form onSubmit={(e) => { void handleSubmit(e); }} noValidate>
-          <div style={styles.field}>
-            <label htmlFor="email" style={styles.label}>
-              Email or user ID
-            </label>
-            <input
-              id="email"
-              type="text"
-              autoComplete="username"
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              style={styles.input}
-              aria-required="true"
-              disabled={state === 'loading'}
-            />
-          </div>
-
-          <div style={styles.field}>
-            <label htmlFor="password" style={styles.label}>
-              Password
-            </label>
-            <input
-              id="password"
-              type="password"
-              autoComplete="current-password"
-              required
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              style={styles.input}
-              aria-required="true"
-              disabled={state === 'loading'}
-            />
-          </div>
-
-          <button
-            type="submit"
-            style={styles.submitBtn}
-            disabled={state === 'loading'}
-            aria-busy={state === 'loading'}
-          >
+    <main id="main-content" className="auth-page">
+      <a className="workspace-skip-link" href="#main-content">Skip to main content</a>
+      <section className="auth-card" aria-labelledby="login-heading">
+        <h1 id="login-heading" tabIndex={-1}>Sign in to Symphony</h1>
+        {error && <div role="alert" aria-live="assertive" data-testid="login-error">{error}</div>}
+        <form onSubmit={(event) => { void handleLogin(event); }} aria-busy={state === 'loading'}>
+          <label htmlFor="email">Email or user ID</label>
+          <input id="email" type="text" autoComplete="username" required value={userId}
+            onChange={(event) => setUserId(event.target.value)} disabled={state === 'loading'} />
+          <label htmlFor="password">Password</label>
+          <input id="password" type="password" autoComplete="current-password" required value={credential}
+            onChange={(event) => setCredential(event.target.value)} disabled={state === 'loading'} />
+          <button type="submit" disabled={state === 'loading'} aria-busy={state === 'loading'}>
             {state === 'loading' ? 'Signing in…' : 'Sign in'}
           </button>
         </form>
-      </div>
+      </section>
     </main>
   );
 }
-
-const styles = {
-  page: {
-    minHeight: '100vh',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    background: '#f8f9fa',
-    fontFamily: "'Inter', 'Segoe UI', system-ui, sans-serif",
-  },
-  card: {
-    background: '#ffffff',
-    borderRadius: '0.5rem',
-    padding: '2rem',
-    width: '100%',
-    maxWidth: '400px',
-    boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
-  },
-  heading: {
-    margin: '0 0 1.5rem',
-    fontSize: '1.5rem',
-    fontWeight: 700,
-    color: '#212529',
-  },
-  errorBox: {
-    background: '#fff5f5',
-    border: '1px solid #feb2b2',
-    color: '#c53030',
-    borderRadius: '0.25rem',
-    padding: '0.75rem 1rem',
-    marginBottom: '1rem',
-    fontSize: '0.875rem',
-  },
-  field: {
-    marginBottom: '1rem',
-  },
-  label: {
-    display: 'block',
-    marginBottom: '0.375rem',
-    fontSize: '0.875rem',
-    fontWeight: 500,
-    color: '#495057',
-  },
-  input: {
-    display: 'block',
-    width: '100%',
-    padding: '0.5rem 0.75rem',
-    border: '1px solid #ced4da',
-    borderRadius: '0.25rem',
-    fontSize: '1rem',
-    color: '#212529',
-    background: '#ffffff',
-    boxSizing: 'border-box' as const,
-  },
-  submitBtn: {
-    display: 'block',
-    width: '100%',
-    padding: '0.625rem 1rem',
-    background: '#2c3e6b',
-    color: '#ffffff',
-    border: 'none',
-    borderRadius: '0.25rem',
-    fontSize: '1rem',
-    fontWeight: 600,
-    cursor: 'pointer',
-    marginTop: '1.5rem',
-  },
-  info: {
-    color: '#495057',
-    fontSize: '0.875rem',
-    lineHeight: 1.6,
-    marginBottom: '1rem',
-  },
-  link: {
-    color: '#2c3e6b',
-    fontWeight: 600,
-  },
-};
-

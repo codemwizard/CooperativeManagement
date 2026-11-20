@@ -31,7 +31,7 @@ The checked-in index lists the normative source set and evidence set. Every revi
 - Candidate-specific SHA-256 manifest for every indexed file.
 - Complete CI/test output, including failed and skipped checks, or the exact artifact location and immutable run identifier.
 - Phase 0 carry-forward evidence and the current Phase 1 task/dependency/BDD maps.
-- The actual prior WP0 independent review report at `docs/Independent-Review-Report-Phase-1_Remediation-Plan_v2.md`, its exact candidate SHA, owner disposition, and referenced primary evidence.
+- The actual prior REM-WP0 independent review report at `docs/Independent-Review-Report-Phase-1_Remediation-Plan_v2.md`, its exact candidate SHA, owner disposition, and referenced primary evidence.
 - The raw stdout for the historical `node tools/phase1-contracts.js` run. The current index marks it as not retained; `tasks.json` records only the command/result summary. Do not describe a new run on a different commit as the original output.
 - The new independent review report and any follow-up disposition.
 

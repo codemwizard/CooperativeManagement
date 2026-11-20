@@ -1,0 +1,22 @@
+
+> symphony-prototype@1.0.0 test:workspace
+> npm run test:unit --workspace @symphony/workspace
+
+
+> @symphony/workspace@0.1.0 test:unit
+> vitest run --reporter=verbose
+
+
+ RUN  v2.1.9 C:/Workspace/GitHub/Prototype/apps/workspace
+
+ ✓ src/__tests__/presenter.test.ts > presenterTest_noSnakeCaseInOutput > evidence presenter output contains no snake_case (underscore) text
+ ✓ src/__tests__/presenter.test.ts > presenterTest_noSnakeCaseInOutput > requirement presenter output contains no snake_case (underscore) text
+ ✓ src/__tests__/presenter.test.ts > presenterTest_noBannedWords > no output contains the word "compliant"
+ ✓ src/__tests__/presenter.test.ts > presenterTest_noBannedWords > no output contains "certified" without an authority qualifier
+ ✓ src/__tests__/presenter.test.ts > presenterTest_noBannedWords > no output contains a bare "Verified" (title-case, without scope/verifier)
+
+ Test Files  1 passed (1)
+      Tests  5 passed (5)
+   Start at  15:46:47
+   Duration  24.05s (transform 166ms, setup 0ms, collect 175ms, tests 13ms, environment 18.84s, prepare 1.01s)
+

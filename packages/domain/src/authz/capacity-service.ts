@@ -14,7 +14,7 @@
  */
 
 import { decide } from './policy-engine.js';
-import type { ActorContext, PolicyTarget } from './policy-engine.js';
+import type { ActorContext, CapacityType, PolicyTarget } from './policy-engine.js';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -28,6 +28,7 @@ export interface CapacityGrantedPayload {
   readonly granteeUserId: string;
   readonly capacityType: string;
   readonly tenantId: string;
+  readonly organizationId: string;
   readonly activeFrom: string;
   readonly activeTo: string;
   readonly occurredAt: string;
@@ -38,19 +39,21 @@ export interface CapacityRevokedPayload {
   readonly revokedUserId: string;
   readonly capacityType: string;
   readonly tenantId: string;
+  readonly organizationId: string;
   readonly occurredAt: string;
 }
 
 export interface CapacityCommand {
   readonly type: 'GrantCapacity' | 'RevokeCapacity';
   readonly actorUserId: string;
-  readonly actorAppointments: ReadonlyArray<{ position: string; tenantId: string; activeFrom: string; activeTo: string }>;
-  readonly actorCapacities: ReadonlyArray<{ type: string; tenantId: string; activeFrom: string; activeTo: string }>;
+  readonly actorAppointments: ReadonlyArray<{ position: string; tenantId: string; organizationId: string; activeFrom: string; activeTo: string }>;
+  readonly actorCapacities: ReadonlyArray<{ type: CapacityType; tenantId: string; organizationId: string; activeFrom: string; activeTo: string }>;
   readonly actorPlatformRoles: readonly string[];
-  readonly actorDelegations: ReadonlyArray<{ type: string; tenantId: string; position: string; activeFrom: string; activeTo: string }>;
+  readonly actorDelegations: ReadonlyArray<{ type: 'acting_officer'; tenantId: string; organizationId: string; position: string; activeFrom: string; activeTo: string }>;
   readonly tenantId: string;
+  readonly organizationId: string;
   readonly targetUserId: string;
-  readonly capacityType: string;
+  readonly capacityType: CapacityType;
   readonly activeFrom: string;
   readonly activeTo: string;
   readonly now: string;
@@ -59,9 +62,6 @@ export interface CapacityCommand {
 export interface CapacitySuccess {
   readonly ok: true;
   readonly events: readonly CapacityEvent[];
-  /** True when revoking — existing findings need annotation. */
-  readonly annotateFindings: boolean;
-  readonly annotationText: string;
 }
 
 export interface CapacityFailure {
@@ -102,19 +102,19 @@ export class CapacityService {
 
     const target: PolicyTarget = {
       id: `capacity-${cmd.targetUserId}`,
-      type: 'CapacityGrant',
+      type: 'organization_capacity',
       tenantId: cmd.tenantId,
+      organizationId: cmd.organizationId,
     };
 
-    const policyAction =
-      cmd.type === 'GrantCapacity'
-        ? `GrantCapacity:${cmd.capacityType}`
-        : `RevokeCapacity:${cmd.capacityType}`;
+    const policyAction = cmd.type === 'GrantCapacity'
+      ? { type: 'capacity.grant' as const, capacityType: cmd.capacityType, granteeUserId: cmd.targetUserId, activeFrom: cmd.activeFrom, activeTo: cmd.activeTo }
+      : { type: 'capacity.revoke' as const, capacityType: cmd.capacityType, granteeUserId: cmd.targetUserId };
 
     const decision = decide(policyAction, target, actor, { now: cmd.now });
 
     if (decision === 'deny') {
-      return { ok: false, code: 'NOT_PERMITTED', detail: `Policy denied ${policyAction} for actor ${cmd.actorUserId}` };
+      return { ok: false, code: 'NOT_PERMITTED', detail: `Policy denied ${policyAction.type}` };
     }
 
     if (cmd.type === 'GrantCapacity') {
@@ -125,12 +125,13 @@ export class CapacityService {
           granteeUserId: cmd.targetUserId,
           capacityType: cmd.capacityType,
           tenantId: cmd.tenantId,
+          organizationId: cmd.organizationId,
           activeFrom: cmd.activeFrom,
           activeTo: cmd.activeTo,
           occurredAt: cmd.now,
         } satisfies CapacityGrantedPayload,
       };
-      return { ok: true, events: [event], annotateFindings: false, annotationText: '' };
+      return { ok: true, events: [event] };
     }
 
     // RevokeCapacity
@@ -141,17 +142,12 @@ export class CapacityService {
         revokedUserId: cmd.targetUserId,
         capacityType: cmd.capacityType,
         tenantId: cmd.tenantId,
+        organizationId: cmd.organizationId,
         occurredAt: cmd.now,
       } satisfies CapacityRevokedPayload,
     };
 
-    return {
-      ok: true,
-      events: [event],
-      // IFV-7: Revocation requires annotation of existing findings
-      annotateFindings: true,
-      annotationText: 'verifier no longer active',
-    };
+    return { ok: true, events: [event] };
   }
 }
 

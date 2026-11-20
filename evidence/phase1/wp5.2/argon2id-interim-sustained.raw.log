@@ -1,0 +1,77 @@
+npm notice run symphony-prototype@1.0.0 npx
+npm notice run tsx tools/benchmark_argon2_wp5_2.ts
+{
+  "parameters": {
+    "algorithm": "Argon2id",
+    "memoryCost": 19456,
+    "timeCost": 2,
+    "parallelism": 1
+  },
+  "environment": {
+    "node": "v26.7.0",
+    "platform": "win32-x64",
+    "osRelease": "10.0.19045",
+    "cpuModel": "Intel(R) Core(TM) i5-7300U CPU @ 2.60GHz",
+    "logicalCpuCount": 4,
+    "availableParallelism": 4,
+    "totalMemoryBytes": 8441487360
+  },
+  "sampleCount": 5,
+  "serialVerificationMs": [
+    87.97180000000003,
+    75.18239999999992,
+    78.82409999999982,
+    67.77440000000001,
+    96.95569999999998
+  ],
+  "serialMedianMs": 78.82409999999982,
+  "serialMaxMs": 96.95569999999998,
+  "concurrent": {
+    "2": {
+      "wallMs": 87.63229999999999,
+      "perVerificationMs": [
+        87.3168999999998,
+        87.44589999999994
+      ]
+    },
+    "4": {
+      "wallMs": 134.32979999999998,
+      "perVerificationMs": [
+        85.79610000000002,
+        99.61160000000018,
+        105.16480000000001,
+        105.31410000000005
+      ]
+    },
+    "8": {
+      "wallMs": 189.9147999999998,
+      "perVerificationMs": [
+        105.22400000000016,
+        110.57150000000001,
+        115.54539999999997,
+        115.69260000000008,
+        122.5143999999998,
+        122.77969999999982,
+        147.90010000000007,
+        147.9154000000001
+      ]
+    }
+  },
+  "sustained": {
+    "concurrency": 8,
+    "requestedDurationMs": 60000,
+    "wallMs": 60089.584,
+    "verificationCount": 3322,
+    "throughputPerSecond": 55.28412378424853,
+    "latencyMs": {
+      "p50": 137.22769999999582,
+      "p95": 203.38139999999976,
+      "p99": 267.86609999999973,
+      "max": 419.0598000000027
+    },
+    "verificationUnderOneSecond": true,
+    "rssBytesBefore": 137138176,
+    "rssBytesAfter": 84721664
+  },
+  "qualification": "Owner-approved interim profile only: eight concurrent verification workers sustained for 60 seconds; report p50/p95/p99 and keep every verification below one second. This does not claim production expected-load qualification."
+}

@@ -24,7 +24,7 @@ export const NAV_AREAS = [
   { label: 'Findings and next actions', path: '/workspace/findings' },
 ] as const;
 
-export function LeftNav(): React.ReactElement {
+export function LeftNav({ basePath = '/workspace' }: { basePath?: string }): React.ReactElement {
   return (
     <nav
       aria-label="Primary navigation"
@@ -34,7 +34,8 @@ export function LeftNav(): React.ReactElement {
         {NAV_AREAS.map((area) => (
           <li key={area.path} style={styles.item}>
             <NavLink
-              to={area.path}
+              to={`${basePath}/${area.path.split('/').at(-1)}`}
+              end
               style={({ isActive }) => ({
                 ...styles.link,
                 ...(isActive ? styles.linkActive : {}),

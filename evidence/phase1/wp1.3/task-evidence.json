@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "task_id": "WP1.3",
+  "task_id": "REM-WP1.3",
   "status": {
     "implementation": "complete",
     "unit_test": "passed",
@@ -24,7 +24,7 @@
       "artifact": "evidence/phase1/wp1.3/red-concurrency-tests.log"
     },
     {
-      "command": "node ../../node_modules/vitest/vitest.mjs run --reporter=verbose (packages/db; full 12-file regression suite includes WP1.3 concurrency)",
+      "command": "node ../../node_modules/vitest/vitest.mjs run --reporter=verbose (packages/db; full 12-file regression suite includes REM-WP1.3 concurrency)",
       "result": "passed",
       "artifact": "evidence/phase1/wp1.5/local/2026-11-15/final-db-suite-bootstrapped.raw.log"
     },
@@ -56,34 +56,34 @@
   ],
   "claims": {
     "behavior_proved": "PostgreSQL tests prove identical concurrent command replay has one committed effect; a rolled-back owner permits one contender; concurrent reuse of a receipt key with changed actor, command type, or semantic envelope is denied without disclosing the stored result or committing losing aggregate effects; competing expected-version writes do not overwrite newer state; retries apply only to SQLSTATE 40001 and 40P01 for at most three total transaction attempts, including an uncertain-commit re-entry, with the same command identity; commit-boundary uncertainty resolves from a separately pooled fresh connection, re-enters only after a healthy lookup confirms no receipt, and returns an outcome-neutral retryable result when lookup fails.",
-    "path_proved": "The tested source is pinned to commit fb3d4f2cf6b1023cca5e90f2768783c892c96d13. The retained full PostgreSQL suite passed all 62 tests across 12 files, including WP1.3 concurrency and WP1.2 transaction/audit regressions; WP1.3 domain unit tests passed all 92 tests across 13 files. Workspace typecheck, architecture, Phase 1 contract tests (110), and the structural task/dependency validator passed. Raw outputs are linked in the command list.",
+    "path_proved": "The tested source is pinned to commit fb3d4f2cf6b1023cca5e90f2768783c892c96d13. The retained full PostgreSQL suite passed all 62 tests across 12 files, including REM-WP1.3 concurrency and REM-WP1.2 transaction/audit regressions; REM-WP1.3 domain unit tests passed all 92 tests across 13 files. Workspace typecheck, architecture, Phase 1 contract tests (110), and the structural task/dependency validator passed. Raw outputs are linked in the command list.",
     "configuration_proved": "Node v26.7.0 and PostgreSQL server_version_num=180000 were used. The full DB suite used the isolated symphony_phase1_test database with separate postgres test administrator, symphony_migrator and symphony_app identities. The app identity assertions remained restricted; temporary migrator membership and password changes were restored. Current npm 12.2.0 is the installed project toolchain, but the final DB/domain reruns invoked Vitest directly through Node; no npm-driven full gate or hosted CI pass is claimed here. No credential or connection string is retained.",
     "coverage_limitations": [
       "Commit loss is exercised with narrow pre-commit and post-commit fault hooks at the transaction boundary; the test does not sever a live network socket during PostgreSQL COMMIT exchange.",
-      "The WP1.3 tests use the isolated owner/migrator context required by their database fixtures. No WP1.5 tenant-RLS claim is derived from WP1.3 tests; that claim is covered by the separate WP1.5 actual-app-role integration suite.",
-      "BDD-AUD-002/003 HTTP composition and public response assertions belong to WP1.6. Terminal VERSION_CONFLICT receipt/inbox atomicity belongs to WP1.4; tenant RLS belongs to WP1.5; mutable-authority revocation races belong to WP2.4.",
+      "The REM-WP1.3 tests use the isolated owner/migrator context required by their database fixtures. No REM-WP1.5 tenant-RLS claim is derived from REM-WP1.3 tests; that claim is covered by the separate REM-WP1.5 actual-app-role integration suite.",
+      "BDD-AUD-002/003 HTTP composition and public response assertions belong to REM-WP1.6. Terminal VERSION_CONFLICT receipt/inbox atomicity belongs to REM-WP1.4; tenant RLS belongs to REM-WP1.5; mutable-authority revocation races belong to REM-WP2.4.",
       "The tests-first log records the intended pre-implementation retry and uncertain-commit failures; that initial run also exposed a test-fixture double-close cleanup issue, corrected before the passing run."
     ]
   },
   "limitations": [
-    "This WP1.3 evidence is pinned to tested source commit fb3d4f2cf6b1023cca5e90f2768783c892c96d13. The post-test evidence/documentation commit does not change the tested WP1.3 implementation. No hosted CI result is claimed for the WP1.5 final-closeout candidate.",
+    "This REM-WP1.3 evidence is pinned to tested source commit fb3d4f2cf6b1023cca5e90f2768783c892c96d13. The post-test evidence/documentation commit does not change the tested REM-WP1.3 implementation. No hosted CI result is claimed for the REM-WP1.5 final-closeout candidate.",
     "No independent review is claimed."
   ],
   "unresolved_decisions": [],
   "reviewer": "Codex implementation and closeout review; independent review is not claimed",
   "deferred_followups": [
     {
-      "task_id": "WP1.6",
+      "task_id": "REM-WP1.6",
       "scope": "Prove BDD-AUD-002/003 through the composed HTTP API, including public status, body and replay metadata.",
       "acceptance_evidence": "Actual API integration and mapped BDD scenarios pass with observable database state and no skipped or undefined steps."
     },
     {
-      "task_id": "WP1.4",
+      "task_id": "REM-WP1.4",
       "scope": "Persist accepted terminal VERSION_CONFLICT receipts and reconciliation inbox rows atomically.",
       "acceptance_evidence": "PostgreSQL tests prove receipt/inbox atomicity and absence of success state/event/outbox effects."
     },
     {
-      "task_id": "WP1.5",
+      "task_id": "REM-WP1.5",
       "scope": "Apply and prove the least-privilege application-role grants and tenant RLS boundary.",
       "acceptance_evidence": "Actual app-role PostgreSQL tests prove tenant isolation and pooled-context reset across classified tables."
     }

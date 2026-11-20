@@ -1,0 +1,145 @@
+{
+  "schema_version": 1,
+  "task_id": "REM-WP5.2",
+  "status": {
+    "implementation": "complete",
+    "unit_test": "passed",
+    "integration_test": "passed",
+    "bdd_ui_test": "not_applicable",
+    "gate_verified": "passed"
+  },
+  "commit": "7003723da67057bac110b5e364fdadddee6c6785",
+  "environment": {
+    "node": "v26.7.0",
+    "npm": "v12.2.0 (elevated CLI)",
+    "postgres": "18.0 (package build 18.0-2)",
+    "database_role": "migration integration gate; app-role credential/RLS assertions included",
+    "data_mode": "test",
+    "key_provider": "local-test"
+  },
+  "commands": [
+    {
+      "command": "npm run test:unit --workspace @symphony/domain -- src/identity/__tests__/credential-lifecycle.test.ts",
+      "result": "passed",
+      "artifact": "evidence/phase1/wp5.2/credential-lifecycle-unit.log"
+    },
+    {
+      "command": "npm run test:db:migrations",
+      "result": "passed",
+      "artifact": "evidence/phase1/wp5.2/credential-migration-integration.log"
+    },
+    {
+      "command": "npm run test:api",
+      "result": "passed",
+      "artifact": "evidence/phase1/wp5.2/api-log-redaction-tests.log"
+    },
+    {
+      "command": "node tools/verify_wp5_2_password_blocklist.mjs",
+      "result": "passed",
+      "artifact": "evidence/phase1/wp5.2/blocklist/verification.log"
+    },
+    {
+      "command": "npm exec -- tsx tools/benchmark_argon2_wp5_2.ts",
+      "result": "passed",
+      "artifact": "evidence/phase1/wp5.2/argon2id-benchmark.log"
+    },
+    {
+      "command": "npm exec -- tsx tools/benchmark_argon2_wp5_2.ts -- --sustained 60000 --concurrency 8",
+      "result": "passed",
+      "artifact": "evidence/phase1/wp5.2/argon2id-interim-sustained.raw.log"
+    },
+    {
+      "command": "npm run typecheck:v4",
+      "result": "passed",
+      "artifact": "evidence/phase1/wp5.2/typecheck-v4.log"
+    },
+    {
+      "command": "npm run verify:arch",
+      "result": "passed",
+      "artifact": "evidence/phase1/wp5.2/architecture-check.log"
+    },
+    {
+      "command": "npm run verify:toolchain",
+      "result": "passed",
+      "artifact": "evidence/phase1/wp5.2/toolchain-verify.log"
+    },
+    {
+      "command": "npm run verify:phase1:contracts",
+      "result": "passed",
+      "artifact": "evidence/phase1/wp5.2/phase1-contracts.log"
+    },
+    {
+      "command": "npm run test:api (WP5.1 predecessor suite)",
+      "result": "passed",
+      "artifact": "evidence/phase1/wp5.2/wp5.1-api-suite.log"
+    },
+    {
+      "command": "node tools/verify_wp5_2_closure.mjs 7003723da67057bac110b5e364fdadddee6c6785",
+      "result": "passed",
+      "artifact": "evidence/phase1/wp5.2/closure-verifier.log"
+    }
+  ],
+  "claims": {
+    "behavior_proved": "Separate tenant-bound temporary credentials (72-hour fixed expiry) and permanent password records are persisted through PostgreSQL. Unique plaintext canaries prove temporary and permanent secret values do not appear in repository results, direct database rows, or captured application logs. Persisted hashes are Argon2id m=19456 KiB/t=2/p=1; correct secrets verify and incorrect secrets fail. Temporary credential consumption and permanent credential establishment are atomic and one-use. Password policy uses the approved 12 Unicode code-point minimum, preserves the full supplied string, and rejects common/compromised entries from the bundled local corpus.",
+    "path_proved": "Focused credential lifecycle unit tests passed (5 tests); PostgreSQL migration integration suite passed (16 tests) using actual PostgresCredentialRepository persistence; API suite passed (21 tests) including captured Fastify application-log canaries. Blocklist integrity validation, typecheck, architecture, toolchain and Phase 1 contract checks passed. See retained command outputs.",
+    "configuration_proved": "Node v26.7.0, npm v12.2.0, PostgreSQL 18.0 / package build 18.0-2. Isolated test database and migration integration identities used; no credentials recorded. Production expected concurrency and hardware remain unspecified.",
+    "password_blocklist": {
+      "version": "phase1-ncsc-top100k-v1",
+      "source": "danielmiessler/SecLists commit 6b19c2f5088c45b5dadb4d8918d2ab4f7efb03a9, Passwords/Common-Credentials/100k-most-used-passwords-NCSC.txt",
+      "source_nonempty_entries": 99839,
+      "normalized_unique_entries": 97746,
+      "source_sha256": "C2E5696882C603B76BB67A47EE970897E5A76FC4C3F5547ABE3D0CA340C576E0",
+      "runtime_data_sha256": "F35ABFB8FAB6A152DFB26271C5A200BE2940C57EA5E0A7AA0395F527DB7D2734",
+      "provenance_and_rebuild": "evidence/phase1/wp5.2/blocklist/README.md; tools/prepare_wp5_2_password_blocklist.mjs; tools/verify_wp5_2_password_blocklist.mjs",
+      "runtime_lookup": "none"
+    },
+    "argon2id_qualification": {
+      "profile": "Owner-approved interim: 8 concurrent local workers sustained 60 seconds; p50/p95/p99 each below 1 second.",
+      "approval": "evidence/phase1/wp5.2/argon2-interim-owner-approval.md",
+      "result": {
+        "verifications": 3322,
+        "per_second": 55.28,
+        "p50_ms": 137.23,
+        "p95_ms": 203.38,
+        "p99_ms": 267.87,
+        "max_ms": 419.06
+      },
+      "qualification_limit": "Interim local profile only; production expected-load qualification not claimed because production hardware and expected concurrency are unspecified."
+    },
+    "predecessors": {
+      "REM-WP5.1": {
+        "result": "Independently inspected and verified; evidence pinned to this candidate.",
+        "artifact": "evidence/phase1/wp5.1/task-evidence.json"
+      },
+      "REM-WP1.2": {
+        "result": "Independently confirmed passing on ancestor commit 29317ff15dbb8010aa8768bb9ae451b54476875d.",
+        "artifact": "evidence/phase1/wp1.2/task-evidence.json"
+      }
+    },
+    "coverage_limitations": [
+      "This closes credential lifecycle and security remediation only; it does not claim integrated production authentication readiness.",
+      "Persisted sessions, CSRF/Origin enforcement, forced-change routing, PostgreSQL-backed account/source throttling and session rotation/logout are REM-WP5.3 scope and remain unimplemented.",
+      "Production expected-load Argon2 qualification remains outstanding.",
+      "No workspace login/password-change Playwright journey or integrated Phase 1 authentication BDD path is claimed."
+    ]
+  },
+  "limitations": [
+    "Argon2id result is owner-approved interim local qualification, not production expected-load evidence; production hardware and authentication concurrency are unspecified.",
+    "Independent security review remains outstanding.",
+    "WP5.3 session/security composition and WP5.4 browser login remain unimplemented and are not claimed by WP5.2."
+  ],
+  "unresolved_decisions": [],
+  "reviewer": "Implementation self-review; acceptance evidence executed locally against the pinned implementation candidate.",
+  "deferred_followups": [
+    {
+      "task_id": "REM-WP5.3",
+      "scope": "Persisted sessions, forced password change composition, account/source PostgreSQL throttling and accepted session controls.",
+      "acceptance_evidence": "Independent-instance PostgreSQL concurrency tests, actual API session/forced-change tests, and evidence against the approved D-14 contract."
+    },
+    {
+      "task_id": "REM-WP5.4",
+      "scope": "Accessible real workspace login and forced password change journey.",
+      "acceptance_evidence": "Playwright against the real API, workspace and PostgreSQL path with persisted test credentials and cookie/session assertions."
+    }
+  ]
+}

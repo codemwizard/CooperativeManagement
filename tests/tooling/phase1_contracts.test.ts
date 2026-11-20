@@ -42,7 +42,7 @@ import {
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const readJson = (relativePath: string): any => JSON.parse(readFileSync(path.join(root, relativePath), 'utf8'));
 
-describe('WP0.1 executable command contract vectors', () => {
+describe('REM-WP0.1 executable command contract vectors', () => {
   const vectors = readJson('evidence/phase1/command-contract-vectors.json');
 
   it('canonicalizes the approved semantic envelope and matches the fixed HMAC-SHA-256 vector', () => {
@@ -167,7 +167,7 @@ describe('WP0.1 executable command contract vectors', () => {
   });
 });
 
-describe('WP0.2 executable reconciliation contract vectors', () => {
+describe('REM-WP0.2 executable reconciliation contract vectors', () => {
   const vectors = readJson('evidence/phase1/reconciliation-contract-vectors.json');
 
   for (const testCase of vectors.access_cases) it(`enforces ${testCase.id} with current tenant membership and permission`, () => {
@@ -202,7 +202,7 @@ describe('WP0.2 executable reconciliation contract vectors', () => {
   });
 });
 
-describe('WP0.5 purge preflight decision vectors', () => {
+describe('REM-WP0.5 purge preflight decision vectors', () => {
   const baseline = {
     runtimeProfile: 'test', dataMode: 'test', syntheticOnly: true,
     database: 'symphony_phase1_test', expectedDatabase: 'symphony_phase1_test',
@@ -245,7 +245,7 @@ describe('WP0.5 purge preflight decision vectors', () => {
   });
 });
 
-describe('WP0.6 server-side demo authorization vectors', () => {
+describe('REM-WP0.6 server-side demo authorization vectors', () => {
   const baseline = {
     runtimeProfile: 'demo', dataMode: 'test', syntheticOnly: true,
     actorId: 'demo-actor', configuredActorId: 'demo-actor',
@@ -272,7 +272,7 @@ describe('WP0.6 server-side demo authorization vectors', () => {
   });
 });
 
-describe('WP0.10 session policy boundary vectors', () => {
+describe('REM-WP0.10 session policy boundary vectors', () => {
   const policy = { idleLimitMs: 30 * 60 * 1000, absoluteLimitMs: 12 * 60 * 60 * 1000 };
   const issuedAtMs = 1_000_000;
 
@@ -322,12 +322,19 @@ describe('WP0.10 session policy boundary vectors', () => {
     expect(matrix.unsafe_request_protection.origin_required).toBe(true);
     for (const route of matrix.forced_change_allowlist) expect(forcedChangeRouteAllowed(route.method, route.path)).toBe(true);
     for (const route of matrix.explicitly_denied_while_forced_change) expect(forcedChangeRouteAllowed(route.method, route.path)).toBe(false);
-    expect(matrix.rate_limit.numeric_parameters).toMatch(/not specified/);
-    expect(matrix.password_policy.rule).toMatch(/not specified/);
+    expect(matrix.rate_limit.dimensions).toEqual(['account', 'trusted_source']);
+    expect(matrix.rate_limit.window_seconds).toBe(900);
+    expect(matrix.rate_limit.threshold_failures_without_added_delay).toBe(5);
+    expect(matrix.rate_limit.delay_seconds_after_five_prior_failures).toEqual([1, 2, 4, 8, 16, 32]);
+    expect(matrix.rate_limit.maximum_delay_seconds).toBe(32);
+    expect(matrix.rate_limit.permanent_lockout).toBe(false);
+    expect(matrix.password_policy.minimum_unicode_code_points).toBe(12);
+    expect(matrix.password_policy.composition_rules).toBe('none');
+    expect(matrix.password_policy.hash).toMatchObject({ algorithm: 'Argon2id', memory_kib: 19456, iterations: 2, parallelism: 1, unique_random_salt_per_credential: true });
   });
 });
 
-describe('WP0.12 evidence contract', () => {
+describe('REM-WP0.12 evidence contract', () => {
   it('accepts the published example against the versioned JSON Schema', () => {
     const schema = readJson('evidence/phase1/task-evidence.schema.json');
     const example = readJson('evidence/phase1/examples/wp0-12.example.json');
@@ -353,7 +360,7 @@ describe('WP0.12 evidence contract', () => {
     const schema = readJson('evidence/phase1/task-evidence.schema.json');
     const record = structuredClone(readJson('evidence/phase1/examples/wp0-12.example.json')) as Record<string, any>;
     record.deferred_followups = [{
-      task_id: 'WP1.2',
+      task_id: 'REM-WP1.2',
       scope: 'Exercise receipt atomicity against the PostgreSQL transaction adapter.',
       acceptance_evidence: 'Focused PostgreSQL integration suite proves rollback and no partial receipt/event/outbox rows.',
     }];
@@ -368,7 +375,7 @@ describe('WP0.12 evidence contract', () => {
   });
 });
 
-describe('WP1.2 evidence sub-gates', () => {
+describe('REM-WP1.2 evidence sub-gates', () => {
   it('runs the security-attempt persistence proof through the restricted application role', () => {
     const source = readFileSync(path.join(root, 'packages/db/src/__tests__/security-attempt-audit.integration.test.ts'), 'utf8');
     expect(source).toContain("process.env['PHASE1_TEST_APP_DATABASE_URL']");
@@ -378,7 +385,7 @@ describe('WP1.2 evidence sub-gates', () => {
     expect(source).not.toContain("const databaseUrl = process.env['MIGRATION_TEST_DATABASE_URL']");
   });
 
-  it('accepts the completed WP1.2 gate with both sub-gates and pinned-toolchain evidence', () => {
+  it('accepts the completed REM-WP1.2 gate with both sub-gates and pinned-toolchain evidence', () => {
     const schema = readJson('evidence/phase1/task-evidence.schema.json');
     const envelope = readJson('evidence/phase1/wp1.2/task-evidence.json');
     expect(validateEvidence(envelope, schema)).toEqual([]);
@@ -391,7 +398,7 @@ describe('WP1.2 evidence sub-gates', () => {
 
   const passingWp1Record = () => {
     const record = structuredClone(readJson('evidence/phase1/examples/wp0-12.example.json')) as Record<string, any>;
-    record.task_id = 'WP1.2';
+    record.task_id = 'REM-WP1.2';
     record.status.gate_verified = 'passed';
     record.commit = '0123456789abcdef0123456789abcdef01234567';
     const commands = [
@@ -427,22 +434,37 @@ describe('WP1.2 evidence sub-gates', () => {
       },
     ];
     record.commands = commands;
-    record.sub_gates = ['WP1.2-A', 'WP1.2-B'].map((gate_id) => ({
+    record.sub_gates = ['REM-WP1.2-A', 'REM-WP1.2-B'].map((gate_id) => ({
       gate_id,
       status: 'passed',
-      commands: gate_id === 'WP1.2-A'
-        ? [commands[0], commands[1], commands[3]]
+      commands: gate_id === 'REM-WP1.2-A'
+        ? [commands[0], commands[1]]
         : [commands[2], commands[1], commands[3]],
     }));
     return record;
   };
 
-  it('requires both WP1.2-A and WP1.2-B before task gate can pass', () => {
+  it('requires both REM-WP1.2-A and REM-WP1.2-B with distinct evidence before task gate can pass', () => {
     const schema = readJson('evidence/phase1/task-evidence.schema.json');
-    expect(validateEvidence(passingWp1Record(), schema)).toEqual([]);
+    const complete = passingWp1Record();
+    const gateA = complete.sub_gates.find((gate: Record<string, any>) => gate.gate_id === 'REM-WP1.2-A');
+    const gateB = complete.sub_gates.find((gate: Record<string, any>) => gate.gate_id === 'REM-WP1.2-B');
+    const artifactsA = gateA.commands.map((command: Record<string, any>) => command.artifact);
+    const artifactsB = gateB.commands.map((command: Record<string, any>) => command.artifact);
+    expect(artifactsA).toEqual([
+      'evidence/phase1/wp1.2/domain-transaction-tests.log',
+      'evidence/phase1/wp1.2/command-transaction-tests.log',
+    ]);
+    expect(artifactsB).toEqual([
+      'evidence/phase1/wp1.2/security-audit-tests.log',
+      'evidence/phase1/wp1.2/command-transaction-tests.log',
+      'evidence/phase1/wp1.2/migration-tests.log',
+    ]);
+    expect(artifactsA).not.toEqual(artifactsB);
+    expect(validateEvidence(complete, schema)).toEqual([]);
 
     const incomplete = passingWp1Record();
-    incomplete.sub_gates = incomplete.sub_gates.filter((gate: Record<string, unknown>) => gate.gate_id !== 'WP1.2-B');
+    incomplete.sub_gates = incomplete.sub_gates.filter((gate: Record<string, unknown>) => gate.gate_id !== 'REM-WP1.2-B');
     expect(validateEvidence(incomplete, schema).join(' ')).toMatch(/sub_gates/);
   });
 
@@ -459,7 +481,7 @@ describe('WP1.2 evidence sub-gates', () => {
     }
   });
 
-  it('rejects an overall WP1.2 pass while either sub-gate or one of its commands is pending', () => {
+  it('rejects an overall REM-WP1.2 pass while either sub-gate or one of its commands is pending', () => {
     const schema = readJson('evidence/phase1/task-evidence.schema.json');
     const incomplete = passingWp1Record();
     incomplete.sub_gates[1].status = 'pending';
@@ -498,7 +520,7 @@ describe('WP1.2 evidence sub-gates', () => {
   });
 });
 
-describe('WP1.3 immutable evidence pin', () => {
+describe('REM-WP1.3 immutable evidence pin', () => {
   it('rejects working-tree and malformed commits for passed evidence and accepts a full source SHA', () => {
     const schema = readJson('evidence/phase1/task-evidence.schema.json');
     const record = structuredClone(readJson('evidence/phase1/wp1.3/task-evidence.json')) as Record<string, any>;
@@ -514,33 +536,33 @@ describe('WP1.3 immutable evidence pin', () => {
   });
 });
 
-describe('WP0.13 dependency gate', () => {
+describe('REM-WP0.13 dependency gate', () => {
   it('requires all WP0 tasks, known nodes, justified acyclic edges, and passing predecessors', () => {
     const graph = readJson('evidence/phase1/task-dependencies.yml');
     const records = Object.fromEntries((readJson('evidence/phase1/tasks.json') as Array<Record<string, any>>).map((record) => [record.task_id, record]));
     const readiness = readJson('evidence/phase1/wp0-closure-readiness.json');
-    expect(validateDependencyGraph(graph, records, 'WP0.13', readiness)).toEqual([]);
-    expect(validateDependencyGraph(graph, records, 'WP1.1')).toEqual([]);
-    expect(validateDependencyGraph(graph, records, 'WP0.13', { ...readiness, phase0_candidate_worktree_dirty: true })).toContain('WP0.13 Phase 0 candidate must be a clean exact commit');
-    const incomplete = { ...records, 'WP0.13': { ...records['WP0.13'], status: { ...records['WP0.13'].status, gate_verified: 'pending' } } };
-    expect(validateDependencyGraph(graph, incomplete, 'WP1.1')).toContain('WP0.13 has no passing completion record');
+    expect(validateDependencyGraph(graph, records, 'REM-WP0.13', readiness)).toEqual([]);
+    expect(validateDependencyGraph(graph, records, 'REM-WP1.1')).toEqual([]);
+    expect(validateDependencyGraph(graph, records, 'REM-WP0.13', { ...readiness, phase0_candidate_worktree_dirty: true })).toContain('REM-WP0.13 Phase 0 candidate must be a clean exact commit');
+    const incomplete = { ...records, 'REM-WP0.13': { ...records['REM-WP0.13'], status: { ...records['REM-WP0.13'].status, gate_verified: 'pending' } } };
+    expect(validateDependencyGraph(graph, incomplete, 'REM-WP1.1')).toContain('REM-WP0.13 has no passing completion record');
   });
 
   it('rejects a cycle, an unknown predecessor, and a predecessor without a reason', () => {
     const invalid = {
       version: 1,
       tasks: {
-        'WP0.1': { depends_on: ['WP0.2'], edge_reasons: { 'WP0.2': 'fixture reason' } },
-        'WP0.2': { depends_on: ['WP0.1'], edge_reasons: { 'WP0.1': 'fixture reason' } },
+        'REM-WP0.1': { depends_on: ['REM-WP0.2'], edge_reasons: { 'REM-WP0.2': 'fixture reason' } },
+        'REM-WP0.2': { depends_on: ['REM-WP0.1'], edge_reasons: { 'REM-WP0.1': 'fixture reason' } },
       },
     };
-    expect(validateDependencyGraph(invalid, {}, 'WP0.1').join(' ')).toMatch(/cycle/i);
-    expect(validateDependencyGraph({ version: 1, tasks: { 'WP0.1': { depends_on: ['WP9.9'], edge_reasons: {} } } }, {}, 'WP0.1').join(' ')).toMatch(/unknown/i);
+    expect(validateDependencyGraph(invalid, {}, 'REM-WP0.1').join(' ')).toMatch(/cycle/i);
+    expect(validateDependencyGraph({ version: 1, tasks: { 'REM-WP0.1': { depends_on: ['WP9.9'], edge_reasons: {} } } }, {}, 'REM-WP0.1').join(' ')).toMatch(/unknown/i);
   });
 
-  it('does not let WP0.13 pass without explicit owner, Phase 0, decision, and independent-review sign-off', () => {
+  it('does not let REM-WP0.13 pass without explicit owner, Phase 0, decision, and independent-review sign-off', () => {
     const graph = readJson('evidence/phase1/task-dependencies.yml');
-    expect(validateDependencyGraph(graph, {}, 'WP0.13', {}).join(' ')).toContain('project_owner_signed is not confirmed');
+    expect(validateDependencyGraph(graph, {}, 'REM-WP0.13', {}).join(' ')).toContain('project_owner_signed is not confirmed');
   });
 
   it('rejects a dirty Phase 0 candidate even when every reviewer and owner flag is true', () => {
@@ -550,7 +572,7 @@ describe('WP0.13 dependency gate', () => {
       phase0_candidate_commit: 'c25b616fa2e0f75b14327d87747880a227cbb8b2', all_contract_decisions_resolved: true,
       independent_reviewer_named: true, reviewer_independent: true, reviewer_available: true,
     };
-    expect(validateDependencyGraph(graph, {}, 'WP0.13', readiness).join(' ')).toContain('must be a clean exact commit');
+    expect(validateDependencyGraph(graph, {}, 'REM-WP0.13', readiness).join(' ')).toContain('must be a clean exact commit');
   });
 });
 
@@ -562,11 +584,11 @@ describe('WP0 phase-boundary evidence', () => {
   });
 
   it('rejects a missing or self-owned deferred product-path test', () => {
-    const graph = { tasks: { 'WP0.1': {}, 'WP1.2': {} } };
+    const graph = { tasks: { 'REM-WP0.1': {}, 'REM-WP1.2': {} } };
     const record = {
-      task_id: 'WP0.1',
+      task_id: 'REM-WP0.1',
       status: { integration_test: 'not_applicable', bdd_ui_test: 'not_applicable' },
-      deferred_followups: [{ task_id: 'WP0.1' }],
+      deferred_followups: [{ task_id: 'REM-WP0.1' }],
     };
     expect(validateDeferredFollowups([record], graph).join(' ')).toMatch(/cannot be owned by the same task/);
   });
@@ -596,7 +618,7 @@ describe('Phase 1 BDD discovery', () => {
 
   it('fails closed if a frozen scenario is omitted or its owner is not in the task graph', () => {
     const manifest = { scenarios: [{ id: 'BDD-AUD-001', feature: 'features/09_commands_audit_and_integrity.feature' }] };
-    const graph = { tasks: { 'WP1.2': {} } };
+    const graph = { tasks: { 'REM-WP1.2': {} } };
     const missing = { scenarios: [] };
     expect(validateBddOwnerMap(missing, manifest, graph).join(' ')).toContain('exactly one owner/path mapping');
     const invalid = { scenarios: [{ id: 'BDD-AUD-001', feature: manifest.scenarios[0].feature, requirements: ['REQ-AUD-001'], owner_tasks: ['WP9.9'], required_path: 'real API path with observable assertions', assertion_rule: 'observable assertions required' }] };
@@ -604,7 +626,7 @@ describe('Phase 1 BDD discovery', () => {
   });
 });
 
-describe('WP0.11 runtime/data mode contract', () => {
+describe('REM-WP0.11 runtime/data mode contract', () => {
   const matrix = readJson('evidence/phase1/runtime-mode-matrix.json');
 
   it('accepts each documented profile only when its critical composition guard is present', () => {
@@ -649,7 +671,7 @@ describe('WP0.11 runtime/data mode contract', () => {
   });
 });
 
-describe('WP0.3 migrated table inventory', () => {
+describe('REM-WP0.3 migrated table inventory', () => {
   it('classifies every actual migration table and reports current ENABLE plus FORCE RLS accurately', () => {
     const inventory = readJson('evidence/phase1/tenant-table-inventory.json');
     const migrationDirectory = path.join(root, 'migrations');
@@ -661,20 +683,23 @@ describe('WP0.3 migrated table inventory', () => {
     expect(inventory.tables.filter((table: { rls_current: boolean }) => table.rls_current).map((table: { table: string }) => table.table).sort()).toEqual(['command_receipts', 'domain_events', 'reconciliation_inbox']);
   });
 
-  it('defines a least-privilege RLS/grant policy for every migrated table and keeps baseline inventory distinct from WP1.5 deployment proof', () => {
+  it('defines a least-privilege RLS/grant policy for every migrated table and keeps baseline inventory distinct from REM-WP1.5 deployment proof', () => {
     const inventory = readJson('evidence/phase1/tenant-table-inventory.json');
     const matrix = readJson('evidence/phase1/tenant-table-policy-matrix.json');
     expect(validateTenantPolicyMatrix(matrix, inventory)).toEqual([]);
-    expect(matrix.tables).toHaveLength(54);
+    expect(matrix.tables).toHaveLength(inventory.tables.length);
     expect(matrix.roles.application).toContain('provisioned on local');
-    expect(matrix.policy_specification.tenant_scoped_table_count).toBe(37);
+    expect(matrix.policy_specification.tenant_scoped_table_count).toBe(
+      [...inventory.tables, ...inventory.planned_phase1_tables]
+        .filter((table: { classification: string }) => table.classification === 'tenant_scoped').length,
+    );
   });
 
   it('freezes executable policy expressions and named mismatch cases for all tenant tables', () => {
     const matrix = readJson('evidence/phase1/tenant-table-policy-matrix.json');
     const manifest = readJson('evidence/phase1/wp1.5-tenant-policy-manifest.json');
     expect(validateTenantPolicyManifest(manifest, matrix)).toEqual([]);
-    expect(manifest.status).toBe('candidate_verified_pending_independent_review');
+    expect(manifest.status).toBe('candidate_frozen_pending_restricted_role_integration_and_review');
   });
 
   it('freezes the event_outbox RLS writer capability separately from tenant-table policies', () => {
@@ -705,13 +730,13 @@ describe('WP0.3 migrated table inventory', () => {
   });
 });
 
-describe('WP0.4 authority dependency inventory', () => {
-  it('covers every agreed mutable authorization dependency, its change paths and both serial orders', () => {
+describe('REM-WP0.4 authority dependency inventory', () => {
+  it('covers each Phase 1 authority dependency with race proofs or enforceable runtime-freeze proofs', () => {
     const inventory = readJson('evidence/phase1/authority-dependency-inventory.json');
     const tables = readJson('evidence/phase1/tenant-table-inventory.json');
     expect(validateAuthorityDependencyInventory(inventory, tables)).toEqual([]);
     for (const dependency of inventory.dependencies) {
-      for (const testCase of dependency.required_race_cases) {
+      for (const testCase of dependency.required_race_cases ?? []) {
         if (!testCase.includes('first-then')) continue;
         const protectedFirst = testCase.startsWith('protected-command-first-');
         const result = authorityRaceOutcome({
@@ -722,9 +747,68 @@ describe('WP0.4 authority dependency inventory', () => {
       }
     }
   });
+
+  it('freezes the single D-16 serialization model and excludes Phase 2 identity conflicts', () => {
+    const inventory = readJson('evidence/phase1/authority-dependency-inventory.json');
+    expect(inventory.version).toBe(2);
+    expect(inventory.authority_contract).toBe('phase1-authorization-capacity-v3');
+    expect(inventory.serialization.table).toBe('symphony.authority_scope_versions');
+    expect(inventory.serialization.actor_tenant_aggregate).toMatch(/actor_tenant scope row/);
+    expect(inventory.serialization.lock_order).toEqual([
+      'command_aggregate', 'global_policy', 'organization', 'tenant', 'actor_tenant', 'actor',
+    ]);
+    expect(inventory.serialization.protected_command_lock_mode).toMatch(/FOR SHARE/);
+    expect(inventory.serialization.authority_mutation_lock_mode).toMatch(/FOR UPDATE/);
+    expect(inventory.serialization.canonical_scope_keys).toMatchObject({
+      global_policy: '(global_policy, NULL, fixed sentinel UUID 00000000-0000-0000-0000-000000000001)',
+      organization: '(organization, tenant_id UUID, organization scope_id UUID)',
+      tenant: '(tenant, tenant_id UUID, same tenant scope_id UUID)',
+      actor_tenant: '(actor_tenant, tenant_id UUID, actor_user_id scope_id UUID)',
+      actor: '(actor, NULL, actor_user_id scope_id UUID)',
+    });
+    expect(inventory.serialization.database_identity).toMatch(/UNIQUE NULLS NOT DISTINCT/);
+    expect(inventory.serialization.lock_order_rule).toMatch(/COALESCE\(tenant_id::text, empty string\) COLLATE C.*scope_id::text COLLATE C/);
+    expect(inventory.serialization.rls_and_privilege_contract).toMatch(/ENABLE.*FORCE ROW LEVEL SECURITY.*UPDATE \(version\)/);
+    expect(inventory.serialization.row_provisioning).toMatch(/INSERT only tenant, organization, and actor_tenant.*migration\/bootstrap owner seeds.*global_policy.*actor.*fails closed/);
+    const identity = inventory.dependencies.find((row: { id: string }) => row.id === 'identity-conflict-and-ineligibility-facts');
+    expect(identity.phase1_authorization_dependency).toBe(false);
+    expect(identity.phase_scope).toBe('original-phase-2-carry-forward');
+    expect(identity.scope_types).toEqual([]);
+    expect(identity.required_race_cases).toBeUndefined();
+    expect(identity.phase2_required_race_cases.length).toBeGreaterThan(0);
+  });
+
+  it('rejects a competing lock mode, Phase 2 scope leakage, or an unproved runtime freeze', () => {
+    const inventory = readJson('evidence/phase1/authority-dependency-inventory.json');
+    const tables = readJson('evidence/phase1/tenant-table-inventory.json');
+    const wrongOrder = structuredClone(inventory);
+    wrongOrder.serialization.lock_order = ['command_aggregate', 'organization', 'global_policy'];
+    expect(validateAuthorityDependencyInventory(wrongOrder, tables).join(' ')).toMatch(/lock_order/);
+
+    const wrongTuple = structuredClone(inventory);
+    wrongTuple.serialization.canonical_scope_keys.actor_tenant = '(actor_tenant, actor UUID only)';
+    expect(validateAuthorityDependencyInventory(wrongTuple, tables).join(' ')).toMatch(/canonical key for actor_tenant/);
+
+    const wrongPrivileges = structuredClone(inventory);
+    wrongPrivileges.serialization.rls_and_privilege_contract = 'RLS enabled only';
+    expect(validateAuthorityDependencyInventory(wrongPrivileges, tables).join(' ')).toMatch(/enabled and forced RLS/);
+
+    const unsafeProvisioning = structuredClone(inventory);
+    unsafeProvisioning.serialization.row_provisioning = 'Runtime inserts all scope rows.';
+    expect(validateAuthorityDependencyInventory(unsafeProvisioning, tables).join(' ')).toMatch(/separate tenant-owned runtime inserts/);
+
+    const phase2Leak = structuredClone(inventory);
+    phase2Leak.dependencies.find((row: { id: string }) => row.id === 'identity-conflict-and-ineligibility-facts').scope_types = ['tenant'];
+    expect(validateAuthorityDependencyInventory(phase2Leak, tables).join(' ')).toMatch(/Phase 2-only dependency must not declare Phase 1 scope rows/);
+
+    const unprovedFreeze = structuredClone(inventory);
+    const frozen = unprovedFreeze.dependencies.find((row: { id: string }) => row.id === 'tenant-membership');
+    delete frozen.required_freeze_proofs;
+    expect(validateAuthorityDependencyInventory(unprovedFreeze, tables).join(' ')).toMatch(/privilege and registry\/startup negative proofs/);
+  });
 });
 
-describe('WP0.7 privacy requirement-to-persistence trace', () => {
+describe('REM-WP0.7 privacy requirement-to-persistence trace', () => {
   it('maps every frozen privacy BDD ID to normative requirements, fields/gaps, actor audience and retention', () => {
     const mapping = readJson('evidence/phase1/privacy-field-requirement-map.json');
     const manifest = readJson('evidence/phase1/bdd-scenarios.json');
@@ -753,19 +837,20 @@ describe('WP0.7 privacy requirement-to-persistence trace', () => {
   });
 });
 
-describe('WP0.5 purge allowlist and preservation matrix', () => {
+describe('REM-WP0.5 purge allowlist and preservation matrix', () => {
   it('covers every migration table exactly once with explicit safe deletion or preservation semantics', () => {
     const matrix = readJson('evidence/phase1/purge-table-policy-matrix.json');
     const inventory = readJson('evidence/phase1/tenant-table-inventory.json');
     expect(validatePurgeTablePolicyMatrix(matrix, inventory)).toEqual([]);
     expect(matrix.target.marker_installed).toBe(false);
     expect(matrix.purge_role_contract.status).toContain('not provisioned');
-    expect(matrix.delete_tables).toHaveLength(47);
-    expect(matrix.preserve_tables).toHaveLength(6);
+    expect(matrix.delete_tables.length + matrix.preserve_tables.length + matrix.planned_preserve_tables.length).toBe(
+      inventory.tables.length + inventory.planned_phase1_tables.length,
+    );
   });
 });
 
-describe('WP0.9 Phase 1 gate contract', () => {
+describe('REM-WP0.9 Phase 1 gate contract', () => {
   it('names real mandatory checks and preserves child failures without optional-script semantics', () => {
     const pkg = readJson('package.json');
     const gate = validatePhase1Gate(pkg, root);
@@ -798,15 +883,21 @@ describe('WP0.9 Phase 1 gate contract', () => {
     }
   });
 
-  it('keeps the WP5.3 API-backed login test out of legacy E2E while retaining its dedicated Phase 1 gate', () => {
+  it('keeps the REM-WP5.3 API-backed login test out of legacy E2E while retaining its dedicated Phase 1 gate', () => {
     const pkg = readJson('package.json');
     const legacyConfig = readFileSync(path.join(root, 'playwright.config.ts'), 'utf8');
     const dedicatedConfig = readFileSync(path.join(root, 'playwright.phase1.config.ts'), 'utf8');
+    const wp6Config = readFileSync(path.join(root, 'playwright.wp6.1.config.ts'), 'utf8');
+    const loginApiRunner = readFileSync(path.join(root, 'tools/run_wp5_4_browser.mjs'), 'utf8');
     expect(pkg.scripts['test:e2e']).toContain('tools/run_e2e.mjs');
-    expect(pkg.scripts['test:login:api']).toContain('playwright.phase1.config.ts');
-    expect(pkg.scripts['test:login:api']).toContain('tests/workspace/login-api.spec.ts');
+    expect(pkg.scripts['test:login:api']).toContain('tools/run_wp5_4_browser.mjs');
+    expect(loginApiRunner).toContain('playwright.phase1.config.ts');
+    expect(loginApiRunner).toContain('tests/workspace/login-api.spec.ts');
     expect(pkg.scripts['verify:phase1']).toContain('npm run test:login:api');
     expect(legacyConfig).toMatch(/testIgnore\s*:\s*\[[^\]]*tests\/workspace\/login-api\.spec\.ts/s);
+    expect(legacyConfig).toMatch(/testIgnore\s*:\s*\[[^\]]*tests\/workspace\/routes\.spec\.ts/s);
     expect(dedicatedConfig).toContain("testMatch: /login-api\\.spec\\.ts/");
+    expect(pkg.scripts['verify:phase1']).toContain('npm run test:wp6.1');
+    expect(wp6Config).toContain('testMatch: /routes\\.spec\\.ts/');
   });
 });

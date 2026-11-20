@@ -1,0 +1,16 @@
+npm notice run symphony-prototype@1.0.0 build
+npm notice run tsc --noEmit && vite build
+vite v5.4.21 building for production...
+transforming...
+✓ 1640 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                   0.45 kB │ gzip:   0.31 kB
+dist/assets/index-CUbEzOSE.css   17.90 kB │ gzip:   4.40 kB
+dist/assets/index-DjKOmytQ.js   511.06 kB │ gzip: 127.35 kB
+
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+✓ built in 24.29s

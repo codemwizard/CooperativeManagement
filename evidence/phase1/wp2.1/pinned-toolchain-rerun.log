@@ -1,0 +1,20 @@
+Candidate: uncommitted working tree, 2026-11-18
+Runtime: Node v26.7.0; npm v12.2.0 (elevated CLI invocation)
+
+PASS npm run verify:wp2.1:matrix
+  Matrix valid: 4 actions x 22 actor classes; 14 required boundary dimensions.
+  Completeness checker tests: 3 passed, 0 failed.
+
+PASS npm run typecheck:v4
+  TypeScript build and workspace typechecks completed for domain, contracts, db, testkit, API, and workspace.
+
+PASS npm run verify:arch
+  No dependency violations (144 modules, 296 dependencies).
+
+PASS npm run verify:trace
+  205 scenarios scanned; 27 hard non-WIP scenarios covered; traceability gate passed.
+
+PASS npm run verify:toolchain
+  Node 26.7.0, npm 12.2.0, PostgreSQL 18.0 (package build 18.0-2).
+
+The ordinary shell resolves npm 11.19.0 because Windows denies access to the global roaming npm prefix. The elevated npm CLI was used for these checks and reports 12.2.0. No production database, API route, BDD product path, or independent review is claimed by this WP2.1 evidence.

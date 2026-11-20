@@ -1,0 +1,17 @@
+
+> symphony-prototype@1.0.0 test:login:api
+> node --env-file-if-exists=.env.local --env-file-if-exists=.env tools/run_wp5_4_browser.mjs
+
+
+  VITE v5.4.21  ready in 807 ms
+
+  ➜  Local:   http://127.0.0.1:53178/
+
+Running 2 tests using 1 worker
+
+(node:29872) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok 1 tests\workspace\login-api.spec.ts:70:1 › temporary login requires password change, revokes its session, then fresh login survives refresh (5.8s)
+  ok 2 tests\workspace\login-api.spec.ts:128:1 › unknown accounts show a non-enumerating failure through the real API (911ms)
+
+  2 passed (14.0s)
