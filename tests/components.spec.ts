@@ -1,8 +1,20 @@
-import { expect, test } from '@playwright/test';
+import { expect, test, type Page } from '@playwright/test';
+
+const COMPONENT_READY_TIMEOUT_MS = 45_000;
+
+async function openComponents(page: Page): Promise<void> {
+  // Vite may need to compile the legacy route's dependency graph on a fresh CI
+  // worker. Wait for the response commit, then for the hydrated UI we exercise.
+  const response = await page.goto('/components', { waitUntil: 'commit' });
+  expect(response?.ok()).toBe(true);
+  await expect(page.getByTestId('tour-launcher')).toBeVisible({ timeout: COMPONENT_READY_TIMEOUT_MS });
+}
 
 test.describe('Phase 2 component shell', () => {
+  test.describe.configure({ timeout: 60_000 });
+
   test('opens the governed requirement chain and evidence drawer in two clicks', async ({ page }) => {
-    await page.goto('/components');
+    await openComponents(page);
 
     await page.getByTestId('state-badge-demo-verified').click();
     await expect(page.getByTestId('requirement-chain')).toBeVisible();
@@ -14,7 +26,7 @@ test.describe('Phase 2 component shell', () => {
   });
 
   test('renders mandatory guidance and accessible help text', async ({ page }) => {
-    await page.goto('/components');
+    await openComponents(page);
 
     await expect(page.getByText('Illustrative products.')).toBeVisible();
 
@@ -23,7 +35,7 @@ test.describe('Phase 2 component shell', () => {
   });
 
   test('tour launcher starts, advances, and exits tours from tour data', async ({ page }) => {
-    await page.goto('/components');
+    await openComponents(page);
 
     await page.getByTestId('start-nabii-tour').click();
     await expect(page.getByTestId('tour-bubble')).toHaveAttribute('data-tour', 'nabii');
