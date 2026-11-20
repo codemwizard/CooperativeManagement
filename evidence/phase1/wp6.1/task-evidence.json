@@ -77,6 +77,11 @@
       "command": "WP6.1 dedicated Cucumber runner stdout/stderr",
       "result": "passed",
       "artifact": "evidence/phase1/wp6.1/cucumber-run.log"
+    },
+    {
+      "command": "node tools/verify_wp6_1_closure.mjs 8182c5036a944c2411beccf91db2a35540bfd2b1 --preflight",
+      "result": "passed",
+      "artifact": "evidence/phase1/wp6.1/closure-preflight.log"
     }
   ],
   "claims": {
