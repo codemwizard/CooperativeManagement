@@ -8,7 +8,7 @@
     "bdd_ui_test": "passed",
     "gate_verified": "pending"
   },
-  "commit": "b63154a40cfe0b2dee0fa1f2c449de2019104990",
+  "commit": "8182c5036a944c2411beccf91db2a35540bfd2b1",
   "environment": {
     "node": "v26.7.0",
     "npm": "12.2.0",
