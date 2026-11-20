@@ -50,11 +50,11 @@ async function verifyPredecessor(taskId) {
   }
   assert.match(record.commit ?? record.candidate?.implementation_commit ?? '', /^[0-9a-f]{40}$/i, `${taskId} has no immutable implementation SHA`);
   const commit = record.commit ?? record.candidate.implementation_commit;
-  assert.equal(
-    execFileSync('git', ['merge-base', '--is-ancestor', commit, candidate], { stdio: 'ignore' }).status ?? 0,
-    0,
-    `${taskId} implementation is not an ancestor of candidate`,
-  );
+  try {
+    execFileSync('git', ['merge-base', '--is-ancestor', commit, candidate], { stdio: 'ignore' });
+  } catch {
+    assert.fail(`${taskId} implementation is not an ancestor of candidate`);
+  }
   for (const predecessor of definition.depends_on ?? []) await verifyPredecessor(predecessor);
 }
 
