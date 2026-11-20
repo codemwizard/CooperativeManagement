@@ -6,7 +6,7 @@
     "unit_test": "passed",
     "integration_test": "passed",
     "bdd_ui_test": "passed",
-    "gate_verified": "pending"
+    "gate_verified": "passed"
   },
   "commit": "8182c5036a944c2411beccf91db2a35540bfd2b1",
   "environment": {
@@ -112,7 +112,7 @@
       "/coop/:cooperativeId/financial-records",
       "/coop/:cooperativeId/capability-gaps"
     ],
-    "coverage_limitations": [
+      "coverage_limitations": [
       "This record distinguishes implementation and focused acceptance from exact-candidate gate verification; gate_verified remains pending until both exact-candidate verifier modes pass.",
       "The fixture seeds synthetic verified findings administratively; a product finding-authoring/write lifecycle is not implemented or claimed by WP6.1.",
       "The /coop/:cooperativeId shell and finding projection enforce current persisted context/tenant scope; unrelated tenant-specific directory and other business-record workflows remain outside this task.",
