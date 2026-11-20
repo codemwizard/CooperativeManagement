@@ -6,7 +6,7 @@
     "unit_test": "passed",
     "integration_test": "passed",
     "bdd_ui_test": "not_applicable",
-    "gate_verified": "pending"
+    "gate_verified": "passed"
   },
   "commit": "6ba1885035b330122570bf4602d88bcd19f73fc1",
   "environment": {
@@ -69,7 +69,6 @@
     ]
   },
   "limitations": [
-    "Gate remains pending until the exact immutable candidate verifier passes.",
     "The browser login and password-change flow and its mapped BDD acceptance belong to downstream WP5.4 and WP5.5."
   ],
   "unresolved_decisions": [],
