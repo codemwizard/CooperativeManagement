@@ -2,7 +2,7 @@
   "verification_date": "2026-11-20",
   "branch": "codex/prototype14-remediation-resync",
   "working_tree_base_commit": "5c6eb42912405c60198a461b999bba64363dc0be",
-  "candidate_commit": "1b19531b2b387132c6baafd634423dbe0ace154d",
+  "candidate_commit": "1b195317eaa342c91efabb2f987bb6b87daaec6c",
   "working_tree_dirty": true,
   "environment": {
     "node": "v26.7.0",
