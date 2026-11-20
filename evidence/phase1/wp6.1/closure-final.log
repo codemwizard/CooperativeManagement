@@ -1,2 +1,2 @@
-PASS REM-WP6.1 exact candidate 8182c5036a944c2411beccf91db2a35540bfd2b1.
+PASS REM-WP6.1 exact candidate c3f4af5ed20ac6922e0dbcd46a12e263fd5b0406.
 PASS mandatory predecessor gates, frozen ownership, active live browser BDD (BDD-UXW-001, BDD-UXW-002, BDD-UXW-003, BDD-UXW-004), candidate-bound artifacts, and toolchain/database evidence.
