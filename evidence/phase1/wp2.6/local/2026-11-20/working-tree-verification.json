@@ -2,7 +2,7 @@
   "verification_date": "2026-11-20",
   "branch": "codex/prototype14-remediation-resync",
   "working_tree_base_commit": "5c6eb42912405c60198a461b999bba64363dc0be",
-  "candidate_commit": null,
+  "candidate_commit": "1b19531b2b387132c6baafd634423dbe0ace154d",
   "working_tree_dirty": true,
   "environment": {
     "node": "v26.7.0",
@@ -27,5 +27,5 @@
     "phase1-contract-verification.raw.log": "69c822e139beae3e8c1570daffe7146e11494b81123f0008c07457eb13e1900d",
     "typecheck-v4.raw.log": "210ca8284f5332a14d73d1a511ef359639b5e97cf1882bade52e102b32de7bf2"
   },
-  "limitation": "Raw logs describe the current uncommitted working tree based on working_tree_base_commit; they are not task-evidence for an immutable candidate."
+  "limitation": "Verification commands ran against the working tree based on working_tree_base_commit. Their tracked implementation snapshot was committed without application/schema changes as candidate_commit; the retained logs were produced before that commit. Candidate-bound task evidence and gate status are checked separately by the exact-candidate verifier."
 }
