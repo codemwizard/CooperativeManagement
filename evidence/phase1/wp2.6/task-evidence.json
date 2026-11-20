@@ -29,14 +29,14 @@
       "artifact": "evidence/phase1/wp2.6/local/2026-11-20/migration-apply.raw.log"
     },
     {
-      "command": "npm run test:db:migrations (PostgreSQL 18 migration suite; 17 tests passed)",
-      "result": "passed",
-      "artifact": "evidence/phase1/wp2.6/local/2026-11-20/migration-suite.raw.log"
-    },
-    {
       "command": "node --env-file-if-exists=../../.env.local ../../node_modules/vitest/vitest.mjs run --config vitest.config.ts --reporter=verbose (from packages/db; 13 files, 71 tests passed)",
       "result": "passed",
       "artifact": "evidence/phase1/wp2.6/local/2026-11-20/postgres-db-suite.raw.log"
+    },
+    {
+      "command": "npm run test:db:migrations (PostgreSQL 18 migration suite; 17 tests passed)",
+      "result": "passed",
+      "artifact": "evidence/phase1/wp2.6/local/2026-11-20/migration-suite.raw.log"
     },
     {
       "command": "npm run verify:phase1:contracts",
