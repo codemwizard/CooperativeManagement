@@ -7,6 +7,8 @@ export default defineConfig({
     port: 5174,
     proxy: {
       '/auth': { target: process.env.VITE_AUTH_API_TARGET ?? 'http://127.0.0.1:3000', changeOrigin: false },
+      '^/workspace/context$': { target: process.env.VITE_AUTH_API_TARGET ?? 'http://127.0.0.1:3000', changeOrigin: false },
+      '/workspace/verified-findings': { target: process.env.VITE_AUTH_API_TARGET ?? 'http://127.0.0.1:3000', changeOrigin: false },
     },
   },
   preview: { port: 5174 },

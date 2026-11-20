@@ -472,7 +472,7 @@
       "owner_tasks": [
         "REM-WP6.1"
       ],
-      "required_path": "browser-to-API route with observable assertions",
+      "required_path": "persisted-session browser-to-workspace-context API route backed by PostgreSQL; verify fixed menus for Cooperative member, Chairperson, Vice-Chairperson, Secretary, Treasurer, internal verifier, programme manager, Union TA, and self-enroller",
       "assertion_rule": "Execute this exact tagged scenario with observable assertions on the specified product path; no mock, @wip, skip, tag removal, zero-step pass, or in-memory substitute.",
       "phase0_status": "mapped_and_deferred_to_owner_task"
     },

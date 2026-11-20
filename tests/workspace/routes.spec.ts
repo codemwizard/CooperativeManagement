@@ -1,64 +1,14 @@
-import { createHmac, randomUUID } from 'node:crypto';
-import pg from 'pg';
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test, type Page } from '@playwright/test';
-import { CredentialLifecycleService } from '@symphony/domain/identity/credential-lifecycle';
-import { NAV_AREAS } from '../../apps/workspace/src/shell/LeftNav.js';
+import { cleanupWp6_1Fixture, officeActors, organizationId, password, seedWp6_1Fixture, userId } from '../../packages/testkit/src/step-definitions/wp6.1-fixture.js';
 
-const adminUrl = process.env.PHASE1_TEST_ADMIN_DATABASE_URL;
-const appUrl = process.env.PHASE1_TEST_APP_DATABASE_URL;
-if (!adminUrl || !appUrl) throw new Error('WP6.1 route tests require both test-admin and app-role PostgreSQL URLs.');
-
-const admin = new pg.Pool({ connectionString: adminUrl, max: 2 });
-const app = new pg.Pool({ connectionString: appUrl, max: 2 });
-const tenantId = randomUUID();
-const userId = randomUUID();
-const password = `WP6.1 route password ${randomUUID()}`;
-const throttleKey = Buffer.from(process.env.AUTH_THROTTLE_HMAC_KEY!, 'base64');
-
-test.beforeAll(async () => {
-  await admin.query('INSERT INTO symphony.tenants(id,name) VALUES($1,$2)', [tenantId, `wp6.1-routes-${tenantId}`]);
-  await admin.query(
-    `INSERT INTO symphony.users(id,tenant_id,email,email_normalized,status)
-     VALUES($1,$2,$3,$3,'active')`, [userId, tenantId, `wp61-${userId}@example.invalid`],
-  );
-  const lifecycle = new CredentialLifecycleService({ now: () => new Date().toISOString() });
-  const passwordHash = await lifecycle.hashPermanentPassword(password);
-  const client = await app.connect();
-  try {
-    await client.query('BEGIN');
-    await client.query("SELECT set_config('app.tenant_id',$1,true)", [tenantId]);
-    await client.query(
-      'INSERT INTO symphony.password_credentials(tenant_id,user_id,secret_hash) VALUES($1,$2,$3)',
-      [tenantId, userId, passwordHash],
-    );
-    await client.query('COMMIT');
-  } catch (error) {
-    await client.query('ROLLBACK').catch(() => undefined);
-    throw error;
-  } finally {
-    client.release();
-  }
-});
-
-test.afterAll(async () => {
-  const accountKey = createHmac('sha256', throttleKey).update(`account:${userId.toLowerCase()}`).digest();
-  const sourceKey = createHmac('sha256', throttleKey).update('trusted_source:127.0.0.1').digest();
-  await admin.query('DELETE FROM symphony.auth_sessions WHERE tenant_id=$1', [tenantId]).catch(() => undefined);
-  await admin.query('DELETE FROM symphony.authentication_events WHERE user_id=$1', [userId]).catch(() => undefined);
-  await admin.query('DELETE FROM symphony.password_credentials WHERE tenant_id=$1', [tenantId]).catch(() => undefined);
-  await admin.query('DELETE FROM symphony.auth_attempt_events WHERE identity_hmac=ANY($1::bytea[])', [[accountKey, sourceKey]]).catch(() => undefined);
-  await admin.query('DELETE FROM symphony.users WHERE tenant_id=$1', [tenantId]).catch(() => undefined);
-  await admin.query('DELETE FROM symphony.tenants WHERE id=$1', [tenantId]).catch(() => undefined);
-  await app.end();
-  await admin.end();
-});
-
-async function signIn(page: Page): Promise<void> {
+test.beforeAll(seedWp6_1Fixture);
+test.afterAll(cleanupWp6_1Fixture);
+async function signIn(page: Page, accountId = userId, accountPassword = password): Promise<void> {
   await page.goto('/login');
   await expect(page.getByRole('heading', { name: 'Sign in to Symphony' })).toBeVisible();
-  await page.getByLabel('Email or user ID').fill(userId);
-  await page.getByLabel('Password').fill(password);
+  await page.getByLabel('Email or user ID').fill(accountId);
+  await page.getByLabel('Password').fill(accountPassword);
   await page.getByRole('button', { name: 'Sign in' }).click();
   await page.waitForURL(/\/workspace(?:\/.*)?$/);
 }
@@ -69,6 +19,7 @@ async function expectAxeClean(page: Page, route: string): Promise<void> {
 }
 
 test('served component, login and workspace routes have titles, landmarks and keyboard route focus', async ({ page }) => {
+  test.setTimeout(90_000);
   const visited: string[] = [];
   await page.goto('/components');
   await expect(page).toHaveTitle('Symphony Component Library — Phase 0 Scaffold');
@@ -91,36 +42,113 @@ test('served component, login and workspace routes have titles, landmarks and ke
   await expect(page.getByRole('banner')).toBeVisible();
   await expect(page.getByRole('main')).toBeVisible();
   await expectAxeClean(page, '/workspace/overview');
-  expect(NAV_AREAS.length).toBeGreaterThan(0);
-  console.log(`WP6.1 route list: /components, /login, ${NAV_AREAS.map((area) => area.path).join(', ')}`);
+  const workflowRoutes = [
+    { label: 'Cooperative member', items: ['Overview', 'My activities', 'My household'] },
+    { label: 'Secretary', items: ['Overview', 'Identity', 'By-laws and requirements', 'Governance', 'Meetings and resolutions', 'Evidence register', 'Findings and next actions'] },
+    { label: 'Internal verifier', items: ['Overview', 'Evidence register', 'Verification queue', 'Findings and next actions'] },
+    { label: 'Programme manager', items: ['Pipeline', 'Cohort', 'Directory', 'Legal catalogue review', 'Delegations'] },
+    { label: 'Union TA', items: ['Cohort', 'Capability gaps'] },
+    { label: 'Self-enroller', items: ['Certificate details', 'Create officer accounts', 'Hand over'] },
+  ];
+  const contextSelect = page.getByLabel('Current workflow', { exact: true });
+  const contextOptions = await contextSelect.locator('option').evaluateAll((options) => options.map((option) => ({
+    label: option.textContent ?? '',
+    value: (option as HTMLOptionElement).value,
+  })));
+  console.log(`WP6.1 route list: /components, /login, six API-resolved workflow contexts plus three separately persisted officeholder contexts`);
 
-  for (const area of NAV_AREAS) {
-    await page.locator(`nav[aria-label="Primary navigation"] a[href="${area.path}"]`).click();
-    await expect(page).toHaveURL(new RegExp(`${area.path.replaceAll('/', '\\/')}$`));
-    const heading = page.getByRole('heading', { level: 1, name: area.label });
+  for (const workflow of workflowRoutes) {
+    const contextOption = contextOptions.find((option) => option.label.startsWith(workflow.label));
+    expect(contextOption, `API did not resolve ${workflow.label} workflow context`).toBeTruthy();
+    await contextSelect.selectOption(contextOption!.value);
+    for (const label of workflow.items) {
+      const link = page.getByRole('navigation', { name: 'Primary navigation' }).getByRole('link', { name: new RegExp(`^${label}`) });
+      await link.click();
+      const href = await link.getAttribute('href');
+      expect(href).toBeTruthy();
+      await expect(page).toHaveURL(new RegExp(`${href!.replaceAll('/', '\\/')}$`));
+      const heading = page.getByRole('heading', { level: 1, name: label });
     await expect(heading).toBeFocused();
     await expect(page.locator('h1')).toHaveCount(1);
-    await expect(page).toHaveTitle(`${area.label} | Symphony Workspace`);
-    const visibleText = await page.locator('body').innerText();
-    expect(visibleText).not.toMatch(/\b[a-z][a-z0-9]*_[a-z0-9_]+\b/);
-    expect(visibleText).not.toMatch(/\bcompliant\b|\bapproved\b|\bVerified\b/);
-    visited.push(area.path);
+      await expect(page).toHaveTitle(`${label} | Symphony Workspace`);
+      if (workflow.label === 'Secretary' && label === 'Evidence register') {
+        await page.getByText('Cooperative-verified (internal)', { exact: true }).click();
+        await expect(page.getByText(/Example Cooperative Secretary/)).toBeVisible();
+        await expect(page.getByText('Financial statement completeness', { exact: true })).toBeVisible();
+        await expect(page.getByText('cooperative-internal', { exact: true })).toBeVisible();
+      }
+      const visibleText = await page.locator('body').innerText();
+      expect(visibleText).not.toMatch(/\b[a-z][a-z0-9]*_[a-z0-9_]+\b/);
+      // D-18 explicitly permits this qualified chip and its attribution label;
+      // broad scans must not reject those approved phrases as generic claims.
+      expect(visibleText).not.toMatch(/\bcompliant\b|\bapproved\b/);
+      visited.push(href!);
+    }
+    await expect(page.getByRole('navigation', { name: 'Primary navigation' }).getByRole('link')).toHaveCount(workflow.items.length);
   }
 
-  await page.goto('/coop/org-1/evidence?filter=open&sort=severity');
+  const officeWorkflows = [
+    { persona: 'Chairperson', items: ['Overview', 'Governance', 'Meetings and resolutions', 'By-laws and requirements', 'Evidence register', 'Findings and next actions'] },
+    { persona: 'Vice-Chairperson', items: ['Overview', 'Governance', 'Meetings and resolutions', 'By-laws and requirements', 'Evidence register', 'Findings and next actions'] },
+    { persona: 'Treasurer', items: ['Overview', 'Financial records', 'Meetings and resolutions', 'Evidence register', 'Findings and next actions'] },
+  ];
+  for (const actor of officeActors) {
+    await page.context().clearCookies();
+    await signIn(page, actor.userId, actor.password);
+    const officeWorkflow = officeWorkflows.find((workflow) => workflow.persona === actor.persona)!;
+    const officeContext = page.getByLabel('Current workflow', { exact: true });
+    await expect(officeContext.locator('option')).toHaveCount(2);
+    const officeOptions = await officeContext.locator('option').evaluateAll((options) => options.map((option) => ({
+      label: option.textContent ?? '',
+      value: (option as HTMLOptionElement).value,
+    })));
+    const actorOption = officeOptions.find((option) => option.label.startsWith(actor.persona));
+    expect(actorOption, `API did not resolve ${actor.persona} workflow context`).toBeTruthy();
+    await officeContext.selectOption(actorOption!.value);
+    await expect(page.getByRole('navigation', { name: 'Primary navigation' }).getByRole('link')).toHaveCount(officeWorkflow.items.length);
+    for (const label of officeWorkflow.items) {
+      const link = page.getByRole('navigation', { name: 'Primary navigation' }).getByRole('link', { name: new RegExp(`^${label}`) });
+      await link.click();
+      const href = await link.getAttribute('href');
+      expect(href).toBeTruthy();
+      await expect(page).toHaveURL(new RegExp(`${href!.replaceAll('/', '\\/')}$`));
+      await expect(page.getByRole('heading', { level: 1, name: label })).toBeFocused();
+      await expect(page.locator('h1')).toHaveCount(1);
+      await expect(page).toHaveTitle(`${label} | Symphony Workspace`);
+      const visibleText = await page.locator('body').innerText();
+      expect(visibleText).not.toMatch(/\b[a-z][a-z0-9]*_[a-z0-9_]+\b/);
+      expect(visibleText).not.toMatch(/\bcompliant\b|\bapproved\b|\bVerified\b/);
+      visited.push(href!);
+    }
+  }
+
+  await page.context().clearCookies();
+  await signIn(page);
+
+  const programmeManagerOption = contextOptions.find((option) => option.label.startsWith('Programme manager'));
+  await contextSelect.selectOption(programmeManagerOption!.value);
+  await page.goto(`/coop/${organizationId}/directory`);
+  await expect(page.getByRole('heading', { level: 1, name: 'Directory' })).toBeFocused();
+  expect(await page.locator('nav[aria-label="Primary navigation"] a').count()).toBe(5);
+
+  const secretaryOption = contextOptions.find((option) => option.label.startsWith('Secretary'));
+  await contextSelect.selectOption(secretaryOption!.value);
+  await page.goto(`/coop/${organizationId}/evidence?filter=open&sort=severity`);
   await expect(page.getByRole('heading', { level: 1, name: 'Evidence register' })).toBeFocused();
-  await expect(page).toHaveURL(/\/coop\/org-1\/evidence\?filter=open&sort=severity$/);
+  await expect(page).toHaveURL(new RegExp(`/coop/${organizationId}/evidence\\?filter=open&sort=severity$`));
   await page.reload();
-  await expect(page).toHaveURL(/\/coop\/org-1\/evidence\?filter=open&sort=severity$/);
+  await expect(page).toHaveURL(new RegExp(`/coop/${organizationId}/evidence\\?filter=open&sort=severity$`));
   await expect(page.getByRole('heading', { level: 1, name: 'Evidence register' })).toBeFocused();
-  await page.locator('nav[aria-label="Primary navigation"] a[href="/coop/org-1/governance"]').click();
+  await contextSelect.selectOption(secretaryOption!.value);
+  await page.goto(`/coop/${organizationId}/evidence?filter=open&sort=severity`);
+  await page.locator(`nav[aria-label="Primary navigation"] a[href="/coop/${organizationId}/governance"]`).click();
   await expect(page.getByRole('heading', { level: 1, name: 'Governance' })).toBeFocused();
   await page.goBack();
-  await expect(page).toHaveURL(/\/coop\/org-1\/evidence\?filter=open&sort=severity$/);
+  await expect(page).toHaveURL(new RegExp(`/coop/${organizationId}/evidence\\?filter=open&sort=severity$`));
   await expect(page.getByRole('heading', { level: 1, name: 'Evidence register' })).toBeFocused();
   await page.goForward();
   await expect(page.getByRole('heading', { level: 1, name: 'Governance' })).toBeFocused();
-  visited.push('/coop/org-1/evidence?filter=open&sort=severity');
+  visited.push(`/coop/${organizationId}/evidence?filter=open&sort=severity`);
   console.log(`WP6.1 served routes exercised: ${visited.join(', ')}`);
 });
 

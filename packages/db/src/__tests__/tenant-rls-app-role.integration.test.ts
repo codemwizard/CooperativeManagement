@@ -156,7 +156,7 @@ describe('WP1.5 actual restricted-role tenant isolation', () => {
     await Promise.all([db.destroy(), recoveryDb.destroy(), app.end(), admin.end()]);
   }, 30_000);
 
-  it('matches all migrated tables, all 44 PostgreSQL tenant policy expressions, the frozen manifest, and effective grants', async () => {
+  it('matches all migrated tables, all 45 PostgreSQL tenant policy expressions, the frozen manifest, and effective grants', async () => {
     const expectedTables = [...inventory.tables, ...inventory.planned_phase1_tables].map((row) => row.table).sort();
     const actual = await admin.query<{ table_name: string; table_owner: string; relrowsecurity: boolean; relforcerowsecurity: boolean }>(
       `SELECT c.relname AS table_name, pg_get_userbyid(c.relowner) AS table_owner,
@@ -170,7 +170,7 @@ describe('WP1.5 actual restricted-role tenant isolation', () => {
 
     const policies = new Map([...matrix.tables, ...matrix.planned_phase1_tables].map((row) => [row.table, row]));
     const tenantRows = [...policies.values()].filter((row) => row.classification === 'tenant_scoped');
-    expect(tenantRows).toHaveLength(44);
+    expect(tenantRows).toHaveLength(45);
     expect(manifest.table_count).toBe(tenantRows.length);
     expect(manifest.required_tenant_scoped_count).toBe(tenantRows.length);
     expect(tenantPolicyTableSetErrors(
@@ -470,7 +470,7 @@ describe('WP1.5 actual restricted-role tenant isolation', () => {
       'state', 'person', 'personIdentifier', 'platformRole', 'roleAssignment', 'event',
       'capacityGrant', 'delegation', 'enrolmentSession', 'approvalPolicy', 'organizationEnrollment',
       'handover', 'evidenceVersion', 'supportItem', 'admission', 'verificationAssignment',
-      'finding', 'userPersonLink', 'requirement', 'requirementLink', 'appointment', 'bylawDocument', 'bylawVersion', 'bylawProvision',
+      'finding', 'findingAttribution', 'userPersonLink', 'requirement', 'requirementLink', 'appointment', 'bylawDocument', 'bylawVersion', 'bylawProvision',
       'temporaryCredential', 'passwordCredential',
     ].map((key) => [key, randomUUID()]));
     const fixtureRows: { table: string; id: string }[] = [];
@@ -543,14 +543,21 @@ describe('WP1.5 actual restricted-role tenant isolation', () => {
         'INSERT INTO symphony.verification_assignments (id,evidence_item_id,assigned_to_user_id,evidence_version_id,completed_at) VALUES ($1,$2,$3,$4,now() - interval \'30 seconds\')',
         [ids.verificationAssignment, itemB, userB, ids.evidenceVersion]);
       await insert('appointments', ids.appointment!,
-        'INSERT INTO symphony.appointments (id,organization_id,person_id,position_id,started_at,source_ref) VALUES ($1,$2,$3,$4,now() - interval \'1 minute\',$5)',
-        [ids.appointment, organizationB, ids.person, '00000000-0000-4000-8000-000000000003', `wp15-source-${ids.appointment}`]);
+        'INSERT INTO symphony.appointments (id,organization_id,person_id,position_id,started_at,source_ref,public_display_name) VALUES ($1,$2,$3,$4,now() - interval \'1 minute\',$5,$6)',
+        [ids.appointment, organizationB, ids.person, '00000000-0000-4000-8000-000000000003', `wp15-source-${ids.appointment}`, `Synthetic official ${ids.appointment}`]);
       await insert('user_person_links', ids.userPersonLink!,
         'INSERT INTO symphony.user_person_links (id,tenant_id,user_id,person_id,linked_at,source_ref,linked_by_user_id) VALUES ($1,$2,$3,$4,now() - interval \'2 minutes\',$5,$3)',
         [ids.userPersonLink, tenantB, userB, ids.person, `wp15-link-${ids.userPersonLink}`]);
       await insert('verification_findings', ids.finding!,
-        'INSERT INTO symphony.verification_findings (id,assignment_id,evidence_version_id,assurance_class,result) VALUES ($1,$2,$3,$4,$5)',
-        [ids.finding, ids.verificationAssignment, ids.evidenceVersion, 'wp15_fixture', 'pass']);
+        'INSERT INTO symphony.verification_findings (id,assignment_id,evidence_version_id,assurance_class,result,outcome) VALUES ($1,$2,$3,$4,$5,$6)',
+        [ids.finding, ids.verificationAssignment, ids.evidenceVersion, 'wp15_fixture', 'pass', 'supports_claim']);
+      const attributionId = randomUUID();
+      await insert('verification_finding_attributions', attributionId,
+        `INSERT INTO symphony.verification_finding_attributions (id,finding_id,verifier_user_id,verifier_person_id,appointment_id,public_name,office_title,source_kind,source_ref,captured_at,effective_at,disclosure_basis)
+         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,
+           (SELECT finding_at FROM symphony.verification_findings WHERE id=$2),
+           (SELECT started_at FROM symphony.appointments WHERE id=$5),$10)`,
+        [attributionId, ids.finding, userB, ids.person, ids.appointment, `Synthetic official ${ids.appointment}`, 'Secretary', 'official_appointment_record', `wp15-source-${ids.appointment}`, 'D-18 authorized cooperative-record viewers; public only where the record is classified public and applicable access/fee policy permits']);
       await insert('requirement_definitions', ids.requirement!,
         'INSERT INTO symphony.requirement_definitions (id,source_tier,description) VALUES ($1,$2,$3)',
         [ids.requirement, 'catalogue', 'Synthetic WP1.5 tenant policy fixture']);
@@ -583,6 +590,7 @@ describe('WP1.5 actual restricted-role tenant isolation', () => {
         { table: 'evidence_admissions', parentTables: ['evidence_versions', 'evidence_items', 'organizations', 'users'], id: ids.admission! },
         { table: 'verification_assignments', parentTables: ['evidence_items', 'organizations', 'evidence_versions', 'users'], id: ids.verificationAssignment! },
         { table: 'verification_findings', parentTables: ['verification_assignments', 'evidence_items', 'organizations'], id: ids.finding! },
+        { table: 'verification_finding_attributions', parentTables: ['verification_findings', 'verification_assignments', 'evidence_items', 'organizations'], id: attributionId },
         { table: 'evidence_requirement_links', parentTables: ['evidence_items', 'organizations'], id: ids.requirementLink! },
         { table: 'appointments', parentTables: ['organizations', 'persons'], id: ids.appointment! },
         { table: 'bylaw_versions', parentTables: ['bylaw_documents', 'organizations'], id: ids.bylawVersion! },
@@ -614,11 +622,13 @@ describe('WP1.5 actual restricted-role tenant isolation', () => {
       }
     } finally {
       for (const fixture of [...fixtureRows].reverse()) {
+        if (fixture.table === 'verification_finding_attributions') await admin.query('ALTER TABLE symphony.verification_finding_attributions DISABLE TRIGGER verification_finding_attributions_immutability');
         if (fixture.table === 'evidence_versions') await admin.query('ALTER TABLE symphony.evidence_versions DISABLE TRIGGER evidence_versions_immutability');
         if (fixture.table === 'domain_events') await admin.query('ALTER TABLE symphony.domain_events DISABLE TRIGGER domain_events_immutability');
         await admin.query(`DELETE FROM symphony.${fixture.table} WHERE id=$1`, [fixture.id]);
         if (fixture.table === 'evidence_versions') await admin.query('ALTER TABLE symphony.evidence_versions ENABLE TRIGGER evidence_versions_immutability');
         if (fixture.table === 'domain_events') await admin.query('ALTER TABLE symphony.domain_events ENABLE TRIGGER domain_events_immutability');
+        if (fixture.table === 'verification_finding_attributions') await admin.query('ALTER TABLE symphony.verification_finding_attributions ENABLE TRIGGER verification_finding_attributions_immutability');
       }
     }
   }, 30_000);

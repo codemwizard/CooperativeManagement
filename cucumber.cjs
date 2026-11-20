@@ -22,4 +22,14 @@ module.exports = {
     tags: '@wip',
     dryRun: true,
   },
+  wp61: {
+    paths: ['features/10_workspace_and_capabilities.feature'],
+    requireModule: [],
+    import: [
+      'packages/testkit/src/step-definitions/world.ts',
+      'packages/testkit/src/step-definitions/workspace-live-steps.ts',
+    ],
+    format: ['progress'],
+    tags: '(@BDD-UXW-001 or @BDD-UXW-002 or @BDD-UXW-003 or @BDD-UXW-004) and not @wip',
+  },
 };

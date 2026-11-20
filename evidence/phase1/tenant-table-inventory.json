@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "source": "Root migrations 0001-0016 plus the REM-WP2.2 trusted authority resolver policy additions.",
+  "source": "Root migrations 0001-0018; classifications include WP6.1 migrations 0017-0018 (candidate-specific RLS evidence pending).",
   "tables": [
     {
       "table": "acceptance_policies",
@@ -357,6 +357,12 @@
       "rls_current": false
     },
     {
+      "table": "verification_finding_attributions",
+      "classification": "tenant_scoped",
+      "scope_basis": "Finding-time verifier snapshot; tenant inherited through finding, assignment, evidence item, and organization.",
+      "rls_current": true
+    },
+    {
       "table": "verification_findings",
       "classification": "tenant_scoped",
       "scope_basis": "Tenant inherited through assignment/evidence; immutable findings.",
@@ -413,6 +419,6 @@
       ]
     }
   ],
-  "known_gap": "Root migrations 0001-0016 plus the REM-WP2.2 trusted authority resolver policy additions.",
+  "known_gap": "REM-WP6.1 migrations 0017-0018 add a tenant-scoped finding-attribution snapshot; app-role RLS and immutable-snapshot integration evidence remain pending.",
   "status": "WP1.5 original 55-table scope passed on candidate d7fbf5851b11b07b65bde36f062db7b21f487947; later migrations 0014-0016 require candidate-specific verification."
 }

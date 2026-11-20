@@ -4,7 +4,7 @@ import { existsSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import pg from 'pg';
 import { CredentialLifecycleService } from '@symphony/domain/identity/credential-lifecycle';
-import { PostgresCredentialRepository, PostgresWorkspaceContextRepository } from '@symphony/db';
+import { PostgresCredentialRepository, PostgresVerifiedFindingRepository, PostgresWorkspaceContextRepository } from '@symphony/db';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { createAuthComposition } from '../authentication-composition.js';
 import { buildApiServer } from '../server.js';
@@ -143,8 +143,8 @@ describe.skipIf(!enabled)('WP5.3 Fastify and PostgreSQL integration',()=>{
     });
     const authA=createAuthComposition({pool:appPoolA,config:profile,throttleHmacKey:hmacKey});
     const authB=createAuthComposition({pool:appPoolB,config:profile,throttleHmacKey:hmacKey});
-    const contextA=createWorkspaceContextRoutes(new PostgresWorkspaceContextRepository(appPoolA));
-    const contextB=createWorkspaceContextRoutes(new PostgresWorkspaceContextRepository(appPoolB));
+    const contextA=createWorkspaceContextRoutes(new PostgresWorkspaceContextRepository(appPoolA),new PostgresVerifiedFindingRepository(appPoolA));
+    const contextB=createWorkspaceContextRoutes(new PostgresWorkspaceContextRepository(appPoolB),new PostgresVerifiedFindingRepository(appPoolB));
     appA=buildApiServer({config:profile,routes:{authentication:authA.authentication,verifyCsrf:authA.verifyCsrf,authorize:authA.authorize,rotateSession:authA.rotateSession,workspace:contextA}});
     appB=buildApiServer({config:profile,routes:{authentication:authB.authentication,verifyCsrf:authB.verifyCsrf,authorize:authB.authorize,rotateSession:authB.rotateSession,workspace:contextB}});
     await Promise.all([appA.ready(),appB.ready()]);
@@ -212,6 +212,13 @@ describe.skipIf(!enabled)('WP5.3 Fastify and PostgreSQL integration',()=>{
     expect(facts.facts.find((fact)=>fact.kind==='institutional_role')?.scopeOrganizationIds).toEqual([organizationId]);
     expect(facts.facts.some((fact)=>fact.authority==='vice_chairperson' || fact.authority==='field_agent')).toBe(false);
     expect(context.body).not.toContain('@example.invalid');
+    const unauthenticatedFindings=await appA.inject({method:'GET',url:`/workspace/verified-findings?organizationId=${organizationId}`});
+    expect(unauthenticatedFindings.statusCode).toBe(401);
+    const findings=await appA.inject({method:'GET',url:`/workspace/verified-findings?organizationId=${organizationId}`,headers:{cookie:cookie(freshLogin)}});
+    expect(findings.statusCode).toBe(200);
+    expect(findings.headers['cache-control']).toBe('no-store, private');
+    expect(findings.json()).toEqual({data:[]});
+    expect((await appA.inject({method:'GET',url:'/workspace/verified-findings?organizationId=invalid',headers:{cookie:cookie(freshLogin)}})).statusCode).toBe(400);
   },60_000);
 
   it('records generic failed attempts from two independent Fastify instances in one shared PostgreSQL throttle store',async()=>{

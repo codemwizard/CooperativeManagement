@@ -106,7 +106,12 @@
         "behavior_proved": { "type": "string", "minLength": 1 },
         "path_proved": { "type": "string", "minLength": 1 },
         "configuration_proved": { "type": "string", "minLength": 1 },
-        "coverage_limitations": { "type": "array", "items": { "type": "string" } }
+        "coverage_limitations": { "type": "array", "items": { "type": "string" } },
+        "route_inventory": {
+          "description": "Explicit route patterns exercised by a live UI acceptance task.",
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        }
       }
     },
     "limitations": { "type": "array", "items": { "type": "string" } },

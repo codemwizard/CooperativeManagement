@@ -8,71 +8,72 @@
     "bdd_ui_test": "not_applicable",
     "gate_verified": "pending"
   },
-  "candidate": {
-    "status": "uncommitted working tree",
-    "head_commit_before_implementation": "32fba54a8dbf0b70b8bf0c719f56291e8cf5815d",
-    "implementation_commit": null
+  "commit": "working-tree",
+  "environment": {
+    "node": "v26.7.0",
+    "npm": "v12.2.0 (global npm prefix prepended for this run)",
+    "postgres": "18.0 (package build 18.0-2)",
+    "database_role": "symphony_app API and repository tests; test-admin/migration role for synthetic fixture setup and schema install",
+    "data_mode": "test",
+    "key_provider": "local-test"
   },
   "commands": [
     {
-      "command": "npm run test:api",
-      "result": "passed; 6 files, 25 tests, including real Fastify plus disposable PostgreSQL integration",
+      "command": "npm run test:api (Fastify and PostgreSQL integration; 25 tests)",
+      "result": "passed",
       "artifact": "evidence/phase1/wp5.3/api-tests.log"
     },
     {
-      "command": "npm run test:db:migrations",
-      "result": "passed; 3 files, 17 tests, including session, expiry, revocation, rotation and throttle persistence",
+      "command": "npm run test:db:migrations (PostgreSQL migration/session integration; 17 tests)",
+      "result": "passed",
       "artifact": "evidence/phase1/wp5.3/postgresql-migration-tests.log"
     },
     {
       "command": "npm run typecheck:v4",
       "result": "passed",
-      "artifact": null
+      "artifact": "evidence/phase1/wp5.3/typecheck-v4.log"
     },
     {
       "command": "npm run verify:arch",
-      "result": "passed; 149 modules, 324 dependencies, no dependency violations",
-      "artifact": null
+      "result": "passed",
+      "artifact": "evidence/phase1/wp5.3/architecture-check.log"
     },
     {
       "command": "npm run verify:phase1:contracts",
-      "result": "passed; 112 tests and structural contract validation",
-      "artifact": null
+      "result": "passed",
+      "artifact": "evidence/phase1/wp5.3/phase1-contracts.log"
     },
     {
       "command": "git diff --check",
-      "result": "passed; only standard line-ending conversion warnings",
-      "artifact": null
+      "result": "passed",
+      "artifact": "evidence/phase1/wp5.3/diff-check.log"
     }
   ],
   "claims": {
-    "behavior_proved": "PostgreSQL-backed opaque hashed sessions enforce 30-minute idle and 12-hour absolute lifetimes, login rotation, logout of current session, all-session revocation on forced password change, CSRF synchronizer tokens and exact Origin checks. Forced-change sessions can access only the approved authentication routes. Account and trusted-source failure throttles are transactionally shared across API instances, use HMAC identifiers, apply the greater schedule up to 32 seconds, and return generic failures.",
-    "path_proved": "The API integration ran the actual Fastify composition against app-role connections to an isolated disposable PostgreSQL database for temporary login, forced-change authorization, permanent password establishment, session revocation, fresh login, and shared throttle history across two Fastify instances. Repository integration assertions also cover expiry equality, logout/revocation, session rotation, throttle timing and bounded history.",
-    "policy_source": "evidence/phase1/authentication-session-policy-matrix.json; docs/phase1/AUTHENTICATION_CONTRACT.md; Implementation-Plan-V4/02-decision-register.md D-10 and D-14; Implementation-Plan-V4/implementation/PHASE-1-REMEDIATION-PLAN-v2.md REM-WP5.3.",
-    "table_inventory": "Migration 0015's auth_sessions, auth_user_tenant_index and auth_attempt_events are classified in evidence/phase1/tenant-table-inventory.json and evidence/phase1/tenant-table-policy-matrix.json. The disposable test purge inventory preserves these authentication/security stores explicitly. Structural contract tests pass; independent security review is pending.",
-    "predecessors": {
-      "REM-WP0.10": "Approved policy source: evidence/phase1/authentication-session-policy-matrix.json.",
-      "REM-WP5.2": "Passing predecessor record: evidence/phase1/wp5.2/task-evidence.json; dependency graph lists WP0.10 and WP5.2 as WP5.3 predecessors."
-    }
+    "behavior_proved": "Opaque PostgreSQL-backed sessions enforce the approved idle and absolute lifetimes, login rotation, current-session logout, all-session revocation on forced password change, synchronizer CSRF tokens, exact Origin validation, and forced-change route restrictions. Shared account/source throttles use HMAC identifiers and transactionally coordinate across API instances.",
+    "path_proved": "The Fastify integration uses app-role PostgreSQL connections for temporary login, forced-change denial, permanent password establishment, session revocation, fresh login and cross-instance shared throttle history. Migration integration covers expiration boundaries, rotation, logout/revocation and bounded throttling. Current candidate reruns retain all raw logs listed above.",
+    "configuration_proved": "Local synthetic test mode on PostgreSQL 18.0. Authentication identity and tenant are session-derived; the runtime API uses symphony_app. No production database or key provider is asserted.",
+    "coverage_limitations": [
+      "No production deployment configuration, production expected-load qualification or independent security review is claimed.",
+      "The privilege/tenant-change session rotation hook is implemented and repository-tested; no authorized business route currently consumes it because the command facade is downstream of WP5.3."
+    ]
   },
   "limitations": [
-    "No WP5.3 candidate commit exists yet; all current implementation changes are uncommitted and the recorded HEAD is the pre-implementation parent, not a candidate SHA.",
-    "No authoritative WP5.3 closure verifier was found in the repository; gate_verified remains pending exact-candidate reconciliation.",
-    "The privilege/tenant-change rotation hook is implemented and repository rotation is tested, but no authorized business route currently consumes it; the downstream command facade is outside WP5.3 scope.",
-    "Production deployment configuration and independent security review remain outside this local implementation evidence."
+    "Gate remains pending until the exact immutable candidate verifier passes.",
+    "The browser login and password-change flow and its mapped BDD acceptance belong to downstream WP5.4 and WP5.5."
   ],
   "unresolved_decisions": [],
-  "reviewer": "Local implementation and test evidence; independent review not performed.",
+  "reviewer": "Local implementation and integration evidence; independent security review not performed.",
   "deferred_followups": [
     {
       "task_id": "REM-WP5.4",
-      "scope": "Accessible workspace login/password-change UI and browser path through real API and PostgreSQL.",
-      "status": "not started by this WP5.3 implementation"
+      "scope": "Accessible workspace login/password-change UI and browser path through the real API and PostgreSQL.",
+      "acceptance_evidence": "REM-WP5.4 task evidence and served browser assertions exercise login and forced password change without route interception."
     },
     {
       "task_id": "REM-WP5.5",
       "scope": "Mapped authentication BDD and regression gate against the implemented browser path.",
-      "status": "not started by this WP5.3 implementation"
+      "acceptance_evidence": "The exact frozen authentication BDD tags pass through the live browser, API, session and PostgreSQL test path."
     }
   ]
 }

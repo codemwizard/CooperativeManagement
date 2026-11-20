@@ -1,9 +1,9 @@
 {
   "version": 1,
   "status": "candidate_frozen_pending_restricted_role_integration_and_review",
-  "source": "Root migrations 0001-0016 plus the REM-WP2.2 trusted authority resolver policy additions.",
-  "table_count": 44,
-  "required_tenant_scoped_count": 44,
+  "source": "migrations 0013-0018; REM-WP6.1 migrations 0017-0018 add one tenant-scoped official finding-attribution table and normalize its admission/scope policies.",
+  "table_count": 45,
+  "required_tenant_scoped_count": 45,
   "policy_entries": [
     {
       "table": "aggregate_states",
@@ -613,6 +613,23 @@
       "update_with_check": "EXISTS (SELECT 1 FROM symphony.evidence_items i JOIN symphony.organizations o ON o.id = i.organization_id WHERE i.id = evidence_item_id AND o.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), '')) AND EXISTS (SELECT 1 FROM symphony.evidence_versions v JOIN symphony.evidence_items vi ON vi.id = v.evidence_item_id JOIN symphony.organizations vo ON vo.id = vi.organization_id WHERE v.id = evidence_version_id AND vo.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), '')) AND EXISTS (SELECT 1 FROM symphony.users u WHERE u.id = assigned_to_user_id AND u.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), ''))",
       "mismatch_fixture": "wp15-verification_assignments-cross-tenant-parent",
       "missing_parent_fixture": "wp15-verification_assignments-missing-parent"
+    },
+    {
+      "table": "verification_finding_attributions",
+      "parent_tables": [
+        "verification_findings",
+        "verification_assignments",
+        "evidence_items",
+        "organizations"
+      ],
+      "tenant_resolution_sql": "EXISTS (SELECT 1 FROM symphony.verification_findings f JOIN symphony.verification_assignments a ON a.id = f.assignment_id AND a.evidence_version_id = f.evidence_version_id JOIN symphony.evidence_items i ON i.id = a.evidence_item_id JOIN symphony.organizations o ON o.id = i.organization_id WHERE f.id = finding_id AND o.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), ''))",
+      "missing_parent_behavior": "An absent finding, assignment, evidence item or organization makes the EXISTS predicate false.",
+      "cross_tenant_parent_behavior": "Every parent resolves through the active app.tenant_id; a missing or different-tenant parent makes the predicate false.",
+      "insert_with_check": "EXISTS (SELECT 1 FROM symphony.verification_findings f JOIN symphony.verification_assignments a ON a.id = f.assignment_id AND a.evidence_version_id = f.evidence_version_id JOIN symphony.evidence_items i ON i.id = a.evidence_item_id JOIN symphony.organizations o ON o.id = i.organization_id WHERE f.id = finding_id AND o.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), ''))",
+      "update_using": "EXISTS (SELECT 1 FROM symphony.verification_findings f JOIN symphony.verification_assignments a ON a.id = f.assignment_id AND a.evidence_version_id = f.evidence_version_id JOIN symphony.evidence_items i ON i.id = a.evidence_item_id JOIN symphony.organizations o ON o.id = i.organization_id WHERE f.id = finding_id AND o.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), ''))",
+      "update_with_check": "EXISTS (SELECT 1 FROM symphony.verification_findings f JOIN symphony.verification_assignments a ON a.id = f.assignment_id AND a.evidence_version_id = f.evidence_version_id JOIN symphony.evidence_items i ON i.id = a.evidence_item_id JOIN symphony.organizations o ON o.id = i.organization_id WHERE f.id = finding_id AND o.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), ''))",
+      "mismatch_fixture": "wp61-finding-attribution-cross-tenant-parent",
+      "missing_parent_fixture": "wp61-finding-attribution-missing-parent"
     },
     {
       "table": "verification_findings",

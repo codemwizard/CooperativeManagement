@@ -1,0 +1,1217 @@
+[
+  {
+    "description": "  The workspace shows exactly what the model supports. It never shows a score on readiness surfaces,\n  never leaks enum text, never claims more than the evidence shows, and always makes capability gaps visible.",
+    "elements": [
+      {
+        "description": "",
+        "id": "workspace,-status-vocabulary-and-extension-capabilities;navigation-is-scoped-to-the-persona-and-every-screen-has-a-url",
+        "keyword": "Scenario Outline",
+        "line": 17,
+        "name": "Navigation is scoped to the persona and every screen has a URL",
+        "steps": [
+          {
+            "result": {
+              "status": "passed",
+              "duration": 1616680899
+            },
+            "keyword": "Before",
+            "hidden": true
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 519600
+            },
+            "arguments": [],
+            "keyword": "Given ",
+            "line": 7,
+            "name": "the workspace is running with seed data in test mode",
+            "match": {
+              "location": "packages\\testkit\\src\\step-definitions\\workspace-live-steps.ts:48"
+            }
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 1262774399
+            },
+            "arguments": [],
+            "keyword": "When ",
+            "line": 11,
+            "name": "\"cooperative member\" signs in",
+            "match": {
+              "location": "packages\\testkit\\src\\step-definitions\\workspace-live-steps.ts:54"
+            }
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 37199599
+            },
+            "arguments": [],
+            "keyword": "Then ",
+            "line": 12,
+            "name": "the primary navigation shows \"Overview, My activities, My household\"",
+            "match": {
+              "location": "packages\\testkit\\src\\step-definitions\\workspace-live-steps.ts:77"
+            }
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 1009611600
+            },
+            "arguments": [],
+            "keyword": "And ",
+            "line": 13,
+            "name": "each item opens a route with one h1 and a document title",
+            "match": {
+              "location": "packages\\testkit\\src\\step-definitions\\workspace-live-steps.ts:83"
+            }
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 1359290000
+            },
+            "keyword": "After",
+            "hidden": true
+          }
+        ],
+        "tags": [
+          {
+            "name": "@phase1",
+            "line": 1
+          },
+          {
+            "name": "@area-UXW",
+            "line": 1
+          },
+          {
+            "name": "@REQ-UXW-001",
+            "line": 9
+          },
+          {
+            "name": "@BDD-UXW-001",
+            "line": 9
+          },
+          {
+            "name": "@ui",
+            "line": 9
+          }
+        ],
+        "type": "scenario"
+      },
+      {
+        "description": "",
+        "id": "workspace,-status-vocabulary-and-extension-capabilities;navigation-is-scoped-to-the-persona-and-every-screen-has-a-url",
+        "keyword": "Scenario Outline",
+        "line": 18,
+        "name": "Navigation is scoped to the persona and every screen has a URL",
+        "steps": [
+          {
+            "result": {
+              "status": "passed",
+              "duration": 1800102999
+            },
+            "keyword": "Before",
+            "hidden": true
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 154899
+            },
+            "arguments": [],
+            "keyword": "Given ",
+            "line": 7,
+            "name": "the workspace is running with seed data in test mode",
+            "match": {
+              "location": "packages\\testkit\\src\\step-definitions\\workspace-live-steps.ts:48"
+            }
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 1819138699
+            },
+            "arguments": [],
+            "keyword": "When ",
+            "line": 11,
+            "name": "\"chairperson\" signs in",
+            "match": {
+              "location": "packages\\testkit\\src\\step-definitions\\workspace-live-steps.ts:54"
+            }
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 44772000
+            },
+            "arguments": [],
+            "keyword": "Then ",
+            "line": 12,
+            "name": "the primary navigation shows \"Overview, Governance, Meetings and resolutions, By-laws and requirements, Evidence register, Findings and next actions\"",
+            "match": {
+              "location": "packages\\testkit\\src\\step-definitions\\workspace-live-steps.ts:77"
+            }
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 620143000
+            },
+            "arguments": [],
+            "keyword": "And ",
+            "line": 13,
+            "name": "each item opens a route with one h1 and a document title",
+            "match": {
+              "location": "packages\\testkit\\src\\step-definitions\\workspace-live-steps.ts:83"
+            }
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 131046899
+            },
+            "keyword": "After",
+            "hidden": true
+          }
+        ],
+        "tags": [
+          {
+            "name": "@phase1",
+            "line": 1
+          },
+          {
+            "name": "@area-UXW",
+            "line": 1
+          },
+          {
+            "name": "@REQ-UXW-001",
+            "line": 9
+          },
+          {
+            "name": "@BDD-UXW-001",
+            "line": 9
+          },
+          {
+            "name": "@ui",
+            "line": 9
+          }
+        ],
+        "type": "scenario"
+      },
+      {
+        "description": "",
+        "id": "workspace,-status-vocabulary-and-extension-capabilities;navigation-is-scoped-to-the-persona-and-every-screen-has-a-url",
+        "keyword": "Scenario Outline",
+        "line": 19,
+        "name": "Navigation is scoped to the persona and every screen has a URL",
+        "steps": [
+          {
+            "result": {
+              "status": "passed",
+              "duration": 907073500
+            },
+            "keyword": "Before",
+            "hidden": true
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 199800
+            },
+            "arguments": [],
+            "keyword": "Given ",
+            "line": 7,
+            "name": "the workspace is running with seed data in test mode",
+            "match": {
+              "location": "packages\\testkit\\src\\step-definitions\\workspace-live-steps.ts:48"
+            }
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 700816200
+            },
+            "arguments": [],
+            "keyword": "When ",
+            "line": 11,
+            "name": "\"vice-chairperson\" signs in",
+            "match": {
+              "location": "packages\\testkit\\src\\step-definitions\\workspace-live-steps.ts:54"
+            }
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 25994999
+            },
+            "arguments": [],
+            "keyword": "Then ",
+            "line": 12,
+            "name": "the primary navigation shows \"Overview, Governance, Meetings and resolutions, By-laws and requirements, Evidence register, Findings and next actions\"",
+            "match": {
+              "location": "packages\\testkit\\src\\step-definitions\\workspace-live-steps.ts:77"
+            }
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 887188699
+            },
+            "arguments": [],
+            "keyword": "And ",
+            "line": 13,
+            "name": "each item opens a route with one h1 and a document title",
+            "match": {
+              "location": "packages\\testkit\\src\\step-definitions\\workspace-live-steps.ts:83"
+            }
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 96015800
+            },
+            "keyword": "After",
+            "hidden": true
+          }
+        ],
+        "tags": [
+          {
+            "name": "@phase1",
+            "line": 1
+          },
+          {
+            "name": "@area-UXW",
+            "line": 1
+          },
+          {
+            "name": "@REQ-UXW-001",
+            "line": 9
+          },
+          {
+            "name": "@BDD-UXW-001",
+            "line": 9
+          },
+          {
+            "name": "@ui",
+            "line": 9
+          }
+        ],
+        "type": "scenario"
+      },
+      {
+        "description": "",
+        "id": "workspace,-status-vocabulary-and-extension-capabilities;navigation-is-scoped-to-the-persona-and-every-screen-has-a-url",
+        "keyword": "Scenario Outline",
+        "line": 20,
+        "name": "Navigation is scoped to the persona and every screen has a URL",
+        "steps": [
+          {
+            "result": {
+              "status": "passed",
+              "duration": 521356800
+            },
+            "keyword": "Before",
+            "hidden": true
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 152600
+            },
+            "arguments": [],
+            "keyword": "Given ",
+            "line": 7,
+            "name": "the workspace is running with seed data in test mode",
+            "match": {
+              "location": "packages\\testkit\\src\\step-definitions\\workspace-live-steps.ts:48"
+            }
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 626316699
+            },
+            "arguments": [],
+            "keyword": "When ",
+            "line": 11,
+            "name": "\"secretary\" signs in",
+            "match": {
+              "location": "packages\\testkit\\src\\step-definitions\\workspace-live-steps.ts:54"
+            }
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 32908699
+            },
+            "arguments": [],
+            "keyword": "Then ",
+            "line": 12,
+            "name": "the primary navigation shows \"Overview, Identity, By-laws and requirements, Governance, Meetings and resolutions, Evidence register, Findings and next actions\"",
+            "match": {
+              "location": "packages\\testkit\\src\\step-definitions\\workspace-live-steps.ts:77"
+            }
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 617015900
+            },
+            "arguments": [],
+            "keyword": "And ",
+            "line": 13,
+            "name": "each item opens a route with one h1 and a document title",
+            "match": {
+              "location": "packages\\testkit\\src\\step-definitions\\workspace-live-steps.ts:83"
+            }
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 117185099
+            },
+            "keyword": "After",
+            "hidden": true
+          }
+        ],
+        "tags": [
+          {
+            "name": "@phase1",
+            "line": 1
+          },
+          {
+            "name": "@area-UXW",
+            "line": 1
+          },
+          {
+            "name": "@REQ-UXW-001",
+            "line": 9
+          },
+          {
+            "name": "@BDD-UXW-001",
+            "line": 9
+          },
+          {
+            "name": "@ui",
+            "line": 9
+          }
+        ],
+        "type": "scenario"
+      },
+      {
+        "description": "",
+        "id": "workspace,-status-vocabulary-and-extension-capabilities;navigation-is-scoped-to-the-persona-and-every-screen-has-a-url",
+        "keyword": "Scenario Outline",
+        "line": 21,
+        "name": "Navigation is scoped to the persona and every screen has a URL",
+        "steps": [
+          {
+            "result": {
+              "status": "passed",
+              "duration": 557187200
+            },
+            "keyword": "Before",
+            "hidden": true
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 130000
+            },
+            "arguments": [],
+            "keyword": "Given ",
+            "line": 7,
+            "name": "the workspace is running with seed data in test mode",
+            "match": {
+              "location": "packages\\testkit\\src\\step-definitions\\workspace-live-steps.ts:48"
+            }
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 629042399
+            },
+            "arguments": [],
+            "keyword": "When ",
+            "line": 11,
+            "name": "\"treasurer\" signs in",
+            "match": {
+              "location": "packages\\testkit\\src\\step-definitions\\workspace-live-steps.ts:54"
+            }
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 33788000
+            },
+            "arguments": [],
+            "keyword": "Then ",
+            "line": 12,
+            "name": "the primary navigation shows \"Overview, Financial records, Meetings and resolutions, Evidence register, Findings and next actions\"",
+            "match": {
+              "location": "packages\\testkit\\src\\step-definitions\\workspace-live-steps.ts:77"
+            }
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 547125000
+            },
+            "arguments": [],
+            "keyword": "And ",
+            "line": 13,
+            "name": "each item opens a route with one h1 and a document title",
+            "match": {
+              "location": "packages\\testkit\\src\\step-definitions\\workspace-live-steps.ts:83"
+            }
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 100525000
+            },
+            "keyword": "After",
+            "hidden": true
+          }
+        ],
+        "tags": [
+          {
+            "name": "@phase1",
+            "line": 1
+          },
+          {
+            "name": "@area-UXW",
+            "line": 1
+          },
+          {
+            "name": "@REQ-UXW-001",
+            "line": 9
+          },
+          {
+            "name": "@BDD-UXW-001",
+            "line": 9
+          },
+          {
+            "name": "@ui",
+            "line": 9
+          }
+        ],
+        "type": "scenario"
+      },
+      {
+        "description": "",
+        "id": "workspace,-status-vocabulary-and-extension-capabilities;navigation-is-scoped-to-the-persona-and-every-screen-has-a-url",
+        "keyword": "Scenario Outline",
+        "line": 22,
+        "name": "Navigation is scoped to the persona and every screen has a URL",
+        "steps": [
+          {
+            "result": {
+              "status": "passed",
+              "duration": 526208399
+            },
+            "keyword": "Before",
+            "hidden": true
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 102200
+            },
+            "arguments": [],
+            "keyword": "Given ",
+            "line": 7,
+            "name": "the workspace is running with seed data in test mode",
+            "match": {
+              "location": "packages\\testkit\\src\\step-definitions\\workspace-live-steps.ts:48"
+            }
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 696297600
+            },
+            "arguments": [],
+            "keyword": "When ",
+            "line": 11,
+            "name": "\"internal verifier\" signs in",
+            "match": {
+              "location": "packages\\testkit\\src\\step-definitions\\workspace-live-steps.ts:54"
+            }
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 22285599
+            },
+            "arguments": [],
+            "keyword": "Then ",
+            "line": 12,
+            "name": "the primary navigation shows \"Overview, Evidence register, Verification queue, Findings and next actions\"",
+            "match": {
+              "location": "packages\\testkit\\src\\step-definitions\\workspace-live-steps.ts:77"
+            }
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 356588499
+            },
+            "arguments": [],
+            "keyword": "And ",
+            "line": 13,
+            "name": "each item opens a route with one h1 and a document title",
+            "match": {
+              "location": "packages\\testkit\\src\\step-definitions\\workspace-live-steps.ts:83"
+            }
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 165925999
+            },
+            "keyword": "After",
+            "hidden": true
+          }
+        ],
+        "tags": [
+          {
+            "name": "@phase1",
+            "line": 1
+          },
+          {
+            "name": "@area-UXW",
+            "line": 1
+          },
+          {
+            "name": "@REQ-UXW-001",
+            "line": 9
+          },
+          {
+            "name": "@BDD-UXW-001",
+            "line": 9
+          },
+          {
+            "name": "@ui",
+            "line": 9
+          }
+        ],
+        "type": "scenario"
+      },
+      {
+        "description": "",
+        "id": "workspace,-status-vocabulary-and-extension-capabilities;navigation-is-scoped-to-the-persona-and-every-screen-has-a-url",
+        "keyword": "Scenario Outline",
+        "line": 23,
+        "name": "Navigation is scoped to the persona and every screen has a URL",
+        "steps": [
+          {
+            "result": {
+              "status": "passed",
+              "duration": 595972399
+            },
+            "keyword": "Before",
+            "hidden": true
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 118399
+            },
+            "arguments": [],
+            "keyword": "Given ",
+            "line": 7,
+            "name": "the workspace is running with seed data in test mode",
+            "match": {
+              "location": "packages\\testkit\\src\\step-definitions\\workspace-live-steps.ts:48"
+            }
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 686510500
+            },
+            "arguments": [],
+            "keyword": "When ",
+            "line": 11,
+            "name": "\"programme manager\" signs in",
+            "match": {
+              "location": "packages\\testkit\\src\\step-definitions\\workspace-live-steps.ts:54"
+            }
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 32016099
+            },
+            "arguments": [],
+            "keyword": "Then ",
+            "line": 12,
+            "name": "the primary navigation shows \"Pipeline, Cohort, Directory, Legal catalogue review, Delegations\"",
+            "match": {
+              "location": "packages\\testkit\\src\\step-definitions\\workspace-live-steps.ts:77"
+            }
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 332307600
+            },
+            "arguments": [],
+            "keyword": "And ",
+            "line": 13,
+            "name": "each item opens a route with one h1 and a document title",
+            "match": {
+              "location": "packages\\testkit\\src\\step-definitions\\workspace-live-steps.ts:83"
+            }
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 114884300
+            },
+            "keyword": "After",
+            "hidden": true
+          }
+        ],
+        "tags": [
+          {
+            "name": "@phase1",
+            "line": 1
+          },
+          {
+            "name": "@area-UXW",
+            "line": 1
+          },
+          {
+            "name": "@REQ-UXW-001",
+            "line": 9
+          },
+          {
+            "name": "@BDD-UXW-001",
+            "line": 9
+          },
+          {
+            "name": "@ui",
+            "line": 9
+          }
+        ],
+        "type": "scenario"
+      },
+      {
+        "description": "",
+        "id": "workspace,-status-vocabulary-and-extension-capabilities;navigation-is-scoped-to-the-persona-and-every-screen-has-a-url",
+        "keyword": "Scenario Outline",
+        "line": 24,
+        "name": "Navigation is scoped to the persona and every screen has a URL",
+        "steps": [
+          {
+            "result": {
+              "status": "passed",
+              "duration": 623398699
+            },
+            "keyword": "Before",
+            "hidden": true
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 167199
+            },
+            "arguments": [],
+            "keyword": "Given ",
+            "line": 7,
+            "name": "the workspace is running with seed data in test mode",
+            "match": {
+              "location": "packages\\testkit\\src\\step-definitions\\workspace-live-steps.ts:48"
+            }
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 547456099
+            },
+            "arguments": [],
+            "keyword": "When ",
+            "line": 11,
+            "name": "\"union ta\" signs in",
+            "match": {
+              "location": "packages\\testkit\\src\\step-definitions\\workspace-live-steps.ts:54"
+            }
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 27190700
+            },
+            "arguments": [],
+            "keyword": "Then ",
+            "line": 12,
+            "name": "the primary navigation shows \"Cohort, Capability gaps\"",
+            "match": {
+              "location": "packages\\testkit\\src\\step-definitions\\workspace-live-steps.ts:77"
+            }
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 178795900
+            },
+            "arguments": [],
+            "keyword": "And ",
+            "line": 13,
+            "name": "each item opens a route with one h1 and a document title",
+            "match": {
+              "location": "packages\\testkit\\src\\step-definitions\\workspace-live-steps.ts:83"
+            }
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 104147300
+            },
+            "keyword": "After",
+            "hidden": true
+          }
+        ],
+        "tags": [
+          {
+            "name": "@phase1",
+            "line": 1
+          },
+          {
+            "name": "@area-UXW",
+            "line": 1
+          },
+          {
+            "name": "@REQ-UXW-001",
+            "line": 9
+          },
+          {
+            "name": "@BDD-UXW-001",
+            "line": 9
+          },
+          {
+            "name": "@ui",
+            "line": 9
+          }
+        ],
+        "type": "scenario"
+      },
+      {
+        "description": "",
+        "id": "workspace,-status-vocabulary-and-extension-capabilities;navigation-is-scoped-to-the-persona-and-every-screen-has-a-url",
+        "keyword": "Scenario Outline",
+        "line": 25,
+        "name": "Navigation is scoped to the persona and every screen has a URL",
+        "steps": [
+          {
+            "result": {
+              "status": "passed",
+              "duration": 557204399
+            },
+            "keyword": "Before",
+            "hidden": true
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 133799
+            },
+            "arguments": [],
+            "keyword": "Given ",
+            "line": 7,
+            "name": "the workspace is running with seed data in test mode",
+            "match": {
+              "location": "packages\\testkit\\src\\step-definitions\\workspace-live-steps.ts:48"
+            }
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 738876000
+            },
+            "arguments": [],
+            "keyword": "When ",
+            "line": 11,
+            "name": "\"self-enroller\" signs in",
+            "match": {
+              "location": "packages\\testkit\\src\\step-definitions\\workspace-live-steps.ts:54"
+            }
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 23757799
+            },
+            "arguments": [],
+            "keyword": "Then ",
+            "line": 12,
+            "name": "the primary navigation shows \"Certificate details, Create officer accounts, Hand over\"",
+            "match": {
+              "location": "packages\\testkit\\src\\step-definitions\\workspace-live-steps.ts:77"
+            }
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 171300699
+            },
+            "arguments": [],
+            "keyword": "And ",
+            "line": 13,
+            "name": "each item opens a route with one h1 and a document title",
+            "match": {
+              "location": "packages\\testkit\\src\\step-definitions\\workspace-live-steps.ts:83"
+            }
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 65644899
+            },
+            "keyword": "After",
+            "hidden": true
+          }
+        ],
+        "tags": [
+          {
+            "name": "@phase1",
+            "line": 1
+          },
+          {
+            "name": "@area-UXW",
+            "line": 1
+          },
+          {
+            "name": "@REQ-UXW-001",
+            "line": 9
+          },
+          {
+            "name": "@BDD-UXW-001",
+            "line": 9
+          },
+          {
+            "name": "@ui",
+            "line": 9
+          }
+        ],
+        "type": "scenario"
+      },
+      {
+        "description": "",
+        "id": "workspace,-status-vocabulary-and-extension-capabilities;route-changes-move-focus-and-survive-reload",
+        "keyword": "Scenario",
+        "line": 28,
+        "name": "Route changes move focus and survive reload",
+        "steps": [
+          {
+            "result": {
+              "status": "passed",
+              "duration": 471577400
+            },
+            "keyword": "Before",
+            "hidden": true
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 135299
+            },
+            "arguments": [],
+            "keyword": "Given ",
+            "line": 7,
+            "name": "the workspace is running with seed data in test mode",
+            "match": {
+              "location": "packages\\testkit\\src\\step-definitions\\workspace-live-steps.ts:48"
+            }
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 1879040600
+            },
+            "arguments": [],
+            "keyword": "When ",
+            "line": 29,
+            "name": "the user opens \"/coop/org-1/evidence\" and presses Back and Forward",
+            "match": {
+              "location": "packages\\testkit\\src\\step-definitions\\workspace-live-steps.ts:105"
+            }
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 328299
+            },
+            "arguments": [],
+            "keyword": "Then ",
+            "line": 30,
+            "name": "focus moves to the page h1 each time",
+            "match": {
+              "location": "packages\\testkit\\src\\step-definitions\\workspace-live-steps.ts:127"
+            }
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 507799
+            },
+            "arguments": [],
+            "keyword": "And ",
+            "line": 31,
+            "name": "filters and sort order persist in the URL query",
+            "match": {
+              "location": "packages\\testkit\\src\\step-definitions\\workspace-live-steps.ts:133"
+            }
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 152695400
+            },
+            "keyword": "After",
+            "hidden": true
+          }
+        ],
+        "tags": [
+          {
+            "name": "@phase1",
+            "line": 1
+          },
+          {
+            "name": "@area-UXW",
+            "line": 1
+          },
+          {
+            "name": "@REQ-UXW-001",
+            "line": 27
+          },
+          {
+            "name": "@BDD-UXW-002",
+            "line": 27
+          },
+          {
+            "name": "@ui",
+            "line": 27
+          }
+        ],
+        "type": "scenario"
+      },
+      {
+        "description": "",
+        "id": "workspace,-status-vocabulary-and-extension-capabilities;no-enum-text-reaches-the-user",
+        "keyword": "Scenario",
+        "line": 34,
+        "name": "No enum text reaches the user",
+        "steps": [
+          {
+            "result": {
+              "status": "passed",
+              "duration": 497856899
+            },
+            "keyword": "Before",
+            "hidden": true
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 121999
+            },
+            "arguments": [],
+            "keyword": "Given ",
+            "line": 7,
+            "name": "the workspace is running with seed data in test mode",
+            "match": {
+              "location": "packages\\testkit\\src\\step-definitions\\workspace-live-steps.ts:48"
+            }
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 4158108300
+            },
+            "arguments": [],
+            "keyword": "When ",
+            "line": 35,
+            "name": "every route is rendered with seed data",
+            "match": {
+              "location": "packages\\testkit\\src\\step-definitions\\workspace-live-steps.ts:139"
+            }
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 849199
+            },
+            "arguments": [],
+            "keyword": "Then ",
+            "line": 36,
+            "name": "no rendered text contains snake_case enum values",
+            "match": {
+              "location": "packages\\testkit\\src\\step-definitions\\workspace-live-steps.ts:153"
+            }
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 890400
+            },
+            "arguments": [],
+            "keyword": "And ",
+            "line": 37,
+            "name": "no rendered text contains the phrases \"compliant\", \"approved\" without authority or a bare \"Verified\"",
+            "match": {
+              "location": "packages\\testkit\\src\\step-definitions\\workspace-live-steps.ts:158"
+            }
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 138877599
+            },
+            "keyword": "After",
+            "hidden": true
+          }
+        ],
+        "tags": [
+          {
+            "name": "@phase1",
+            "line": 1
+          },
+          {
+            "name": "@area-UXW",
+            "line": 1
+          },
+          {
+            "name": "@REQ-UXW-002",
+            "line": 33
+          },
+          {
+            "name": "@BDD-UXW-003",
+            "line": 33
+          },
+          {
+            "name": "@ui",
+            "line": 33
+          },
+          {
+            "name": "@hard",
+            "line": 33
+          }
+        ],
+        "type": "scenario"
+      },
+      {
+        "description": "",
+        "id": "workspace,-status-vocabulary-and-extension-capabilities;verified-chips-carry-scope,-verifier,-version-and-class",
+        "keyword": "Scenario",
+        "line": 40,
+        "name": "Verified chips carry scope, verifier, version and class",
+        "steps": [
+          {
+            "result": {
+              "status": "passed",
+              "duration": 583577000
+            },
+            "keyword": "Before",
+            "hidden": true
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 114699
+            },
+            "arguments": [],
+            "keyword": "Given ",
+            "line": 7,
+            "name": "the workspace is running with seed data in test mode",
+            "match": {
+              "location": "packages\\testkit\\src\\step-definitions\\workspace-live-steps.ts:48"
+            }
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 898049099
+            },
+            "arguments": [],
+            "keyword": "When ",
+            "line": 41,
+            "name": "an item verified by the internal verifier is expanded",
+            "match": {
+              "location": "packages\\testkit\\src\\step-definitions\\workspace-live-steps.ts:166"
+            }
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 141636299
+            },
+            "arguments": [],
+            "keyword": "Then ",
+            "line": 42,
+            "name": "the chip text includes the verifier, scope, version and \"cooperative-internal\"",
+            "match": {
+              "location": "packages\\testkit\\src\\step-definitions\\workspace-live-steps.ts:179"
+            }
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 111253399
+            },
+            "keyword": "After",
+            "hidden": true
+          }
+        ],
+        "tags": [
+          {
+            "name": "@phase1",
+            "line": 1
+          },
+          {
+            "name": "@area-UXW",
+            "line": 1
+          },
+          {
+            "name": "@REQ-UXW-002",
+            "line": 39
+          },
+          {
+            "name": "@BDD-UXW-004",
+            "line": 39
+          },
+          {
+            "name": "@ui",
+            "line": 39
+          },
+          {
+            "name": "@hard",
+            "line": 39
+          }
+        ],
+        "type": "scenario"
+      }
+    ],
+    "id": "workspace,-status-vocabulary-and-extension-capabilities",
+    "line": 2,
+    "keyword": "Feature",
+    "name": "Workspace, status vocabulary and extension capabilities",
+    "tags": [
+      {
+        "name": "@phase1",
+        "line": 1
+      },
+      {
+        "name": "@area-UXW",
+        "line": 1
+      }
+    ],
+    "uri": "features\\10_workspace_and_capabilities.feature"
+  }
+]

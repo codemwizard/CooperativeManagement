@@ -1,0 +1,18 @@
+npm notice run symphony-prototype@1.0.0 test:wp6.1
+npm notice run node --env-file-if-exists=.env.local --env-file-if-exists=.env tools/run_wp6_1_routes.mjs
+
+  VITE v5.4.21  ready in 1009 ms
+
+  ➜  Local:   http://127.0.0.1:5175/
+
+Running 3 tests using 1 worker
+
+(node:39308) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+WP6.1 route list: /components, /login, six API-resolved workflow contexts plus three separately persisted officeholder contexts
+WP6.1 served routes exercised: /components, /login, /coop/9e8e7b8d-d0dd-4256-85f3-5d972505500e/overview, /coop/9e8e7b8d-d0dd-4256-85f3-5d972505500e/my-activities, /coop/9e8e7b8d-d0dd-4256-85f3-5d972505500e/my-household, /coop/9e8e7b8d-d0dd-4256-85f3-5d972505500e/overview, /coop/9e8e7b8d-d0dd-4256-85f3-5d972505500e/identity, /coop/9e8e7b8d-d0dd-4256-85f3-5d972505500e/bylaws, /coop/9e8e7b8d-d0dd-4256-85f3-5d972505500e/governance, /coop/9e8e7b8d-d0dd-4256-85f3-5d972505500e/meetings, /coop/9e8e7b8d-d0dd-4256-85f3-5d972505500e/evidence, /coop/9e8e7b8d-d0dd-4256-85f3-5d972505500e/findings, /coop/9e8e7b8d-d0dd-4256-85f3-5d972505500e/overview, /coop/9e8e7b8d-d0dd-4256-85f3-5d972505500e/evidence, /coop/9e8e7b8d-d0dd-4256-85f3-5d972505500e/verification-queue, /coop/9e8e7b8d-d0dd-4256-85f3-5d972505500e/findings, /workspace/pipeline, /workspace/cohort, /workspace/directory, /workspace/legal-catalogue, /workspace/delegations, /coop/49d5a14e-1b17-4d5f-bf03-1e3c6461ec5b/cohort, /coop/49d5a14e-1b17-4d5f-bf03-1e3c6461ec5b/capability-gaps, /coop/9e8e7b8d-d0dd-4256-85f3-5d972505500e/certificate-details, /coop/9e8e7b8d-d0dd-4256-85f3-5d972505500e/create-officer-accounts, /coop/9e8e7b8d-d0dd-4256-85f3-5d972505500e/hand-over, /coop/9e8e7b8d-d0dd-4256-85f3-5d972505500e/overview, /coop/9e8e7b8d-d0dd-4256-85f3-5d972505500e/governance, /coop/9e8e7b8d-d0dd-4256-85f3-5d972505500e/meetings, /coop/9e8e7b8d-d0dd-4256-85f3-5d972505500e/bylaws, /coop/9e8e7b8d-d0dd-4256-85f3-5d972505500e/evidence, /coop/9e8e7b8d-d0dd-4256-85f3-5d972505500e/findings, /coop/9e8e7b8d-d0dd-4256-85f3-5d972505500e/overview, /coop/9e8e7b8d-d0dd-4256-85f3-5d972505500e/governance, /coop/9e8e7b8d-d0dd-4256-85f3-5d972505500e/meetings, /coop/9e8e7b8d-d0dd-4256-85f3-5d972505500e/bylaws, /coop/9e8e7b8d-d0dd-4256-85f3-5d972505500e/evidence, /coop/9e8e7b8d-d0dd-4256-85f3-5d972505500e/findings, /coop/9e8e7b8d-d0dd-4256-85f3-5d972505500e/overview, /coop/9e8e7b8d-d0dd-4256-85f3-5d972505500e/financial-records, /coop/9e8e7b8d-d0dd-4256-85f3-5d972505500e/meetings, /coop/9e8e7b8d-d0dd-4256-85f3-5d972505500e/evidence, /coop/9e8e7b8d-d0dd-4256-85f3-5d972505500e/findings, /coop/9e8e7b8d-d0dd-4256-85f3-5d972505500e/evidence?filter=open&sort=severity
+  ok 1 tests\workspace\routes.spec.ts:21:1 › served component, login and workspace routes have titles, landmarks and keyboard route focus (28.9s)
+  ok 2 tests\workspace\routes.spec.ts:155:1 › workspace route rejects an unauthenticated browser session (2.0s)
+  ok 3 tests\workspace\routes.spec.ts:161:1 › provenance dialog has an accessible name, contains keyboard focus and restores its trigger on Escape (5.6s)
+
+  3 passed (46.3s)

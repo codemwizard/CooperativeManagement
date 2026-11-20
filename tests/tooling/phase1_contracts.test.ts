@@ -680,7 +680,7 @@ describe('REM-WP0.3 migrated table inventory', () => {
       .map((name) => readFileSync(path.join(migrationDirectory, name), 'utf8'));
     expect(validateTenantTableInventory(inventory, migrations)).toEqual([]);
     expect(inventory.tables.length).toBeGreaterThan(40);
-    expect(inventory.tables.filter((table: { rls_current: boolean }) => table.rls_current).map((table: { table: string }) => table.table).sort()).toEqual(['command_receipts', 'domain_events', 'reconciliation_inbox']);
+    expect(inventory.tables.filter((table: { rls_current: boolean }) => table.rls_current).map((table: { table: string }) => table.table).sort()).toEqual(['command_receipts', 'domain_events', 'reconciliation_inbox', 'verification_finding_attributions']);
   });
 
   it('defines a least-privilege RLS/grant policy for every migrated table and keeps baseline inventory distinct from REM-WP1.5 deployment proof', () => {

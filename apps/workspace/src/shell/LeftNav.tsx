@@ -8,33 +8,19 @@
 
 import React from 'react';
 import { NavLink } from 'react-router-dom';
+import type { WorkspaceNavigationItem } from '../presenters/present-workspace-context.js';
 
-/** All navigation areas defined by the spec */
-export const NAV_AREAS = [
-  { label: 'Overview', path: '/workspace/overview' },
-  { label: 'Identity', path: '/workspace/identity' },
-  { label: 'Enrolment and authority', path: '/workspace/enrolment' },
-  { label: 'By-laws and requirements', path: '/workspace/bylaws' },
-  { label: 'Governance', path: '/workspace/governance' },
-  { label: 'People and appointments', path: '/workspace/people' },
-  { label: 'Meetings and resolutions', path: '/workspace/meetings' },
-  { label: 'Committees', path: '/workspace/committees' },
-  { label: 'Audit and education', path: '/workspace/audit' },
-  { label: 'Evidence register', path: '/workspace/evidence' },
-  { label: 'Findings and next actions', path: '/workspace/findings' },
-] as const;
-
-export function LeftNav({ basePath = '/workspace' }: { basePath?: string }): React.ReactElement {
+export function LeftNav({ basePath = '/workspace', items }: { basePath?: string; items: readonly WorkspaceNavigationItem[] }): React.ReactElement {
   return (
     <nav
       aria-label="Primary navigation"
       style={styles.nav}
     >
       <ul style={styles.list} role="list">
-        {NAV_AREAS.map((area) => (
-          <li key={area.path} style={styles.item}>
+        {items.map((area) => (
+          <li key={`${area.path}:${area.label}`} style={styles.item}>
             <NavLink
-              to={`${basePath}/${area.path.split('/').at(-1)}`}
+              to={`${basePath}/${area.path}`}
               end
               style={({ isActive }) => ({
                 ...styles.link,
