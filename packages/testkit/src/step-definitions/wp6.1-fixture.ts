@@ -39,6 +39,13 @@ export const officeActors = [
   { persona: 'Vice-Chairperson', authority: 'vice_chairperson', positionId: '00000000-0000-4000-8000-000000000002' },
   { persona: 'Treasurer', authority: 'treasurer', positionId: '00000000-0000-4000-8000-000000000004' },
 ].map((actor) => ({ ...actor, userId: randomUUID(), personId: randomUUID(), password: `WP6.1 ${actor.authority} ${randomUUID()}` }));
+
+export async function countDomainEventsForWp6Fixture(): Promise<number> {
+  const result = await admin.query<{ count: string }>(
+    'SELECT count(*)::text AS count FROM symphony.domain_events WHERE tenant_id=$1::uuid', [tenantId],
+  );
+  return Number(result.rows[0]?.count ?? 0);
+}
 const throttleKey = Buffer.from(process.env.AUTH_THROTTLE_HMAC_KEY!, 'base64');
 
 

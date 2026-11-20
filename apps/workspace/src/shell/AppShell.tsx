@@ -12,6 +12,7 @@ import { OrgHeader } from './OrgHeader.js';
 import { ProvenanceDrawer } from './ProvenanceDrawer.js';
 import { CapabilityGapPage } from './CapabilityGapPage.js';
 import { EvidenceRegisterPage } from '../routes/EvidenceRegisterPage.js';
+import { publishUiTelemetry } from '../telemetry/ui-telemetry.js';
 import { readWorkspaceContext } from '../api/workspace-client.js';
 import { isOrganizationInContext, presentWorkspaceContexts, selectWorkspaceContext } from '../presenters/present-workspace-context.js';
 import type { WorkspaceContextFactsContract } from '@symphony/contracts';
@@ -67,6 +68,12 @@ export function AppShell(): React.ReactElement {
     document.querySelector<HTMLElement>('#main-content h1')?.focus({ preventScroll: true });
   }, [basePath, location.pathname, selectedContext?.id,
     selectedContext?.navigation.find((candidate) => location.pathname.endsWith(`/${candidate.path}`))?.label]);
+
+  useEffect(() => {
+    if (import.meta.env.VITE_ENABLE_UI_TELEMETRY === 'true' && selectedContext) {
+      publishUiTelemetry(location.pathname);
+    }
+  }, [location.pathname, selectedContext?.id]);
 
   const selectContext = (contextId: string): void => {
     const next = contexts.find((context) => context.id === contextId);

@@ -4,6 +4,7 @@ import { After, AfterAll, Before, BeforeAll, Given, Then, When, setDefaultTimeou
 import { chromium, type Page } from '@playwright/test';
 import {
   cleanupWp6_1Fixture,
+  countDomainEventsForWp6Fixture,
   independentlyVerifiedFindingId,
   officeActors,
   organizationId,
@@ -18,6 +19,50 @@ const baseUrl = process.env.WP6_1_BASE_URL ?? 'http://127.0.0.1:5175';
 const routeInventory = (JSON.parse(readFileSync('evidence/phase1/wp6.1/task-evidence.json', 'utf8')) as {
   claims?: { route_inventory?: string[] };
 }).claims?.route_inventory ?? [];
+
+When('the user clicks around the workspace with telemetry enabled', async function (this: SymphonyWorld) {
+  assert.equal(process.env.VITE_ENABLE_UI_TELEMETRY, 'true', 'Telemetry scenario requires the explicit test opt-in.');
+  const page = requiredPage(this);
+  await signInAsBase(page, this.baseUrl!);
+  const contextSelect = page.getByLabel('Current workflow', { exact: true });
+  const verifierContext = contextSelect.locator('option').filter({ hasText: /internal verifier/i }).first();
+  await verifierContext.waitFor({ state: 'attached' });
+  await contextSelect.selectOption((await verifierContext.getAttribute('value'))!);
+  const before = await countDomainEventsForWp6Fixture();
+  await page.evaluate(() => {
+    (window as Window & { __uiTelemetry?: unknown[] }).__uiTelemetry = [];
+    window.addEventListener('symphony:ui-telemetry', (event) => {
+      (window as Window & { __uiTelemetry?: unknown[] }).__uiTelemetry?.push((event as CustomEvent).detail);
+    });
+  });
+  await page.getByRole('link', { name: 'Evidence register' }).click();
+  await page.getByRole('heading', { level: 1, name: 'Evidence register' }).waitFor({ state: 'visible' });
+  await page.getByRole('link', { name: 'Overview' }).click();
+  await page.getByRole('heading', { level: 1, name: 'Overview' }).waitFor({ state: 'visible' });
+  const events = await page.evaluate(() => (window as Window & { __uiTelemetry?: unknown[] }).__uiTelemetry ?? []);
+  const after = await countDomainEventsForWp6Fixture();
+  (this as unknown as Record<string, unknown>)['_uiTelemetryEvents'] = events;
+  (this as unknown as Record<string, unknown>)['_uiTelemetryDomainEventCounts'] = { before, after };
+});
+
+Then('the domain event store contains no UI interaction events', function (this: SymphonyWorld) {
+  const counts = (this as unknown as Record<string, unknown>)['_uiTelemetryDomainEventCounts'] as { before: number; after: number } | undefined;
+  assert.ok(counts, 'No telemetry scenario database observation was captured.');
+  assert.equal(counts.after, counts.before, 'Opening workspace screens must not append business domain events.');
+});
+
+Then('the telemetry stream contains no personal data', function (this: SymphonyWorld) {
+  const events = (this as unknown as Record<string, unknown>)['_uiTelemetryEvents'] as Array<Record<string, unknown>> | undefined;
+  assert.ok(events && events.length >= 2, 'The enabled UI telemetry stream must report the visited screens.');
+  for (const event of events) {
+    assert.deepEqual(Object.keys(event).sort(), ['event', 'occurredAt', 'screen']);
+    assert.equal(event.event, 'workspace.screen_viewed');
+    assert.ok(['overview', 'evidence'].includes(String(event.screen)));
+    assert.ok(Number.isFinite(Date.parse(String(event.occurredAt))));
+    const serialized = JSON.stringify(event);
+    assert.doesNotMatch(serialized, /@|[0-9a-f]{8}-[0-9a-f-]{27}/i);
+  }
+});
 
 const navigationByPersona: Record<string, readonly string[]> = {
   'cooperative member': ['Overview', 'My activities', 'My household'],

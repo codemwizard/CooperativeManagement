@@ -12,6 +12,29 @@ import { describe, it, expect } from 'vitest';
 import { presentEvidence, type EvidenceStanding } from '../presenters/present-evidence.js';
 import { presentRequirement, type RequirementStatus } from '../presenters/present-requirement.js';
 import { selectWorkspaceContext, type PresentedWorkspaceContext } from '../presenters/present-workspace-context.js';
+import { publishUiTelemetry, UI_TELEMETRY_EVENT } from '../telemetry/ui-telemetry.js';
+
+describe('privacy-safe workspace UI telemetry', () => {
+  it('emits only an allowlisted screen category and timestamp, never path identifiers', () => {
+    const stream = new EventTarget();
+    let captured: unknown;
+    stream.addEventListener(UI_TELEMETRY_EVENT, (event) => {
+      captured = (event as CustomEvent).detail;
+    });
+    publishUiTelemetry('/coop/00000000-0000-4000-8000-000000000001/evidence?member=private', stream);
+    expect(captured).toEqual({
+      event: 'workspace.screen_viewed',
+      screen: 'evidence',
+      occurredAt: expect.any(String),
+    });
+    expect(JSON.stringify(captured)).not.toContain('00000000-0000-4000-8000-000000000001');
+    expect(JSON.stringify(captured)).not.toContain('member=private');
+  });
+
+  it('does not expose an unrecognized route as telemetry', () => {
+    expect(publishUiTelemetry('/coop/private-organization-id/private-route', new EventTarget()).screen).toBe('overview');
+  });
+});
 
 const ALL_EVIDENCE_STANDINGS: EvidenceStanding[] = [
   'asserted',

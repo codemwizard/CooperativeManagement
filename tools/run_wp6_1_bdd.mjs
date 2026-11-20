@@ -32,6 +32,7 @@ mkdirSync(evidenceDirectory, { recursive: true });
 const reportPath = path.join(evidenceDirectory, 'cucumber-report.json');
 const runLogPath = path.join(evidenceDirectory, 'cucumber-run.log');
 const apiLogPath = path.join(evidenceDirectory, 'cucumber-api-redacted.log');
+const telemetryMode = process.env.WP6_1_SCENARIO_SET === 'telemetry';
 writeFileSync(apiLogPath, '');
 
 const environment = {
@@ -41,6 +42,7 @@ const environment = {
   AUTH_THROTTLE_HMAC_KEY: process.env.AUTH_THROTTLE_HMAC_KEY ?? Buffer.alloc(32, 0x61).toString('base64'),
   WP5_5_API_LOG_PATH: apiLogPath,
   WP6_1_BASE_URL: origin,
+  VITE_ENABLE_UI_TELEMETRY: telemetryMode ? 'true' : 'false',
   VITE_AUTH_API_TARGET: `http://127.0.0.1:${apiPort}`,
   NODE_OPTIONS: [process.env.NODE_OPTIONS, '--import=tsx'].filter(Boolean).join(' '),
 };
@@ -63,7 +65,7 @@ function runCucumber() {
   const cli = path.join(root, 'node_modules', '@cucumber', 'cucumber', 'bin', 'cucumber.js');
   return new Promise((resolve, reject) => {
     const cucumberReportPath = reportPath.replaceAll('\\', '/');
-    const child = start([cli, '--config', 'cucumber.cjs', '--profile', 'wp61', '--format', `json:"${cucumberReportPath}"`], { stdio: ['ignore', 'pipe', 'pipe'] });
+    const child = start([cli, '--config', 'cucumber.cjs', '--profile', telemetryMode ? 'telemetry' : 'wp61', '--format', `json:"${cucumberReportPath}"`], { stdio: ['ignore', 'pipe', 'pipe'] });
     let stdout = '';
     let stderr = '';
     child.stdout.setEncoding('utf8').on('data', (chunk) => { stdout += chunk; process.stdout.write(chunk); });
@@ -87,7 +89,7 @@ try {
     try { report = JSON.parse(readFileSync(reportPath, 'utf8')); }
     catch (error) { throw new Error(`Cucumber report is missing or invalid: ${error instanceof Error ? error.message : String(error)}`); }
     const elements = report.flatMap((feature) => feature.elements ?? []);
-    const requiredIds = ['BDD-UXW-001', 'BDD-UXW-002', 'BDD-UXW-003', 'BDD-UXW-004'];
+    const requiredIds = telemetryMode ? ['BDD-AUD-007'] : ['BDD-UXW-001', 'BDD-UXW-002', 'BDD-UXW-003', 'BDD-UXW-004'];
     for (const id of requiredIds) {
       const scenarios = elements.filter((scenario) => (scenario.tags ?? []).some((tag) => tag.name === `@${id}`));
       if (!scenarios.length) throw new Error(`Cucumber report contains no executed examples for ${id}.`);
@@ -97,9 +99,14 @@ try {
         }
       }
     }
-    const navigationCount = elements.filter((scenario) => (scenario.tags ?? []).some((tag) => tag.name === '@BDD-UXW-001')).length;
-    if (navigationCount !== 9) throw new Error(`Expected nine frozen UXW-001 contexts, observed ${navigationCount}.`);
-    console.log(`WP6.1 live Cucumber PASS: ${navigationCount} UXW-001 contexts and UXW-002–004 executed.`);
+    if (telemetryMode) {
+      if (elements.length !== 1) throw new Error(`Expected one AUD-007 telemetry scenario, observed ${elements.length}.`);
+      console.log('WP1.1/WP6.1 live telemetry Cucumber PASS: AUD-007 executed against the served workspace and PostgreSQL.');
+    } else {
+      const navigationCount = elements.filter((scenario) => (scenario.tags ?? []).some((tag) => tag.name === '@BDD-UXW-001')).length;
+      if (navigationCount !== 9) throw new Error(`Expected nine frozen UXW-001 contexts, observed ${navigationCount}.`);
+      console.log(`WP6.1 live Cucumber PASS: ${navigationCount} UXW-001 contexts and UXW-002–004 executed.`);
+    }
   }
 } catch (error) {
   const message = error instanceof Error ? error.stack ?? error.message : String(error);

@@ -272,7 +272,7 @@
       {
         "command": "node node_modules/vitest/vitest.mjs run tests/tooling/phase1_contracts.test.ts (94 tests passed)",
         "result": "passed",
-        "artifact": "evidence/phase1/DEMO_AUTHORIZATION_CONTRACT.md"
+        "artifact": "docs/phase1/DEMO_AUTHORIZATION_CONTRACT.md"
       }
     ],
     "claims": {

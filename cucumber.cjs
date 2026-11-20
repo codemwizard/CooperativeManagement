@@ -32,4 +32,15 @@ module.exports = {
     format: ['progress'],
     tags: '(@BDD-UXW-001 or @BDD-UXW-002 or @BDD-UXW-003 or @BDD-UXW-004) and not @wip',
   },
+  telemetry: {
+    paths: ['features/09_commands_audit_and_integrity.feature'],
+    requireModule: [],
+    import: [
+      'packages/testkit/src/step-definitions/world.ts',
+      'packages/testkit/src/step-definitions/kernel-steps.ts',
+      'packages/testkit/src/step-definitions/workspace-live-steps.ts',
+    ],
+    format: ['progress'],
+    tags: '@BDD-AUD-007 and not @wip',
+  },
 };

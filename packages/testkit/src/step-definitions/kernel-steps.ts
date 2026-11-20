@@ -16,7 +16,15 @@ import { z } from 'zod';
 import { After, Given, When, Then } from '@cucumber/cucumber';
 import pg from 'pg';
 import { sql, type Kysely } from 'kysely';
-import { createDb, PostgresSecurityAttemptWriter, validateSecurityAttemptRuntimeProfile, type SymphonyDatabase } from '@symphony/db';
+import {
+  createDb,
+  PostgresCommandReceiptStore,
+  PostgresCommandTransactionRunner,
+  PostgresRepository,
+  PostgresSecurityAttemptWriter,
+  validateSecurityAttemptRuntimeProfile,
+  type SymphonyDatabase,
+} from '@symphony/db';
 import type { SymphonyWorld } from './world.js';
 import {
   CommandBus,
@@ -40,6 +48,84 @@ import { FakeClock, SequentialIds } from '../index.js';
 
 interface BddTestAggregate extends AggregateRoot {
   readonly label: string;
+}
+
+interface PostgresAtomicBddState {
+  readonly admin: pg.Pool;
+  readonly db: Kysely<SymphonyDatabase>;
+  readonly recoveryDb: Kysely<SymphonyDatabase>;
+  readonly tenantId: string;
+  readonly aggregateId: string;
+  readonly commandId: string;
+  readonly actorId: string;
+  readonly eventId: string;
+  readonly outboxId: string;
+  readonly triggerName: string;
+  readonly functionName: string;
+  readonly result?: CommandResult<unknown>;
+  readonly error?: unknown;
+}
+
+interface PostgresTimestampBddState {
+  readonly admin: pg.Pool;
+  readonly db: Kysely<SymphonyDatabase>;
+  readonly recoveryDb: Kysely<SymphonyDatabase>;
+  readonly tenantId: string;
+  readonly aggregateId: string;
+  readonly eventIds: readonly [string, string];
+  readonly occurredAt: string;
+}
+
+function pgAtomicState(world: SymphonyWorld): PostgresAtomicBddState | undefined {
+  return (world as unknown as Record<string, unknown>)['_postgresAtomicBddState'] as PostgresAtomicBddState | undefined;
+}
+
+async function cleanupPostgresAtomicBddState(state: PostgresAtomicBddState): Promise<void> {
+  try {
+    await state.admin.query(`DROP TRIGGER IF EXISTS ${state.triggerName} ON symphony.event_outbox`);
+    await state.admin.query(`DROP FUNCTION IF EXISTS symphony.${state.functionName}()`);
+    await state.admin.query('DELETE FROM symphony.event_outbox WHERE id = $1', [state.outboxId]);
+    const client = await state.admin.connect();
+    try {
+      await client.query('BEGIN');
+      await client.query("SELECT set_config('app.tenant_id', $1, true)", [state.tenantId]);
+      await client.query('ALTER TABLE symphony.domain_events DISABLE TRIGGER domain_events_immutability');
+      await client.query('DELETE FROM symphony.domain_events WHERE tenant_id = $1', [state.tenantId]);
+      await client.query('ALTER TABLE symphony.domain_events ENABLE TRIGGER domain_events_immutability');
+      await client.query('DELETE FROM symphony.command_receipts WHERE tenant_id = $1', [state.tenantId]);
+      await client.query('DELETE FROM symphony.aggregate_states WHERE tenant_id = $1', [state.tenantId]);
+      await client.query('DELETE FROM symphony.tenants WHERE id = $1', [state.tenantId]);
+      await client.query('COMMIT');
+    } catch (error) {
+      await client.query('ROLLBACK').catch(() => undefined);
+      throw error;
+    } finally {
+      client.release();
+    }
+  } finally {
+    await Promise.all([state.db.destroy(), state.recoveryDb.destroy(), state.admin.end()]);
+  }
+}
+
+async function cleanupPostgresTimestampBddState(state: PostgresTimestampBddState): Promise<void> {
+  const client = await state.admin.connect();
+  try {
+    await client.query('BEGIN');
+    await client.query("SELECT set_config('app.tenant_id', $1, true)", [state.tenantId]);
+    await client.query('ALTER TABLE symphony.domain_events DISABLE TRIGGER domain_events_immutability');
+    await client.query('DELETE FROM symphony.domain_events WHERE id = ANY($1::uuid[])', [state.eventIds]);
+    await client.query('ALTER TABLE symphony.domain_events ENABLE TRIGGER domain_events_immutability');
+    await client.query('DELETE FROM symphony.aggregate_states WHERE tenant_id = $1 AND id = $2', [state.tenantId, state.aggregateId]);
+    await client.query('DELETE FROM symphony.command_receipts WHERE tenant_id = $1', [state.tenantId]);
+    await client.query('DELETE FROM symphony.tenants WHERE id = $1', [state.tenantId]);
+    await client.query('COMMIT');
+  } catch (error) {
+    await client.query('ROLLBACK');
+    throw error;
+  } finally {
+    client.release();
+    await Promise.all([state.db.destroy(), state.recoveryDb.destroy(), state.admin.end()]);
+  }
 }
 
 // ─── In-memory infrastructure stubs ───────────────────────────────────────────
@@ -213,12 +299,23 @@ async function cleanupWp15CrossOrganisationState(state: Wp15CrossOrganisationSta
 After(async function (this: SymphonyWorld) {
   const world = this as unknown as Record<string, unknown>;
   const state = world['_wp15CrossOrganisationState'] as Wp15CrossOrganisationState | undefined;
-  if (!state) return;
-  delete world['_wp15CrossOrganisationState'];
-  try {
-    await cleanupWp15CrossOrganisationState(state);
-  } finally {
-    await Promise.all([state.appDb.destroy(), state.admin.end()]);
+  if (state) {
+    delete world['_wp15CrossOrganisationState'];
+    try {
+      await cleanupWp15CrossOrganisationState(state);
+    } finally {
+      await Promise.all([state.appDb.destroy(), state.admin.end()]);
+    }
+  }
+  const atomicState = pgAtomicState(this);
+  if (atomicState) {
+    delete world['_postgresAtomicBddState'];
+    await cleanupPostgresAtomicBddState(atomicState);
+  }
+  const timestampState = world['_postgresTimestampBddState'] as PostgresTimestampBddState | undefined;
+  if (timestampState) {
+    delete world['_postgresTimestampBddState'];
+    await cleanupPostgresTimestampBddState(timestampState);
   }
 });
 
@@ -252,83 +349,209 @@ When(
   'a command fails after the state change but before the outbox write',
   async function (this: SymphonyWorld) {
     if (this.currentActor === null) throw new Error('No current actor');
+    const adminUrl = process.env['PHASE1_TEST_ADMIN_DATABASE_URL'];
+    const appUrl = process.env['PHASE1_TEST_APP_DATABASE_URL'];
+    if (!adminUrl || !appUrl) throw new Error('BDD-AUD-001 requires isolated PostgreSQL admin and app-role URLs.');
+    if (process.env['DATA_MODE'] !== 'test') throw new Error('BDD-AUD-001 requires DATA_MODE=test.');
 
-    const { tenantId, userId } = this.currentActor;
-    const clock = new FakeClock('2026-01-01T12:00:00.000Z');
-    const ids = new SequentialIds();
-    const repo = new BddRepository();
-    const receiptStore = new BddReceiptStore();
+    const tenantId = randomUUID();
+    const aggregateId = randomUUID();
+    const commandId = randomUUID();
+    const actorId = randomUUID();
+    const eventId = randomUUID();
+    const outboxId = randomUUID();
+    const suffix = randomUUID().replaceAll('-', '');
+    const triggerName = `bdd_aud001_${suffix}`;
+    const functionName = `${triggerName}_fail`;
+    const admin = new pg.Pool({ connectionString: adminUrl, max: 2 });
+    const db = createDb(appUrl, { max: 1 });
+    const recoveryDb = createDb(appUrl, { max: 1 });
+    const state: PostgresAtomicBddState = {
+      admin, db, recoveryDb, tenantId, aggregateId, commandId, actorId, eventId, outboxId, triggerName, functionName,
+    };
+    (this as unknown as Record<string, unknown>)['_postgresAtomicBddState'] = state;
 
-    // Force failure on every save attempt
-    repo.failOnSave = true;
+    const adminIdentity = await admin.query<{ database_name: string; server_version_num: string; can_manage_events: boolean }>(
+      `SELECT current_database() AS database_name, current_setting('server_version_num') AS server_version_num,
+              r.rolsuper OR c.relowner = r.oid AS can_manage_events
+       FROM pg_roles r JOIN pg_class c ON c.oid = 'symphony.domain_events'::regclass
+       WHERE r.rolname = current_user`,
+    );
+    assert.ok(adminIdentity.rows[0]?.database_name.toLowerCase().endsWith('_test'), 'BDD-AUD-001 must use an isolated *_test database.');
+    assert.equal(Number(adminIdentity.rows[0]?.server_version_num), 180000, 'BDD-AUD-001 requires PostgreSQL 18.0.');
+    assert.ok(adminIdentity.rows[0]?.can_manage_events, 'BDD-AUD-001 fixture role must own the append-only event table or be superuser.');
+    const appIdentity = await sql<{ role_name: string }>`SELECT current_user AS role_name`.execute(db);
+    assert.equal(appIdentity.rows[0]?.role_name, 'symphony_app', 'BDD-AUD-001 command must use the restricted app role.');
+    await admin.query('INSERT INTO symphony.tenants (id, name) VALUES ($1, $2)', [tenantId, 'BDD-AUD-001 synthetic transaction fixture']);
 
-    const bus = makeBus(repo, receiptStore, clock, ids);
+    // The trigger fails at the real outbox INSERT after the receipt, aggregate state,
+    // and domain event have been written inside the same PostgreSQL transaction.
+    await admin.query(
+      `CREATE FUNCTION symphony.${functionName}() RETURNS trigger LANGUAGE plpgsql AS $$
+       BEGIN IF NEW.id = '${outboxId}'::uuid THEN RAISE EXCEPTION 'BDD-AUD-001 injected outbox failure'; END IF; RETURN NEW; END $$`,
+    );
+    await admin.query(
+      `CREATE TRIGGER ${triggerName} BEFORE INSERT ON symphony.event_outbox FOR EACH ROW EXECUTE FUNCTION symphony.${functionName}()`,
+    );
 
-    const aggId = ids.next('agg');
-    const evtId = ids.next('evt');
-    const envelope = makeEnvelope({
-      commandId: ids.next('cmd'),
-      tenantId,
-      userId,
-      type: 'AtomicTestCommand',
-      payload: { label: 'atomic' },
+    const clock = { now: () => new Date().toISOString() };
+    const repository = new PostgresRepository<BddTestAggregate>(db, 'BddTestAggregate');
+    const receiptStore = new PostgresCommandReceiptStore({ 'bdd.atomic': z.object({ label: z.string() }).strict() });
+    const bus = new CommandBus<BddTestAggregate>({
+      repository,
+      receiptStore,
+      policyStore: { decide: async () => ({ allow: true }) },
       clock,
+      idGen: { generate: () => randomUUID() },
+      transactionRunner: new PostgresCommandTransactionRunner(db, { recoveryDb }),
+      securityAttemptWriter: new PostgresSecurityAttemptWriter(db, validateSecurityAttemptRuntimeProfile(process.env)),
+      digestKeyProvider: {
+        activeVersion: () => 'bdd-atomic-v1',
+        hmac: async (version, bytes) => createHmac('sha256', version).update(bytes).digest(),
+      },
+      resultDataSchemas: { 'bdd.atomic': z.object({ label: z.string() }).strict() },
     });
-
-    let threw = false;
+    const now = clock.now();
+    const envelope: CommandEnvelope<{ aggregateId: string; label: string }> = {
+      commandId, tenantId, actorUserId: actorId, occurredAt: now, recordedAt: now,
+      deviceId: 'bdd-aud001-synthetic', expectedVersion: 0, correlationId: commandId,
+      type: 'bdd.atomic', schemaVersion: 1, payload: { aggregateId, label: 'atomic' },
+    };
+    let error: unknown;
     try {
-      await bus.dispatch(
-        envelope,
-        async (_env, _ctx) => ({
-          newState: { id: aggId, tenantId, version: 1, label: 'atomic' },
-          events: [
-            {
-              id: evtId,
-              tenantId,
-              aggregateId: aggId,
-              aggregateType: 'BddTestAggregate',
-              eventType: 'AtomicTestEvent',
-              payload: {},
-              occurredAt: clock.nowIso(),
-              recordedAt: clock.nowIso(),
-              sequence: 1,
-            },
-          ],
-          outbox: [
-            {
-              id: ids.next('outbox'),
-              eventId: evtId,
-              status: 'pending' as const,
-              createdAt: clock.nowIso(),
-            },
-          ],
-          data: {},
-        }),
-      );
-    } catch {
-      threw = true;
+      await bus.dispatch(envelope, (command) => ({
+        newState: { id: aggregateId, tenantId, version: 1, label: command.payload.label },
+        events: [{
+          id: eventId, tenantId, aggregateId, aggregateType: 'BddTestAggregate', eventType: 'AtomicTestEvent',
+          payload: { label: 'atomic' }, occurredAt: now, recordedAt: now, sequence: 1,
+        }],
+        outbox: [{ id: outboxId, eventId, status: 'pending', createdAt: now }],
+        data: { label: 'atomic' },
+      }), { trustedPrincipal: { actorUserId: actorId, tenantId } });
+    } catch (caught) {
+      error = caught;
     }
-
-    const world = this as unknown as Record<string, unknown>;
-    world['_atomicThrew'] = threw;
-    world['_atomicRepo'] = repo;
+    assert.ok(error, 'The PostgreSQL outbox failure must abort command dispatch.');
+    Object.assign(state, { error });
   },
 );
 
 Then('no state change persists', function (this: SymphonyWorld) {
+  const state = pgAtomicState(this);
+  assert.ok(state?.error, 'Expected PostgreSQL command dispatch to fail.');
+  return state.admin.query(
+    'SELECT 1 FROM symphony.aggregate_states WHERE tenant_id = $1 AND id = $2',
+    [state.tenantId, state.aggregateId],
+  ).then((result) => assert.equal(result.rowCount, 0, 'Expected no persisted aggregate state.'));
+});
+
+Then('no event persists', async function (this: SymphonyWorld) {
+  const state = pgAtomicState(this);
+  assert.ok(state, 'PostgreSQL transaction fixture is missing.');
+  const result = await state.admin.query('SELECT 1 FROM symphony.domain_events WHERE tenant_id = $1 AND id = $2', [state.tenantId, state.eventId]);
+  assert.equal(result.rowCount, 0, 'Expected no persisted event.');
+});
+
+Then('no outbox row persists', async function (this: SymphonyWorld) {
+  const state = pgAtomicState(this);
+  assert.ok(state, 'PostgreSQL transaction fixture is missing.');
+  const result = await state.admin.query('SELECT 1 FROM symphony.event_outbox WHERE id = $1', [state.outboxId]);
+  assert.equal(result.rowCount, 0, 'Expected no persisted outbox row.');
+});
+
+// ─── BDD-AUD-002: Idempotent replay ───────────────────────────────────────────
+
+Given('a command captured offline two days ago and synced now', async function (this: SymphonyWorld) {
+  const adminUrl = process.env['PHASE1_TEST_ADMIN_DATABASE_URL'];
+  const appUrl = process.env['PHASE1_TEST_APP_DATABASE_URL'];
+  if (!adminUrl || !appUrl || process.env['DATA_MODE'] !== 'test') {
+    throw new Error('BDD-AUD-015 requires the isolated PostgreSQL test database and DATA_MODE=test.');
+  }
+  const admin = new pg.Pool({ connectionString: adminUrl, max: 1 });
+  const db = createDb(appUrl, { max: 1 });
+  const recoveryDb = createDb(appUrl, { max: 1 });
+  const tenantId = randomUUID();
+  const aggregateId = randomUUID();
+  const eventIds: [string, string] = [randomUUID(), randomUUID()];
+  const occurredAt = new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString();
+  const state: PostgresTimestampBddState = { admin, db, recoveryDb, tenantId, aggregateId, eventIds, occurredAt };
+  (this as unknown as Record<string, unknown>)['_postgresTimestampBddState'] = state;
+  const identity = await admin.query<{ database_name: string; server_version_num: string }>(
+    'SELECT current_database() AS database_name, current_setting(\'server_version_num\') AS server_version_num',
+  );
+  assert.ok(identity.rows[0]?.database_name.toLowerCase().endsWith('_test'), 'BDD-AUD-015 must use an isolated *_test database.');
+  assert.equal(Number(identity.rows[0]?.server_version_num), 180000, 'BDD-AUD-015 requires PostgreSQL 18.0.');
+  await admin.query('INSERT INTO symphony.tenants (id, name) VALUES ($1, $2)', [tenantId, 'BDD-AUD-015 synthetic timestamp fixture']);
+  const resultSchema = z.object({ sequence: z.number().int().positive() }).strict();
+  const bus = new CommandBus<BddTestAggregate>({
+    repository: new PostgresRepository<BddTestAggregate>(db, 'BddTimestampAggregate'),
+    receiptStore: new PostgresCommandReceiptStore({ 'bdd.timestamp': resultSchema }),
+    policyStore: { decide: async () => ({ allow: true }) },
+    clock: { now: () => new Date().toISOString() },
+    idGen: { generate: () => randomUUID() },
+    transactionRunner: new PostgresCommandTransactionRunner(db, { recoveryDb }),
+    securityAttemptWriter: new PostgresSecurityAttemptWriter(db, validateSecurityAttemptRuntimeProfile(process.env)),
+    digestKeyProvider: {
+      activeVersion: () => 'bdd-timestamp-v1',
+      hmac: async (version, bytes) => createHmac('sha256', version).update(bytes).digest(),
+    },
+    resultDataSchemas: { 'bdd.timestamp': resultSchema },
+  });
+  const recordedBefore = new Date();
+  for (let sequence = 1; sequence <= 2; sequence++) {
+    const commandId = randomUUID();
+    const envelope: CommandEnvelope<{ aggregateId: string; sequence: number }> = {
+      commandId, tenantId, actorUserId: randomUUID(), occurredAt, recordedAt: new Date(0).toISOString(),
+      deviceId: 'bdd-aud015-synthetic-offline-device', expectedVersion: sequence - 1, correlationId: commandId,
+      type: 'bdd.timestamp', schemaVersion: 1, payload: { aggregateId, sequence },
+    };
+    const result = await bus.dispatch(envelope, (command) => {
+      const version = sequence;
+      return {
+        newState: { id: aggregateId, tenantId, version, label: `event-${sequence}` },
+        events: [{
+          id: eventIds[sequence - 1]!, tenantId, aggregateId, aggregateType: 'BddTimestampAggregate',
+          eventType: 'OfflineCommandRecorded', payload: { sequence }, occurredAt: command.occurredAt,
+          recordedAt: command.recordedAt, sequence,
+        }],
+        data: { sequence },
+      };
+    }, { trustedPrincipal: { actorUserId: envelope.actorUserId, tenantId } });
+    assert.equal(result.ok, true, `PostgreSQL command ${sequence} should commit.`);
+  }
+  (this as unknown as Record<string, unknown>)['_postgresTimestampRecordedBefore'] = recordedBefore;
+});
+
+Then('the event shows occurred_at two days ago and recorded_at now', async function (this: SymphonyWorld) {
   const world = this as unknown as Record<string, unknown>;
-  assert.strictEqual(world['_atomicThrew'], true, 'Expected command to throw');
-  assert.strictEqual((world['_atomicRepo'] as BddRepository).stateCount, 0, 'Expected no state rows');
+  const state = world['_postgresTimestampBddState'] as PostgresTimestampBddState | undefined;
+  const recordedBefore = world['_postgresTimestampRecordedBefore'] as Date | undefined;
+  assert.ok(state && recordedBefore, 'BDD-AUD-015 PostgreSQL fixture is missing.');
+  const events = await state.admin.query<{ occurred_at: Date; recorded_at: Date }>(
+    'SELECT occurred_at, recorded_at FROM symphony.domain_events WHERE tenant_id=$1 AND id=ANY($2::uuid[]) ORDER BY sequence',
+    [state.tenantId, state.eventIds],
+  );
+  assert.equal(events.rowCount, 2);
+  for (const event of events.rows) {
+    assert.equal(event.occurred_at.toISOString(), state.occurredAt);
+    assert.ok(event.recorded_at >= recordedBefore, 'recorded_at must be generated by PostgreSQL at persistence time.');
+    assert.ok(event.recorded_at.getTime() - event.occurred_at.getTime() > 24 * 60 * 60 * 1000);
+  }
 });
 
-Then('no event persists', function (this: SymphonyWorld) {
-  const repo = (this as unknown as Record<string, unknown>)['_atomicRepo'] as BddRepository;
-  assert.strictEqual(repo.events.length, 0, 'Expected no events');
-});
-
-Then('no outbox row persists', function (this: SymphonyWorld) {
-  const repo = (this as unknown as Record<string, unknown>)['_atomicRepo'] as BddRepository;
-  assert.strictEqual(repo.outbox.length, 0, 'Expected no outbox rows');
+Then('ordering of events within the aggregate follows the aggregate version', async function (this: SymphonyWorld) {
+  const state = (this as unknown as Record<string, unknown>)['_postgresTimestampBddState'] as PostgresTimestampBddState | undefined;
+  assert.ok(state, 'BDD-AUD-015 PostgreSQL fixture is missing.');
+  const persisted = await state.admin.query<{ sequence: number; aggregate_version: number }>(
+    `SELECT e.sequence, s.version AS aggregate_version
+       FROM symphony.domain_events e
+       JOIN symphony.aggregate_states s ON s.tenant_id=e.tenant_id AND s.id=e.aggregate_id
+      WHERE e.tenant_id=$1 AND e.aggregate_id=$2
+      ORDER BY e.sequence`,
+    [state.tenantId, state.aggregateId],
+  );
+  assert.deepEqual(persisted.rows.map((row) => Number(row.sequence)), [1, 2]);
+  assert.ok(persisted.rows.every((row) => Number(row.aggregate_version) === 2));
 });
 
 // ─── BDD-AUD-002: Idempotent replay ───────────────────────────────────────────

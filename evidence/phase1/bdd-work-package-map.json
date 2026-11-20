@@ -129,9 +129,10 @@
       ],
       "scenario": "A member may inspect the register read-only",
       "owner_tasks": [
-        "REM-WP6.1"
+        "REM-WP3.3",
+        "REM-WP6.3"
       ],
-      "required_path": "browser-to-API route with observable assertions",
+      "required_path": "REM-WP3.3 inspection-session and public-register policy plus REM-WP6.3 rendered member route",
       "assertion_rule": "Execute this exact tagged scenario with observable assertions on the specified product path; no mock, @wip, skip, tag removal, zero-step pass, or in-memory substitute.",
       "phase0_status": "mapped_and_deferred_to_owner_task"
     },
@@ -526,9 +527,9 @@
       ],
       "scenario": "The status strip uses shape, colour and text together",
       "owner_tasks": [
-        "REM-WP6.1"
+        "REM-WP6.3"
       ],
-      "required_path": "browser-to-API route with observable assertions",
+      "required_path": "WP6.3 served workspace presentation with rendered DOM and accessibility assertions",
       "assertion_rule": "Execute this exact tagged scenario with observable assertions on the specified product path; no mock, @wip, skip, tag removal, zero-step pass, or in-memory substitute.",
       "phase0_status": "mapped_and_deferred_to_owner_task"
     },
@@ -540,9 +541,9 @@
       ],
       "scenario": "Blocked actions explain themselves in text and are announced",
       "owner_tasks": [
-        "REM-WP6.1"
+        "REM-WP6.3"
       ],
-      "required_path": "browser-to-API route with observable assertions",
+      "required_path": "WP6.3 served workspace presentation with rendered DOM and accessibility assertions",
       "assertion_rule": "Execute this exact tagged scenario with observable assertions on the specified product path; no mock, @wip, skip, tag removal, zero-step pass, or in-memory substitute.",
       "phase0_status": "mapped_and_deferred_to_owner_task"
     },
@@ -582,9 +583,9 @@
       ],
       "scenario": "The provenance drawer is accessible and complete",
       "owner_tasks": [
-        "REM-WP6.1"
+        "REM-WP6.3"
       ],
-      "required_path": "browser-to-API route with observable assertions",
+      "required_path": "WP6.3 served workspace presentation with rendered DOM and accessibility assertions",
       "assertion_rule": "Execute this exact tagged scenario with observable assertions on the specified product path; no mock, @wip, skip, tag removal, zero-step pass, or in-memory substitute.",
       "phase0_status": "mapped_and_deferred_to_owner_task"
     },
