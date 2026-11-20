@@ -16,6 +16,8 @@ interface FindingRow {
   completed_at: Date | null;
   assignment_version_id: string;
   finding_version_id: string;
+  supplier_user_id: string;
+  assigned_to_user_id: string;
 }
 
 /** Read-only verified finding projection for the currently assigned, active internal verifier. */
@@ -33,7 +35,8 @@ export class PostgresVerifiedFindingRepository {
                 attr.public_name AS verifier_name, attr.office_title AS verifier_office,
                 f.scope, f.assurance_class, f.finding_at, attr.effective_at AS office_effective_at,
                 a.completed_at, a.evidence_version_id AS assignment_version_id,
-                f.evidence_version_id AS finding_version_id
+                f.evidence_version_id AS finding_version_id,
+                v.supplier_user_id, a.assigned_to_user_id
            FROM symphony.verification_assignments a
            JOIN symphony.evidence_items i ON i.id = a.evidence_item_id
            JOIN symphony.organizations o ON o.id = i.organization_id
@@ -67,6 +70,7 @@ export class PostgresVerifiedFindingRepository {
       return result.rows.map((row) => {
         const complete = row.completed_at !== null
           && row.assignment_version_id === row.finding_version_id
+          && row.supplier_user_id !== row.assigned_to_user_id
           && row.scope !== null && row.scope.trim().length > 0
           && row.verifier_name !== null && row.verifier_name.trim().length > 0
           && row.verifier_office !== null && row.verifier_office.trim().length > 0

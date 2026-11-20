@@ -25,7 +25,9 @@ if (process.env.DATA_MODE !== 'test' || !validLocalTestUrl(adminUrl) || !validLo
 const workspacePort = Number(process.env.WP6_1_WORKSPACE_PORT ?? 5176);
 const apiPort = Number(process.env.WP6_1_API_PORT ?? 3001);
 const origin = `http://127.0.0.1:${workspacePort}`;
-const evidenceDirectory = path.join(root, 'evidence', 'phase1', 'wp6.1');
+const evidenceDirectory = process.env.WP6_1_EVIDENCE_DIR
+  ? path.resolve(root, process.env.WP6_1_EVIDENCE_DIR)
+  : path.join(root, 'evidence', 'phase1', 'wp6.1');
 mkdirSync(evidenceDirectory, { recursive: true });
 const reportPath = path.join(evidenceDirectory, 'cucumber-report.json');
 const runLogPath = path.join(evidenceDirectory, 'cucumber-run.log');

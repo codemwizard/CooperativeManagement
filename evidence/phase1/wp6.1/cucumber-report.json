@@ -12,7 +12,7 @@
           {
             "result": {
               "status": "passed",
-              "duration": 3956434500
+              "duration": 1848631400
             },
             "keyword": "Before",
             "hidden": true
@@ -20,59 +20,59 @@
           {
             "result": {
               "status": "passed",
-              "duration": 304700
+              "duration": 593600
             },
             "arguments": [],
             "keyword": "Given ",
             "line": 7,
             "name": "the workspace is running with seed data in test mode",
             "match": {
-              "location": "packages\\testkit\\src\\step-definitions\\workspace-live-steps.ts:48"
+              "location": "packages\\testkit\\src\\step-definitions\\workspace-live-steps.ts:57"
             }
           },
           {
             "result": {
               "status": "passed",
-              "duration": 9005580500
+              "duration": 1788463499
             },
             "arguments": [],
             "keyword": "When ",
             "line": 11,
             "name": "\"cooperative member\" signs in",
             "match": {
-              "location": "packages\\testkit\\src\\step-definitions\\workspace-live-steps.ts:54"
+              "location": "packages\\testkit\\src\\step-definitions\\workspace-live-steps.ts:63"
             }
           },
           {
             "result": {
               "status": "passed",
-              "duration": 62967100
+              "duration": 43263700
             },
             "arguments": [],
             "keyword": "Then ",
             "line": 12,
             "name": "the primary navigation shows \"Overview, My activities, My household\"",
             "match": {
-              "location": "packages\\testkit\\src\\step-definitions\\workspace-live-steps.ts:77"
+              "location": "packages\\testkit\\src\\step-definitions\\workspace-live-steps.ts:86"
             }
           },
           {
             "result": {
               "status": "passed",
-              "duration": 418396300
+              "duration": 260295399
             },
             "arguments": [],
             "keyword": "And ",
             "line": 13,
             "name": "each item opens a route with one h1 and a document title",
             "match": {
-              "location": "packages\\testkit\\src\\step-definitions\\workspace-live-steps.ts:83"
+              "location": "packages\\testkit\\src\\step-definitions\\workspace-live-steps.ts:92"
             }
           },
           {
             "result": {
               "status": "passed",
-              "duration": 1897811199
+              "duration": 206238499
             },
             "keyword": "After",
             "hidden": true
@@ -112,7 +112,7 @@
           {
             "result": {
               "status": "passed",
-              "duration": 1191154600
+              "duration": 672860899
             },
             "keyword": "Before",
             "hidden": true
@@ -120,59 +120,59 @@
           {
             "result": {
               "status": "passed",
-              "duration": 1000599
+              "duration": 234800
             },
             "arguments": [],
             "keyword": "Given ",
             "line": 7,
             "name": "the workspace is running with seed data in test mode",
             "match": {
-              "location": "packages\\testkit\\src\\step-definitions\\workspace-live-steps.ts:48"
+              "location": "packages\\testkit\\src\\step-definitions\\workspace-live-steps.ts:57"
             }
           },
           {
             "result": {
               "status": "passed",
-              "duration": 641087400
+              "duration": 660087599
             },
             "arguments": [],
             "keyword": "When ",
             "line": 11,
             "name": "\"chairperson\" signs in",
             "match": {
-              "location": "packages\\testkit\\src\\step-definitions\\workspace-live-steps.ts:54"
+              "location": "packages\\testkit\\src\\step-definitions\\workspace-live-steps.ts:63"
             }
           },
           {
             "result": {
               "status": "passed",
-              "duration": 24536499
+              "duration": 29385099
             },
             "arguments": [],
             "keyword": "Then ",
             "line": 12,
             "name": "the primary navigation shows \"Overview, Governance, Meetings and resolutions, By-laws and requirements, Evidence register, Findings and next actions\"",
             "match": {
-              "location": "packages\\testkit\\src\\step-definitions\\workspace-live-steps.ts:77"
+              "location": "packages\\testkit\\src\\step-definitions\\workspace-live-steps.ts:86"
             }
           },
           {
             "result": {
               "status": "passed",
-              "duration": 864882800
+              "duration": 385552499
             },
             "arguments": [],
             "keyword": "And ",
             "line": 13,
             "name": "each item opens a route with one h1 and a document title",
             "match": {
-              "location": "packages\\testkit\\src\\step-definitions\\workspace-live-steps.ts:83"
+              "location": "packages\\testkit\\src\\step-definitions\\workspace-live-steps.ts:92"
             }
           },
           {
             "result": {
               "status": "passed",
-              "duration": 189674299
+              "duration": 104947799
             },
             "keyword": "After",
             "hidden": true
@@ -212,7 +212,7 @@
           {
             "result": {
               "status": "passed",
-              "duration": 658701100
+              "duration": 644153700
             },
             "keyword": "Before",
             "hidden": true
@@ -220,59 +220,59 @@
           {
             "result": {
               "status": "passed",
-              "duration": 207699
+              "duration": 166199
             },
             "arguments": [],
             "keyword": "Given ",
             "line": 7,
             "name": "the workspace is running with seed data in test mode",
             "match": {
-              "location": "packages\\testkit\\src\\step-definitions\\workspace-live-steps.ts:48"
+              "location": "packages\\testkit\\src\\step-definitions\\workspace-live-steps.ts:57"
             }
           },
           {
             "result": {
               "status": "passed",
-              "duration": 611138500
+              "duration": 607652700
             },
             "arguments": [],
             "keyword": "When ",
             "line": 11,
             "name": "\"vice-chairperson\" signs in",
             "match": {
-              "location": "packages\\testkit\\src\\step-definitions\\workspace-live-steps.ts:54"
+              "location": "packages\\testkit\\src\\step-definitions\\workspace-live-steps.ts:63"
             }
           },
           {
             "result": {
               "status": "passed",
-              "duration": 25462800
+              "duration": 24082099
             },
             "arguments": [],
             "keyword": "Then ",
             "line": 12,
             "name": "the primary navigation shows \"Overview, Governance, Meetings and resolutions, By-laws and requirements, Evidence register, Findings and next actions\"",
             "match": {
-              "location": "packages\\testkit\\src\\step-definitions\\workspace-live-steps.ts:77"
+              "location": "packages\\testkit\\src\\step-definitions\\workspace-live-steps.ts:86"
             }
           },
           {
             "result": {
               "status": "passed",
-              "duration": 443952600
+              "duration": 508867599
             },
             "arguments": [],
             "keyword": "And ",
             "line": 13,
             "name": "each item opens a route with one h1 and a document title",
             "match": {
-              "location": "packages\\testkit\\src\\step-definitions\\workspace-live-steps.ts:83"
+              "location": "packages\\testkit\\src\\step-definitions\\workspace-live-steps.ts:92"
             }
           },
           {
             "result": {
               "status": "passed",
-              "duration": 92534700
+              "duration": 88967000
             },
             "keyword": "After",
             "hidden": true
@@ -312,7 +312,7 @@
           {
             "result": {
               "status": "passed",
-              "duration": 532375199
+              "duration": 690346099
             },
             "keyword": "Before",
             "hidden": true
@@ -320,59 +320,59 @@
           {
             "result": {
               "status": "passed",
-              "duration": 225699
+              "duration": 153100
             },
             "arguments": [],
             "keyword": "Given ",
             "line": 7,
             "name": "the workspace is running with seed data in test mode",
             "match": {
-              "location": "packages\\testkit\\src\\step-definitions\\workspace-live-steps.ts:48"
+              "location": "packages\\testkit\\src\\step-definitions\\workspace-live-steps.ts:57"
             }
           },
           {
             "result": {
               "status": "passed",
-              "duration": 673419300
+              "duration": 582336999
             },
             "arguments": [],
             "keyword": "When ",
             "line": 11,
             "name": "\"secretary\" signs in",
             "match": {
-              "location": "packages\\testkit\\src\\step-definitions\\workspace-live-steps.ts:54"
+              "location": "packages\\testkit\\src\\step-definitions\\workspace-live-steps.ts:63"
             }
           },
           {
             "result": {
               "status": "passed",
-              "duration": 25852800
+              "duration": 25026499
             },
             "arguments": [],
             "keyword": "Then ",
             "line": 12,
             "name": "the primary navigation shows \"Overview, Identity, By-laws and requirements, Governance, Meetings and resolutions, Evidence register, Findings and next actions\"",
             "match": {
-              "location": "packages\\testkit\\src\\step-definitions\\workspace-live-steps.ts:77"
+              "location": "packages\\testkit\\src\\step-definitions\\workspace-live-steps.ts:86"
             }
           },
           {
             "result": {
               "status": "passed",
-              "duration": 452873900
+              "duration": 964557899
             },
             "arguments": [],
             "keyword": "And ",
             "line": 13,
             "name": "each item opens a route with one h1 and a document title",
             "match": {
-              "location": "packages\\testkit\\src\\step-definitions\\workspace-live-steps.ts:83"
+              "location": "packages\\testkit\\src\\step-definitions\\workspace-live-steps.ts:92"
             }
           },
           {
             "result": {
               "status": "passed",
-              "duration": 73663800
+              "duration": 78738199
             },
             "keyword": "After",
             "hidden": true
@@ -412,7 +412,7 @@
           {
             "result": {
               "status": "passed",
-              "duration": 523984899
+              "duration": 1566708999
             },
             "keyword": "Before",
             "hidden": true
@@ -420,59 +420,59 @@
           {
             "result": {
               "status": "passed",
-              "duration": 181599
+              "duration": 122699
             },
             "arguments": [],
             "keyword": "Given ",
             "line": 7,
             "name": "the workspace is running with seed data in test mode",
             "match": {
-              "location": "packages\\testkit\\src\\step-definitions\\workspace-live-steps.ts:48"
+              "location": "packages\\testkit\\src\\step-definitions\\workspace-live-steps.ts:57"
             }
           },
           {
             "result": {
               "status": "passed",
-              "duration": 662354600
+              "duration": 630458999
             },
             "arguments": [],
             "keyword": "When ",
             "line": 11,
             "name": "\"treasurer\" signs in",
             "match": {
-              "location": "packages\\testkit\\src\\step-definitions\\workspace-live-steps.ts:54"
+              "location": "packages\\testkit\\src\\step-definitions\\workspace-live-steps.ts:63"
             }
           },
           {
             "result": {
               "status": "passed",
-              "duration": 24127800
+              "duration": 28146000
             },
             "arguments": [],
             "keyword": "Then ",
             "line": 12,
             "name": "the primary navigation shows \"Overview, Financial records, Meetings and resolutions, Evidence register, Findings and next actions\"",
             "match": {
-              "location": "packages\\testkit\\src\\step-definitions\\workspace-live-steps.ts:77"
+              "location": "packages\\testkit\\src\\step-definitions\\workspace-live-steps.ts:86"
             }
           },
           {
             "result": {
               "status": "passed",
-              "duration": 338313099
+              "duration": 361625799
             },
             "arguments": [],
             "keyword": "And ",
             "line": 13,
             "name": "each item opens a route with one h1 and a document title",
             "match": {
-              "location": "packages\\testkit\\src\\step-definitions\\workspace-live-steps.ts:83"
+              "location": "packages\\testkit\\src\\step-definitions\\workspace-live-steps.ts:92"
             }
           },
           {
             "result": {
               "status": "passed",
-              "duration": 76105999
+              "duration": 114039899
             },
             "keyword": "After",
             "hidden": true
@@ -512,7 +512,7 @@
           {
             "result": {
               "status": "passed",
-              "duration": 526570599
+              "duration": 664405300
             },
             "keyword": "Before",
             "hidden": true
@@ -520,59 +520,59 @@
           {
             "result": {
               "status": "passed",
-              "duration": 128899
+              "duration": 224600
             },
             "arguments": [],
             "keyword": "Given ",
             "line": 7,
             "name": "the workspace is running with seed data in test mode",
             "match": {
-              "location": "packages\\testkit\\src\\step-definitions\\workspace-live-steps.ts:48"
+              "location": "packages\\testkit\\src\\step-definitions\\workspace-live-steps.ts:57"
             }
           },
           {
             "result": {
               "status": "passed",
-              "duration": 589567999
+              "duration": 589698100
             },
             "arguments": [],
             "keyword": "When ",
             "line": 11,
             "name": "\"internal verifier\" signs in",
             "match": {
-              "location": "packages\\testkit\\src\\step-definitions\\workspace-live-steps.ts:54"
+              "location": "packages\\testkit\\src\\step-definitions\\workspace-live-steps.ts:63"
             }
           },
           {
             "result": {
               "status": "passed",
-              "duration": 23078999
+              "duration": 25753700
             },
             "arguments": [],
             "keyword": "Then ",
             "line": 12,
             "name": "the primary navigation shows \"Overview, Evidence register, Verification queue, Findings and next actions\"",
             "match": {
-              "location": "packages\\testkit\\src\\step-definitions\\workspace-live-steps.ts:77"
+              "location": "packages\\testkit\\src\\step-definitions\\workspace-live-steps.ts:86"
             }
           },
           {
             "result": {
               "status": "passed",
-              "duration": 291962200
+              "duration": 428752200
             },
             "arguments": [],
             "keyword": "And ",
             "line": 13,
             "name": "each item opens a route with one h1 and a document title",
             "match": {
-              "location": "packages\\testkit\\src\\step-definitions\\workspace-live-steps.ts:83"
+              "location": "packages\\testkit\\src\\step-definitions\\workspace-live-steps.ts:92"
             }
           },
           {
             "result": {
               "status": "passed",
-              "duration": 72677800
+              "duration": 90424399
             },
             "keyword": "After",
             "hidden": true
@@ -612,7 +612,7 @@
           {
             "result": {
               "status": "passed",
-              "duration": 547315299
+              "duration": 653101900
             },
             "keyword": "Before",
             "hidden": true
@@ -620,59 +620,59 @@
           {
             "result": {
               "status": "passed",
-              "duration": 233500
+              "duration": 122800
             },
             "arguments": [],
             "keyword": "Given ",
             "line": 7,
             "name": "the workspace is running with seed data in test mode",
             "match": {
-              "location": "packages\\testkit\\src\\step-definitions\\workspace-live-steps.ts:48"
+              "location": "packages\\testkit\\src\\step-definitions\\workspace-live-steps.ts:57"
             }
           },
           {
             "result": {
               "status": "passed",
-              "duration": 644019199
+              "duration": 616881799
             },
             "arguments": [],
             "keyword": "When ",
             "line": 11,
             "name": "\"programme manager\" signs in",
             "match": {
-              "location": "packages\\testkit\\src\\step-definitions\\workspace-live-steps.ts:54"
+              "location": "packages\\testkit\\src\\step-definitions\\workspace-live-steps.ts:63"
             }
           },
           {
             "result": {
               "status": "passed",
-              "duration": 22199799
+              "duration": 27744199
             },
             "arguments": [],
             "keyword": "Then ",
             "line": 12,
             "name": "the primary navigation shows \"Pipeline, Cohort, Directory, Legal catalogue review, Delegations\"",
             "match": {
-              "location": "packages\\testkit\\src\\step-definitions\\workspace-live-steps.ts:77"
+              "location": "packages\\testkit\\src\\step-definitions\\workspace-live-steps.ts:86"
             }
           },
           {
             "result": {
               "status": "passed",
-              "duration": 315950000
+              "duration": 475110300
             },
             "arguments": [],
             "keyword": "And ",
             "line": 13,
             "name": "each item opens a route with one h1 and a document title",
             "match": {
-              "location": "packages\\testkit\\src\\step-definitions\\workspace-live-steps.ts:83"
+              "location": "packages\\testkit\\src\\step-definitions\\workspace-live-steps.ts:92"
             }
           },
           {
             "result": {
               "status": "passed",
-              "duration": 69829600
+              "duration": 130838599
             },
             "keyword": "After",
             "hidden": true
@@ -712,7 +712,7 @@
           {
             "result": {
               "status": "passed",
-              "duration": 495165799
+              "duration": 1333257599
             },
             "keyword": "Before",
             "hidden": true
@@ -720,59 +720,59 @@
           {
             "result": {
               "status": "passed",
-              "duration": 123299
+              "duration": 164499
             },
             "arguments": [],
             "keyword": "Given ",
             "line": 7,
             "name": "the workspace is running with seed data in test mode",
             "match": {
-              "location": "packages\\testkit\\src\\step-definitions\\workspace-live-steps.ts:48"
+              "location": "packages\\testkit\\src\\step-definitions\\workspace-live-steps.ts:57"
             }
           },
           {
             "result": {
               "status": "passed",
-              "duration": 776846200
+              "duration": 587877800
             },
             "arguments": [],
             "keyword": "When ",
             "line": 11,
             "name": "\"union ta\" signs in",
             "match": {
-              "location": "packages\\testkit\\src\\step-definitions\\workspace-live-steps.ts:54"
+              "location": "packages\\testkit\\src\\step-definitions\\workspace-live-steps.ts:63"
             }
           },
           {
             "result": {
               "status": "passed",
-              "duration": 23398399
+              "duration": 26959299
             },
             "arguments": [],
             "keyword": "Then ",
             "line": 12,
             "name": "the primary navigation shows \"Cohort, Capability gaps\"",
             "match": {
-              "location": "packages\\testkit\\src\\step-definitions\\workspace-live-steps.ts:77"
+              "location": "packages\\testkit\\src\\step-definitions\\workspace-live-steps.ts:86"
             }
           },
           {
             "result": {
               "status": "passed",
-              "duration": 131688099
+              "duration": 122398499
             },
             "arguments": [],
             "keyword": "And ",
             "line": 13,
             "name": "each item opens a route with one h1 and a document title",
             "match": {
-              "location": "packages\\testkit\\src\\step-definitions\\workspace-live-steps.ts:83"
+              "location": "packages\\testkit\\src\\step-definitions\\workspace-live-steps.ts:92"
             }
           },
           {
             "result": {
               "status": "passed",
-              "duration": 84906499
+              "duration": 91001799
             },
             "keyword": "After",
             "hidden": true
@@ -812,7 +812,7 @@
           {
             "result": {
               "status": "passed",
-              "duration": 566016299
+              "duration": 562918200
             },
             "keyword": "Before",
             "hidden": true
@@ -820,59 +820,59 @@
           {
             "result": {
               "status": "passed",
-              "duration": 136499
+              "duration": 129999
             },
             "arguments": [],
             "keyword": "Given ",
             "line": 7,
             "name": "the workspace is running with seed data in test mode",
             "match": {
-              "location": "packages\\testkit\\src\\step-definitions\\workspace-live-steps.ts:48"
+              "location": "packages\\testkit\\src\\step-definitions\\workspace-live-steps.ts:57"
             }
           },
           {
             "result": {
               "status": "passed",
-              "duration": 619775399
+              "duration": 552771199
             },
             "arguments": [],
             "keyword": "When ",
             "line": 11,
             "name": "\"self-enroller\" signs in",
             "match": {
-              "location": "packages\\testkit\\src\\step-definitions\\workspace-live-steps.ts:54"
+              "location": "packages\\testkit\\src\\step-definitions\\workspace-live-steps.ts:63"
             }
           },
           {
             "result": {
               "status": "passed",
-              "duration": 23496299
+              "duration": 23851800
             },
             "arguments": [],
             "keyword": "Then ",
             "line": 12,
             "name": "the primary navigation shows \"Certificate details, Create officer accounts, Hand over\"",
             "match": {
-              "location": "packages\\testkit\\src\\step-definitions\\workspace-live-steps.ts:77"
+              "location": "packages\\testkit\\src\\step-definitions\\workspace-live-steps.ts:86"
             }
           },
           {
             "result": {
               "status": "passed",
-              "duration": 167645199
+              "duration": 168566800
             },
             "arguments": [],
             "keyword": "And ",
             "line": 13,
             "name": "each item opens a route with one h1 and a document title",
             "match": {
-              "location": "packages\\testkit\\src\\step-definitions\\workspace-live-steps.ts:83"
+              "location": "packages\\testkit\\src\\step-definitions\\workspace-live-steps.ts:92"
             }
           },
           {
             "result": {
               "status": "passed",
-              "duration": 80900600
+              "duration": 90640199
             },
             "keyword": "After",
             "hidden": true
@@ -912,7 +912,7 @@
           {
             "result": {
               "status": "passed",
-              "duration": 524740400
+              "duration": 534353500
             },
             "keyword": "Before",
             "hidden": true
@@ -920,59 +920,59 @@
           {
             "result": {
               "status": "passed",
-              "duration": 125999
+              "duration": 124899
             },
             "arguments": [],
             "keyword": "Given ",
             "line": 7,
             "name": "the workspace is running with seed data in test mode",
             "match": {
-              "location": "packages\\testkit\\src\\step-definitions\\workspace-live-steps.ts:48"
+              "location": "packages\\testkit\\src\\step-definitions\\workspace-live-steps.ts:57"
             }
           },
           {
             "result": {
               "status": "passed",
-              "duration": 1666304700
+              "duration": 1624399400
             },
             "arguments": [],
             "keyword": "When ",
             "line": 29,
             "name": "the user opens \"/coop/org-1/evidence\" and presses Back and Forward",
             "match": {
-              "location": "packages\\testkit\\src\\step-definitions\\workspace-live-steps.ts:105"
+              "location": "packages\\testkit\\src\\step-definitions\\workspace-live-steps.ts:114"
             }
           },
           {
             "result": {
               "status": "passed",
-              "duration": 200799
+              "duration": 423099
             },
             "arguments": [],
             "keyword": "Then ",
             "line": 30,
             "name": "focus moves to the page h1 each time",
             "match": {
-              "location": "packages\\testkit\\src\\step-definitions\\workspace-live-steps.ts:127"
+              "location": "packages\\testkit\\src\\step-definitions\\workspace-live-steps.ts:136"
             }
           },
           {
             "result": {
               "status": "passed",
-              "duration": 349500
+              "duration": 677400
             },
             "arguments": [],
             "keyword": "And ",
             "line": 31,
             "name": "filters and sort order persist in the URL query",
             "match": {
-              "location": "packages\\testkit\\src\\step-definitions\\workspace-live-steps.ts:133"
+              "location": "packages\\testkit\\src\\step-definitions\\workspace-live-steps.ts:142"
             }
           },
           {
             "result": {
               "status": "passed",
-              "duration": 88204499
+              "duration": 102331299
             },
             "keyword": "After",
             "hidden": true
@@ -1012,7 +1012,7 @@
           {
             "result": {
               "status": "passed",
-              "duration": 516415899
+              "duration": 633503999
             },
             "keyword": "Before",
             "hidden": true
@@ -1020,59 +1020,59 @@
           {
             "result": {
               "status": "passed",
-              "duration": 122400
+              "duration": 152200
             },
             "arguments": [],
             "keyword": "Given ",
             "line": 7,
             "name": "the workspace is running with seed data in test mode",
             "match": {
-              "location": "packages\\testkit\\src\\step-definitions\\workspace-live-steps.ts:48"
+              "location": "packages\\testkit\\src\\step-definitions\\workspace-live-steps.ts:57"
             }
           },
           {
             "result": {
               "status": "passed",
-              "duration": 3810551399
+              "duration": 3502724800
             },
             "arguments": [],
             "keyword": "When ",
             "line": 35,
             "name": "every route is rendered with seed data",
             "match": {
-              "location": "packages\\testkit\\src\\step-definitions\\workspace-live-steps.ts:139"
+              "location": "packages\\testkit\\src\\step-definitions\\workspace-live-steps.ts:148"
             }
           },
           {
             "result": {
               "status": "passed",
-              "duration": 809900
+              "duration": 526599
             },
             "arguments": [],
             "keyword": "Then ",
             "line": 36,
             "name": "no rendered text contains snake_case enum values",
             "match": {
-              "location": "packages\\testkit\\src\\step-definitions\\workspace-live-steps.ts:153"
+              "location": "packages\\testkit\\src\\step-definitions\\workspace-live-steps.ts:162"
             }
           },
           {
             "result": {
               "status": "passed",
-              "duration": 934600
+              "duration": 903899
             },
             "arguments": [],
             "keyword": "And ",
             "line": 37,
             "name": "no rendered text contains the phrases \"compliant\", \"approved\" without authority or a bare \"Verified\"",
             "match": {
-              "location": "packages\\testkit\\src\\step-definitions\\workspace-live-steps.ts:158"
+              "location": "packages\\testkit\\src\\step-definitions\\workspace-live-steps.ts:167"
             }
           },
           {
             "result": {
               "status": "passed",
-              "duration": 111464699
+              "duration": 121886100
             },
             "keyword": "After",
             "hidden": true
@@ -1116,7 +1116,7 @@
           {
             "result": {
               "status": "passed",
-              "duration": 638954400
+              "duration": 1697670500
             },
             "keyword": "Before",
             "hidden": true
@@ -1124,46 +1124,46 @@
           {
             "result": {
               "status": "passed",
-              "duration": 120199
+              "duration": 107400
             },
             "arguments": [],
             "keyword": "Given ",
             "line": 7,
             "name": "the workspace is running with seed data in test mode",
             "match": {
-              "location": "packages\\testkit\\src\\step-definitions\\workspace-live-steps.ts:48"
+              "location": "packages\\testkit\\src\\step-definitions\\workspace-live-steps.ts:57"
             }
           },
           {
             "result": {
               "status": "passed",
-              "duration": 1092085399
+              "duration": 977665300
             },
             "arguments": [],
             "keyword": "When ",
             "line": 41,
             "name": "an item verified by the internal verifier is expanded",
             "match": {
-              "location": "packages\\testkit\\src\\step-definitions\\workspace-live-steps.ts:166"
+              "location": "packages\\testkit\\src\\step-definitions\\workspace-live-steps.ts:175"
             }
           },
           {
             "result": {
               "status": "passed",
-              "duration": 107160699
+              "duration": 171687899
             },
             "arguments": [],
             "keyword": "Then ",
             "line": 42,
             "name": "the chip text includes the verifier, scope, version and \"cooperative-internal\"",
             "match": {
-              "location": "packages\\testkit\\src\\step-definitions\\workspace-live-steps.ts:179"
+              "location": "packages\\testkit\\src\\step-definitions\\workspace-live-steps.ts:188"
             }
           },
           {
             "result": {
               "status": "passed",
-              "duration": 94656900
+              "duration": 98467899
             },
             "keyword": "After",
             "hidden": true

@@ -66,7 +66,7 @@ test('served component, login and workspace routes have titles, landmarks and ke
       await link.click();
       const href = await link.getAttribute('href');
       expect(href).toBeTruthy();
-      await expect(page).toHaveURL(new RegExp(`${href!.replaceAll('/', '\\/')}$`));
+      await expect(page).toHaveURL(new URL(href!, page.url()).href);
       const heading = page.getByRole('heading', { level: 1, name: label });
     await expect(heading).toBeFocused();
     await expect(page.locator('h1')).toHaveCount(1);
@@ -111,7 +111,7 @@ test('served component, login and workspace routes have titles, landmarks and ke
       await link.click();
       const href = await link.getAttribute('href');
       expect(href).toBeTruthy();
-      await expect(page).toHaveURL(new RegExp(`${href!.replaceAll('/', '\\/')}$`));
+      await expect(page).toHaveURL(new URL(href!, page.url()).href);
       await expect(page.getByRole('heading', { level: 1, name: label })).toBeFocused();
       await expect(page.locator('h1')).toHaveCount(1);
       await expect(page).toHaveTitle(`${label} | Symphony Workspace`);
@@ -137,7 +137,15 @@ test('served component, login and workspace routes have titles, landmarks and ke
   expect(await page.locator('nav[aria-label="Primary navigation"] a').count()).toBe(5);
 
   const secretaryOption = contextOptions.find((option) => option.label.startsWith('Secretary'));
+  expect(secretaryOption, 'API did not resolve the secretary workflow context').toBeTruthy();
   await contextSelect.selectOption(secretaryOption!.value);
+  await expect(page).toHaveURL(new RegExp(`/coop/${organizationId}\\?context=${encodeURIComponent(secretaryOption!.value)}$`));
+  await page.reload();
+  await expect(contextSelect).toHaveValue(secretaryOption!.value);
+  await page.getByRole('navigation', { name: 'Primary navigation' }).getByRole('link', { name: /^Overview/ }).click();
+  await expect(page).toHaveURL(new RegExp(`/coop/${organizationId}/overview\\?context=${encodeURIComponent(secretaryOption!.value)}$`));
+  await expect(contextSelect).toHaveValue(secretaryOption!.value);
+  await expect(page.getByRole('navigation', { name: 'Primary navigation' }).getByRole('link')).toHaveCount(7);
   await page.goto(`/coop/${organizationId}/evidence?filter=open&sort=severity`);
   await expect(page.getByRole('heading', { level: 1, name: 'Evidence register' })).toBeFocused();
   await expect(page).toHaveURL(new RegExp(`/coop/${organizationId}/evidence\\?filter=open&sort=severity$`));
@@ -146,7 +154,7 @@ test('served component, login and workspace routes have titles, landmarks and ke
   await expect(page.getByRole('heading', { level: 1, name: 'Evidence register' })).toBeFocused();
   await contextSelect.selectOption(secretaryOption!.value);
   await page.goto(`/coop/${organizationId}/evidence?filter=open&sort=severity`);
-  await page.locator(`nav[aria-label="Primary navigation"] a[href="/coop/${organizationId}/governance"]`).click();
+  await page.locator(`nav[aria-label="Primary navigation"] a[href^="/coop/${organizationId}/governance"]`).click();
   await expect(page.getByRole('heading', { level: 1, name: 'Governance' })).toBeFocused();
   await page.goBack();
   await expect(page).toHaveURL(new RegExp(`/coop/${organizationId}/evidence\\?filter=open&sort=severity$`));

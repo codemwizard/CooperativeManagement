@@ -10,7 +10,7 @@ import React from 'react';
 import { NavLink } from 'react-router-dom';
 import type { WorkspaceNavigationItem } from '../presenters/present-workspace-context.js';
 
-export function LeftNav({ basePath = '/workspace', items }: { basePath?: string; items: readonly WorkspaceNavigationItem[] }): React.ReactElement {
+export function LeftNav({ basePath = '/workspace', contextId, items }: { basePath?: string; contextId?: string; items: readonly WorkspaceNavigationItem[] }): React.ReactElement {
   return (
     <nav
       aria-label="Primary navigation"
@@ -20,7 +20,10 @@ export function LeftNav({ basePath = '/workspace', items }: { basePath?: string;
         {items.map((area) => (
           <li key={`${area.path}:${area.label}`} style={styles.item}>
             <NavLink
-              to={`${basePath}/${area.path}`}
+              to={{
+                pathname: `${basePath}/${area.path}`,
+                ...(contextId ? { search: `?context=${encodeURIComponent(contextId)}` } : {}),
+              }}
               end
               style={({ isActive }) => ({
                 ...styles.link,

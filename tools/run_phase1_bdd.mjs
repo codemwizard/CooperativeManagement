@@ -14,7 +14,8 @@ const cucumberCli = path.join(root, 'node_modules/@cucumber/cucumber/bin/cucumbe
 const liveWorkspaceIds = new Set(['BDD-UXW-001', 'BDD-UXW-002', 'BDD-UXW-003', 'BDD-UXW-004']);
 const defaultScenarioIds = manifest.scenarios.filter((scenario) => !liveWorkspaceIds.has(scenario.id)).map((scenario) => `@${scenario.id}`);
 const defaultTagExpression = `(${defaultScenarioIds.join(' or ')}) and not @wip and not @phase6`;
-const liveWorkspaceReportPath = path.join(root, 'evidence/phase1/wp6.1/cucumber-report.json');
+const liveWorkspaceArtifactDirectory = path.join(temporaryDirectory, 'wp6.1');
+const liveWorkspaceReportPath = path.join(liveWorkspaceArtifactDirectory, 'cucumber-report.json');
 
 function runCucumber(profile, reportPath, tags) {
   const args = [cucumberCli, '--config', 'cucumber.cjs', '--profile', profile];
@@ -41,7 +42,11 @@ function runLiveWorkspaceBdd() {
     cwd: root,
     encoding: 'utf8',
     maxBuffer: 16 * 1024 * 1024,
-    env: { ...process.env, AUTH_THROTTLE_HMAC_KEY: process.env.AUTH_THROTTLE_HMAC_KEY ?? Buffer.alloc(32, 0x61).toString('base64') },
+    env: {
+      ...process.env,
+      AUTH_THROTTLE_HMAC_KEY: process.env.AUTH_THROTTLE_HMAC_KEY ?? Buffer.alloc(32, 0x61).toString('base64'),
+      WP6_1_EVIDENCE_DIR: path.relative(root, liveWorkspaceArtifactDirectory),
+    },
   });
   if (result.stdout) process.stdout.write(result.stdout);
   if (result.stderr) process.stderr.write(result.stderr);

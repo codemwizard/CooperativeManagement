@@ -10,6 +10,7 @@ const admin = new pg.Pool({ connectionString: adminUrl, max: 2 });
 const app = new pg.Pool({ connectionString: appUrl, max: 2 });
 export const tenantId = randomUUID();
 export const userId = randomUUID();
+const independentEvidenceSupplierUserId = randomUUID();
 const personId = randomUUID();
 export const organizationId = randomUUID();
 const unionId = randomUUID();
@@ -20,6 +21,7 @@ const verificationAssignmentId = randomUUID();
 const verificationFindingId = randomUUID();
 const negativeFindings = [
   { kind: 'adverse', outcome: 'does_not_support_claim', scope: 'Adverse result scope', assurance: 'cooperative_internal', attribution: true },
+  { kind: 'self-supplied', outcome: 'supports_claim', scope: 'Self-supplied evidence result', assurance: 'cooperative_internal', attribution: true },
   { kind: 'inconclusive', outcome: 'inconclusive', scope: 'Inconclusive result scope', assurance: 'cooperative_internal', attribution: true },
   { kind: 'missing-scope', outcome: 'supports_claim', scope: null, assurance: 'cooperative_internal', attribution: true },
   { kind: 'unknown-assurance', outcome: 'supports_claim', scope: 'Unknown assurance scope', assurance: 'future_unapproved_class', attribution: true },
@@ -27,6 +29,8 @@ const negativeFindings = [
   { kind: 'legacy-outcome', outcome: null, scope: 'Legacy unqualified scope', assurance: 'cooperative_internal', attribution: true },
   { kind: 'missing-finding', outcome: null, scope: null, assurance: null, attribution: false },
 ].map((row) => ({ ...row, itemId: randomUUID(), versionId: randomUUID(), assignmentId: randomUUID(), findingId: randomUUID() }));
+export const selfSuppliedFindingId = negativeFindings.find((row) => row.kind === 'self-supplied')!.findingId;
+export const independentlyVerifiedFindingId = verificationFindingId;
 const programmeScopeId = randomUUID();
 const taDelegationId = randomUUID();
 export const password = `WP6.1 route password ${randomUUID()}`;
@@ -42,7 +46,8 @@ export async function seedWp6_1Fixture() {
   await admin.query('INSERT INTO symphony.tenants(id,name) VALUES($1,$2)', [tenantId, `wp6.1-routes-${tenantId}`]);
   await admin.query(
     `INSERT INTO symphony.users(id,tenant_id,email,email_normalized,status)
-     VALUES($1,$2,$3,$3,'active')`, [userId, tenantId, `wp61-${userId}@example.invalid`],
+     VALUES($1,$2,$3,$3,'active'),($4,$2,$5,$5,'active')`,
+    [userId, tenantId, `wp61-${userId}@example.invalid`, independentEvidenceSupplierUserId, `wp61-supplier-${independentEvidenceSupplierUserId}@example.invalid`],
   );
   await admin.query('INSERT INTO symphony.persons(id,tenant_id,pseudonym_id) VALUES($1,$2,$3)', [personId, tenantId, `wp61-${personId}`]);
   await admin.query(
@@ -69,7 +74,7 @@ export async function seedWp6_1Fixture() {
   );
   await admin.query(
     `INSERT INTO symphony.evidence_versions(id,evidence_item_id,version_number,supplier_user_id,origin,stage,payload)
-     VALUES($1,$2,1,$3,'wp6.1-synthetic-fixture','submitted','{}'::jsonb)`, [evidenceVersionId, evidenceItemId, userId],
+     VALUES($1,$2,1,$3,'wp6.1-synthetic-fixture','submitted','{}'::jsonb)`, [evidenceVersionId, evidenceItemId, independentEvidenceSupplierUserId],
   );
   await admin.query(
     `INSERT INTO symphony.verification_assignments(id,evidence_item_id,assigned_to_user_id,evidence_version_id,completed_at)
@@ -99,7 +104,8 @@ export async function seedWp6_1Fixture() {
     );
     await admin.query(
       `INSERT INTO symphony.evidence_versions(id,evidence_item_id,version_number,supplier_user_id,origin,stage,payload)
-       VALUES($1,$2,1,$3,'wp6.1-negative-fixture','submitted','{}'::jsonb)`, [fixture.versionId, fixture.itemId, userId],
+       VALUES($1,$2,1,$3,'wp6.1-negative-fixture','submitted','{}'::jsonb)`,
+      [fixture.versionId, fixture.itemId, fixture.kind === 'self-supplied' ? userId : independentEvidenceSupplierUserId],
     );
     await admin.query(
       `INSERT INTO symphony.verification_assignments(id,evidence_item_id,assigned_to_user_id,evidence_version_id,completed_at)

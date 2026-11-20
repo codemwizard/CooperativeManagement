@@ -2,7 +2,16 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { After, AfterAll, Before, BeforeAll, Given, Then, When, setDefaultTimeout } from '@cucumber/cucumber';
 import { chromium, type Page } from '@playwright/test';
-import { cleanupWp6_1Fixture, officeActors, organizationId, password, seedWp6_1Fixture, userId } from './wp6.1-fixture.js';
+import {
+  cleanupWp6_1Fixture,
+  independentlyVerifiedFindingId,
+  officeActors,
+  organizationId,
+  password,
+  seedWp6_1Fixture,
+  selfSuppliedFindingId,
+  userId,
+} from './wp6.1-fixture.js';
 import { SymphonyWorld } from './world.js';
 
 const baseUrl = process.env.WP6_1_BASE_URL ?? 'http://127.0.0.1:5175';
@@ -183,11 +192,11 @@ Then('the chip text includes the verifier, scope, version and {string}', async f
   await page.getByText('version 1', { exact: false }).first().waitFor({ state: 'visible' });
   await page.getByText(assuranceLabel, { exact: true }).waitFor({ state: 'visible' });
   const rows = page.getByRole('list', { name: 'Assigned verification findings' }).getByRole('listitem');
-  assert.equal(await rows.count(), 7, 'Only persisted findings should be projected; the assignment with no finding must be absent.');
+  assert.equal(await rows.count(), 8, 'Only persisted findings should be projected; the assignment with no finding must be absent.');
   const summaries = await rows.locator('summary').allInnerTexts();
   assert.equal(summaries.filter((text) => text.includes('Claim not supported')).length, 1);
   assert.equal(summaries.filter((text) => text.includes('Inconclusive')).length, 1);
-  assert.equal(summaries.filter((text) => text.includes('Provenance incomplete')).length, 3);
+  assert.equal(summaries.filter((text) => text.includes('Provenance incomplete')).length, 4);
   assert.equal(summaries.filter((text) => text.includes('No qualified result')).length, 1);
   assert.equal(summaries.filter((text) => text.includes('Cooperative-verified (internal)')).length, 1);
   for (const row of await rows.all()) {
@@ -196,6 +205,16 @@ Then('the chip text includes the verifier, scope, version and {string}', async f
       assert.equal(await row.getByText('Cooperative-verified (internal)', { exact: true }).count(), 0, `${summary} rendered a positive chip.`);
     }
   }
+  const projected = await page.evaluate(async (cooperativeId) => {
+    const response = await fetch(`/workspace/verified-findings?organizationId=${encodeURIComponent(cooperativeId)}`, { credentials: 'same-origin' });
+    if (!response.ok) throw new Error(`Verified-finding API returned ${response.status}.`);
+    const envelope = await response.json() as { data: Array<{ findingId: string; verified: boolean }> };
+    return envelope.data;
+  }, organizationId);
+  assert.equal(projected.find((finding) => finding.findingId === independentlyVerifiedFindingId)?.verified, true,
+    'A distinct evidence supplier and assigned verifier should retain the positive finding result.');
+  assert.equal(projected.find((finding) => finding.findingId === selfSuppliedFindingId)?.verified, false,
+    'The assigned verifier must not receive a positive result for evidence they supplied.');
 });
 
 function requiredPage(world: SymphonyWorld) {

@@ -98,7 +98,7 @@ export function AppShell(): React.ReactElement {
           >
             {contexts.map((context) => <option key={context.id} value={context.id}>{context.label}</option>)}
           </select>
-          <LeftNav basePath={basePath} items={selectedContext.navigation} />
+          <LeftNav basePath={basePath} contextId={selectedContext.id} items={selectedContext.navigation} />
         </aside>
         <main id="main-content" style={styles.main} tabIndex={-1}>
           <Routes>

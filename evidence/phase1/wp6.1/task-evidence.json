@@ -6,7 +6,7 @@
     "unit_test": "passed",
     "integration_test": "passed",
     "bdd_ui_test": "passed",
-    "gate_verified": "passed"
+    "gate_verified": "pending"
   },
   "commit": "c3f4af5ed20ac6922e0dbcd46a12e263fd5b0406",
   "environment": {
@@ -79,12 +79,12 @@
       "artifact": "evidence/phase1/wp6.1/cucumber-run.log"
     },
     {
-      "command": "node tools/verify_wp6_1_closure.mjs c3f4af5ed20ac6922e0dbcd46a12e263fd5b0406 --preflight",
+      "command": "node tools/verify_wp6_1_closure.mjs <review-fix-candidate> --preflight",
       "result": "passed",
       "artifact": "evidence/phase1/wp6.1/closure-preflight.log"
     },
     {
-      "command": "node tools/verify_wp6_1_closure.mjs c3f4af5ed20ac6922e0dbcd46a12e263fd5b0406",
+      "command": "node tools/verify_wp6_1_closure.mjs <review-fix-candidate>",
       "result": "passed",
       "artifact": "evidence/phase1/wp6.1/closure-final.log"
     },
@@ -95,8 +95,8 @@
     }
   ],
   "claims": {
-    "behavior_proved": "The real served workspace derives nine workflow contexts from authenticated persisted WP2.2 facts and renders their exact navigation. BDD-UXW-001–004 pass through a live Cucumber browser/API/PostgreSQL run: 12 scenarios and 71 steps, including all nine frozen UXW-001 examples, route focus/back/forward/query persistence, a nonempty route inventory and DOM vocabulary scan, and persisted positive verified provenance. Only exact supports_claim with a completed assignment, matching evidence version, scope, immutable official appointment snapshot and exact cooperative_internal assurance renders the positive chip.",
-    "path_proved": "The dedicated runner starts Fastify and Vite, validates local _test PostgreSQL URLs, seeds synthetic rows through test-admin, establishes real WP5.3 sessions via the login API, and reads workspace/finding data through symphony_app. The retained Cucumber JSON report records every required scenario and all steps passed. UXW-004 negative fixtures cover does_not_support_claim, inconclusive, NULL legacy outcome, missing scope, unsupported assurance, missing attribution, an assignment with no finding, and PostgreSQL rejection of a mismatched assignment/evidence-version finding.",
+    "behavior_proved": "The real served workspace derives nine workflow contexts from authenticated persisted WP2.2 facts and renders their exact navigation. BDD-UXW-001–004 pass through a live Cucumber browser/API/PostgreSQL run: 12 scenarios and 71 steps, including all nine frozen UXW-001 examples, route focus/back/forward/query persistence, a nonempty route inventory and DOM vocabulary scan, and persisted finding provenance. A positive result additionally requires the evidence supplier to differ from the assigned verifier; a self-supplied supports_claim finding remains unverified.",
+    "path_proved": "The dedicated runner starts Fastify and Vite, validates local _test PostgreSQL URLs, seeds synthetic rows through test-admin, establishes real WP5.3 sessions via the login API, and reads workspace/finding data through symphony_app. The retained Cucumber JSON report records every required scenario and all steps passed. UXW-004 negative fixtures cover self-supplied evidence, does_not_support_claim, inconclusive, NULL legacy outcome, missing scope, unsupported assurance, missing attribution, an assignment with no finding, and PostgreSQL rejection of a mismatched assignment/evidence-version finding. The BDD directly asserts the independent-supplier positive and self-supplier negative results from the persisted API projection.",
     "configuration_proved": "Node v26.7.0, npm 12.2.0, PostgreSQL 18.0, DATA_MODE=test; local _test databases; symphony_app for runtime reads and test-admin only for setup/cleanup; local-test key provider.",
     "route_inventory": [
       "/components",
@@ -129,11 +129,11 @@
       "Member activity/household persistence, authority grant/revoke lifecycle and a first-class cohort lifecycle remain the explicit WP2.2 limitations.",
       "Production hosting/data, legal record-classification and public inspection fee workflows, production accessibility review and independent security review are not claimed.",
       "The integrated 41-scenario REM-WP7.2 gate remains downstream and was not run as WP6.1 acceptance.",
-      "The aggregate test:bdd:phase1 runner now executes BDD-UXW-001–004 through the live WP6.1 browser/API/PostgreSQL runner and merges that report with default-profile results. The aggregate currently remains failing on other frozen scenarios: BDD-ENR-004, BDD-AUD-001/002/003/005/014 and BDD-UXW-015 fail; BDD-AUD authorization steps remain undefined; BDD-PRV-008/015/016/018/019/020, BDD-UNI-001/002, BDD-AUD-004/007/015 and BDD-UXW-005/009/010/011/013 remain filtered or @wip. UXW-015 is owned by WP6.3."
+      "The aggregate test:bdd:phase1 runner now executes BDD-UXW-001–004 through the live WP6.1 browser/API/PostgreSQL runner and merges that report with default-profile results. The aggregate currently remains failing on other frozen scenarios: BDD-ENR-004, BDD-AUD-001/002/003/005/014 and BDD-UXW-015 fail; BDD-AUD authorization steps remain undefined; BDD-PRV-008/015/016/018/019/020, BDD-UNI-001/002, BDD-AUD-004/007/015 and BDD-UXW-005/009/010/011/013 remain filtered or @wip. UXW-015 is owned by WP6.3. The aggregate run writes live Cucumber reports/logs to a temporary directory; a hash check confirmed the tracked candidate reports and API log were unchanged by the run."
     ]
   },
   "limitations": [
-    "WP6.1 review-fix candidate c3f4af5ed20ac6922e0dbcd46a12e263fd5b0406 passed exact-candidate preflight and final verification.",
+    "The prior WP6.1 candidate passed exact-candidate preflight and final verification. These review fixes require a new immutable candidate and fresh preflight/final verification before the gate is restored.",
     "No production deployment, public-record classification/fee workflow, tenant-specific directory data, member activity/household persistence, authority mutation lifecycle, cohort lifecycle, or general finding-authoring flow is claimed.",
     "The Phase 1 aggregate BDD gate remains open outside WP6.1; see the exact scenario results in claims.coverage_limitations."
   ],
