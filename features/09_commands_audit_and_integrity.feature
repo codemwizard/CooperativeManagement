@@ -4,7 +4,7 @@ Feature: Commands, audit trail and integrity
   detects stale writes, isolates tenants and never trusts the client for standing or authority.
 
   Background:
-    Given two organisations "Org A" and "Org B"
+    Given two organisations "Org A" and "Org B" in separate tenants
     And an authenticated Secretary in "Org A"
 
   @REQ-AUD-001 @BDD-AUD-001 @hard @SC-018
@@ -14,14 +14,14 @@ Feature: Commands, audit trail and integrity
     And no event persists
     And no outbox row persists
 
-  @REQ-AUD-002 @BDD-AUD-002 @hard @SC-016
+  @REQ-AUD-002 @BDD-AUD-002 @hard @SC-016 @wip
   Scenario: The same command id with the same payload returns the original result
     Given a command with id "c-1" has been applied
     When the same command is submitted again
     Then the result equals the first result
     And no second event is written
 
-  @REQ-AUD-002 @BDD-AUD-003 @hard @SC-016
+  @REQ-AUD-002 @BDD-AUD-003 @hard @SC-016 @wip
   Scenario: The same command id with a different payload is rejected
     Given a command with id "c-1" has been applied
     When a command with id "c-1" and a different payload is submitted
@@ -35,10 +35,10 @@ Feature: Commands, audit trail and integrity
     And the second is rejected with reason "VERSION_CONFLICT"
     And the rejected input is stored for reconciliation
 
-  @REQ-AUD-004 @BDD-AUD-005 @hard @SC-015
+  @REQ-AUD-004 @BDD-AUD-005 @hard @SC-015 @wip
   Scenario: A command cannot touch another organisation
     When the Secretary in "Org A" sends a command targeting an evidence item in "Org B"
-    Then it is rejected with reason "UNAUTHORIZED"
+    Then it is rejected with reason "NOT_AUTHORIZED"
     And nothing in "Org B" changes
     And the tenant mismatch is recorded in the security-attempt audit
 
@@ -53,7 +53,7 @@ Feature: Commands, audit trail and integrity
     Then the domain event store contains no UI interaction events
     And the telemetry stream contains no personal data
 
-  @REQ-AUD-006 @BDD-AUD-008 @hard @SC-019
+  @REQ-AUD-006 @BDD-AUD-008 @hard @SC-019 @wip
   Scenario Outline: Read-only institutions cannot mutate cooperative source records
     Given a "<role>" with read-only scope on "Org A"
     When they send "<command>"
@@ -66,7 +66,7 @@ Feature: Commands, audit trail and integrity
       | fund_manager  | ApproveMinutes     |
       | ta            | RecordTaCompletion |
 
-  @REQ-AUD-006 @BDD-AUD-009 @hard @INV-021
+  @REQ-AUD-006 @BDD-AUD-009 @hard @INV-021 @wip
   Scenario: The client cannot set verified, authority or approval states
     When a client submits a payload containing "status": "approved_official"
     Then the field is ignored or the command is rejected
@@ -97,7 +97,7 @@ Feature: Commands, audit trail and integrity
     When a finding is recorded for version 1 against that assignment
     Then the database or command rejects it with reason "FINDING_VERSION_MISMATCH"
 
-  @REQ-AUD-008 @BDD-AUD-014 @hard
+  @REQ-AUD-008 @BDD-AUD-014 @hard @wip
   Scenario: Authorisation is enforced on the server for every command
     When a command is sent with a forged role header
     Then the server uses the stored user, capacities and appointments

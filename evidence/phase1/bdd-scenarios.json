@@ -120,7 +120,7 @@
     {
       "id": "BDD-AUD-005",
       "feature": "features/09_commands_audit_and_integrity.feature",
-      "proves": "A foreign-tenant command receives non-disclosing UNAUTHORIZED; the restricted PostgreSQL app identity cannot read or mutate the target evidence, and TENANT_MISMATCH is persisted for the authenticated tenant."
+      "proves": "A foreign-tenant command receives non-disclosing NOT_AUTHORIZED; the restricted PostgreSQL app identity cannot read or mutate the target evidence, and TENANT_MISMATCH is persisted for the authenticated tenant."
     },
     {
       "id": "BDD-AUD-006",

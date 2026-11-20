@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "source": "Original migration inventory plus REM-WP1.2 security_attempts, REM-WP1.4 reconciliation_inbox, REM-WP5.2 credential tables, and REM-WP5.3 auth stores; PostgreSQL 18.0 pg_constraint foreign-key catalog requires candidate refresh",
+  "source": "Original migration inventory plus REM-WP1.2 security_attempts, REM-WP1.4 reconciliation_inbox, REM-WP5.2 credential tables, and REM-WP5.3 auth stores; PostgreSQL 18.0 pg_constraint foreign-key catalog requires candidate refresh; REM-WP2.6 D-16 control-plane scope versions",
   "status": "REM-WP0 proposed, reviewable table/row allowlist; no destructive statements executed",
   "target": {
     "database": "symphony_phase1_test",
@@ -391,6 +391,11 @@
       "table": "requirement_sources",
       "disposition": "preserve_global_requirement_legal_source_mappings",
       "reason": "Root migration 0006 links requirement_sources to global requirement_definitions and legal_sources; it has no organization or tenant ownership path and is preserved with the restricted global catalogue."
+    },
+    {
+      "table": "authority_scope_versions",
+      "disposition": "preserve_authority_scope_serialization_control_plane",
+      "reason": "D-16 authority serialization rows are policy/concurrency metadata, not disposable business data. The table is read/updated only through the registered authority transaction path; purge does not delete scope rows or reset their versions."
     }
   ],
   "audit_ledger": {

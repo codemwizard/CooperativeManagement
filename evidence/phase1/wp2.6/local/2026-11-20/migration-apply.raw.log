@@ -1,0 +1,24 @@
+Running migrations from: C:\Workspace\GitHub\Prototype\migrations
+Schema: symphony
+
+  ⏭  0001_kernel.sql — already applied
+  ⏭  0002_identity.sql — already applied
+  ⏭  0003_policy.sql — already applied
+  ⏭  0004_enrolment.sql — already applied
+  ⏭  0005_evidence.sql — already applied
+  ⏭  0006_legal.sql — already applied
+  ⏭  0006b_governance_stub.sql — already applied
+  ⏭  0007_aggregate_states.sql — already applied
+  ⏭  0008_rls_tenant_isolation.sql — already applied
+  ⏭  0009_command_receipts_v2.sql — already applied
+  ⏭  0010_security_attempts.sql — already applied
+  ⏭  0012_reconciliation_inbox.sql — already applied
+  ⏭  0013_tenant_rls_app_role.sql — already applied
+  ⏭  0014_auth_credentials.sql — already applied
+  ⏭  0015_auth_sessions_and_throttling.sql — already applied
+  ⏭  0016_trusted_authority_context.sql — already applied
+  ⏭  0017_verified_finding_attribution.sql — already applied
+  ⏭  0018_wp6_1_attribution_policy_names.sql — already applied
+  ⏭  0019_authority_scope_versions.sql — already applied
+  ⏭  0020_authority_scope_frozen_lock_policy.sql — already applied
+No new migrations to apply — database is up to date.

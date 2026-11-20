@@ -5,7 +5,7 @@ import { pathToFileURL } from 'node:url';
 import { randomBytes } from 'node:crypto';
 import pg from 'pg';
 import { createAuthComposition } from './authentication-composition.js';
-import { PostgresVerifiedFindingRepository, PostgresWorkspaceContextRepository } from '@symphony/db';
+import { checkAuthorityScopeReadiness, PostgresVerifiedFindingRepository, PostgresWorkspaceContextRepository } from '@symphony/db';
 import { createWorkspaceContextRoutes } from './routes/workspace-context.js';
 import { createWriteStream, type WriteStream } from 'node:fs';
 
@@ -44,7 +44,10 @@ export async function startApi(environment: NodeJS.ProcessEnv = process.env): Pr
       workspace: createWorkspaceContextRoutes(workspaceContext, verifiedFindings),
     },
     ...(authEvidenceLog ? { logStream: authEvidenceLog } : {}),
-    readinessChecks: [{ name: 'postgres-auth', check: auth.healthCheck }],
+    readinessChecks: [
+      { name: 'postgres-auth', check: auth.healthCheck },
+      { name: 'wp2.6-authority-scope', check: () => checkAuthorityScopeReadiness(pool) },
+    ],
   });
   const shutdown = (): void => { void app.close().catch(() => undefined); };
   app.addHook('onClose', async () => {

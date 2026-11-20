@@ -1,6 +1,6 @@
 # REM-WP1.6 Remediation Implementation Plan — Application Composition and Product-Path BDD
 
-**Plan status:** Execution plan prepared; implementation start is gated by seven technical predecessor task records. The former REM-WP1.7 dependency was removed because inbox authorization is downstream of command submission. Owner ruling D-13 Option A (2026-11-17) assigns BDD-AUD-016 to original Phase 6 WP6.2; it is excluded from the Phase 1 manifest and REM-WP1.6 BDD ownership. The Phase 1 runner and owner map use the amended 41-scenario acceptance set. Authoring this plan does not claim predecessor gates passed or Phase 6 implementation complete.
+**Plan status:** Implementation start is gated by the current graph-defined predecessor records. Prototype-14 reconciliation adds REM-WP2.3 and REM-WP2.6 because a real registered command and D-16 serialization infrastructure must exist before HTTP composition. The new prerequisites have no completion evidence yet. The former REM-WP1.7 dependency remains removed because inbox authorization is downstream of command submission. Owner ruling D-13 Option A (2026-11-17) assigns BDD-AUD-016 to original Phase 6 WP6.2; it is excluded from the Phase 1 manifest and REM-WP1.6 BDD ownership. The amended Phase 1 manifest contains 41 scenarios. Authoring this plan does not claim predecessor gates passed or Phase 6 implementation complete.
 **Task:** REM-WP1.6 — application composition and BDD boundary
 **Normative parent:** [`PHASE-1-REMEDIATION-PLAN-v2.md`](./PHASE-1-REMEDIATION-PLAN-v2.md), REM-WP1.6 and its command/API contract sections.
 **Contract set:** [`API_CONTRACT.md`](../../docs/phase1/API_CONTRACT.md), [`COMMAND_TRANSACTION_CONTRACT.md`](../../docs/phase1/COMMAND_TRANSACTION_CONTRACT.md), [`AUTHENTICATION_CONTRACT.md`](../../docs/phase1/AUTHENTICATION_CONTRACT.md), [`AUTHORIZATION_CAPACITY_CONTRACT.md`](../../docs/phase1/AUTHORIZATION_CAPACITY_CONTRACT.md), [`RECONCILIATION_CONTRACT.md`](../../docs/phase1/RECONCILIATION_CONTRACT.md), canonical feature 09, the REM-WP1.6 ownership entries in [`bdd-work-package-map.json`](../../evidence/phase1/bdd-work-package-map.json), [`task-dependencies.yml`](../../evidence/phase1/task-dependencies.yml), and current candidate/evidence status in [`PHASE-1-CLOSURE-DECISIONS-AND-ACTIONS.md`](./PHASE-1-CLOSURE-DECISIONS-AND-ACTIONS.md).
@@ -14,7 +14,7 @@ The bounded outcome is one supported command per `POST /commands`, with strict s
 
 ## 2. Readiness gate and current state
 
-`evidence/phase1/task-dependencies.yml` is the authoritative graph. REM-WP1.6 depends on seven tasks, and each must have a schema-valid task record whose implementation, required tests, and gate status are passed for the exact predecessor candidate being used. REM-WP2.2 and REM-WP5.3 are scheduled before REM-WP1.6 despite their higher workstream numbers because the actual command endpoint requires persisted trusted authority and persisted-session middleware. REM-WP1.7 is independent of REM-WP1.6: it may proceed in parallel once REM-WP1.4, REM-WP1.5 and REM-WP2.2 pass, and REM-WP7.2 waits for both tasks.
+`evidence/phase1/task-dependencies.yml` is the authoritative graph. The verifier reads WP1.6's predecessor set from that graph and requires schema-valid, candidate-ancestor evidence for every direct and transitive predecessor. The graph now includes the command implementation (WP2.3) and serialization infrastructure (WP2.6) as prerequisites. Their records are absent until implementation and exact-candidate verification. REM-WP2.2 and REM-WP5.3 remain prerequisites for trusted authority and persisted-session middleware. REM-WP1.7 is independent of REM-WP1.6: it may proceed in parallel once REM-WP1.4, REM-WP1.5 and REM-WP2.2 pass, and REM-WP7.2 waits for both tasks.
 
 | Required predecessor | Why it is required | Repository record observed while preparing this plan | Start condition |
 |---|---|---|---|
@@ -23,10 +23,12 @@ The bounded outcome is one supported command per `POST /commands`, with strict s
 | REM-WP1.3 | Replay, contention, bounded retry and uncertain-outcome semantics | Current `evidence/phase1/wp1.3/task-evidence.json` reports complete/passed and pins full commit `fb3d4f2cf6b1023cca5e90f2768783c892c96d13` (not `working-tree`); this commit exists and is an ancestor of current HEAD `9919440c71e167050f8e011a6ed3a432e779eb66` | Recheck the record and referenced artifacts. Require a full 40-character commit that exists locally and is an ancestor of the REM-WP1.6 candidate; if the record says `working-tree`, fail the predecessor gate regardless of status labels. The review's prior `working-tree` finding is stale for the current record, but remains a fail condition for any record that still has it. |
 | REM-WP1.4 | Terminal conflict receipt plus encrypted reconciliation inbox | `evidence/phase1/wp1.4/task-evidence.json` reports complete/passed | Revalidate record and the persisted inbox/receipt boundary |
 | REM-WP1.5 | Actual app-role grants, RLS, tenant setting and table matrix | `evidence/phase1/wp1.5/task-evidence.json` reports complete/passed for candidate `d7fbf5851b11b07b65bde36f062db7b21f487947`; the closure register separately records later local remediation and its candidate-evidence status | Reconcile the task record, closure register, local artifacts and actual source SHA before REM-WP1.6 starts. If source changed after d7fb, obtain same-candidate DB/CI/evidence required by the register; never treat d7fb artifacts as proof for the changed source |
-| REM-WP2.2 | Server-resolved actor, tenant and persisted authority context | No `evidence/phase1/wp2.2/task-evidence.json` was present when this plan was prepared | Must implement, verify and record REM-WP2.2 first |
-| REM-WP5.3 | Real persisted-session middleware for the API boundary | No `evidence/phase1/wp5.3/task-evidence.json` was present when this plan was prepared | Must implement, verify and record REM-WP5.3 first |
+| REM-WP2.2 | Server-resolved actor, tenant and persisted authority context | `evidence/phase1/wp2.2/task-evidence.json` records complete/passed at `5c5c730843ba3b5627a5389383496b9653caae04` | Revalidate exact-candidate evidence and ancestry for the candidate being reviewed |
+| REM-WP2.3 | Registered command IDs, strict schemas and persisted authority mutation handlers | `evidence/phase1/wp2.3/capacity-delegation-command-contract.json` and task evidence are not present | Freeze the four in-scope policy families into approved command contracts and complete WP2.3 after WP2.6 |
+| REM-WP2.6 | D-16 scope-version schema, bootstrap, privileges and lock service | No WP2.6 implementation/evidence package exists | Implement and verify D-16 infrastructure before WP2.3 |
+| REM-WP5.3 | Real persisted-session middleware for the API boundary | `evidence/phase1/wp5.3/task-evidence.json` records complete/passed at `6ba1885035b330122570bf4602d88bcd19f73fc1` | Revalidate exact-candidate evidence and ancestry for the candidate being reviewed |
 
-The record statuses are evidence summaries, not permission to skip checking their cited artifacts. Before implementation begins, run the executable dependency gate described in WP1.6-A. It must load all seven direct predecessors and their complete transitive closure from the graph, validate each task record against the common JSON Schema, require complete/passed-or-justifiably-not-applicable statuses with no unresolved decisions, require a full immutable commit SHA that exists in Git and is an ancestor of the selected REM-WP1.6 candidate, verify referenced evidence files/checksums where supplied, and fail unless every scheduled prerequisite has completed with passing evidence. It must independently verify that the full dependency graph is known and acyclic. A passing label by itself is never sufficient. REM-WP1.6 must not substitute stubs or assumed behavior for an uncompleted prerequisite, or report partial API composition as satisfying the task. If a predecessor changes after REM-WP1.6 starts, determine impact, rerun affected REM-WP1.6 proofs, and record the exact source SHAs.
+The record statuses are evidence summaries, not permission to skip checking their cited artifacts. Before implementation begins, run the executable dependency gate described in WP1.6-A. It loads every direct graph predecessor and their complete transitive closure, validates each task record against the common JSON Schema, requires complete/passed-or-justifiably-not-applicable statuses with no unresolved decisions, requires a full immutable commit SHA that exists in Git and is an ancestor of the selected REM-WP1.6 candidate, verifies referenced evidence files/checksums where supplied, and fails unless every scheduled prerequisite has completed with passing evidence. It independently verifies that the full dependency graph is known and acyclic and that every other owner of a WP1.6-mapped BDD scenario is in the graph predecessor closure. A passing label by itself is never sufficient. REM-WP1.6 must not substitute stubs or assumed behavior for an uncompleted prerequisite, or report partial API composition as satisfying the task. If a predecessor changes after REM-WP1.6 starts, determine impact, rerun affected REM-WP1.6 proofs, and record the exact source SHAs.
 
 REM-WP1.6 must implement the resolved API contract without introducing new owner policy: D-15 specifies timestamp representability, uniform organization-denial behavior, unsupported content-encoding response and generic internal errors. D-13 is resolved: BDD-AUD-016 is original Phase 6 acceptance under IMP-P6-WP6.2, not a REM-WP1.6 prerequisite or closeout criterion. Carry-forward questions owned by later work (non-test key custody, retention duration, backup/replica deletion, offline behavior) remain assigned there and do not authorize REM-WP1.6 to invent policy. `POST /commands/batch` remains out of scope and must not be exposed as a loop over single-command transactions.
 
@@ -80,7 +82,7 @@ Responses must match strict shared response schemas; no SQL, exception text, pol
 
 ## 4. Ordered implementation work packages inside REM-WP1.6
 
-No production implementation begins until Section 2's seven predecessor records pass. Within REM-WP1.6, work is divided into these sequential gates; each gate captures its red result before its implementation change.
+No production implementation begins until every graph-defined predecessor record passes. Within REM-WP1.6, work is divided into these sequential gates; each gate captures its red result before its implementation change.
 
 ### WP1.6-A — Freeze traceability and executable contract matrix
 
@@ -132,16 +134,15 @@ For test seams, permit deterministic barriers and controlled DB/network fault in
 
 ### WP1.6-E — Accurate BDD runner and real step definitions
 
-The current `tools/run_phase1_bdd.mjs` runs the complete manifest and has no `--work-package` selector. Extend it only after adding red tests to `tests/tooling/phase1_contracts.test.ts`:
+`tools/run_phase1_bdd.mjs` supports strict `--work-package` selectors while preserving the default full-manifest run:
 
-- `--work-package REM-WP1.6` selects only BDD-map scenarios owned by REM-WP1.6: `BDD-AUD-002` and `BDD-AUD-003`; reject unknown package names, arbitrary tags, duplicate flags, malformed IDs and empty selections;
+- `--work-package REM-WP1.6` selects every BDD-map scenario owned by REM-WP1.6, currently `BDD-AUD-002`, `BDD-AUD-003`, `BDD-AUD-005`, `BDD-AUD-008`, `BDD-AUD-009` and `BDD-AUD-014`; reject unknown package names, arbitrary tags, duplicate flags, malformed IDs and empty selections;
 - `--work-package REM-WP1` selects the cumulative eight-ID REM-WP1 acceptance allowlist from the parent plan (`BDD-AUD-001/002/003/004/005/006/010/015`). This is a separate aggregate run and cannot substitute for the REM-WP1.6-owned run;
 - no change to default aggregate behavior: unqualified command still selects every frozen Phase 1 scenario;
 - report selected IDs and expected count before execution, then parse the Cucumber JSON report and compare discovered, passed, failed, skipped, pending, undefined and duplicate IDs. Each evidence record includes scenario ID, owning WP, execution path/harness, candidate SHA and result;
 - exit nonzero unless every selected ID is discovered and passed exactly once and there are zero skipped/pending/undefined/ambiguous scenarios and zero selected `@wip` scenarios;
 - do not remove `@wip` from BDD-AUD-004 or BDD-AUD-015 merely to make the cumulative selector green. Remove a WIP marker only after that scenario's owner implements the required product path and its full assertions pass; until then the cumulative REM-WP1 selection must report the blocked scenario and fail rather than omit it;
-- propagate Cucumber's nonzero status, preserve logs and never let JSON report generation/tee hide failure;
-- tests use temporary fixture reports to prove missing, extra, duplicate, skipped, undefined and zero-scenario results fail. At least one test launches a child command that fails through the same capture mechanism and asserts the runner fails.
+- propagate Cucumber's nonzero status, preserve raw reports/logs under a candidate/timestamp artifact directory and never let JSON report generation/tee hide failure;
 
 Then change `packages/testkit` steps so the selected BDD scenarios use the actual product server, persisted session, PostgreSQL adapters and real command facade. Setup may create authorized baseline entities through supported setup APIs or narrowly scoped test fixture SQL for preconditions, but must not insert the outcome being asserted. Each step asserts externally visible HTTP result and independent persisted state. No undefined-to-pending/wip conversion, tag deletion, scenario weakening, sleep-based race, in-memory substitute, or unconditional pass is allowed.
 
@@ -154,7 +155,7 @@ npm run test:bdd:phase1 -- --work-package REM-WP1
 
 For BDD-AUD-002/003, retain separate REM-WP1.3 PostgreSQL proof and REM-WP1.6 HTTP/session/composition proof records. A scenario passing under one harness does not count as the other owner's proof.
 
-Retain Cucumber JSON, raw stdout/stderr and validator summary under `evidence/phase1/wp1.6/`. Verify canonical `Implementation-Plan-V4/features/09_commands_audit_and_integrity.feature` and runnable `features/09_commands_audit_and_integrity.feature` are byte-equivalent except only for an established, validator-checked generation rule. Do not alter canonical scenario meaning to make implementation pass.
+Retain Cucumber JSON, raw stdout/stderr and validator summary under `evidence/phase1/wp1.6/`; the runner preserves every invocation under a candidate/timestamp path rather than deleting temporary output. Set `PHASE1_BDD_ARTIFACT_DIR` to the tracked WP1.6 evidence destination for the accepted candidate. Run `npm run verify:phase1:feature-sync` to require canonical/runnable parity, allowing only runtime `@wip` status tags and a leading UTF-8 BOM. Do not alter canonical scenario meaning to make implementation pass.
 
 ### WP1.6-F — Green gates, evidence and closeout
 
@@ -194,7 +195,7 @@ Any failed item returns the corresponding subgate to in progress; do not relabel
 
 REM-WP1.6 may be marked complete only when all are true:
 
-- [ ] All seven predecessor task records and their referenced evidence validate and remain compatible with the candidate.
+- [ ] All graph-defined predecessor task records and their referenced evidence validate and remain compatible with the candidate, including REM-WP2.3 and REM-WP2.6.
 - [ ] Request/response/error contracts are shared, strict, typed, and tested at HTTP boundary.
 - [ ] Product server composition uses actual persisted authentication, trusted actor/tenant/authority and restricted PostgreSQL role.
 - [ ] HTTP status/body mapping and privacy rules pass, including audit-before-403 and audit-failure-503.
@@ -205,6 +206,6 @@ REM-WP1.6 may be marked complete only when all are true:
 - [ ] Focused contract/API/DB/BDD gates, typecheck, architecture, trace and Phase 0 floor pass on one documented candidate.
 - [ ] Independent review, if required by the project gate, is recorded separately and is not self-certified by the implementer.
 
-REM-WP1.6 implementation may start when its seven actual technical predecessors and its own API contract dispositions pass. REM-WP1.7 is downstream and must not block it. BDD-AUD-016 does not block REM-WP1.6 implementation, BDD closeout, or Phase 1 closure; its acceptance remains owned by original Phase 6 WP6.2. This plan itself does not change dependency status or close any task.
+REM-WP1.6 implementation may start when all actual technical predecessors in the graph and its own API contract dispositions pass. REM-WP1.7 is downstream and must not block it. BDD-AUD-016 does not block REM-WP1.6 implementation, BDD closeout, or Phase 1 closure; its acceptance remains owned by original Phase 6 WP6.2. This plan itself does not change dependency status or close any task.
 
 

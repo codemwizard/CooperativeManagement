@@ -1,9 +1,9 @@
 # REM-WP2.4 Authority Scope Serialization Specification
 
 **Specification:** `phase1-authority-scope-serialization-v1`
-**Status:** Normative technical reconciliation for REM-WP2.4; no implementation or race-test pass is claimed.
+**Status:** Normative shared D-16 contract; no implementation or race-test pass is claimed. REM-WP2.6 owns schema/bootstrap/privilege/lock-service implementation; REM-WP2.4 owns post-WP2.3 serial-order and immutable-history proof.
 **Decision:** D-16 in `Implementation-Plan-V4/02-decision-register.md` §7.5. This refines D-04's approved serial outcomes without changing the Phase 1/Phase 2 boundary.
-**Authority:** `docs/phase1/AUTHORIZATION_CAPACITY_CONTRACT.md` v3; `evidence/phase1/authority-dependency-inventory.json` v2; `evidence/phase1/task-dependencies.yml`; REM-WP2.3 and REM-WP2.4 in `WP2-WP5-IMPLEMENTATION-READINESS-PLAN.md`.
+**Authority:** `docs/phase1/AUTHORIZATION_CAPACITY_CONTRACT.md` v3; `evidence/phase1/authority-dependency-inventory.json` v2; `evidence/phase1/task-dependencies.yml`; REM-WP2.3, REM-WP2.4 and REM-WP2.6 in `WP2-WP5-IMPLEMENTATION-READINESS-PLAN.md`.
 
 ## 1. Reconciliation ruling
 
@@ -86,6 +86,13 @@ CREATE POLICY authority_scope_versions_update ON symphony.authority_scope_versio
     scope_type NOT IN ('global_policy', 'actor')
     AND tenant_id = NULLIF(current_setting('app.tenant_id', true), '')::uuid
   );
+-- PostgreSQL also consults UPDATE-policy visibility for SELECT ... FOR SHARE
+-- and FOR UPDATE. Frozen global/actor rows need to participate in a complete
+-- mutation lock set, while the false WITH CHECK prevents app-role writes.
+CREATE POLICY authority_scope_versions_frozen_lock ON symphony.authority_scope_versions
+  FOR UPDATE TO symphony_app
+  USING (scope_type IN ('global_policy', 'actor'))
+  WITH CHECK (false);
 
 REVOKE ALL ON symphony.authority_scope_versions FROM PUBLIC, symphony_app;
 GRANT SELECT, INSERT (scope_type, tenant_id, scope_id), UPDATE (version)
@@ -93,7 +100,7 @@ GRANT SELECT, INSERT (scope_type, tenant_id, scope_id), UPDATE (version)
 REVOKE DELETE, TRUNCATE ON symphony.authority_scope_versions FROM symphony_app;
 ```
 
-The ordered REM-WP2.4 migration/bootstrap seeds the single `global_policy` sentinel row at version 0. It also seeds version-0 `actor` rows for every actor represented by a global actor fact in the frozen Phase 1 catalogue. The deployment/bootstrap process uses the migration/bootstrap owner, outside serving traffic, and verifies exactly one global sentinel plus one row for each required actor tuple before enabling the runtime. Since platform-role assignment is frozen during Phase 1, adding/removing a globally scoped actor requires a reviewed offline migration/deployment that changes the source and corresponding scope-row set together. It is not an application request or an ordinary app-role insert. If a required row is absent, runtime authorization returns a generic fail-closed error and performs no protected source read/write, receipt, event or outbox mutation. Bootstrap validation fails before the service is marked ready if the singleton or required actor rows are absent or duplicated.
+The ordered REM-WP2.6 migration/bootstrap seeds the single `global_policy` sentinel row at version 0. It also seeds version-0 `actor` rows for every actor represented by a global actor fact in the frozen Phase 1 catalogue. Migration 0020 adds the frozen-scope lock policy after the table and grants exist. The deployment/bootstrap process uses the migration/bootstrap owner, outside serving traffic, and verifies exactly one global sentinel plus one row for each required actor tuple before enabling the runtime. Since platform-role assignment is frozen during Phase 1, adding/removing a globally scoped actor requires a reviewed offline migration/deployment that changes the source and corresponding scope-row set together. It is not an application request or an ordinary app-role insert. If a required row is absent, runtime authorization returns a generic fail-closed error and performs no protected source read/write, receipt, event or outbox mutation. Bootstrap validation fails before the service is marked ready if the singleton or required actor rows are absent or duplicated.
 
 For non-global rows, `symphony_app` may create only `tenant`, `organization`, and `actor_tenant` tuples whose `tenant_id` matches the transaction-local authenticated tenant. It derives every tuple from persisted tenant/organization/actor context, not request-supplied IDs. The `scope_shape` CHECK and INSERT RLS policy reject any other shape or tenant. No privileged fallback or retry under the migration owner is permitted.
 
@@ -109,7 +116,7 @@ For non-global rows, `symphony_app` may create only `tenant`, `organization`, an
 
 The log/debug encoding is exactly `scope_type|tenant_id-or-~|scope_id`, using lowercase PostgreSQL UUID text and `~` only for a null tenant. Examples: `organization|<tenant-uuid>|<organization-uuid>`, `actor_tenant|<tenant-uuid>|<actor-uuid>`, `global_policy|~|00000000-0000-0000-0000-000000000001`. The unique tuple, not the concatenated string, is the database identity. Application code derives tuple fields only from authenticated context and persisted rows; client-provided scope IDs/keys are rejected. The database CHECK rejects invalid shape; resolver tests prove tenant ownership and actor binding.
 
-The trigger rejects changes to the scope tuple and any version update other than `OLD.version + 1`; `updated_at` is assigned by PostgreSQL. Inserts default version to zero. The runtime API accepts neither field. RLS is both ENABLED and FORCED. Before resolver access, the transaction sets local `app.tenant_id` and `app.actor_user_id` from the authenticated server principal. Tenant/organization/actor_tenant rows are visible only to the transaction tenant; global actor row only to that actor; the fixed global policy row is read-only for `symphony_app`.
+The trigger rejects changes to the scope tuple and any version update other than `OLD.version + 1`; `updated_at` is assigned by PostgreSQL. Inserts default version to zero. The runtime API accepts neither field. RLS is both ENABLED and FORCED. Before resolver access, the transaction sets local `app.tenant_id` and `app.actor_user_id` from the authenticated server principal. Tenant/organization/actor_tenant rows are visible only to the transaction tenant; global actor row only to that actor; the fixed global policy row is read-only for `symphony_app`. PostgreSQL applies UPDATE-policy visibility to row-locking SELECTs; the dedicated `authority_scope_versions_frozen_lock` policy exposes global/actor rows for locking but `WITH CHECK (false)` prevents any app-role update to those frozen scope rows.
 
 ## 3. Database roles and mutation enforcement
 
@@ -149,7 +156,9 @@ The JSON inventory v2 is the machine-readable source of truth. This summarized m
 
 The REM-WP2.1 action catalogue is the final authority for whether a capacity rule consumes a global `actor` scope. WP2.1 must freeze the action-by-action dependency row before WP2.3 specifies that command. A command may not be implemented until every applicable row is explicit, and WP2.4 must reject a command-to-scope map that omits any declared dependency. If no applicable row consumes global actor status, the command omits that lock; if a row does, it includes the `actor` scope. This prevents both speculative locks and lock reduction that changes authorization semantics.
 
-## 6. Required PostgreSQL TDD/BDD evidence
+## 6. Required PostgreSQL evidence and owner allocation
+
+REM-WP2.6 owns DDL, bootstrap, RLS/privilege probes, canonical lock acquisition, frozen-source enforcement and rollback tests for the infrastructure. REM-WP2.4 owns serial-order barriers, authority outcomes, descendant delegation locking and immutable-history assertions after WP2.3 is implemented. The WP2.6 evidence record must be complete before WP2.3 starts; the WP2.4 record must reference that exact WP2.6 candidate and the WP2.3 mutation candidate. No test below is a pass claim in this specification.
 
 TDD creates a red test that detects the current unlocked/stale-read behavior before introducing the scope table or locks. The red test must demonstrate a stale authorization result or a missing scope-version update, not merely a missing file or compile error. Use an isolated PostgreSQL 18 database, actual `symphony_app` for application operations, a migration owner only for fixture setup, two independent connections, explicit test barriers, and fresh-connection assertions.
 

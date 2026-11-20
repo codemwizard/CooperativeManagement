@@ -205,7 +205,7 @@ Feature: Identity, privacy and access
     And the screen shows "Minor members: platform capability not enabled; legal reviewer to advise"
     And the rejection does not claim the Act forbids minors, because s.24 permits them
 
-  @REQ-ID-008 @BDD-PRV-021 @wip
+  @REQ-ID-008 @BDD-PRV-021
   Scenario: Enabling minor membership needs a recorded legal review
     When the programme manager records the legal reviewer's advice and sets policy "allow_minor_members" on
     Then minor members can be added with the lawful basis and guardian consent rules from that advice

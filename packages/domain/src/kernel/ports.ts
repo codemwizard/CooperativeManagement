@@ -56,6 +56,8 @@ export interface CommandTransactionRunner {
     tenantId: string,
     work: (context: CommandTransactionContext) => Promise<T>,
     recovery?: CommandTransactionRecovery<T>,
+    /** Trusted principal identity; supplied by CommandBus after principal/envelope equality is checked. */
+    actorUserId?: string,
   ): Promise<T>;
 }
 

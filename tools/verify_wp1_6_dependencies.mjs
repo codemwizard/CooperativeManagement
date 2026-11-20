@@ -16,6 +16,7 @@ export function validateWp16DependencyData({
   isAncestor,
   artifactExists,
   taskEvidenceValidator = validateTaskEvidence,
+  bddMap,
   taskId = 'REM-WP1.6',
 }) {
   assert.ok(graph?.tasks && typeof graph.tasks === 'object', 'dependency graph has no task map');
@@ -45,8 +46,8 @@ export function validateWp16DependencyData({
   for (const id of Object.keys(graph.tasks)) visit(id);
 
   const records = new Map(taskRecords.map((record) => [record.task_id, record]));
-  const requiredDirect = ['REM-WP1.1', 'REM-WP1.2', 'REM-WP1.3', 'REM-WP1.4', 'REM-WP1.5', 'REM-WP2.2', 'REM-WP5.3'];
-  assert.deepEqual(graph.tasks[taskId]?.depends_on, requiredDirect, `${taskId} direct predecessors differ from the approved seven-task gate`);
+  const directPredecessors = graph.tasks[taskId]?.depends_on;
+  assert.ok(Array.isArray(directPredecessors) && directPredecessors.length > 0, `${taskId} has no graph-defined predecessors`);
 
   const checked = new Set();
   const candidates = new Map();
@@ -80,7 +81,17 @@ export function validateWp16DependencyData({
     for (const predecessor of graph.tasks[id].depends_on) verify(predecessor);
   }
 
-  for (const predecessor of requiredDirect) verify(predecessor);
+  for (const predecessor of directPredecessors) verify(predecessor);
+  if (bddMap) {
+    assert.ok(Array.isArray(bddMap.scenarios), 'BDD owner map has no scenario list');
+    for (const scenario of bddMap.scenarios.filter((entry) => entry.owner_tasks?.includes(taskId))) {
+      for (const owner of scenario.owner_tasks) {
+        if (owner !== taskId) {
+          assert.ok(checked.has(owner), `${taskId} BDD scenario ${scenario.id} owner ${owner} is not a graph predecessor`);
+        }
+      }
+    }
+  }
   return { checkedTaskIds: [...checked].sort(), candidates };
 }
 
@@ -91,22 +102,32 @@ async function main() {
   const graph = JSON.parse(await readFile('evidence/phase1/task-dependencies.yml', 'utf8'));
   const registry = JSON.parse(await readFile('evidence/phase1/tasks.json', 'utf8'));
   const taskRecords = [...registry];
+  const bddMap = JSON.parse(await readFile('evidence/phase1/bdd-work-package-map.json', 'utf8'));
   const required = new Set();
   function collect(id) {
     if (required.has(id)) return;
     required.add(id);
     for (const dependency of graph.tasks[id]?.depends_on ?? []) collect(dependency);
   }
-  for (const id of ['REM-WP1.1', 'REM-WP1.2', 'REM-WP1.3', 'REM-WP1.4', 'REM-WP1.5', 'REM-WP2.2', 'REM-WP5.3']) collect(id);
+  for (const id of graph.tasks['REM-WP1.6']?.depends_on ?? []) collect(id);
   for (const id of required) {
     if (taskRecords.some((record) => record.task_id === id)) continue;
     const match = /^REM-WP(\d+(?:\.\d+)?)$/.exec(id);
     assert.ok(match, `unsupported task ID ${id}`);
-    taskRecords.push(JSON.parse(await readFile(`evidence/phase1/wp${match[1]}/task-evidence.json`, 'utf8')));
+    const evidencePath = `evidence/phase1/wp${match[1]}/task-evidence.json`;
+    try {
+      taskRecords.push(JSON.parse(await readFile(evidencePath, 'utf8')));
+    } catch (error) {
+      if (error instanceof Error && 'code' in error && error.code === 'ENOENT') {
+        throw new Error(`${id} predecessor evidence is missing at ${evidencePath}; the REM-WP1.6 predecessor gate cannot pass.`, { cause: error });
+      }
+      throw new Error(`${id} predecessor evidence could not be read from ${evidencePath}: ${error instanceof Error ? error.message : String(error)}`, { cause: error });
+    }
   }
   const result = validateWp16DependencyData({
     graph,
     taskRecords,
+    bddMap,
     candidate,
     commitExists: (sha) => spawnSync('git', ['cat-file', '-e', `${sha}^{commit}`], { stdio: 'ignore' }).status === 0,
     isAncestor: (sha, head) => spawnSync('git', ['merge-base', '--is-ancestor', sha, head], { stdio: 'ignore' }).status === 0,

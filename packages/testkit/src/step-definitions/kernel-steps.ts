@@ -322,7 +322,7 @@ After(async function (this: SymphonyWorld) {
 // ─── Background steps ──────────────────────────────────────────────────────────
 
 Given(
-  'two organisations {string} and {string}',
+  /^two organisations "([^"]+)" and "([^"]+)"(?: in separate tenants)?$/,
   function (this: SymphonyWorld, orgAName: string, orgBName: string) {
     const orgAId = makeOrgId(orgAName);
     const orgBId = makeOrgId(orgBName);

@@ -310,9 +310,10 @@
       "scenario": "The same command id with the same payload returns the original result",
       "owner_tasks": [
         "REM-WP1.3",
+        "REM-WP2.3",
         "REM-WP1.6"
       ],
-      "required_path": "REM-WP1.3 proves PostgreSQL receipt contention/replay and actor/semantic-envelope binding; REM-WP1.6 proves the same behavior through the composed HTTP API.",
+      "required_path": "REM-WP1.3 proves PostgreSQL receipt contention/replay and actor/semantic-envelope binding; REM-WP2.3 supplies the approved registered command; REM-WP1.6 proves replay through the composed HTTP API.",
       "assertion_rule": "Execute this exact tagged scenario with observable assertions on the specified product path; no mock, @wip, skip, tag removal, zero-step pass, or in-memory substitute.",
       "phase0_status": "mapped_and_deferred_to_owner_task"
     },
@@ -325,9 +326,10 @@
       "scenario": "The same command id with a different payload is rejected",
       "owner_tasks": [
         "REM-WP1.3",
+        "REM-WP2.3",
         "REM-WP1.6"
       ],
-      "required_path": "REM-WP1.3 proves PostgreSQL receipt contention/replay and actor/semantic-envelope binding; REM-WP1.6 proves the same behavior through the composed HTTP API.",
+      "required_path": "REM-WP1.3 proves PostgreSQL receipt contention/replay and actor/semantic-envelope binding; REM-WP2.3 supplies the approved registered command; REM-WP1.6 proves changed-envelope rejection through the composed HTTP API.",
       "assertion_rule": "Execute this exact tagged scenario with observable assertions on the specified product path; no mock, @wip, skip, tag removal, zero-step pass, or in-memory substitute.",
       "phase0_status": "mapped_and_deferred_to_owner_task"
     },
@@ -354,9 +356,14 @@
       ],
       "scenario": "A command cannot touch another organisation",
       "owner_tasks": [
-        "REM-WP1.5"
+        "REM-WP1.2",
+        "REM-WP1.5",
+        "REM-WP2.2",
+        "REM-WP2.3",
+        "REM-WP5.3",
+        "REM-WP1.6"
       ],
-      "required_path": "PostgreSQL least-privilege role, RLS and explicit tenant-filter tests",
+      "required_path": "REM-WP1.2 proves committed security-attempt audit behavior; REM-WP1.5 proves restricted-role RLS and tenant isolation; REM-WP2.2/REM-WP5.3 supply trusted tenant and persisted session; REM-WP2.3 supplies a registered command; REM-WP1.6 proves the non-disclosing HTTP response. Use distinct tenants for the tenant-mismatch assertion.",
       "assertion_rule": "Execute this exact tagged scenario with observable assertions on the specified product path; no mock, @wip, skip, tag removal, zero-step pass, or in-memory substitute.",
       "phase0_status": "mapped_and_deferred_to_owner_task"
     },
@@ -398,9 +405,11 @@
       "scenario": "Read-only institutions cannot mutate cooperative source records",
       "owner_tasks": [
         "REM-WP2.1",
-        "REM-WP2.2"
+        "REM-WP2.2",
+        "REM-WP2.3",
+        "REM-WP1.6"
       ],
-      "required_path": "default-deny policy/domain plus trusted API composition and forged-claim tests",
+      "required_path": "Pure policy denial (REM-WP2.1), trusted persisted authority (REM-WP2.2), an approved registered Phase 1 command (REM-WP2.3), and actual HTTP composition with forged-claim rejection (REM-WP1.6). The current feature examples must be reconciled to registered command IDs before this scenario can pass.",
       "assertion_rule": "Execute this exact tagged scenario with observable assertions on the specified product path; no mock, @wip, skip, tag removal, zero-step pass, or in-memory substitute.",
       "phase0_status": "mapped_and_deferred_to_owner_task"
     },
@@ -413,9 +422,11 @@
       "scenario": "The client cannot set verified, authority or approval states",
       "owner_tasks": [
         "REM-WP2.1",
-        "REM-WP2.2"
+        "REM-WP2.2",
+        "REM-WP2.3",
+        "REM-WP1.6"
       ],
-      "required_path": "default-deny policy/domain plus trusted API composition and forged-claim tests",
+      "required_path": "REM-WP2.3 supplies the strict command schema; REM-WP1.6 proves client-supplied status/authority fields are rejected or ignored over HTTP and independently checks event-derived standing. Schema rejection alone does not prove standing derivation.",
       "assertion_rule": "Execute this exact tagged scenario with observable assertions on the specified product path; no mock, @wip, skip, tag removal, zero-step pass, or in-memory substitute.",
       "phase0_status": "mapped_and_deferred_to_owner_task"
     },

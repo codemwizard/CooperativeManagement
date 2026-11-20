@@ -321,18 +321,24 @@ describe('WP1.5 actual restricted-role tenant isolation', () => {
       "SELECT has_schema_privilege(current_user, 'symphony', 'USAGE') AS usage, has_schema_privilege(current_user, 'symphony', 'CREATE') AS create",
     );
     expect(schema.rows[0]).toEqual({ usage: true, create: false });
-    const columnGrants = await admin.query(
-      `SELECT 1
-       FROM pg_attribute a
-       JOIN pg_class c ON c.oid=a.attrelid
-       JOIN pg_namespace n ON n.oid=c.relnamespace
-       CROSS JOIN LATERAL aclexplode(a.attacl) acl
-       WHERE n.nspname='symphony' AND c.relkind IN ('r','p')
-         AND a.attnum>0 AND NOT a.attisdropped
-         AND acl.grantee IN (0, (SELECT oid FROM pg_roles WHERE rolname='symphony_app'))
-       LIMIT 1`,
+    const columnGrants = await admin.query<{ table_name: string; column_name: string; privilege_type: string; grantee: string }>(
+      `SELECT c.relname AS table_name, a.attname AS column_name,
+              acl.privilege_type, pg_get_userbyid(acl.grantee) AS grantee
+         FROM pg_attribute a
+         JOIN pg_class c ON c.oid=a.attrelid
+         JOIN pg_namespace n ON n.oid=c.relnamespace
+         CROSS JOIN LATERAL aclexplode(a.attacl) acl
+        WHERE n.nspname='symphony' AND c.relkind IN ('r','p')
+          AND a.attnum>0 AND NOT a.attisdropped
+          AND acl.grantee IN (0, (SELECT oid FROM pg_roles WHERE rolname='symphony_app'))
+        ORDER BY table_name,column_name,privilege_type`,
     );
-    expect(columnGrants.rowCount).toBe(0);
+    expect(columnGrants.rows).toEqual([
+      { table_name: 'authority_scope_versions', column_name: 'scope_id', privilege_type: 'INSERT', grantee: 'symphony_app' },
+      { table_name: 'authority_scope_versions', column_name: 'scope_type', privilege_type: 'INSERT', grantee: 'symphony_app' },
+      { table_name: 'authority_scope_versions', column_name: 'tenant_id', privilege_type: 'INSERT', grantee: 'symphony_app' },
+      { table_name: 'authority_scope_versions', column_name: 'version', privilege_type: 'UPDATE', grantee: 'symphony_app' },
+    ]);
     const publicTableGrants = await admin.query(
       "SELECT 1 FROM information_schema.role_table_grants WHERE grantee='PUBLIC' AND table_schema='symphony' LIMIT 1",
     );

@@ -45,8 +45,9 @@ export class PostgresCredentialRepository {
 
   async issueTemporaryCredential(input: IssueTemporaryCredentialInput): Promise<TemporaryCredentialRow> {
     return this.transaction(input.tenantId, async (client) => {
+      await lockUserLifecycle(client, input.tenantId, input.userId);
       const user = await client.query<{ id: string }>(
-        'SELECT id FROM symphony.users WHERE id = $1 AND tenant_id = $2 FOR UPDATE',
+        'SELECT id FROM symphony.users WHERE id = $1 AND tenant_id = $2',
         [input.userId, input.tenantId],
       );
       if (user.rowCount !== 1) throw new Error('Credential subject is unavailable');
@@ -98,8 +99,9 @@ export class PostgresCredentialRepository {
   /** Consumes the temporary credential and creates the permanent password in one transaction. */
   async establishPermanentPassword(input: EstablishPasswordInput): Promise<void> {
     await this.transaction(input.tenantId, async (client) => {
+      await lockUserLifecycle(client, input.tenantId, input.userId);
       const user = await client.query(
-        'SELECT id FROM symphony.users WHERE id = $1 AND tenant_id = $2 FOR UPDATE',
+        'SELECT id FROM symphony.users WHERE id = $1 AND tenant_id = $2',
         [input.userId, input.tenantId],
       );
       if (user.rowCount !== 1) throw new TemporaryCredentialUnavailableError();
@@ -167,6 +169,16 @@ export class PostgresCredentialRepository {
       revokedAt: row.revoked_at?.toISOString() ?? null,
     };
   }
+}
+
+/** Shared credential lifecycle serialization without UPDATE privilege on frozen users. */
+async function lockUserLifecycle(client: PoolClient, tenantId: string, userId: string): Promise<void> {
+  await client.query(
+    `SELECT pg_advisory_xact_lock(
+       hashtextextended('symphony.user-lifecycle:' || $1::text || ':' || $2::text, 0)
+     )`,
+    [tenantId, userId],
+  );
 }
 
 function isUniqueViolation(error: unknown): error is { code: string } {

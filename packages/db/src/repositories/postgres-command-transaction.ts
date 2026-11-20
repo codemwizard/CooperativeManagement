@@ -19,6 +19,7 @@ export class PostgresCommandTransactionRunner implements CommandTransactionRunne
     tenantId: string,
     work: (context: CommandTransactionContext) => Promise<T>,
     recovery?: CommandTransactionRecovery<T>,
+    actorUserId?: string,
   ): Promise<T> {
     let uncertainReentered = false;
     for (let attempt = 1; attempt <= 3; attempt += 1) {
@@ -26,6 +27,7 @@ export class PostgresCommandTransactionRunner implements CommandTransactionRunne
       try {
         const result = await this.db.transaction().execute(async (trx) => {
           await sql`SELECT set_config('app.tenant_id', ${tenantId}, true)`.execute(trx);
+          if (actorUserId !== undefined) await sql`SELECT set_config('app.actor_user_id', ${actorUserId}, true)`.execute(trx);
           const context: PostgresCommandTransactionContext = {
             transactionId: Symbol('symphony-command-transaction'),
             kyselyTransaction: trx,
@@ -54,6 +56,7 @@ export class PostgresCommandTransactionRunner implements CommandTransactionRunne
             await this.options.faults?.beforeUncertainLookup?.();
             recovered = await recoveryDb.transaction().execute(async (trx) => {
               await sql`SELECT set_config('app.tenant_id', ${tenantId}, true)`.execute(trx);
+              if (actorUserId !== undefined) await sql`SELECT set_config('app.actor_user_id', ${actorUserId}, true)`.execute(trx);
               const context: PostgresCommandTransactionContext = {
                 transactionId: Symbol('symphony-command-recovery-transaction'),
                 kyselyTransaction: trx,

@@ -121,7 +121,7 @@ export class CommandBus<TAggregate extends AggregateRoot> {
           const receipt = await this.deps.receiptStore.get(envelope.commandId, envelope.tenantId, transaction);
           return receipt === null ? null : this.replayReceipt<TData, TPayload>(receipt, envelope);
         },
-      });
+      }, envelope.actorUserId);
     } catch (error: unknown) {
       if (error instanceof OptimisticConcurrencyError) {
         return { ok: false, code: 'STALE_VERSION', detail: error.message };

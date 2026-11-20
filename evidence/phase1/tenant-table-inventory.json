@@ -417,8 +417,14 @@
         "UPDATE",
         "DELETE"
       ]
+    },
+    {
+      "table": "authority_scope_versions",
+      "classification": "authority_scope_control_plane",
+      "scope_basis": "D-16 transaction serialization metadata; row visibility is bound to transaction tenant and authenticated actor, and app writes are column-limited.",
+      "rls_current": true
     }
   ],
-  "known_gap": "REM-WP6.1 migrations 0017-0018 add a tenant-scoped finding-attribution snapshot; app-role RLS and immutable-snapshot integration evidence remain pending.",
+  "known_gap": "REM-WP2.6 migrations 0019-0020 add D-16 authority scope serialization, frozen-scope row locking and runtime source grants; verify in WP2.6 evidence.",
   "status": "WP1.5 original 55-table scope passed on candidate d7fbf5851b11b07b65bde36f062db7b21f487947; later migrations 0014-0016 require candidate-specific verification."
 }
