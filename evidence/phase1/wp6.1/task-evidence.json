@@ -6,7 +6,7 @@
     "unit_test": "passed",
     "integration_test": "passed",
     "bdd_ui_test": "passed",
-    "gate_verified": "pending"
+    "gate_verified": "passed"
   },
   "commit": "c3f4af5ed20ac6922e0dbcd46a12e263fd5b0406",
   "environment": {
@@ -133,7 +133,7 @@
     ]
   },
   "limitations": [
-    "The previous candidate passed WP6.1 exact-candidate verification. These review fixes require a new immutable candidate and fresh preflight/final verification before that gate status can be restored.",
+    "WP6.1 review-fix candidate c3f4af5ed20ac6922e0dbcd46a12e263fd5b0406 passed exact-candidate preflight and final verification.",
     "No production deployment, public-record classification/fee workflow, tenant-specific directory data, member activity/household persistence, authority mutation lifecycle, cohort lifecycle, or general finding-authoring flow is claimed.",
     "The Phase 1 aggregate BDD gate remains open outside WP6.1; see the exact scenario results in claims.coverage_limitations."
   ],
