@@ -13,7 +13,7 @@
     "node": "v26.7.0",
     "npm": "12.2.0",
     "postgres": "PostgreSQL 18.0 (package build 18.0-2); local isolated databases with _test suffix",
-    "database_role": "symphony_app for authenticated API/browser reads; test-admin role only for synthetic fixture setup/cleanup",
+    "database_role": "app role symphony_app for authenticated API/browser reads; test-admin role only for synthetic fixture setup/cleanup",
     "data_mode": "test",
     "key_provider": "local-test"
   },
