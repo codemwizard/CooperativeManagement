@@ -1,6 +1,6 @@
 # REM-WP6.1 predecessor and closure implementation plan
 
-**Status:** Ready for implementation. This plan closes the remaining predecessor evidence and WP6.1 acceptance gaps on a feature branch based on the updated `origin/main`. No new owner decision is required by the currently approved UXW-004 contract.
+**Status:** Implementation and focused acceptance complete; WP5.3 is exact-candidate gate-closed. WP6.1 exact-candidate preflight/final verification and origin CI remain.
 
 **Candidate base:** `d9a8f47ed278918b507b1776b0bb9d426da37c1a` (`main` / `origin/main` at the time this plan was prepared).
 
@@ -15,8 +15,8 @@
 | REM-WP1.5 | `gate_verified: passed`, commit `6f145875761a2c356bab790324c8a5615ec03652` | Confirm record and ancestry; no implementation work. |
 | REM-WP2.2 | `gate_verified: passed`, commit `5c5c730843ba3b5627a5389383496b9653caae04` | Confirm exact record, verifier evidence and ancestry; do not repeat closure unless its record or source changes. |
 | REM-WP5.2 | `gate_verified: passed`, commit `7003723da67057bac110b5e364fdadddee6c6785` | Confirm record and ancestry; no implementation work. |
-| REM-WP5.3 | implementation and focused tests recorded complete/passed; gate pending and no candidate SHA | Produce an immutable candidate, run its preflight/final verifier in the evidence-only sequence below. |
-| REM-WP6.1 | partial; Cucumber and gate pending; evidence says `commit: working-tree` | Implement live Cucumber acceptance, bind evidence to an exact candidate, and run its preflight/final verifier. |
+| REM-WP5.3 | exact-candidate gate passed on `6ba1885035b330122570bf4602d88bcd19f73fc1` | Preserve and recheck the recorded preflight/final artifacts; no further implementation. |
+| REM-WP6.1 | implementation and focused acceptance complete; live Cucumber passed; gate pending; evidence still needs exact candidate binding | Bind evidence to the final implementation candidate, run preflight/final verifier, then push for CI. |
 
 Authoritative status is always the current task evidence and dependency registry, not this table. Re-read them before each candidate is cut. The verified `main` evidence files are `evidence/phase1/tasks.json`, `evidence/phase1/wp1.5/task-evidence.json`, `evidence/phase1/wp2.2/task-evidence.json`, `evidence/phase1/wp5.2/task-evidence.json`, `evidence/phase1/wp5.3/task-evidence.json`, and `evidence/phase1/wp6.1/task-evidence.json`.
 
@@ -137,3 +137,13 @@ The JSON report must be parsed and checked for all four IDs, every frozen UXW-00
 | Origin CI | pushed branch SHA and provider run/artifact references | CI passes on the exact pushed SHA; no claims based on a different candidate. |
 
 **Out of scope and retained limitations:** production hosting and production data; legal classification and fees for public-record disclosure; member activity/household persistence; tenant-specific directory records; authority grant/revoke lifecycle; first-class cohort lifecycle; complete finding-authoring/write lifecycle; independent security/accessibility review. Do not state these capabilities are implemented as a condition of this bounded WP6.1 gate.
+
+## 9. Implementation progress
+
+| Item | Result | Evidence |
+|---|---|---|
+| Candidate isolation and predecessor ancestry | Local branch `codex/wp6.1-closeout` is based on updated `main`; WP1.5, WP2.2, WP0.9 and WP0.10 passing SHAs are ancestors. | Git ancestry checks; task records. |
+| REM-WP5.3 exact closure | PASS on candidate `6ba1885035b330122570bf4602d88bcd19f73fc1`; preflight and final verifier passed. | `evidence/phase1/wp5.3/closure-preflight.log`, `closure-final.log`, and `task-evidence.json`. |
+| Live WP6.1 Cucumber | PASS: 12 scenarios, 71 steps; nine UXW-001 contexts and UXW-002–004 each executed with all steps passing. | `evidence/phase1/wp6.1/cucumber-report.json`, `cucumber-run.log`. |
+| Focused implementation checks | PASS: typecheck, workspace build/unit tests, API/PostgreSQL tests, migration gate, restricted-role RLS, architecture, Phase 1 contracts, Playwright routes, and pinned toolchain. | Raw logs listed in `evidence/phase1/wp6.1/task-evidence.json`. |
+| REM-WP6.1 exact closure and push | Pending. Bind the WP6.1 record to the exact candidate after this progress update, run preflight/final verification, then push the feature branch for CI. | `tools/verify_wp6_1_closure.mjs`; final gate artifacts to be retained in `evidence/phase1/wp6.1/`. |
