@@ -52,6 +52,11 @@
       "result": "passed",
       "command": "node tools/verify_wp2_6_closure.mjs 1b195317eaa342c91efabb2f987bb6b87daaec6c --preflight",
       "artifact": "evidence/phase1/wp2.6/local/2026-11-20/preflight.raw.log"
+    },
+    {
+      "artifact": "evidence/phase1/wp2.6/local/2026-11-20/closure-verification.raw.log",
+      "command": "node tools/verify_wp2_6_closure.mjs 1b195317eaa342c91efabb2f987bb6b87daaec6c",
+      "result": "passed"
     }
   ],
   "claims": {
@@ -78,9 +83,8 @@
     }
   },
   "limitations": [
-    "Exact-candidate preflight passed; final exact-candidate verification remains to be run.",
     "Capacity and delegation application-role DML remains denied until REM-WP2.3 defines, registers and validates supported mutation writers."
   ],
   "unresolved_decisions": [],
-  "reviewer": "Implementation self-review; final candidate-bound gate status is assigned only by the WP2.6 exact-candidate verifier. Independent review remains separate."
+  "reviewer": "WP2.6 exact-candidate verifier passed; independent review remains separate."
 }

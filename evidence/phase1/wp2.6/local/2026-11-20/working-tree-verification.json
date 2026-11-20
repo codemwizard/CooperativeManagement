@@ -26,7 +26,8 @@
     "migration-apply.raw.log": "97dbf6d22757484c6e2dbe8fec61c05086e7d72cb9b0021748d3d82a469c6871",
     "phase1-contract-verification.raw.log": "69c822e139beae3e8c1570daffe7146e11494b81123f0008c07457eb13e1900d",
     "typecheck-v4.raw.log": "210ca8284f5332a14d73d1a511ef359639b5e97cf1882bade52e102b32de7bf2",
-    "preflight.raw.log": "6be931e9e2c67d38a53deeb9233b2d2eb07372a75bff198301b31afe653e1eae"
+    "preflight.raw.log": "6be931e9e2c67d38a53deeb9233b2d2eb07372a75bff198301b31afe653e1eae",
+    "closure-verification.raw.log": "21461de65ae3d7718bc67d2346bb603bc605382e7ad103d1ad313d50a0ed09db"
   },
   "limitation": "Verification commands ran against the working tree based on working_tree_base_commit. Their tracked implementation snapshot was committed without application/schema changes as candidate_commit; the retained logs were produced before that commit. Candidate-bound task evidence and gate status are checked separately by the exact-candidate verifier."
 }
