@@ -13,7 +13,7 @@ import { ProvenanceDrawer } from './ProvenanceDrawer.js';
 import { CapabilityGapPage } from './CapabilityGapPage.js';
 import { EvidenceRegisterPage } from '../routes/EvidenceRegisterPage.js';
 import { readWorkspaceContext } from '../api/workspace-client.js';
-import { isOrganizationInContext, presentWorkspaceContexts, type PresentedWorkspaceContext } from '../presenters/present-workspace-context.js';
+import { isOrganizationInContext, presentWorkspaceContexts, selectWorkspaceContext } from '../presenters/present-workspace-context.js';
 import type { WorkspaceContextFactsContract } from '@symphony/contracts';
 import './workspace-shell.css';
 
@@ -26,10 +26,14 @@ export function AppShell(): React.ReactElement {
   const location = useLocation();
   const navigate = useNavigate();
   const { cooperativeId } = useParams<{ cooperativeId?: string }>();
-  const contexts = workspaceFacts ? presentWorkspaceContexts(workspaceFacts) : [];
-  const routeContext = contexts.find((context) => (!cooperativeId || isOrganizationInContext(context, cooperativeId))
-    && context.navigation.some((area) => location.pathname.endsWith(`/${area.path}`)));
-  const selectedContext = contexts.find((context) => context.id === selectedContextId) ?? routeContext ?? contexts[0];
+  const contexts = React.useMemo(() => workspaceFacts ? presentWorkspaceContexts(workspaceFacts) : [], [workspaceFacts]);
+  const requestedContextId = new URLSearchParams(location.search).get('context');
+  const selectedContext = selectWorkspaceContext(contexts, {
+    requestedContextId,
+    selectedContextId,
+    cooperativeId,
+    pathname: location.pathname,
+  });
   const requestedOrganizationAllowed = cooperativeId && selectedContext
     ? isOrganizationInContext(selectedContext, cooperativeId)
     : true;
@@ -44,6 +48,7 @@ export function AppShell(): React.ReactElement {
     setDrawerOpen(false);
     requestAnimationFrame(() => provenanceTriggerRef.current?.focus({ preventScroll: true }));
   }, []);
+  const openProvenance = useCallback(() => setDrawerOpen(true), []);
 
   useEffect(() => {
     let mounted = true;
@@ -60,14 +65,15 @@ export function AppShell(): React.ReactElement {
     const isWorkspaceRoot = location.pathname === basePath || location.pathname === `${basePath}/`;
     document.title = `${area?.label ?? (isWorkspaceRoot ? 'Overview' : 'Page not found')} | Symphony Workspace`;
     document.querySelector<HTMLElement>('#main-content h1')?.focus({ preventScroll: true });
-  }, [basePath, location.pathname, selectedContext]);
+  }, [basePath, location.pathname, selectedContext?.id,
+    selectedContext?.navigation.find((candidate) => location.pathname.endsWith(`/${candidate.path}`))?.label]);
 
   const selectContext = (contextId: string): void => {
     const next = contexts.find((context) => context.id === contextId);
     if (!next) return;
     setSelectedContextId(next.id);
     const rootPath = next.organizationId ? `/coop/${encodeURIComponent(next.organizationId)}` : '/workspace';
-    navigate(rootPath);
+    navigate(`${rootPath}?context=${encodeURIComponent(next.id)}`);
   };
 
   if (!workspaceFacts && !contextLoadFailed) return <main id="main-content" aria-busy="true"><p role="status">Loading your workspace context…</p></main>;
@@ -80,7 +86,7 @@ export function AppShell(): React.ReactElement {
     <div className="app-shell" style={styles.shell}>
       <a className="workspace-skip-link" href="#main-content">Skip to main content</a>
       <OrgHeader {...(selectedContext.organizationName ? { orgName: selectedContext.organizationName } : {})}
-        provenanceButtonRef={provenanceTriggerRef} onOpenProvenance={() => setDrawerOpen(true)} />
+        provenanceButtonRef={provenanceTriggerRef} onOpenProvenance={openProvenance} />
       <div className="app-shell-body" style={styles.body}>
         <aside aria-label="Current workflow and navigation" style={styles.navigationColumn}>
           <label style={styles.contextLabel} htmlFor="workspace-context-select">Current workflow</label>

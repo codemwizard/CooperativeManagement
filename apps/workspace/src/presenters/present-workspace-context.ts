@@ -135,3 +135,32 @@ export function isOrganizationInContext(context: PresentedWorkspaceContext, orga
   if (context.organizationId === organizationId || context.scopeOrganizationIds.includes(organizationId)) return true;
   return false;
 }
+
+export function selectWorkspaceContext(
+  contexts: readonly PresentedWorkspaceContext[],
+  input: {
+    readonly requestedContextId?: string | null;
+    readonly selectedContextId?: string | null;
+    readonly cooperativeId?: string | null | undefined;
+    readonly pathname: string;
+  },
+): PresentedWorkspaceContext | undefined {
+  const authorized = input.cooperativeId
+    ? contexts.filter((context) => isOrganizationInContext(context, input.cooperativeId!))
+    : [...contexts];
+  const selectedByUrl = contexts.find((context) => context.id === input.requestedContextId);
+  if (selectedByUrl && (!input.cooperativeId || isOrganizationInContext(selectedByUrl, input.cooperativeId))) return selectedByUrl;
+
+  const selectedInSession = contexts.find((context) => context.id === input.selectedContextId);
+  if (selectedInSession && (!input.cooperativeId || isOrganizationInContext(selectedInSession, input.cooperativeId))) return selectedInSession;
+
+  const routeContext = authorized.find((context) =>
+    context.navigation.some((area) => input.pathname.endsWith(`/${area.path}`)));
+  if (routeContext) return routeContext;
+
+  if (input.cooperativeId && /^\/coop\/[^/]+\/?$/.test(input.pathname)) {
+    return authorized.find((context) => context.organizationId === input.cooperativeId) ?? authorized[0];
+  }
+
+  return contexts[0];
+}

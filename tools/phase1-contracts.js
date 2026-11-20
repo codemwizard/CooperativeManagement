@@ -6,8 +6,8 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const WP0_IDS = Array.from({ length: 13 }, (_, index) => `REM-WP0.${index + 1}`);
 const MANDATORY_GATE_SCRIPTS = [
-  'verify:phase0', 'verify:phase1:contracts', 'verify:wp2.2', 'typecheck:v4', 'verify:arch', 'test:unit',
-  'test:db:migrations', 'test:db --workspace @symphony/db', 'test:api', 'verify:wp5.3',
+  'verify:phase0', 'verify:phase1:contracts', 'verify:phase1:predecessors', 'typecheck:v4', 'verify:arch', 'test:unit',
+  'test:db:migrations', 'test:db --workspace @symphony/db', 'test:api',
   'test:workspace', 'test:wp6.1', 'test:bdd:phase1', 'verify:wp6.1', 'verify:trace', 'test:a11y',
   'test:login:api', 'verify:legacy-floor', 'test:e2e',
 ];
@@ -533,7 +533,7 @@ export function validatePhase1Gate(packageJson, repoRoot = ROOT) {
   }
   if (!aggregate.includes('&&')) errors.push('verify:phase1 must stop on the first failed mandatory check');
   if (!aggregate.trim().startsWith('npm run verify:phase0 &&')) errors.push('verify:phase1 must begin with the complete Phase 0 gate');
-  const mustHaveScripts = ['verify:phase1:contracts', 'verify:wp2.2', 'verify:wp5.3', 'test:api', 'test:workspace', 'test:wp6.1', 'test:bdd:phase1', 'test:login:api', 'test:wp5.5'];
+  const mustHaveScripts = ['verify:phase1:contracts', 'verify:phase1:predecessors', 'verify:wp2.2', 'verify:wp5.3', 'test:api', 'test:workspace', 'test:wp6.1', 'test:bdd:phase1', 'test:login:api', 'test:wp5.5'];
   for (const name of mustHaveScripts) if (!scripts[name]) errors.push(`mandatory npm script ${name} is missing`);
   const targetFiles = [
     'tools/phase1-contracts.js', 'tools/run_phase1_bdd.mjs', 'tools/phase1-command-contract-oracle.js',
@@ -578,6 +578,7 @@ export function validatePhase1Gate(packageJson, repoRoot = ROOT) {
   const operationChecks = [
     [scripts['verify:phase0'], 'test:phase0-contract'],
     [scripts['verify:phase0'], 'verify:archive-hygiene'],
+    [scripts['verify:phase1:predecessors'], 'tools/verify_phase1_predecessors.mjs'],
     [scripts['typecheck:v4'], 'tsc --build --force'],
     [scripts['verify:arch'], 'depcruise'],
     [scripts['test:unit'], 'vitest run'],

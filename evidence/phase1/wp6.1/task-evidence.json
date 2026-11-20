@@ -6,7 +6,7 @@
     "unit_test": "passed",
     "integration_test": "passed",
     "bdd_ui_test": "passed",
-    "gate_verified": "passed"
+    "gate_verified": "pending"
   },
   "commit": "8182c5036a944c2411beccf91db2a35540bfd2b1",
   "environment": {
@@ -87,6 +87,11 @@
       "command": "node tools/verify_wp6_1_closure.mjs 8182c5036a944c2411beccf91db2a35540bfd2b1",
       "result": "passed",
       "artifact": "evidence/phase1/wp6.1/closure-final.log"
+    },
+    {
+      "command": "npm run verify:phase1:predecessors",
+      "result": "passed",
+      "artifact": "evidence/phase1/wp6.1/predecessor-check.log"
     }
   ],
   "claims": {
@@ -123,12 +128,14 @@
       "The /coop/:cooperativeId shell and finding projection enforce current persisted context/tenant scope; unrelated tenant-specific directory and other business-record workflows remain outside this task.",
       "Member activity/household persistence, authority grant/revoke lifecycle and a first-class cohort lifecycle remain the explicit WP2.2 limitations.",
       "Production hosting/data, legal record-classification and public inspection fee workflows, production accessibility review and independent security review are not claimed.",
-      "The integrated 41-scenario REM-WP7.2 gate remains downstream and was not run as WP6.1 acceptance."
+      "The integrated 41-scenario REM-WP7.2 gate remains downstream and was not run as WP6.1 acceptance.",
+      "The aggregate test:bdd:phase1 runner now executes BDD-UXW-001–004 through the live WP6.1 browser/API/PostgreSQL runner and merges that report with default-profile results. The aggregate currently remains failing on other frozen scenarios: BDD-ENR-004, BDD-AUD-001/002/003/005/014 and BDD-UXW-015 fail; BDD-AUD authorization steps remain undefined; BDD-PRV-008/015/016/018/019/020, BDD-UNI-001/002, BDD-AUD-004/007/015 and BDD-UXW-005/009/010/011/013 remain filtered or @wip. UXW-015 is owned by WP6.3."
     ]
   },
   "limitations": [
-    "WP6.1 exact-candidate preflight and final verification passed; origin CI on the pushed feature branch remains a downstream confirmation.",
-    "No production deployment, public-record classification/fee workflow, tenant-specific directory data, member activity/household persistence, authority mutation lifecycle, cohort lifecycle, or general finding-authoring flow is claimed."
+    "The previous candidate passed WP6.1 exact-candidate verification. These review fixes require a new immutable candidate and fresh preflight/final verification before that gate status can be restored.",
+    "No production deployment, public-record classification/fee workflow, tenant-specific directory data, member activity/household persistence, authority mutation lifecycle, cohort lifecycle, or general finding-authoring flow is claimed.",
+    "The Phase 1 aggregate BDD gate remains open outside WP6.1; see the exact scenario results in claims.coverage_limitations."
   ],
   "unresolved_decisions": [],
   "reviewer": "Live local browser/API/PostgreSQL acceptance and focused checks recorded; independent security/accessibility review remains separate governance evidence.",

@@ -1,0 +1,4 @@
+npm notice run symphony-prototype@1.0.0 verify:phase1:predecessors
+npm notice run node tools/verify_phase1_predecessors.mjs
+PASS Phase 1 predecessor records and candidate ancestry at 433c3d3106c38d58ad38611b628f3cba57547c09.
+PASS WP2.2 and WP5.3 historical exact-candidate final proofs are retained; their historical verifiers were not rerun against later commits.

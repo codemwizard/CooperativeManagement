@@ -7,15 +7,13 @@ npm notice run vitest run tests/tooling/phase1_contracts.test.ts
 
  RUN  v2.1.9 C:/Workspace/GitHub/Prototype
 
- ✓ tests/tooling/phase1_contracts.test.ts (112 tests) 13174ms
-   ✓ REM-WP0.12 evidence contract > accepts the published example against the versioned JSON Schema 353ms
-   ✓ REM-WP1.2 evidence sub-gates > requires an immutable SHA and all audit, end-to-end, and migration evidence for a pass 648ms
-   ✓ REM-WP0.9 Phase 1 gate contract > proves a failing fixture command prevents later gate commands from running 9599ms
+ ✓ tests/tooling/phase1_contracts.test.ts (112 tests) 4057ms
+   ✓ REM-WP0.9 Phase 1 gate contract > proves a failing fixture command prevents later gate commands from running 2795ms
 
  Test Files  1 passed (1)
       Tests  112 passed (112)
-   Start at  04:14:25
-   Duration  17.07s (transform 483ms, setup 0ms, collect 1.71s, tests 13.17s, environment 28ms, prepare 1.04s)
+   Start at  06:17:51
+   Duration  5.25s (transform 183ms, setup 0ms, collect 474ms, tests 4.06s, environment 0ms, prepare 175ms)
 
 Phase 1 REM-WP0 contract artifacts are structurally valid.
 Dependency graph: 45 task nodes; all edges are known, justified and acyclic.

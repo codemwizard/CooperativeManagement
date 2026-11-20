@@ -126,7 +126,12 @@ test('served component, login and workspace routes have titles, landmarks and ke
   await signIn(page);
 
   const programmeManagerOption = contextOptions.find((option) => option.label.startsWith('Programme manager'));
+  expect(programmeManagerOption, 'API did not resolve the programme manager workflow context').toBeTruthy();
   await contextSelect.selectOption(programmeManagerOption!.value);
+  await expect(page).toHaveURL(new RegExp(`/workspace\\?context=${encodeURIComponent(programmeManagerOption!.value)}$`));
+  await page.reload();
+  await expect(contextSelect).toHaveValue(programmeManagerOption!.value);
+  await expect(page.getByRole('navigation', { name: 'Primary navigation' }).getByRole('link')).toHaveCount(5);
   await page.goto(`/coop/${organizationId}/directory`);
   await expect(page.getByRole('heading', { level: 1, name: 'Directory' })).toBeFocused();
   expect(await page.locator('nav[aria-label="Primary navigation"] a').count()).toBe(5);

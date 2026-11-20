@@ -10,8 +10,11 @@ npm notice run vitest run --reporter=verbose
  ✓ src/__tests__/presenter.test.ts > presenterTest_noBannedWords > no output contains the word "compliant"
  ✓ src/__tests__/presenter.test.ts > presenterTest_noBannedWords > no output contains "certified" without an authority qualifier
  ✓ src/__tests__/presenter.test.ts > presenterTest_noBannedWords > no output contains a bare "Verified" (title-case, without scope/verifier)
+ ✓ src/__tests__/presenter.test.ts > workspace context selection > restores a programme manager selected at the workspace root from the URL
+ ✓ src/__tests__/presenter.test.ts > workspace context selection > selects an authorized cooperative at its root even when it is not the first context
+ ✓ src/__tests__/presenter.test.ts > workspace context selection > does not restore a URL context that is outside the requested cooperative scope
 
  Test Files  1 passed (1)
-      Tests  5 passed (5)
-   Start at  04:22:41
-   Duration  11.18s (transform 183ms, setup 0ms, collect 152ms, tests 10ms, environment 9.45s, prepare 576ms)
+      Tests  8 passed (8)
+   Start at  06:17:38
+   Duration  5.53s (transform 112ms, setup 0ms, collect 126ms, tests 12ms, environment 4.70s, prepare 294ms)

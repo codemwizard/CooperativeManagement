@@ -2,8 +2,10 @@ import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
 import { access, readFile } from 'node:fs/promises';
 
-const candidate = process.argv[2];
+const suppliedCandidate = process.argv[2]?.startsWith('--') ? undefined : process.argv[2];
 const preflight = process.argv.includes('--preflight');
+const taskEvidence = await readFile('evidence/phase1/wp6.1/task-evidence.json', 'utf8').then(JSON.parse);
+const candidate = suppliedCandidate ?? taskEvidence.commit;
 assert.match(candidate ?? '', /^[0-9a-f]{40}$/i, 'usage: node tools/verify_wp6_1_closure.mjs <candidate-sha> [--preflight]');
 
 const git = (...args) => execFileSync('git', args, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] }).trim();
@@ -24,7 +26,7 @@ const [graph, registry, mapping, manifest, evidence] = await Promise.all([
   readFile('evidence/phase1/tasks.json', 'utf8').then(JSON.parse),
   readFile('evidence/phase1/bdd-work-package-map.json', 'utf8').then(JSON.parse),
   readFile('evidence/phase1/bdd-scenarios.json', 'utf8').then(JSON.parse),
-  readFile('evidence/phase1/wp6.1/task-evidence.json', 'utf8').then(JSON.parse),
+  Promise.resolve(taskEvidence),
 ]);
 const taskById = new Map(registry.map((record) => [record.task_id, record]));
 
