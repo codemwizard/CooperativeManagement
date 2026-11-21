@@ -187,21 +187,25 @@ export function createCapacityDelegationHandlers(policyStore: PostgresCapacityDe
         representativePersonId,
         representativeDecision: envelope.payload.assistedEnrolment?.representativeDecision ?? null,
       }, 1, now);
-      await trx.insertInto('symphony.capacity_grants').values({
-        id: envelope.payload.capacityGrantId, user_id: envelope.payload.targetUserId,
-        organization_id: mutation.targetOrganizationId, capacity_type: envelope.payload.capacityType,
-        granted_by_user_id: envelope.actorUserId, active_from: new Date(envelope.payload.activeFrom),
-        expires_at: new Date(envelope.payload.activeTo), source_ref: envelope.payload.sourceRef ?? null,
-        assisted_session_id: envelope.payload.assistedEnrolment?.sessionId ?? null,
-        representative_person_id: representativePersonId,
-        representative_decision: envelope.payload.assistedEnrolment?.representativeDecision ?? null,
-        source_event_id: null,
-      }).execute();
-      await mutation.authorityLocks.incrementChangedScopes(mutableChangedScopes(mutation));
       const transition = committedTransition(envelope.tenantId, envelope.payload.capacityGrantId, 1, event, {
         operation: 'granted', sourceId: envelope.payload.capacityGrantId,
       }, context.idGen.generate());
-      return { ...transition, afterPersistence: async () => { await trx.updateTable('symphony.capacity_grants')
+      return {
+        ...transition,
+        beforePersistence: async () => {
+          await trx.insertInto('symphony.capacity_grants').values({
+            id: envelope.payload.capacityGrantId, user_id: envelope.payload.targetUserId,
+            organization_id: mutation.targetOrganizationId, capacity_type: envelope.payload.capacityType,
+            granted_by_user_id: envelope.actorUserId, active_from: new Date(envelope.payload.activeFrom),
+            expires_at: new Date(envelope.payload.activeTo), source_ref: envelope.payload.sourceRef ?? null,
+            assisted_session_id: envelope.payload.assistedEnrolment?.sessionId ?? null,
+            representative_person_id: representativePersonId,
+            representative_decision: envelope.payload.assistedEnrolment?.representativeDecision ?? null,
+            source_event_id: null,
+          }).execute();
+          await mutation.authorityLocks.incrementChangedScopes(mutableChangedScopes(mutation));
+        },
+        afterPersistence: async () => { await trx.updateTable('symphony.capacity_grants')
         .set({ source_event_id: event.id }).where('id', '=', envelope.payload.capacityGrantId).executeTakeFirstOrThrow(); } };
     },
     RevokeCapacity: async (envelope, context) => {
@@ -216,13 +220,17 @@ export function createCapacityDelegationHandlers(policyStore: PostgresCapacityDe
         sourceId: row.id, revokerUserId: envelope.actorUserId, organizationId: mutation.targetOrganizationId,
         effectiveAt: revokedAt.toISOString(),
       }, (context.aggregate?.version ?? 0) + 1, revokedAt);
-      await trx.updateTable('symphony.capacity_grants').set({ revoked_at: revokedAt, revoked_event_id: null })
-        .where('id', '=', row.id).where('revoked_at', 'is', null).executeTakeFirstOrThrow();
-      await mutation.authorityLocks.incrementChangedScopes(mutableChangedScopes(mutation));
       const transition = committedTransition(envelope.tenantId, row.id, (context.aggregate?.version ?? 0) + 1, event, {
         operation: 'revoked', sourceId: row.id,
       }, context.idGen.generate());
-      return { ...transition, afterPersistence: async () => { await trx.updateTable('symphony.capacity_grants')
+      return {
+        ...transition,
+        beforePersistence: async () => {
+          await trx.updateTable('symphony.capacity_grants').set({ revoked_at: revokedAt, revoked_event_id: null })
+            .where('id', '=', row.id).where('revoked_at', 'is', null).executeTakeFirstOrThrow();
+          await mutation.authorityLocks.incrementChangedScopes(mutableChangedScopes(mutation));
+        },
+        afterPersistence: async () => { await trx.updateTable('symphony.capacity_grants')
         .set({ revoked_event_id: event.id }).where('id', '=', row.id).executeTakeFirstOrThrow(); } };
     },
     DelegateTaScope: async (envelope, context) => {
@@ -240,13 +248,17 @@ export function createCapacityDelegationHandlers(policyStore: PostgresCapacityDe
           sourceId: row.id, revokerUserId: envelope.actorUserId, organizationId: mutation.targetOrganizationId,
           effectiveAt: revokedAt.toISOString(),
         }, (context.aggregate?.version ?? 0) + 1, revokedAt);
-        await trx.updateTable('symphony.ta_scope_delegations').set({ revoked_at: revokedAt, revoked_event_id: null })
-          .where('id', '=', row.id).where('revoked_at', 'is', null).executeTakeFirstOrThrow();
-        await mutation.authorityLocks.incrementChangedScopes(mutableChangedScopes(mutation));
         const transition = committedTransition(envelope.tenantId, row.id, (context.aggregate?.version ?? 0) + 1, event, {
           operation: 'revoked', sourceId: row.id,
         }, context.idGen.generate());
-        return { ...transition, afterPersistence: async () => { await trx.updateTable('symphony.ta_scope_delegations')
+        return {
+          ...transition,
+          beforePersistence: async () => {
+            await trx.updateTable('symphony.ta_scope_delegations').set({ revoked_at: revokedAt, revoked_event_id: null })
+              .where('id', '=', row.id).where('revoked_at', 'is', null).executeTakeFirstOrThrow();
+            await mutation.authorityLocks.incrementChangedScopes(mutableChangedScopes(mutation));
+          },
+          afterPersistence: async () => { await trx.updateTable('symphony.ta_scope_delegations')
           .set({ revoked_event_id: event.id }).where('id', '=', row.id).executeTakeFirstOrThrow(); } };
       }
 
@@ -269,20 +281,24 @@ export function createCapacityDelegationHandlers(policyStore: PostgresCapacityDe
         cooperativeOrganizationId: mutation.targetOrganizationId, agreementRef: payload.agreementRef,
         activeFrom: payload.activeFrom, activeTo: payload.activeTo,
       }, 1, now);
-      await trx.insertInto('symphony.ta_scope_delegations').values({
-        id: payload.delegationId, tenant_id: envelope.tenantId,
-        programme_manager_user_id: envelope.actorUserId,
-        union_organization_id: payload.unionOrganizationId,
-        delegatee_user_id: payload.delegateeUserId,
-        target_organization_id: mutation.targetOrganizationId,
-        active_from: new Date(payload.activeFrom), expires_at: new Date(payload.activeTo),
-        agreement_ref: payload.agreementRef, source_event_id: null,
-      }).execute();
-      await mutation.authorityLocks.incrementChangedScopes(mutableChangedScopes(mutation));
       const transition = committedTransition(envelope.tenantId, payload.delegationId, 1, event, {
         operation: 'granted', sourceId: payload.delegationId,
       }, context.idGen.generate());
-      return { ...transition, afterPersistence: async () => { await trx.updateTable('symphony.ta_scope_delegations')
+      return {
+        ...transition,
+        beforePersistence: async () => {
+          await trx.insertInto('symphony.ta_scope_delegations').values({
+            id: payload.delegationId, tenant_id: envelope.tenantId,
+            programme_manager_user_id: envelope.actorUserId,
+            union_organization_id: payload.unionOrganizationId,
+            delegatee_user_id: payload.delegateeUserId,
+            target_organization_id: mutation.targetOrganizationId,
+            active_from: new Date(payload.activeFrom), expires_at: new Date(payload.activeTo),
+            agreement_ref: payload.agreementRef, source_event_id: null,
+          }).execute();
+          await mutation.authorityLocks.incrementChangedScopes(mutableChangedScopes(mutation));
+        },
+        afterPersistence: async () => { await trx.updateTable('symphony.ta_scope_delegations')
         .set({ source_event_id: event.id }).where('id', '=', payload.delegationId).executeTakeFirstOrThrow(); } };
     },
   };

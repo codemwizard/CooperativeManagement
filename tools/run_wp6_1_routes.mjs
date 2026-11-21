@@ -23,7 +23,9 @@ writeFileSync(apiLogPath, '');
 
 const environment = {
   ...process.env,
+  NODE_ENV: 'test', SYNTHETIC_ONLY: 'true',
   RUNTIME_PROFILE: 'test', APP_ENV: 'test', DATA_MODE: 'test',
+  COMMAND_DIGEST_HMAC_KEY: process.env.COMMAND_DIGEST_HMAC_KEY ?? Buffer.alloc(32, 0x44).toString('base64'),
   PUBLIC_ORIGIN: origin, PORT: String(apiPort), DATABASE_URL: appUrl,
   AUTH_THROTTLE_HMAC_KEY: process.env.AUTH_THROTTLE_HMAC_KEY ?? Buffer.alloc(32, 0x61).toString('base64'),
   WP5_5_API_LOG_PATH: apiLogPath,

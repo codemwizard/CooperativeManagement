@@ -60,6 +60,8 @@ export class PostgresVerifiedFindingRepository {
                  AND (m.ended_at IS NULL OR m.ended_at > transaction_timestamp())
                WHERE c.user_id = $1::uuid AND c.organization_id = o.id
                  AND c.capacity_type = 'internal_verifier'
+                 AND c.active_from <= transaction_timestamp()
+                 AND (c.expires_at IS NULL OR c.expires_at > transaction_timestamp())
                  AND c.granted_at <= transaction_timestamp()
                  AND (c.revoked_at IS NULL OR c.revoked_at > transaction_timestamp())
             )

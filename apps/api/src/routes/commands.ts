@@ -135,7 +135,10 @@ async function dispatchCommand(
     case 'IDEMPOTENCY_KEY_REUSED':
       return { status: 409, body: { ok: false, code: result.code, replayed: false } };
     case 'STALE_VERSION':
-      return { status: 409, body: { ok: false, code: 'VERSION_CONFLICT', replayed: result.replayed ?? false } };
+      return { status: 409, body: {
+        ok: false, code: 'VERSION_CONFLICT', replayed: result.replayed ?? false,
+        ...(result.reconciliationId ? { reconciliationId: result.reconciliationId } : {}),
+      } };
     case 'COMMAND_TEMPORARILY_UNAVAILABLE':
       return { status: 503, body: { ok: false, code: result.code, retryable: true } };
     case 'DOMAIN_VIOLATION':

@@ -278,6 +278,22 @@ describe.skipIf(!enabled)('WP5.3 Fastify and PostgreSQL integration',()=>{
       await targetFixture.query('COMMIT');
     } catch(error) { await targetFixture.query('ROLLBACK').catch(()=>undefined);throw error; }
     finally { targetFixture.release(); }
+    const findingItemId=randomUUID();
+    const findingVersionId=randomUUID();
+    const findingAssignmentId=randomUUID();
+    const findingId=randomUUID();
+    await isolatedAdmin.query('BEGIN');
+    try {
+      await isolatedAdmin.query("SELECT set_config('app.tenant_id',$1,true)",[tenantId]);
+      await isolatedAdmin.query('INSERT INTO symphony.evidence_items(id,organization_id,track,evidence_type) VALUES($1,$2,\'R\',\'authority-window-fixture\')',[findingItemId,organizationId]);
+      await isolatedAdmin.query(`INSERT INTO symphony.evidence_versions(id,evidence_item_id,version_number,supplier_user_id,origin,stage,payload)
+        VALUES($1,$2,1,$3,'cooperative_supplied','supplied','{}'::jsonb)`,[findingVersionId,findingItemId,targetUserId]);
+      await isolatedAdmin.query(`INSERT INTO symphony.verification_assignments(id,evidence_item_id,assigned_to_user_id,evidence_version_id,completed_at)
+        VALUES($1,$2,$3,$4,clock_timestamp())`,[findingAssignmentId,findingItemId,userId,findingVersionId]);
+      await isolatedAdmin.query(`INSERT INTO symphony.verification_findings(id,assignment_id,evidence_version_id,assurance_class,result,scope,outcome)
+        VALUES($1,$2,$3,'cooperative_internal','inconclusive','scheduled authority regression','inconclusive')`,[findingId,findingAssignmentId,findingVersionId]);
+      await isolatedAdmin.query('COMMIT');
+    } catch(error) { await isolatedAdmin.query('ROLLBACK').catch(()=>undefined);throw error; }
     const freshSession=await appA.inject({method:'GET',url:'/auth/session',headers:{cookie:cookie(freshLogin)}});
     expect(freshSession.statusCode).toBe(200);
     const command={
@@ -287,12 +303,58 @@ describe.skipIf(!enabled)('WP5.3 Fastify and PostgreSQL integration',()=>{
         activeFrom:new Date(Date.now()-60_000).toISOString(),activeTo:new Date(Date.now()+60*60_000).toISOString(),sourceRef:'wp1.6-http-fixture'},
     };
     const commandHeaders={cookie:cookie(freshLogin),origin:profile.publicOrigin,'x-csrf-token':freshSession.json<{csrfToken:string}>().csrfToken,'x-role':'platform_admin'};
+    const activeFindings=await appA.inject({method:'GET',url:`/workspace/verified-findings?organizationId=${organizationId}`,headers:{cookie:cookie(freshLogin)}});
+    expect(activeFindings.statusCode).toBe(200);
+    expect(activeFindings.json<{data:{findingId:string}[]}>().data.map((finding)=>finding.findingId)).toContain(findingId);
+    await isolatedAdmin.query('BEGIN');
+    await isolatedAdmin.query("SELECT set_config('app.tenant_id',$1,true)",[tenantId]);
+    await isolatedAdmin.query(`UPDATE symphony.capacity_grants SET active_from=clock_timestamp()+interval '1 hour'
+      WHERE user_id=$1 AND organization_id=$2 AND capacity_type='internal_verifier'`,[userId,organizationId]);
+    await isolatedAdmin.query('COMMIT');
+    const beforeAuthority=await appA.inject({method:'GET',url:`/workspace/verified-findings?organizationId=${organizationId}`,headers:{cookie:cookie(freshLogin)}});
+    expect(beforeAuthority.statusCode).toBe(200);
+    expect(beforeAuthority.json()).toEqual({data:[]});
+    await isolatedAdmin.query('BEGIN');
+    await isolatedAdmin.query("SELECT set_config('app.tenant_id',$1,true)",[tenantId]);
+    await isolatedAdmin.query(`UPDATE symphony.capacity_grants SET active_from=clock_timestamp()-interval '1 hour',
+      expires_at=clock_timestamp()-interval '1 second'
+      WHERE user_id=$1 AND organization_id=$2 AND capacity_type='internal_verifier'`,[userId,organizationId]);
+    await isolatedAdmin.query('COMMIT');
+    const afterAuthority=await appA.inject({method:'GET',url:`/workspace/verified-findings?organizationId=${organizationId}`,headers:{cookie:cookie(freshLogin)}});
+    expect(afterAuthority.statusCode).toBe(200);
+    expect(afterAuthority.json()).toEqual({data:[]});
+    await isolatedAdmin.query('BEGIN');
+    await isolatedAdmin.query("SELECT set_config('app.tenant_id',$1,true)",[tenantId]);
+    await isolatedAdmin.query(`UPDATE symphony.capacity_grants SET active_from=clock_timestamp()-interval '1 hour',expires_at=NULL
+      WHERE user_id=$1 AND organization_id=$2 AND capacity_type='internal_verifier'`,[userId,organizationId]);
+    await isolatedAdmin.query('COMMIT');
     const firstCommand=await appA.inject({method:'POST',url:'/commands',headers:commandHeaders,payload:command});
     expect(firstCommand.statusCode).toBe(200);
     expect(firstCommand.json()).toMatchObject({ok:true,replayed:false,data:{operation:'granted'}});
     const repeatedCommand=await appA.inject({method:'POST',url:'/commands',headers:commandHeaders,payload:command});
     expect(repeatedCommand.statusCode).toBe(200);
     expect(repeatedCommand.json()).toMatchObject({ok:true,replayed:true,data:{operation:'granted'}});
+    const staleRevoke={
+      commandId:randomUUID(), organizationId, occurredAt:new Date().toISOString(), expectedVersion:0,
+      schemaVersion:1, type:'RevokeCapacity', payload:{capacityGrantId:command.payload.capacityGrantId},
+    };
+    const staleFirst=await appA.inject({method:'POST',url:'/commands',headers:commandHeaders,payload:staleRevoke});
+    expect(staleFirst.statusCode).toBe(409);
+    const staleFirstBody=staleFirst.json<{ok:boolean;code:string;replayed:boolean;reconciliationId:string}>();
+    expect(staleFirstBody).toMatchObject({ok:false,code:'VERSION_CONFLICT',replayed:false});
+    expect(staleFirstBody.reconciliationId).toMatch(/^[0-9a-f-]{36}$/i);
+    const staleReplay=await appA.inject({method:'POST',url:'/commands',headers:commandHeaders,payload:staleRevoke});
+    expect(staleReplay.statusCode).toBe(409);
+    expect(staleReplay.json()).toEqual({...staleFirstBody,replayed:true});
+    await isolatedAdmin.query('BEGIN');
+    await isolatedAdmin.query("SELECT set_config('app.tenant_id',$1,true)",[tenantId]);
+    const stalePersistence=await isolatedAdmin.query<{receipts:number;inbox:number}>(
+      `SELECT (SELECT count(*)::int FROM symphony.command_receipts WHERE tenant_id=$1 AND command_id=$2) AS receipts,
+              (SELECT count(*)::int FROM symphony.reconciliation_inbox WHERE tenant_id=$1 AND reconciliation_id=$3) AS inbox`,
+      [tenantId,staleRevoke.commandId,staleFirstBody.reconciliationId],
+    );
+    await isolatedAdmin.query('COMMIT');
+    expect(stalePersistence.rows[0]).toEqual({receipts:1,inbox:1});
     const changedCommand=await appA.inject({method:'POST',url:'/commands',headers:commandHeaders,payload:{...command,payload:{...command.payload,activeTo:new Date(Date.now()+2*60*60_000).toISOString()}}});
     expect(changedCommand.statusCode).toBe(409);
     expect(changedCommand.json()).toEqual({ok:false,code:'IDEMPOTENCY_KEY_REUSED',replayed:false});

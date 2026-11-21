@@ -8,6 +8,16 @@ ALTER TABLE symphony.capacity_grants
   ADD COLUMN source_ref text,
   ADD COLUMN revoked_event_id uuid REFERENCES symphony.domain_events(id)
     DEFERRABLE INITIALLY DEFERRED;
+
+-- This migration runs as the owner of these tables. Their forced tenant RLS
+-- intentionally rejects an unset app.tenant_id, which is correct for runtime
+-- access but would hide legacy rows from a global schema backfill. Temporarily
+-- exempt only the owner inside this migration transaction; ALTER TABLE locks
+-- prevent concurrent access and FORCE is restored before commit. A failure
+-- rolls the entire migration back, including these owner/RLS changes.
+ALTER TABLE symphony.capacity_grants NO FORCE ROW LEVEL SECURITY;
+ALTER TABLE symphony.ta_scope_delegations NO FORCE ROW LEVEL SECURITY;
+
 UPDATE symphony.capacity_grants SET active_from = granted_at WHERE active_from IS NULL;
 ALTER TABLE symphony.capacity_grants
   ALTER COLUMN granted_at SET DEFAULT transaction_timestamp(),
@@ -35,6 +45,10 @@ ALTER TABLE symphony.ta_scope_delegations
   ALTER COLUMN active_from SET NOT NULL,
   ADD CONSTRAINT ta_scope_active_interval_ck CHECK (expires_at IS NULL OR expires_at > active_from),
   ADD CONSTRAINT ta_scope_agreement_ref_ck CHECK (length(btrim(agreement_ref)) > 0);
+
+ALTER TABLE symphony.capacity_grants FORCE ROW LEVEL SECURITY;
+ALTER TABLE symphony.ta_scope_delegations FORCE ROW LEVEL SECURITY;
+
 CREATE UNIQUE INDEX ta_scope_active_semantic_key
   ON symphony.ta_scope_delegations (
     tenant_id, union_organization_id,

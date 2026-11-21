@@ -58,6 +58,8 @@ export interface DomainTransitionResult<TAggregate extends AggregateRoot, TData 
   readonly data: TData;
   /** Accepted semantic no-op: receipt persists, but no aggregate/event/outbox write occurs. */
   readonly persistAggregate?: boolean;
+  /** Same-transaction source mutations. Runs only after this command wins receipt insertion. */
+  readonly beforePersistence?: () => Promise<void> | void;
   /** Same-transaction writes that must follow persisted events, such as binding a source row to its event. */
   readonly afterPersistence?: () => Promise<void> | void;
   /** Accepted deterministic business conflict; it commits a terminal safe receipt without business writes. */
@@ -278,7 +280,11 @@ export class CommandBus<TAggregate extends AggregateRoot> {
       if (transition.afterPersistence !== undefined) {
         throw new TypeError('A non-mutating command cannot run after-persistence writes');
       }
+      if (transition.beforePersistence !== undefined) {
+        throw new TypeError('A non-mutating command cannot run source-persistence writes');
+      }
     } else {
+      await transition.beforePersistence?.();
       await this.deps.repository.save(
         transition.newState,
         envelope.expectedVersion,
@@ -391,7 +397,9 @@ export class CommandBus<TAggregate extends AggregateRoot> {
       tombstoned_at: null,
     };
     await inboxStore.save(inboxItem, transaction);
-    return { ok: false, code: 'STALE_VERSION', detail: 'Command version conflict' };
+    return {
+      ok: false, code: 'STALE_VERSION', detail: 'Command version conflict', reconciliationId,
+    };
   }
 
   private async replayReceipt<TData, TPayload>(
@@ -422,7 +430,10 @@ export class CommandBus<TAggregate extends AggregateRoot> {
       if (validated.safe_result.code === 'DOMAIN_CONFLICT') {
         return { ok: false, replayed: true, code: 'DOMAIN_VIOLATION', detail: 'The requested authority conflicts with an active grant' };
       }
-      return { ok: false, replayed: true, code: 'STALE_VERSION', detail: 'Command version conflict' };
+      return {
+        ok: false, replayed: true, code: 'STALE_VERSION', detail: 'Command version conflict',
+        ...(validated.safe_result.reconciliation_id ? { reconciliationId: validated.safe_result.reconciliation_id } : {}),
+      };
     }
     return {
       ok: true,

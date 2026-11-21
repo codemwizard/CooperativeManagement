@@ -32,4 +32,6 @@ export type CommandResult<T> =
       readonly replayed?: true;
       readonly code: CommandErrorCode;
       readonly detail: string;
+      /** Opaque reference returned for a persisted terminal VERSION_CONFLICT only. */
+      readonly reconciliationId?: string;
     };

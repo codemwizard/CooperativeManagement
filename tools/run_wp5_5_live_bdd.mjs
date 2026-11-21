@@ -24,7 +24,9 @@ const apiPort = Number(process.env['WP5_5_API_PORT'] ?? 3000);
 const origin = `http://127.0.0.1:${workspacePort}`;
 const commonEnv = {
   ...process.env,
+  NODE_ENV: 'test', SYNTHETIC_ONLY: 'true',
   RUNTIME_PROFILE: 'test', APP_ENV: 'test', DATA_MODE: 'test',
+  COMMAND_DIGEST_HMAC_KEY: process.env['COMMAND_DIGEST_HMAC_KEY'] ?? Buffer.alloc(32, 0x44).toString('base64'),
   PUBLIC_ORIGIN: origin,
   PORT: String(apiPort),
   WP5_5_API_LOG_PATH: apiLogPath,

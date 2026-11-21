@@ -61,6 +61,9 @@ export const capacityDelegationCommandPayloadSchemas = {
   DelegateTaScope: delegateTaScopePayloadSchema,
 } as const;
 
+/** Exact registered command payload allowlists retained for stale-command reconciliation. */
+export const capacityDelegationCommandReconciliationDataSchemas = capacityDelegationCommandPayloadSchemas;
+
 export type GrantCapacityPayload = z.infer<typeof grantCapacityPayloadSchema>;
 export type RevokeCapacityPayload = z.infer<typeof revokeCapacityPayloadSchema>;
 export type DelegateTaScopePayload = z.infer<typeof delegateTaScopePayloadSchema>;

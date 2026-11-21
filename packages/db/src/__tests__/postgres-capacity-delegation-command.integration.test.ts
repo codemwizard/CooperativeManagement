@@ -435,6 +435,54 @@ describe.skipIf(!adminUrl || !appUrl)('REM-WP2.3 PostgreSQL capacity and TA comm
     expect(rows.rows[0]?.revoked_event_id).toBeTruthy();
   });
 
+  it('does not persist a losing same-key request when concurrent requests target different aggregates', async () => {
+    const commandId = randomUUID();
+    const firstGrantId = randomUUID();
+    const secondGrantId = randomUUID();
+    const activeFrom = new Date(Date.now() - 60_000).toISOString();
+    const activeTo = new Date(Date.now() + 60 * 60_000).toISOString();
+    const organizationVersion = await authorityVersion('organization', targetOrganizationId, tenantId);
+    const tenantVersion = await authorityVersion('tenant', tenantId, tenantId);
+    const firstActorVersion = await authorityVersion('actor_tenant', delegateeId, tenantId);
+    const secondActorVersion = await authorityVersion('actor_tenant', actingOfficerUserId, tenantId);
+
+    const results = await Promise.all([
+      dispatch('GrantCapacity', {
+        capacityGrantId: firstGrantId, targetUserId: delegateeId, capacityType: 'internal_verifier', activeFrom, activeTo,
+      }, targetOrganizationId, actorId, 0, commandId),
+      dispatch('GrantCapacity', {
+        capacityGrantId: secondGrantId, targetUserId: actingOfficerUserId, capacityType: 'internal_verifier', activeFrom, activeTo,
+      }, targetOrganizationId, actorId, 0, commandId),
+    ]);
+    const winner = results.find((result) => result.ok);
+    const loser = results.find((result) => !result.ok);
+    expect(winner?.ok).toBe(true);
+    expect(loser).toMatchObject({ ok: false, code: 'IDEMPOTENCY_KEY_REUSED' });
+    if (!winner?.ok) throw new Error('A concurrent command with a fresh ID did not win receipt insertion.');
+    const winningGrantId = (winner.data as { sourceId: string }).sourceId;
+    const losingGrantId = winningGrantId === firstGrantId ? secondGrantId : firstGrantId;
+
+    const persistence = await admin.query<{ grants: number; events: number; outbox: number; receipts: number }>(
+      `SELECT
+         (SELECT count(*)::int FROM symphony.capacity_grants WHERE id=ANY($1::uuid[])) AS grants,
+         (SELECT count(*)::int FROM symphony.domain_events WHERE tenant_id=$2 AND aggregate_id=ANY($1::uuid[])) AS events,
+         (SELECT count(*)::int FROM symphony.event_outbox o JOIN symphony.domain_events e ON e.id=o.event_id
+           WHERE e.tenant_id=$2 AND e.aggregate_id=ANY($1::uuid[])) AS outbox,
+         (SELECT count(*)::int FROM symphony.command_receipts WHERE tenant_id=$2 AND command_id=$3) AS receipts`,
+      [[firstGrantId, secondGrantId], tenantId, commandId],
+    );
+    expect(persistence.rows[0]).toEqual({ grants: 1, events: 1, outbox: 1, receipts: 1 });
+    expect((await admin.query('SELECT 1 FROM symphony.capacity_grants WHERE id=$1', [losingGrantId])).rowCount).toBe(0);
+    expect(await authorityVersion('organization', targetOrganizationId, tenantId)).toBe(organizationVersion + 1);
+    expect(await authorityVersion('tenant', tenantId, tenantId)).toBe(tenantVersion + 1);
+    const winnerActorId = winningGrantId === firstGrantId ? delegateeId : actingOfficerUserId;
+    const loserActorId = winningGrantId === firstGrantId ? actingOfficerUserId : delegateeId;
+    const winnerActorBefore = winnerActorId === delegateeId ? firstActorVersion : secondActorVersion;
+    const loserActorBefore = loserActorId === delegateeId ? firstActorVersion : secondActorVersion;
+    expect(await authorityVersion('actor_tenant', winnerActorId, tenantId)).toBe(winnerActorBefore + 1);
+    expect(await authorityVersion('actor_tenant', loserActorId, tenantId)).toBe(loserActorBefore);
+  });
+
   it('rolls back source, receipt, event, outbox and D-16 versions when event binding fails', async () => {
     const grantId = randomUUID();
     capacityGrantIds.push(grantId);
@@ -750,8 +798,7 @@ describe.skipIf(!adminUrl || !appUrl)('REM-WP2.3 PostgreSQL capacity and TA comm
     return Number(result.rows[0]?.version ?? 0);
   }
 
-  async function dispatch(type: string, payload: Record<string, unknown>, organizationId: string, actorUserId: string, expectedVersion = 0) {
-    const commandId = randomUUID();
+  async function dispatch(type: string, payload: Record<string, unknown>, organizationId: string, actorUserId: string, expectedVersion = 0, commandId = randomUUID()) {
     commandIds.push(commandId);
     const now = new Date().toISOString();
     const envelope: CommandEnvelope<Record<string, unknown>> = {
