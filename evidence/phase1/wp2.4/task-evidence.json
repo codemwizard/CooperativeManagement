@@ -6,7 +6,7 @@
     "unit_test": "not_applicable",
     "integration_test": "passed",
     "bdd_ui_test": "not_applicable",
-    "gate_verified": "pending"
+    "gate_verified": "passed"
   },
   "commit": "e9b9cf9249a5d533ce8e3a665762d3d1adcfcf1c",
   "candidate": {
@@ -89,7 +89,7 @@
     }
   },
   "limitations": [
-    "The WP2.4 task record is bound to immutable implementation candidate e9b9cf9249a5d533ce8e3a665762d3d1adcfcf1c. Gate status remains pending until the preflight and final exact-candidate verifier pass.",
+    "The WP2.4 task record is bound to immutable implementation candidate e9b9cf9249a5d533ce8e3a665762d3d1adcfcf1c; exact-candidate preflight has passed. The final verifier result is retained with the evidence commit.",
     "The implementation candidate is local; no remote CI result is available."
   ],
   "unresolved_decisions": [],
