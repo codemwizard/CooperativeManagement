@@ -42,6 +42,7 @@ describe.skipIf(!adminUrl || !appUrl)('REM-WP2.3 PostgreSQL capacity and TA comm
   const commandIds: string[] = [];
   const capacityGrantIds: string[] = [];
   const enrolmentSessionIds: string[] = [];
+  let programmeManagerRoleSeeded = false;
   let enrollerRoleSeeded = false;
   const delegationIds: string[] = [];
   const policyStore = new PostgresCapacityDelegationPolicyStore();
@@ -104,6 +105,10 @@ describe.skipIf(!adminUrl || !appUrl)('REM-WP2.3 PostgreSQL capacity and TA comm
        VALUES($1,$2,'00000000-0000-4000-8000-000000000001',transaction_timestamp(),'wp2.3-test-fixture',true)`,
       [targetOrganizationId, personId],
     );
+    await admin.query(
+      "INSERT INTO symphony.platform_roles(id,code,name) VALUES($1,'programme_manager','Programme Manager') ON CONFLICT (code) DO NOTHING",
+      [randomUUID()],
+    ).then((result) => { programmeManagerRoleSeeded = result.rowCount === 1; });
     const role = await admin.query<{ id: string }>("SELECT id FROM symphony.platform_roles WHERE code='programme_manager'");
     if (!role.rows[0]) throw new Error('Required seeded programme_manager platform role is missing.');
     await admin.query(
@@ -214,6 +219,7 @@ describe.skipIf(!adminUrl || !appUrl)('REM-WP2.3 PostgreSQL capacity and TA comm
       await admin.query('DELETE FROM symphony.persons WHERE id=$1', [actingPersonId]).catch(() => undefined);
       await admin.query('DELETE FROM symphony.organizations WHERE id=ANY($1::uuid[])', [[targetOrganizationId, unionOrganizationId]]).catch(() => undefined);
       await admin.query('DELETE FROM symphony.users WHERE id=ANY($1::uuid[])', [[actorId, delegateeId, actingOfficerUserId]]).catch(() => undefined);
+      if (programmeManagerRoleSeeded) await admin.query("DELETE FROM symphony.platform_roles WHERE code='programme_manager'").catch(() => undefined);
       if (enrollerRoleSeeded) await admin.query("DELETE FROM symphony.platform_roles WHERE code='platform_enroller'").catch(() => undefined);
       await admin.query('DELETE FROM symphony.authority_scope_versions WHERE tenant_id=$1', [tenantId]).catch(() => undefined);
       await admin.query("DELETE FROM symphony.authority_scope_versions WHERE scope_type='actor' AND scope_id=$1", [actorId]).catch(() => undefined);
