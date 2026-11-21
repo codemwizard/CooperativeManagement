@@ -62,6 +62,16 @@
       "command": "npm run test:bdd:phase1 -- --work-package REM-WP1.6 (6 mapped IDs; 8 scenarios; 69 steps)",
       "result": "passed",
       "artifact": "evidence/phase1/wp1.6/local/2026-11-21/wp2.3-candidate-c2764c.mapped-runner.log"
+    },
+    {
+      "command": "npm run verify:wp2.3 -- c2764c6a2f7bc684f49cc8ea877f14ccc9a341f4",
+      "result": "passed",
+      "artifact": "evidence/phase1/wp2.3/local/2026-11-21/wp2.3-exact-candidate-closure.log"
+    },
+    {
+      "command": "npm run verify:wp1.6:dependencies",
+      "result": "passed",
+      "artifact": "evidence/phase1/wp2.3/local/2026-11-21/wp1.6-predecessor-dependency-gate.log"
     }
   ],
   "claims": {
@@ -96,5 +106,5 @@
     "Acting appointment/termination writes remain deferred under the four-command WP2.3 registration boundary."
   ],
   "unresolved_decisions": [],
-  "reviewer": "WP2.3 exact-candidate preflight passed; final verifier run recorded in closure report"
+  "reviewer": "WP2.3 exact-candidate closure verifier passed; WP1.6 predecessor dependency gate passed"
 }
