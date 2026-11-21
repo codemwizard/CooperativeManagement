@@ -78,7 +78,11 @@ function graphErrors(graph) {
   for (const id of WP0_IDS) if (!(id in graph.tasks)) errors.push(`required task ${id} is missing from dependency graph`);
   for (const [id, task] of Object.entries(graph.tasks)) {
     if (!/^REM-WP\d+(?:\.\d+)?$/.test(id)) errors.push(`invalid task ID ${id}`);
-    if (task?.plan_id !== 'phase1-remediation' || typeof task?.title !== 'string' || task.title.trim().length < 3 || task?.source !== 'Implementation-Plan-V4/implementation/PHASE-1-REMEDIATION-PLAN-v2.md') {
+    const allowedTaskSources = [
+      'Implementation-Plan-V4/implementation/PHASE-1-REMEDIATION-PLAN-v2.md',
+      ...(id === 'REM-WP2.6' ? ['Implementation-Plan-V4/implementation/PROTOTYPE-14-REMEDIATION-RESYNCHRONIZATION-PLAN.md'] : []),
+    ];
+    if (task?.plan_id !== 'phase1-remediation' || typeof task?.title !== 'string' || task.title.trim().length < 3 || !allowedTaskSources.includes(task?.source)) {
       errors.push(`${id} must identify the remediation plan, task title, and authoritative source document`);
     }
     if (!task || !Array.isArray(task.depends_on) || !task.edge_reasons || typeof task.edge_reasons !== 'object') {
@@ -291,7 +295,7 @@ export function validateTenantTableInventory(inventory, migrationTexts) {
   const entries = [...(inventory?.tables ?? []), ...(inventory?.planned_phase1_tables ?? [])];
   const names = entries.map((entry) => entry.table);
   if (new Set(names).size !== names.length) errors.push('tenant table inventory contains duplicate table names');
-  const allowedClasses = new Set(['tenant_scoped', 'global_catalogue_read_only', 'control_plane_restricted', 'shared_security_store']);
+  const allowedClasses = new Set(['tenant_scoped', 'global_catalogue_read_only', 'control_plane_restricted', 'authority_scope_control_plane', 'shared_security_store']);
   for (const entry of entries) {
     if (!allowedClasses.has(entry.classification)) errors.push(`${entry.table} has an invalid classification`);
     if (typeof entry.scope_basis !== 'string' || entry.scope_basis.trim().length < 20) errors.push(`${entry.table} lacks a concrete scope basis`);
@@ -346,6 +350,13 @@ export function validateTenantPolicyMatrix(matrix, inventory) {
     } else if (sourceEntry.classification === 'shared_security_store') {
       if (entry.ordinary_runtime_role !== 'symphony_app' || JSON.stringify(entry.permitted_sql_operations) !== JSON.stringify(sourceEntry.permitted_sql_operations)) {
         errors.push(`${name} shared security-store access must match its narrowly documented application grant`);
+      }
+    } else if (sourceEntry.classification === 'authority_scope_control_plane') {
+      if (entry.ordinary_runtime_role !== 'symphony_app' || JSON.stringify(entry.permitted_sql_operations) !== '["SELECT"]') {
+        errors.push(`${name} must expose table SELECT plus only the D-16 column grants documented for the authority lock service`);
+      }
+      if (entry.required_rls !== 'ENABLE+FORCE' || entry.current_rls_enabled_and_forced !== true) {
+        errors.push(`${name} requires ENABLE+FORCE RLS before runtime use`);
       }
     } else if ((entry.permitted_sql_operations ?? []).length !== 0 || entry.ordinary_runtime_role !== 'no ordinary application grant') {
       errors.push(`${name} control-plane table must have no ordinary application-role grant`);
@@ -405,14 +416,14 @@ export function validateTenantPolicyManifest(manifest, matrix) {
 export function validateAuthorityDependencyInventory(inventory, migrationInventory) {
   const required = new Set([
     'tenant-membership', 'platform-role-assignment', 'appointment-and-source-status',
-    'capacity-grant-and-revocation', 'delegation-chain-and-revocation', 'organization-and-cohort-scope',
+    'capacity-grant-and-revocation', 'ta-scope-delegation-and-revocation', 'organization-and-cohort-scope',
     'identity-conflict-and-ineligibility-facts', 'policy-and-configuration-version',
   ]);
   const errors = [];
   const expectedLockOrder = ['command_aggregate', 'global_policy', 'organization', 'tenant', 'actor_tenant', 'actor'];
   const expectedScopes = ['global_policy', 'organization', 'tenant', 'actor_tenant', 'actor'];
-  if (inventory?.version !== 2 || inventory?.authority_contract !== 'phase1-authorization-capacity-v3') {
-    errors.push('authority inventory must use version 2 and phase1-authorization-capacity-v3');
+  if (inventory?.version !== 3 || inventory?.authority_contract !== 'phase1-authorization-capacity-v3') {
+    errors.push('authority inventory must use version 3 and phase1-authorization-capacity-v3');
   }
   const serialization = inventory?.serialization;
   if (serialization?.table !== 'symphony.authority_scope_versions') errors.push('authority serialization must use symphony.authority_scope_versions');
@@ -457,7 +468,14 @@ export function validateAuthorityDependencyInventory(inventory, migrationInvento
       if (!Array.isArray(row.scope_types) || row.scope_types.length === 0 || row.scope_types.some((scope) => !expectedScopes.includes(scope)))
         errors.push(`${row.id} must declare only valid Phase 1 authority scope types`);
       if (!['supported', 'frozen'].includes(row.phase1_mutation_disposition)) errors.push(`${row.id} must be classified as supported or frozen in Phase 1`);
-      if (row.proof_owner !== 'REM-WP2.4') errors.push(`${row.id} Phase 1 proof must be owned by REM-WP2.4`);
+      if (typeof row.proof_owner !== 'string'
+        || !row.proof_owner.includes('REM-WP2.6')
+        || !row.proof_owner.includes('REM-WP2.4')) {
+        errors.push(`${row.id} Phase 1 proof ownership must assign infrastructure/freeze proof to REM-WP2.6 and race/exclusion proof to REM-WP2.4`);
+      }
+      if (row.phase1_mutation_disposition === 'supported' && !row.proof_owner.includes('REM-WP2.3')) {
+        errors.push(`${row.id} supported writer proof must identify REM-WP2.3 as the mutation owner`);
+      }
       if (row.phase1_mutation_disposition === 'supported') {
         if (!Array.isArray(row.required_race_cases) || !row.required_race_cases.some((test) => test.startsWith('protected-command-first-')))
           errors.push(`${row.id} lacks a protected-command-first race case`);

@@ -53,7 +53,7 @@ describe('API runtime profile and listener composition', () => {
 
     child = spawn(process.execPath, ['--import', 'tsx', 'src/main.ts'], {
       cwd: process.cwd(),
-      env: { ...process.env, RUNTIME_PROFILE: 'test', APP_ENV: 'test', DATA_MODE: 'test', PUBLIC_ORIGIN: 'http://127.0.0.1', PORT: String(port), HOST: '127.0.0.1' },
+      env: { ...process.env, DATABASE_URL: '', RUNTIME_PROFILE: 'test', APP_ENV: 'test', DATA_MODE: 'test', PUBLIC_ORIGIN: 'http://127.0.0.1', PORT: String(port), HOST: '127.0.0.1' },
       stdio: 'ignore',
     });
 

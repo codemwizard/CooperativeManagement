@@ -1,0 +1,25 @@
+{
+  "candidate": "86feb09f334f8c6374ea364850631b8eccbafc5a",
+  "work_package": "REM-WP1.6",
+  "selected_scenario_ids": [
+    "BDD-AUD-002",
+    "BDD-AUD-003",
+    "BDD-AUD-005",
+    "BDD-AUD-008",
+    "BDD-AUD-009",
+    "BDD-AUD-014"
+  ],
+  "branch": "codex/prototype14-remediation-resync",
+  "worktree_clean": true,
+  "started_at": "2026-11-21T08:43:32.800Z",
+  "profile_exit_codes": {
+    "default": 0,
+    "live_auth": 0,
+    "live_workspace": 0,
+    "live_telemetry": 0
+  },
+  "validation_errors": [],
+  "passed": true,
+  "finished_at": "2026-11-21T08:44:34.003Z",
+  "exit_code": 0
+}

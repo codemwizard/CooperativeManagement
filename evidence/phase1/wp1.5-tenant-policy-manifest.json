@@ -2,8 +2,7 @@
   "version": 1,
   "status": "candidate_frozen_pending_restricted_role_integration_and_review",
   "source": "migrations 0013-0018; REM-WP6.1 migrations 0017-0018 add one tenant-scoped official finding-attribution table and normalize its admission/scope policies.",
-  "table_count": 45,
-  "required_tenant_scoped_count": 45,
+  "table_count": 47,
   "policy_entries": [
     {
       "table": "aggregate_states",
@@ -646,6 +645,32 @@
       "update_with_check": "EXISTS (SELECT 1 FROM symphony.verification_assignments a JOIN symphony.evidence_items i ON i.id = a.evidence_item_id JOIN symphony.organizations o ON o.id = i.organization_id WHERE a.id = assignment_id AND a.evidence_version_id = evidence_version_id AND o.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), ''))",
       "mismatch_fixture": "wp15-verification_findings-cross-tenant-parent",
       "missing_parent_fixture": "wp15-verification_findings-missing-parent"
+    },
+    {
+      "table": "acting_officer_appointments",
+      "parent_tables": [
+        "organizations"
+      ],
+      "tenant_resolution_sql": "acting_officer_appointments.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), '') AND EXISTS (SELECT 1 FROM symphony.organizations o WHERE o.id = acting_officer_appointments.organization_id AND o.tenant_id = acting_officer_appointments.tenant_id)",
+      "missing_parent_behavior": "A missing organization, person, or exact evidence version makes the tenant policy expression false; a missing or empty app.tenant_id makes the direct tenant predicate false.",
+      "cross_tenant_parent_behavior": "A cross-tenant organization or person makes the tenant policy expression false; the exact evidence version must belong to an item owned by organization_id.",
+      "insert_with_check": "acting_officer_appointments.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), '') AND EXISTS (SELECT 1 FROM symphony.organizations o WHERE o.id = acting_officer_appointments.organization_id AND o.tenant_id = acting_officer_appointments.tenant_id)",
+      "update_using": "acting_officer_appointments.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), '') AND EXISTS (SELECT 1 FROM symphony.organizations o WHERE o.id = acting_officer_appointments.organization_id AND o.tenant_id = acting_officer_appointments.tenant_id)",
+      "update_with_check": "acting_officer_appointments.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), '') AND EXISTS (SELECT 1 FROM symphony.organizations o WHERE o.id = acting_officer_appointments.organization_id AND o.tenant_id = acting_officer_appointments.tenant_id)",
+      "mismatch_fixture": "wp2.3-acting-appointment-cross-tenant-source",
+      "missing_parent_fixture": "wp2.3-acting-appointment-missing-source"
+    },
+    {
+      "table": "acting_officer_appointment_endings",
+      "parent_tables": ["organizations", "acting_officer_appointments"],
+      "tenant_resolution_sql": "acting_officer_appointment_endings.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), '') AND EXISTS (SELECT 1 FROM symphony.organizations o JOIN symphony.acting_officer_appointments a ON a.id = acting_officer_appointment_endings.appointment_id AND a.organization_id = acting_officer_appointment_endings.organization_id AND a.tenant_id = acting_officer_appointment_endings.tenant_id WHERE o.id = acting_officer_appointment_endings.organization_id AND o.tenant_id = acting_officer_appointment_endings.tenant_id)",
+      "missing_parent_behavior": "A missing appointment or organization makes the tenant policy expression false; exact supporting evidence must belong to the same cooperative by trigger; missing app.tenant_id fails closed.",
+      "cross_tenant_parent_behavior": "A cross-tenant appointment or organization makes the tenant policy expression false; supporting evidence version must belong to an evidence item owned by organization_id.",
+      "insert_with_check": "acting_officer_appointment_endings.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), '') AND EXISTS (SELECT 1 FROM symphony.organizations o JOIN symphony.acting_officer_appointments a ON a.id = acting_officer_appointment_endings.appointment_id AND a.organization_id = acting_officer_appointment_endings.organization_id AND a.tenant_id = acting_officer_appointment_endings.tenant_id WHERE o.id = acting_officer_appointment_endings.organization_id AND o.tenant_id = acting_officer_appointment_endings.tenant_id)",
+      "update_using": "acting_officer_appointment_endings.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), '') AND EXISTS (SELECT 1 FROM symphony.organizations o JOIN symphony.acting_officer_appointments a ON a.id = acting_officer_appointment_endings.appointment_id AND a.organization_id = acting_officer_appointment_endings.organization_id AND a.tenant_id = acting_officer_appointment_endings.tenant_id WHERE o.id = acting_officer_appointment_endings.organization_id AND o.tenant_id = acting_officer_appointment_endings.tenant_id)",
+      "update_with_check": "acting_officer_appointment_endings.tenant_id::text = NULLIF(current_setting('app.tenant_id', true), '') AND EXISTS (SELECT 1 FROM symphony.organizations o JOIN symphony.acting_officer_appointments a ON a.id = acting_officer_appointment_endings.appointment_id AND a.organization_id = acting_officer_appointment_endings.organization_id AND a.tenant_id = acting_officer_appointment_endings.tenant_id WHERE o.id = acting_officer_appointment_endings.organization_id AND o.tenant_id = acting_officer_appointment_endings.tenant_id)",
+      "mismatch_fixture": "wp2.3-acting-appointment-ending-cross-tenant-source",
+      "missing_parent_fixture": "wp2.3-acting-appointment-ending-missing-source"
     }
   ],
   "outbox_policy": {
@@ -668,5 +693,6 @@
       "public_execute": false,
       "app_execute": true
     }
-  }
+  },
+  "required_tenant_scoped_count": 47
 }

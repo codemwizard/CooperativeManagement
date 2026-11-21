@@ -72,13 +72,28 @@ describe('WP2.1 policy boundaries', () => {
     expect(decide(grant, target, malformed, { now: NOW })).toBe('deny');
   });
 
-  it('requires programme-manager persisted cohort scope for TA delegation', () => {
-    const taTarget = { id: 'cohort-1', type: 'cohort_ta_delegation', tenantId: 'programme-tenant', cohortId: 'cohort-1' };
-    const taAction = { type: 'ta_scope.grant', delegateeUserId: 'ta-1', cohortId: 'cohort-1', activeFrom: NOW, activeTo: '2026-11-18T12:00:00Z' } as const;
-    const manager = { ...actor(), tenantId: 'programme-tenant', platformRoles: ['programme_manager'], managedCohortIds: ['cohort-1'] };
+  it('requires programme-manager persisted cooperative scope for TA delegation', () => {
+    const taTarget = { id: 'delegation-1', type: 'cooperative_ta_delegation', tenantId: 'programme-tenant', organizationId: 'coop-1' };
+    const taAction = { type: 'ta_scope.grant', delegateeUserId: 'ta-1', cooperativeOrganizationId: 'coop-1', unionOrganizationId: 'union-1', agreementRef: 'agreement-1', activeFrom: NOW, activeTo: '2026-11-18T12:00:00Z' } as const;
+    const manager = { ...actor(), tenantId: 'programme-tenant', platformRoles: ['programme_manager'], managedTaOrganizationIds: ['coop-1'] };
     expect(decide(taAction, taTarget, manager, { now: NOW })).toBe('allow');
-    expect(decide(taAction, taTarget, { ...manager, managedCohortIds: [] }, { now: NOW })).toBe('deny');
-    expect(decide(taAction, { ...taTarget, cohortId: 'cohort-2' }, manager, { now: NOW })).toBe('deny');
+    expect(decide(taAction, taTarget, { ...manager, managedTaOrganizationIds: [] }, { now: NOW })).toBe('deny');
+    expect(decide(taAction, { ...taTarget, organizationId: 'coop-2' }, manager, { now: NOW })).toBe('deny');
+    expect(decide(taAction, { ...taTarget, tenantId: 'other-tenant' }, manager, { now: NOW })).toBe('deny');
+    expect(decide({ ...taAction, extra: true }, taTarget, manager, { now: NOW })).toBe('deny');
+  });
+
+  it('rejects generic acting_officer grants while retaining source-backed acting authority', () => {
+    const actingGrant = { ...grant, capacityType: 'acting_officer' };
+    expect(decide(actingGrant, target, chair, { now: NOW })).toBe('deny');
+    const actingOfficer = { ...actor(), delegations: [{ type: 'acting_officer' as const, tenantId: 'org-a', organizationId: 'org-a', position: 'chairperson', activeFrom: BEFORE, activeTo: AFTER }] };
+    expect(decide(grant, target, actingOfficer, { now: NOW })).toBe('allow');
+  });
+
+  it('requires source provenance for generic delegate capacity', () => {
+    const delegateGrant = { ...grant, capacityType: 'delegate' as const };
+    expect(decide(delegateGrant, target, chair, { now: NOW })).toBe('deny');
+    expect(decide({ ...delegateGrant, sourceRef: 'resolution-1' }, target, chair, { now: NOW })).toBe('allow');
   });
 
   it('denies institutional roles before cooperative officer authority', () => {
@@ -94,11 +109,11 @@ describe('WP2.1 canonical matrix decisions', () => {
       : actionRow.id === 'capacity.revoke'
         ? { type: 'capacity.revoke' as const, capacityType: 'internal_verifier' as const, granteeUserId: 'grantee' }
         : actionRow.id === 'ta_scope.grant'
-          ? { type: 'ta_scope.grant' as const, delegateeUserId: 'delegatee', cohortId: 'cohort-a', activeFrom: NOW, activeTo: AFTER }
-          : { type: 'ta_scope.revoke' as const, delegateeUserId: 'delegatee', cohortId: 'cohort-a' };
+          ? { type: 'ta_scope.grant' as const, delegateeUserId: 'delegatee', cooperativeOrganizationId: 'coop-a', unionOrganizationId: 'union-a', agreementRef: 'agreement-a', activeFrom: NOW, activeTo: AFTER }
+          : { type: 'ta_scope.revoke' as const, delegationId: 'delegation-a', cooperativeOrganizationId: 'coop-a' };
     const resourceTarget: PolicyTarget = actionRow.resource === 'organization_capacity'
       ? target
-      : { id: 'cohort-a', type: 'cohort_ta_delegation', tenantId: 'org-a', cohortId: 'cohort-a' };
+      : { id: 'delegation-a', type: 'cooperative_ta_delegation', tenantId: 'org-a', organizationId: 'coop-a' };
 
     for (const actorClass of matrix.actor_classes) {
       it(`${actionRow.id} decision row: ${actorClass.id}`, () => {
@@ -110,17 +125,20 @@ describe('WP2.1 canonical matrix decisions', () => {
           delegations: withDelegation
             ? [{ type: 'acting_officer', tenantId: 'org-a', organizationId: 'org-a', position: 'chairperson', activeFrom: BEFORE, activeTo: AFTER }]
             : [],
-          managedCohortIds: actorClass.id === 'programme_manager' ? ['cohort-a'] : [],
+          managedTaOrganizationIds: actorClass.id === 'programme_manager' ? ['coop-a'] : [],
           assistedEnrollmentSessions: actorClass.id === 'platform_enroller'
             ? [{ id: 'enrol-1', tenantId: 'org-a', organizationId: 'org-a', activeFrom: BEFORE, activeTo: AFTER, representativePresent: true, grantDecisionRecorded: true }]
             : [],
         };
+        const selectedAction = actorClass.id === 'platform_enroller' && actionRow.id === 'capacity.grant'
+          ? { ...action, assistedEnrolment: { sessionId: 'enrol-1', representativeDecision: 'approve_internal_verifier' as const } }
+          : action;
         const expected = actionRow.allowed_actor_classes.includes(actorClass.id)
           || withDelegation
           || (actorClass.id === 'platform_enroller' && actionRow.id === 'capacity.grant')
           ? 'allow'
           : 'deny';
-        expect(decide(action, resourceTarget, contextualActor, { now: NOW })).toBe(expected);
+        expect(decide(selectedAction, resourceTarget, contextualActor, { now: NOW })).toBe(expected);
       });
     }
   }

@@ -1,0 +1,102 @@
+{
+  "schema_version": 1,
+  "task_id": "REM-WP2.4",
+  "status": {
+    "implementation": "complete",
+    "unit_test": "not_applicable",
+    "integration_test": "passed",
+    "bdd_ui_test": "not_applicable",
+    "gate_verified": "passed"
+  },
+  "commit": "e9b9cf9249a5d533ce8e3a665762d3d1adcfcf1c",
+  "candidate": {
+    "status": "immutable implementation candidate",
+    "head_commit_before_implementation": "88370d01a278425ca90b61c91f1ab8219d14ade9",
+    "implementation_commit": "e9b9cf9249a5d533ce8e3a665762d3d1adcfcf1c"
+  },
+  "environment": {
+    "node": "v26.7.0",
+    "npm": "12.2.0",
+    "postgres": "PostgreSQL 18.0; isolated local *_test databases",
+    "database_role": "symphony_app runtime; configured test-admin and migration fixture roles",
+    "data_mode": "test",
+    "key_provider": "local-test"
+  },
+  "commands": [
+    {
+      "command": "node --env-file-if-exists=.env.local --env-file-if-exists=.env node_modules/vitest/vitest.mjs run src/__tests__/postgres-capacity-delegation-command.integration.test.ts --reporter=verbose --no-file-parallelism --root packages/db (candidate-bound command persistence and WP2.4 races; 13 passed)",
+      "result": "passed",
+      "artifact": "evidence/phase1/wp2.4/local/2026-11-21/postgres-capacity-ta-serialization.log"
+    },
+    {
+      "command": "node --env-file-if-exists=.env.local --env-file-if-exists=.env node_modules/vitest/vitest.mjs run src/__tests__/postgres-authority-scope-locks.integration.test.ts --reporter=verbose --no-file-parallelism --root packages/db (REM-WP2.6 scope infrastructure rerun; 6 passed)",
+      "result": "passed",
+      "artifact": "evidence/phase1/wp2.4/local/2026-11-21/postgres-authority-scope-infrastructure.log"
+    },
+    {
+      "command": "node --env-file-if-exists=.env.local --env-file-if-exists=.env node_modules/vitest/vitest.mjs run --reporter=verbose --no-file-parallelism --root packages/db (full PostgreSQL workspace suite; 84 passed)",
+      "result": "passed",
+      "artifact": "evidence/phase1/wp2.4/local/2026-11-21/postgres-full-db-suite-with-env.log"
+    },
+    {
+      "command": "npm run verify:phase1:contracts (112 tests; Phase 1 contract, graph, inventory, and feature synchronization checks)",
+      "result": "passed",
+      "artifact": "evidence/phase1/wp2.4/local/2026-11-21/phase1-contract-verification.log"
+    },
+    {
+      "command": "npm run typecheck:v4",
+      "result": "passed",
+      "artifact": "evidence/phase1/wp2.4/local/2026-11-21/typecheck.log"
+    },
+    {
+      "command": "npm run verify:arch (180 modules, 412 dependencies)",
+      "result": "passed",
+      "artifact": "evidence/phase1/wp2.4/local/2026-11-21/architecture-verification.log"
+    },
+    {
+      "command": "node tools/verify_wp2_4_closure.mjs e9b9cf9249a5d533ce8e3a665762d3d1adcfcf1c (final exact-candidate closure verification after successful preflight)",
+      "result": "passed",
+      "artifact": "evidence/phase1/wp2.4/local/2026-11-21/wp2.4-exact-candidate-closure.log"
+    }
+  ],
+  "claims": {
+    "behavior_proved": "On the exact implementation candidate, PostgreSQL 18 barrier tests prove that protected FOR SHARE reads block each of the four supported capacity/direct-TA mutation actions until reader commit; later protected reads observe committed source and D-16 versions. Capacity and TA revokes append events without rewriting grant history. Exact changed scopes advance once while unchanged grantor and referenced union scopes do not. Elapsed source expiry is observed without a source mutation or version increment. The test asserts its runtime transaction uses symphony_app.",
+    "path_proved": "The actual PostgreSQL command handlers, app-role connection, D-16 lock service, source tables, event history, receipts, and scope versions were exercised. The full PostgreSQL workspace suite passed 84 tests; the REM-WP2.6 infrastructure suite passed 6 tests, including dual protected-reader blocking, canonical ordering/deduplication, cross-tenant rejection, frozen-source app-role denial, version constraints, and rollback. The Phase 1 contract suite passed 112 tests, typecheck passed, and architecture checks reported no dependency violations.",
+    "configuration_proved": "Node v26.7.0, npm 12.2.0, PostgreSQL 18.0, DATA_MODE=test, isolated synthetic *_test databases, symphony_app for product operations, and separate configured fixture/migration roles. Database URLs were loaded through the repository's .env.local environment-file mechanism; no values are recorded.",
+    "coverage_limitations": [
+      "D-19 approves one cooperative per TA grant/revoke. Phase 1 has no cohort, nested TA delegation, or descendant cascade; no parent/descendant revoke behavior is claimed. The inventory and D-16 specification now make this boundary explicit.",
+      "The expiry case proves an elapsed persisted source is inactive and does not independently increment versions. It does not add a clock-injection API or claim a legally valid source instrument.",
+      "WP2.6 owns generic multi-scope canonical ordering, dual-reader barriers, cross-tenant rejection, schema/privilege enforcement, and rollback. WP2.4 references the exact WP2.6 predecessor and reruns its applicable integration suite rather than claiming those behaviors as new WP2.4 implementation.",
+      "No browser/UI BDD is in scope for the serialization task.",
+      "CI has not run for candidate e9b9cf9249a5d533ce8e3a665762d3d1adcfcf1c. The recorded result is local candidate verification."
+    ],
+    "predecessors": {
+      "REM-WP0.4": {
+        "result": "Passed dependency inventory and serial-order model evidence; direct candidate ancestry is checked by the WP2.4 verifier.",
+        "artifact": "evidence/phase1/tasks.json"
+      },
+      "REM-WP2.1": {
+        "result": "Passed frozen policy action matrix; direct candidate ancestry is checked by the WP2.4 verifier.",
+        "artifact": "evidence/phase1/wp2.1/task-evidence.json"
+      },
+      "REM-WP2.2": {
+        "result": "Passed persisted trusted-authority resolver; direct candidate ancestry is checked by the WP2.4 verifier.",
+        "artifact": "evidence/phase1/wp2.2/task-evidence.json"
+      },
+      "REM-WP2.3": {
+        "result": "Passed capacity/delegation PostgreSQL command implementation candidate; WP2.4 also corrects and verifies changed-scope accounting for the current mutation implementation.",
+        "artifact": "evidence/phase1/wp2.3/task-evidence.json"
+      },
+      "REM-WP2.6": {
+        "result": "Passed D-16 lock/version infrastructure candidate; exact candidate is re-run and checked as an ancestor by the WP2.4 verifier.",
+        "artifact": "evidence/phase1/wp2.6/task-evidence.json"
+      }
+    }
+  },
+  "limitations": [
+    "The WP2.4 task record is bound to immutable implementation candidate e9b9cf9249a5d533ce8e3a665762d3d1adcfcf1c; exact-candidate preflight has passed. The final verifier result is retained with the evidence commit.",
+    "The implementation candidate is local; no remote CI result is available."
+  ],
+  "unresolved_decisions": [],
+  "reviewer": "Local PostgreSQL exact-candidate acceptance; independent reviewer sign-off is separate"
+}

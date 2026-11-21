@@ -688,7 +688,7 @@ describe('REM-WP0.3 migrated table inventory', () => {
       .map((name) => readFileSync(path.join(migrationDirectory, name), 'utf8'));
     expect(validateTenantTableInventory(inventory, migrations)).toEqual([]);
     expect(inventory.tables.length).toBeGreaterThan(40);
-    expect(inventory.tables.filter((table: { rls_current: boolean }) => table.rls_current).map((table: { table: string }) => table.table).sort()).toEqual(['command_receipts', 'domain_events', 'reconciliation_inbox', 'verification_finding_attributions']);
+    expect(inventory.tables.filter((table: { rls_current: boolean }) => table.rls_current).map((table: { table: string }) => table.table).sort()).toEqual(['acting_officer_appointment_endings', 'acting_officer_appointments', 'command_receipts', 'domain_events', 'reconciliation_inbox', 'verification_finding_attributions']);
   });
 
   it('defines a least-privilege RLS/grant policy for every migrated table and keeps baseline inventory distinct from REM-WP1.5 deployment proof', () => {
@@ -758,7 +758,7 @@ describe('REM-WP0.4 authority dependency inventory', () => {
 
   it('freezes the single D-16 serialization model and excludes Phase 2 identity conflicts', () => {
     const inventory = readJson('evidence/phase1/authority-dependency-inventory.json');
-    expect(inventory.version).toBe(2);
+    expect(inventory.version).toBe(3);
     expect(inventory.authority_contract).toBe('phase1-authorization-capacity-v3');
     expect(inventory.serialization.table).toBe('symphony.authority_scope_versions');
     expect(inventory.serialization.actor_tenant_aggregate).toMatch(/actor_tenant scope row/);
@@ -784,6 +784,10 @@ describe('REM-WP0.4 authority dependency inventory', () => {
     expect(identity.scope_types).toEqual([]);
     expect(identity.required_race_cases).toBeUndefined();
     expect(identity.phase2_required_race_cases.length).toBeGreaterThan(0);
+    const taScope = inventory.dependencies.find((row: { id: string }) => row.id === 'ta-scope-delegation-and-revocation');
+    expect(taScope.scope).toMatch(/one persisted cooperative per command/);
+    expect(taScope.phase1_mutation_contract).toMatch(/no cohort or nested delegation descendants/);
+    expect(taScope.required_race_cases).toContain('protected-command-first-then-direct-ta-scope-revoke');
   });
 
   it('rejects a competing lock mode, Phase 2 scope leakage, or an unproved runtime freeze', () => {

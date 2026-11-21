@@ -188,7 +188,8 @@ describe.skipIf(!databaseUrl || !appDatabaseUrl)('WP1.3 PostgreSQL command concu
     await secondRun;
     releaseOwner();
     const [firstResult, secondResult] = await Promise.all([first, second]);
-    expect(secondResult).toEqual(firstResult);
+    expect(firstResult).not.toHaveProperty('replayed');
+    expect(secondResult).toMatchObject({ ...firstResult, replayed: true });
     expect(await counts(command.commandId, aggregateId)).toMatchObject({ receipts: '1', states: '1', events: '1', outbox: '1', version: 1 });
   });
 

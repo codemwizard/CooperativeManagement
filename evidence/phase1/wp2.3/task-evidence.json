@@ -1,0 +1,109 @@
+{
+  "schema_version": 1,
+  "task_id": "REM-WP2.3",
+  "status": {
+    "implementation": "complete",
+    "unit_test": "passed",
+    "integration_test": "passed",
+    "bdd_ui_test": "passed",
+    "gate_verified": "passed"
+  },
+  "commit": "86feb09f334f8c6374ea364850631b8eccbafc5a",
+  "candidate": {
+    "status": "immutable implementation candidate",
+    "head_commit_before_implementation": "a0267a38eed5200e6637f104d1a90342d04b4b24",
+    "implementation_commit": "86feb09f334f8c6374ea364850631b8eccbafc5a"
+  },
+  "environment": {
+    "node": "v26.7.0",
+    "npm": "v12.2.0",
+    "postgres": "PostgreSQL 18.0; per-scenario isolated local *_test databases",
+    "database_role": "symphony_app for runtime, RLS and command assertions; test-admin and migration roles for isolated fixtures",
+    "data_mode": "test",
+    "key_provider": "local-test"
+  },
+  "commands": [
+    {
+      "command": "npm run verify:phase1:contracts (112 tests, feature sync, graph and manifest checks)",
+      "result": "passed",
+      "artifact": "evidence/phase1/wp2.3/local/2026-11-21/phase1-contract-gate.log"
+    },
+    {
+      "command": "npm run typecheck:v4",
+      "result": "passed",
+      "artifact": "evidence/phase1/wp2.3/local/2026-11-21/typecheck.log"
+    },
+    {
+      "command": "npm run verify:wp2.1:matrix (4 actions x 22 actor classes)",
+      "result": "passed",
+      "artifact": "evidence/phase1/wp2.3/local/2026-11-21/wp2.1-matrix-verification.log"
+    },
+    {
+      "command": "npm run test:db:migrations (17 tests)",
+      "result": "passed",
+      "artifact": "evidence/phase1/wp2.3/local/2026-11-21/postgres-migration-gate.log"
+    },
+    {
+      "command": "node --env-file-if-exists=.env.local --env-file-if-exists=.env node_modules/vitest/vitest.mjs run --reporter=verbose --no-file-parallelism --root packages/db (77 tests)",
+      "result": "passed",
+      "artifact": "evidence/phase1/wp2.3/local/2026-11-21/postgres-full-suite.log"
+    },
+    {
+      "command": "npm run test:api (28 tests)",
+      "result": "passed",
+      "artifact": "evidence/phase1/wp2.3/local/2026-11-21/api-integration.log"
+    },
+    {
+      "command": "npm exec --workspace @symphony/domain vitest run src/authz/__tests__/policy.test.ts src/authz/__tests__/policy-matrix.test.ts src/authz/__tests__/capacity-service.test.ts (108 tests)",
+      "result": "passed",
+      "artifact": "evidence/phase1/wp2.3/local/2026-11-21/wp2.3-domain-policy-tests.log"
+    },
+    {
+      "command": "npm run test:bdd:phase1 -- --work-package REM-WP1.6 (6 mapped IDs; 8 scenarios; 69 steps)",
+      "result": "passed",
+      "artifact": "evidence/phase1/wp1.6/local/2026-11-21/wp2.3-candidate-86feb09.mapped-runner.log"
+    },
+    {
+      "command": "npm run verify:wp2.3 -- 86feb09f334f8c6374ea364850631b8eccbafc5a",
+      "result": "passed",
+      "artifact": "evidence/phase1/wp2.3/local/2026-11-21/wp2.3-exact-candidate-closure-86feb09.log"
+    },
+    {
+      "command": "npm run verify:wp1.6:dependencies",
+      "result": "passed",
+      "artifact": "evidence/phase1/wp2.3/local/2026-11-21/wp1.6-predecessor-dependency-gate-86feb09.log"
+    }
+  ],
+  "claims": {
+    "behavior_proved": "Strict GrantCapacity, RevokeCapacity and DelegateTaScope schemas and PostgreSQL handlers implement four capacity/TA-scope mutation actions with atomic source, event, outbox, receipt and D-16 effects. D-20 assisted-enrolment provenance is bound to the exact persisted session. D-21 acting-office source provenance and immutable termination records are resolved by the PostgreSQL policy/context paths; generic capacity commands reject acting_officer.",
+    "path_proved": "Focused policy tests, PostgreSQL migration/command/resolver suite, Fastify/PostgreSQL API integration, and six mapped WP1.6 scenarios run through persisted sessions and the real /commands HTTP composition. The mapped run passed 8 expanded scenarios and 69 steps, covering replay, changed-envelope rejection, cross-tenant denial/audit, read-only roles, rejected status injection with event-linked capability state, and forged role header rejection.",
+    "configuration_proved": "Isolated PostgreSQL 18 *_test databases; symphony_app for runtime and command assertions; restricted app-role database; DATA_MODE=test. No production hardware qualification is claimed.",
+    "coverage_limitations": [
+      "Acting appointment and termination source tables remain SELECT-only. Their writers are outside WP2.3 registered capacity/TA-scope command families and require a separately registered D-16 command transaction before runtime write access.",
+      "External source documents preserve provenance only; legal sufficiency, quorum, vote threshold, issuing-body authority and by-law compliance are not verified.",
+      "The broad domain unit suite was attempted twice; three Argon2-dependent identity tests exceeded Vitest default five-second timeout. The WP2.3-focused domain policy set passed 108/108.",
+      "CI for candidate 86feb09f334f8c6374ea364850631b8eccbafc5a has not yet run."
+    ],
+    "predecessors": {
+      "REM-WP2.1": {
+        "result": "Passing D-19 policy matrix evidence; candidate is an ancestor of WP2.3 implementation candidate.",
+        "artifact": "evidence/phase1/wp2.1/task-evidence.json"
+      },
+      "REM-WP2.2": {
+        "result": "Passing trusted authority resolver evidence; candidate is an ancestor of WP2.3 implementation candidate.",
+        "artifact": "evidence/phase1/wp2.2/task-evidence.json"
+      },
+      "REM-WP2.6": {
+        "result": "Passing D-16 lock/version evidence; candidate is an ancestor of WP2.3 implementation candidate.",
+        "artifact": "evidence/phase1/wp2.6/task-evidence.json"
+      }
+    }
+  },
+  "limitations": [
+    "WP2.3 exact-candidate closure and WP1.6 predecessor dependency verification passed for the status-reconciliation candidate.",
+    "No CI result exists for the immutable candidate SHA.",
+    "Acting appointment/termination writes remain deferred under the four-command WP2.3 registration boundary."
+  ],
+  "unresolved_decisions": [],
+  "reviewer": "Exact-candidate closure and WP1.6 predecessor dependency verifiers passed for the status-reconciliation candidate"
+}

@@ -38,12 +38,13 @@ Feature: Cooperative enrolment and handover
   Scenario: Temporary credentials are single use, expire and force a change
     Given a Secretary account with a temporary password created 73 hours ago
     When the Secretary logs in with the temporary password
-    Then login is rejected with reason "TEMPORARY_CREDENTIAL_EXPIRED"
+    Then login is rejected with the generic authentication failure
     Given a Secretary account with a fresh temporary password
     When the Secretary logs in with the temporary password
     Then the Secretary must change the password before any other action
     And an authentication event "first_login" is recorded
     And the temporary password cannot be used again
+    And the Secretary can sign in with the new password
     And no password value appears in any event or log
 
   @REQ-ENR-006 @REQ-ENR-005 @BDD-ENR-005 @hard

@@ -1,0 +1,11 @@
+{
+  "candidate": "4c60304c608052e67f978224a430286e33511ccc",
+  "work_package": "REM-WP2.5",
+  "selected_scenario_ids": [
+    "BDD-UNI-001",
+    "BDD-UNI-002"
+  ],
+  "branch": "codex/prototype14-remediation-resync",
+  "worktree_clean": false,
+  "started_at": "2026-11-21T12:59:36.442Z"
+}

@@ -1,0 +1,15 @@
+npm notice run symphony-prototype@1.0.0 test:bdd:phase1
+npm notice run node --env-file-if-exists=.env.local --env-file-if-exists=.env tools/run_phase1_bdd.mjs --work-package REM-WP1.6
+Running REM-WP1.6: 6 mapped scenarios [BDD-AUD-002, BDD-AUD-003, BDD-AUD-005, BDD-AUD-008, BDD-AUD-009, BDD-AUD-014]. Artifacts: C:\Users\User\AppData\Local\Temp\wp1.6-final-0995648
+
+
+0 scenarios
+0 steps
+0m 0.003s (0m 0.000s executing your code)
+FAIL BDD-AUD-002 was not executed (missing, filtered, or still @wip)
+FAIL BDD-AUD-003 was not executed (missing, filtered, or still @wip)
+FAIL BDD-AUD-005 was not executed (missing, filtered, or still @wip)
+FAIL BDD-AUD-008 was not executed (missing, filtered, or still @wip)
+FAIL BDD-AUD-009 was not executed (missing, filtered, or still @wip)
+FAIL BDD-AUD-014 was not executed (missing, filtered, or still @wip)
+BDD artifacts retained at C:\Users\User\AppData\Local\Temp\wp1.6-final-0995648

@@ -90,12 +90,12 @@
     {
       "id": "BDD-UNI-001",
       "feature": "features/02_identity_privacy_and_access.feature",
-      "proves": "Union/TA users see assigned cohort gaps but no member-level personal data."
+      "proves": "A Union TA sees the assigned cooperative's capability-gap workflow scope, receives no access to an unassigned cooperative, and sees no member names, identifiers, or sensitive PII in the complete trusted response."
     },
     {
       "id": "BDD-UNI-002",
       "feature": "features/02_identity_privacy_and_access.feature",
-      "proves": "Delegation revocation removes access while preserving past audit actions."
+      "proves": "Programme-manager TA scope for one cooperative flows through the union's institutional TA assignment to the TA officer; revocation removes effective access in both read-before-revoke and revoke-before-read serial orders while immutable grant/revoke audit history remains."
     },
     {
       "id": "BDD-AUD-001",
@@ -120,7 +120,7 @@
     {
       "id": "BDD-AUD-005",
       "feature": "features/09_commands_audit_and_integrity.feature",
-      "proves": "A foreign-tenant command receives non-disclosing UNAUTHORIZED; the restricted PostgreSQL app identity cannot read or mutate the target evidence, and TENANT_MISMATCH is persisted for the authenticated tenant."
+      "proves": "A foreign-tenant command receives non-disclosing NOT_AUTHORIZED; the restricted PostgreSQL app identity cannot read or mutate the target evidence, and TENANT_MISMATCH is persisted for the authenticated tenant."
     },
     {
       "id": "BDD-AUD-006",

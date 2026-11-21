@@ -77,5 +77,18 @@ describe('PolicyEngine', () => {
     const actor = makeActor({ platformRoles: ['platform_enroller'], assistedEnrollmentSessions: [{ id: 'session-1', tenantId: ORG_A, organizationId: ORG_A, activeFrom: PAST, activeTo: FUTURE, representativePresent: false, grantDecisionRecorded: true }] });
     expect(decide({ type: 'capacity.grant', capacityType: 'internal_verifier', granteeUserId: 'ifv-1', activeFrom: NOW, activeTo: FUTURE }, makeTarget(), actor, { now: NOW })).toBe('deny');
   });
+
+  it('requires the command decision to identify the exact persisted assisted session', () => {
+    const actor = makeActor({
+      platformRoles: ['platform_enroller'],
+      assistedEnrollmentSessions: [{ id: 'session-1', tenantId: ORG_A, organizationId: ORG_A, activeFrom: PAST, activeTo: FUTURE, representativePresent: true, grantDecisionRecorded: true }],
+    });
+    const command = { type: 'capacity.grant', capacityType: 'internal_verifier', granteeUserId: 'ifv-1', activeFrom: NOW, activeTo: FUTURE,
+      assistedEnrolment: { sessionId: 'session-1', representativeDecision: 'approve_internal_verifier' } };
+    expect(decide(command, makeTarget(), actor, { now: NOW })).toBe('allow');
+    expect(decide({ ...command, assistedEnrolment: { ...command.assistedEnrolment, sessionId: 'other-session' } }, makeTarget(), actor, { now: NOW })).toBe('deny');
+    expect(decide({ ...command, assistedEnrolment: { ...command.assistedEnrolment, representativeDecision: 'declined' } }, makeTarget(), actor, { now: NOW })).toBe('deny');
+    expect(decide({ ...command, capacityType: 'field_agent' }, makeTarget(), actor, { now: NOW })).toBe('deny');
+  });
 });
 

@@ -1,0 +1,3 @@
+PREFLIGHT PASS REM-WP2.6 exact implementation candidate 1b195317eaa342c91efabb2f987bb6b87daaec6c.
+PASS predecessor gate evidence and ancestry, D-16 migrations/lock-service source, PostgreSQL 18 runtime-role evidence, retained artifact hashes, and bounded infrastructure-only scope.
+WP2.6 gate remains pending until final exact-candidate verification is recorded.

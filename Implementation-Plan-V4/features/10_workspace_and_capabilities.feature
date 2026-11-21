@@ -14,7 +14,11 @@ Feature: Workspace, status vocabulary and extension capabilities
 
     Examples:
       | persona            | items                                                                                              |
+      | cooperative member | Overview, My activities, My household                                                              |
+      | chairperson        | Overview, Governance, Meetings and resolutions, By-laws and requirements, Evidence register, Findings and next actions |
+      | vice-chairperson   | Overview, Governance, Meetings and resolutions, By-laws and requirements, Evidence register, Findings and next actions |
       | secretary          | Overview, Identity, By-laws and requirements, Governance, Meetings and resolutions, Evidence register, Findings and next actions |
+      | treasurer          | Overview, Financial records, Meetings and resolutions, Evidence register, Findings and next actions |
       | internal verifier  | Overview, Evidence register, Verification queue, Findings and next actions                          |
       | programme manager  | Pipeline, Cohort, Directory, Legal catalogue review, Delegations                                    |
       | union ta           | Cohort, Capability gaps                                                                              |

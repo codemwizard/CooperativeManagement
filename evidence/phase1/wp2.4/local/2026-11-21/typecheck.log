@@ -1,0 +1,16 @@
+npm notice run symphony-prototype@1.0.0 typecheck:v4
+npm notice run npx tsc --build --force packages/domain packages/contracts packages/db packages/testkit && npm run typecheck --workspace @symphony/domain && npm run typecheck --workspace @symphony/contracts && npm run typecheck --workspace @symphony/db && npm run typecheck --workspace @symphony/testkit && npm run typecheck --workspace @symphony/api && npm run typecheck --workspace @symphony/workspace
+npm notice run symphony-prototype@1.0.0 npx
+npm notice run tsc --build --force packages/domain packages/contracts packages/db packages/testkit
+npm notice run @symphony/domain@0.1.0 typecheck
+npm notice run tsc --noEmit
+npm notice run @symphony/contracts@0.1.0 typecheck
+npm notice run tsc --noEmit
+npm notice run @symphony/db@0.1.0 typecheck
+npm notice run tsc --noEmit
+npm notice run @symphony/testkit@0.1.0 typecheck
+npm notice run tsc --noEmit
+npm notice run @symphony/api@0.1.0 typecheck
+npm notice run tsc --noEmit
+npm notice run @symphony/workspace@0.1.0 typecheck
+npm notice run tsc --noEmit

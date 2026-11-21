@@ -189,7 +189,13 @@ export class PostgresAuthSessionRepository {
     tenantId: string; userId: string; temporaryCredentialId: string; passwordHash: string;
   }): Promise<void> {
     await this.transaction(input.tenantId, async (client) => {
-      await client.query('SELECT id FROM symphony.users WHERE id=$1 AND tenant_id=$2 FOR UPDATE', [input.userId,input.tenantId]);
+      await client.query(
+        `SELECT pg_advisory_xact_lock(
+           hashtextextended('symphony.user-lifecycle:' || $1::text || ':' || $2::text, 0)
+         )`,
+        [input.tenantId, input.userId],
+      );
+      await client.query('SELECT id FROM symphony.users WHERE id=$1 AND tenant_id=$2', [input.userId,input.tenantId]);
       const consumed = await client.query(
         `UPDATE symphony.temporary_credentials SET consumed_at=clock_timestamp()
           WHERE id=$1 AND tenant_id=$2 AND user_id=$3 AND consumed_at IS NULL AND revoked_at IS NULL

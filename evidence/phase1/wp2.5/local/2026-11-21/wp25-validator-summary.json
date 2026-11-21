@@ -1,0 +1,21 @@
+{
+  "candidate": "4c60304c608052e67f978224a430286e33511ccc",
+  "work_package": "REM-WP2.5",
+  "selected_scenario_ids": [
+    "BDD-UNI-001",
+    "BDD-UNI-002"
+  ],
+  "branch": "codex/prototype14-remediation-resync",
+  "worktree_clean": false,
+  "started_at": "2026-11-21T12:59:36.442Z",
+  "profile_exit_codes": {
+    "default": 0,
+    "live_auth": 0,
+    "live_workspace": 0,
+    "live_telemetry": 0
+  },
+  "validation_errors": [],
+  "passed": true,
+  "finished_at": "2026-11-21T12:59:58.654Z",
+  "exit_code": 0
+}

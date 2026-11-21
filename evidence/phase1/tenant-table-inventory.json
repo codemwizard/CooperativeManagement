@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "source": "Root migrations 0001-0018; classifications include WP6.1 migrations 0017-0018 (candidate-specific RLS evidence pending).",
+  "source": "Root migrations 0001-0033; classifications include WP6.1 migrations 0017-0018 and WP2.3 authority-source migrations through 0033 (candidate-specific RLS evidence pending).",
   "tables": [
     {
       "table": "acceptance_policies",
@@ -13,6 +13,18 @@
       "classification": "tenant_scoped",
       "scope_basis": "Direct tenant_id; aggregate projection state.",
       "rls_current": false
+    },
+    {
+      "table": "acting_officer_appointments",
+      "classification": "tenant_scoped",
+      "scope_basis": "Direct tenant_id with composite cooperative and person tenant references; exact supporting evidence version is cooperative-bound.",
+      "rls_current": true
+    },
+    {
+      "table": "acting_officer_appointment_endings",
+      "classification": "tenant_scoped",
+      "scope_basis": "Direct tenant_id with composite cooperative/appointment references; exact supporting evidence version is cooperative-bound.",
+      "rls_current": true
     },
     {
       "table": "appointments",
@@ -417,8 +429,14 @@
         "UPDATE",
         "DELETE"
       ]
+    },
+    {
+      "table": "authority_scope_versions",
+      "classification": "authority_scope_control_plane",
+      "scope_basis": "D-16 transaction serialization metadata; row visibility is bound to transaction tenant and authenticated actor, and app writes are column-limited.",
+      "rls_current": true
     }
   ],
-  "known_gap": "REM-WP6.1 migrations 0017-0018 add a tenant-scoped finding-attribution snapshot; app-role RLS and immutable-snapshot integration evidence remain pending.",
+  "known_gap": "REM-WP2.6 migrations 0019-0020 add D-16 authority scope serialization, frozen-scope row locking and runtime source grants; verify in WP2.6 evidence.",
   "status": "WP1.5 original 55-table scope passed on candidate d7fbf5851b11b07b65bde36f062db7b21f487947; later migrations 0014-0016 require candidate-specific verification."
 }
