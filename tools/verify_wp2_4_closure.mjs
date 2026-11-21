@@ -49,8 +49,14 @@ for (const predecessor of graph.tasks['REM-WP2.4'].depends_on) {
   assert.equal(spawnSync('git', ['merge-base', '--is-ancestor', predecessorSha, candidate], { stdio: 'ignore' }).status, 0,
     `${predecessor} candidate is not an ancestor of WP2.4`);
   for (const command of source.commands ?? []) {
-    assert.equal(command.result, 'passed', `${predecessor} has failed/unrun command: ${command.command}`);
     await access(command.artifact);
+    if (command.result === 'passed') continue;
+    assert.equal(predecessor, 'REM-WP2.1', 'Only the WP2.1 test-first red artifact may be marked failed');
+    assert.match(command.command, /expected test-first red before production implementation/);
+    assert.match(command.artifact, /red-policy-default-allow\.log$/);
+    const redEvidence = await readFile(command.artifact, 'utf8');
+    assert.match(redEvidence, /WP2\.1 policy default-deny red cases/);
+    assert.match(redEvidence, /expected 'allow' to be 'deny'/);
   }
 }
 
