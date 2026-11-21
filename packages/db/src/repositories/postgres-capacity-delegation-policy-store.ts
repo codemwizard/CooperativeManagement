@@ -11,6 +11,10 @@ export interface CapacityDelegationMutationContext {
   readonly actionId: Phase1AuthorityAction;
   readonly targetOrganizationId: string;
   readonly relatedOrganizationIds: readonly string[];
+  /** Organizations whose effective authority fact changes (not every locked reference). */
+  readonly changedOrganizationIds: readonly string[];
+  /** Actors whose effective authority changes; excludes the command actor when acting only as grantor. */
+  readonly changedActorUserIds: readonly string[];
   readonly affectedActorUserIds: readonly string[];
   readonly authorityLocks: AuthorityScopeLockSet;
   readonly transaction: Transaction<SymphonyDatabase>;
@@ -122,6 +126,8 @@ export class PostgresCapacityDelegationPolicyStore implements PolicyStore {
       actionId: command.actionId,
       targetOrganizationId: identity.targetOrganizationId,
       relatedOrganizationIds: identity.organizationIds,
+      changedOrganizationIds: identity.changedOrganizationIds,
+      changedActorUserIds: identity.changedActorUserIds,
       affectedActorUserIds: identity.affectedActorUserIds,
       authorityLocks,
       transaction: trx,
@@ -191,7 +197,7 @@ export function createCapacityDelegationHandlers(policyStore: PostgresCapacityDe
         representative_decision: envelope.payload.assistedEnrolment?.representativeDecision ?? null,
         source_event_id: null,
       }).execute();
-      await mutation.authorityLocks.incrementChangedScopes(mutableChangedScopes(mutation.authorityLocks));
+      await mutation.authorityLocks.incrementChangedScopes(mutableChangedScopes(mutation));
       const transition = committedTransition(envelope.tenantId, envelope.payload.capacityGrantId, 1, event, {
         operation: 'granted', sourceId: envelope.payload.capacityGrantId,
       }, context.idGen.generate());
@@ -212,7 +218,7 @@ export function createCapacityDelegationHandlers(policyStore: PostgresCapacityDe
       }, (context.aggregate?.version ?? 0) + 1, revokedAt);
       await trx.updateTable('symphony.capacity_grants').set({ revoked_at: revokedAt, revoked_event_id: null })
         .where('id', '=', row.id).where('revoked_at', 'is', null).executeTakeFirstOrThrow();
-      await mutation.authorityLocks.incrementChangedScopes(mutableChangedScopes(mutation.authorityLocks));
+      await mutation.authorityLocks.incrementChangedScopes(mutableChangedScopes(mutation));
       const transition = committedTransition(envelope.tenantId, row.id, (context.aggregate?.version ?? 0) + 1, event, {
         operation: 'revoked', sourceId: row.id,
       }, context.idGen.generate());
@@ -236,7 +242,7 @@ export function createCapacityDelegationHandlers(policyStore: PostgresCapacityDe
         }, (context.aggregate?.version ?? 0) + 1, revokedAt);
         await trx.updateTable('symphony.ta_scope_delegations').set({ revoked_at: revokedAt, revoked_event_id: null })
           .where('id', '=', row.id).where('revoked_at', 'is', null).executeTakeFirstOrThrow();
-        await mutation.authorityLocks.incrementChangedScopes(mutableChangedScopes(mutation.authorityLocks));
+        await mutation.authorityLocks.incrementChangedScopes(mutableChangedScopes(mutation));
         const transition = committedTransition(envelope.tenantId, row.id, (context.aggregate?.version ?? 0) + 1, event, {
           operation: 'revoked', sourceId: row.id,
         }, context.idGen.generate());
@@ -272,7 +278,7 @@ export function createCapacityDelegationHandlers(policyStore: PostgresCapacityDe
         active_from: new Date(payload.activeFrom), expires_at: new Date(payload.activeTo),
         agreement_ref: payload.agreementRef, source_event_id: null,
       }).execute();
-      await mutation.authorityLocks.incrementChangedScopes(mutableChangedScopes(mutation.authorityLocks));
+      await mutation.authorityLocks.incrementChangedScopes(mutableChangedScopes(mutation));
       const transition = committedTransition(envelope.tenantId, payload.delegationId, 1, event, {
         operation: 'granted', sourceId: payload.delegationId,
       }, context.idGen.generate());
@@ -290,8 +296,13 @@ function requiredMutation(
   return mutation;
 }
 
-function mutableChangedScopes(locks: AuthorityScopeLockSet) {
-  return locks.scopes.filter((scope) => scope.scopeType === 'organization' || scope.scopeType === 'tenant' || scope.scopeType === 'actor_tenant');
+function mutableChangedScopes(mutation: CapacityDelegationMutationContext) {
+  const changedActors = new Set(mutation.changedActorUserIds);
+  const changedOrganizations = new Set(mutation.changedOrganizationIds);
+  return mutation.authorityLocks.scopes.filter((scope) =>
+    (scope.scopeType === 'organization' && changedOrganizations.has(scope.scopeId))
+    || scope.scopeType === 'tenant'
+    || (scope.scopeType === 'actor_tenant' && changedActors.has(scope.scopeId)));
 }
 
 function transactionNow(trx: Transaction<SymphonyDatabase>): Promise<Date> {
@@ -351,14 +362,18 @@ function parseCommand(actionName: string, payload: Readonly<Record<string, unkno
 async function resolveMutationIdentity(
   trx: Transaction<SymphonyDatabase>, command: ParsedCommand,
   target: { readonly id: string; readonly organizationId?: string }, actor: { readonly userId: string; readonly tenantId: string },
-): Promise<{ targetOrganizationId: string; organizationIds: string[]; affectedActorUserIds: string[] } | undefined> {
+): Promise<{ targetOrganizationId: string; organizationIds: string[]; changedOrganizationIds: string[]; affectedActorUserIds: string[]; changedActorUserIds: string[] } | undefined> {
   if (command.kind === 'capacity.grant') {
     if (!target.organizationId) return undefined;
-    return { targetOrganizationId: target.organizationId, organizationIds: [target.organizationId], affectedActorUserIds: [command.payload.targetUserId] };
+    return { targetOrganizationId: target.organizationId, organizationIds: [target.organizationId],
+      changedOrganizationIds: [target.organizationId], affectedActorUserIds: [command.payload.targetUserId],
+      changedActorUserIds: [command.payload.targetUserId] };
   }
   if (command.kind === 'ta_scope.grant') {
     if (!target.organizationId) return undefined;
-    return { targetOrganizationId: target.organizationId, organizationIds: [target.organizationId, command.payload.unionOrganizationId], affectedActorUserIds: [command.payload.delegateeUserId] };
+    return { targetOrganizationId: target.organizationId, organizationIds: [target.organizationId, command.payload.unionOrganizationId],
+      changedOrganizationIds: [target.organizationId], affectedActorUserIds: [command.payload.delegateeUserId],
+      changedActorUserIds: [command.payload.delegateeUserId] };
   }
   if (command.kind === 'capacity.revoke') {
     const row = await trx.selectFrom('symphony.capacity_grants').select(['user_id', 'organization_id'])
@@ -366,7 +381,8 @@ async function resolveMutationIdentity(
     if (!row || !target.organizationId || target.organizationId !== row.organization_id) return undefined;
     const owner = await trx.selectFrom('symphony.organizations').select('tenant_id').where('id', '=', row.organization_id).executeTakeFirst();
     if (owner?.tenant_id !== actor.tenantId) return undefined;
-    return { targetOrganizationId: row.organization_id, organizationIds: [row.organization_id], affectedActorUserIds: [row.user_id] };
+    return { targetOrganizationId: row.organization_id, organizationIds: [row.organization_id],
+      changedOrganizationIds: [row.organization_id], affectedActorUserIds: [row.user_id], changedActorUserIds: [row.user_id] };
   }
   const row = await trx.selectFrom('symphony.ta_scope_delegations')
     .select(['programme_manager_user_id', 'union_organization_id', 'delegatee_user_id', 'target_organization_id', 'tenant_id'])
@@ -376,7 +392,9 @@ async function resolveMutationIdentity(
   return {
     targetOrganizationId: row.target_organization_id,
     organizationIds: [row.target_organization_id, row.union_organization_id],
+    changedOrganizationIds: [row.target_organization_id],
     affectedActorUserIds: [row.programme_manager_user_id, row.delegatee_user_id],
+    changedActorUserIds: [row.delegatee_user_id],
   };
 }
 

@@ -1,7 +1,7 @@
 # REM-WP2.4 Authority Scope Serialization Specification
 
 **Specification:** `phase1-authority-scope-serialization-v1`
-**Status:** Normative shared D-16 contract; no implementation or race-test pass is claimed. REM-WP2.6 owns schema/bootstrap/privilege/lock-service implementation; REM-WP2.4 owns post-WP2.3 serial-order and immutable-history proof.
+**Status:** Normative shared D-16 contract; REM-WP2.6 owns schema/bootstrap/privilege/lock-service implementation; REM-WP2.4 owns post-WP2.3 serial-order and immutable-history proof. Direct TA scope and the absence of cohorts or nested delegation descendants follow the later owner ruling D-19.
 **Decision:** D-16 in `Implementation-Plan-V4/02-decision-register.md` §7.5. This refines D-04's approved serial outcomes without changing the Phase 1/Phase 2 boundary.
 **Authority:** `docs/phase1/AUTHORIZATION_CAPACITY_CONTRACT.md` v3; `evidence/phase1/authority-dependency-inventory.json` v2; `evidence/phase1/task-dependencies.yml`; REM-WP2.3, REM-WP2.4 and REM-WP2.6 in `WP2-WP5-IMPLEMENTATION-READINESS-PLAN.md`.
 
@@ -12,7 +12,7 @@
 3. Protected read/command operations acquire `FOR SHARE` on all relevant authority-scope rows. Authority mutations acquire `FOR UPDATE` on those same rows. Both hold their locks through transaction end. Shared readers can proceed together; a conflicting authority mutation waits. A command that begins after a committed revocation reads the post-revocation source facts and denies.
 4. Phase 1 lock order is: command target aggregate, `global_policy`, `organization`, `tenant`, `actor_tenant`, `actor`. Person/shared-identity is not a Phase 1 scope and never appears in the Phase 1 lock list.
 5. Scope versions are incremented only for scope rows whose authority facts are changed by the transaction, exactly once per changed scope. A read-only protected command does not increment authority versions. Source DML and scope-version increments commit or roll back together.
-6. Capacity and delegation grant/revoke are supported Phase 1 mutation paths owned by REM-WP2.3 and race-proved by REM-WP2.4. Membership, platform role/catalogue, appointment/source status, organization/cohort reassignment, and policy/configuration mutation are runtime-frozen for Phase 1. No Phase 1 authorization rule depends on person/shared-identity conflict; that is original Phase 2 work under IMP-P2-WP2.7.
+6. Capacity and direct TA-scope grant/revoke are supported Phase 1 mutation paths owned by REM-WP2.3 and race-proved by REM-WP2.4. D-19 sets one existing cooperative as the TA grant/revoke target; Phase 1 has no cohort aggregate, nested TA delegation, or descendant cascade. The TA mutation locks its persisted programme-manager and delegatee actor/tenant scopes, target cooperative and tenant, and referenced union organization for validation; it versions only changed scopes. Membership, platform role/catalogue, appointment/source status, organization/cohort reassignment, and policy/configuration mutation are runtime-frozen for Phase 1. No Phase 1 authorization rule depends on person/shared-identity conflict; that is original Phase 2 work under IMP-P2-WP2.7.
 7. Scope-row provisioning follows the same phase boundary as its source facts. `symphony_app` may ensure only tenant-owned `tenant`, `organization`, and `actor_tenant` rows. The fixed `global_policy` singleton and any required global `actor` rows must already exist from the trusted migration/bootstrap process; the runtime role verifies them and fails closed if absent. Runtime does not bypass RLS or use another role to provision them.
 
 ## 2. Exact table DDL
@@ -141,7 +141,7 @@ The trigger rejects changes to the scope tuple and any version update other than
 
 ## 5. Dependency-to-scope and writer matrix
 
-The JSON inventory v2 is the machine-readable source of truth. This summarized matrix is for review navigation and must remain identical to it.
+The JSON inventory v3 is the machine-readable source of truth. This summarized matrix is for review navigation and must remain identical to it. Its direct TA-scope model reflects D-19 and supersedes cohort/descendant wording inherited from D-17.
 
 | Dependency | Phase 1 disposition | Scope rows | Writer / enforcement |
 |---|---|---|---|
@@ -149,7 +149,7 @@ The JSON inventory v2 is the machine-readable source of truth. This summarized m
 | Platform role assignment/catalogue | Frozen | `actor`, `actor_tenant`, `global_policy` | No Phase 1 mutation command; app-role DML denied. |
 | Appointment/source status | Frozen | `organization`, `tenant`, `actor_tenant` | No Phase 1 mutation command; app-role DML denied. |
 | Capacity grant/revoke/scope correction | Supported | `organization`, `tenant`, `actor_tenant` for each affected actor; add `actor` only for an action whose frozen REM-WP2.1 matrix row explicitly consumes a global actor fact | REM-WP2.3 commands; both race orders required in REM-WP2.4. The action matrix must identify such a row before its WP2.3 command is specified; implementation may not omit a declared dependency to reduce locks. |
-| Delegation grant/revoke/scope change | Supported | `organization`, `tenant`, and `actor_tenant` for grantor, delegate, and every ancestor/descendant whose effective authority changes | REM-WP2.3 commands; resolve full affected chain before locking; both race orders required in REM-WP2.4. |
+| Direct TA-scope grant/revoke | Supported | `organization`, `tenant`, and `actor_tenant` for programme manager and delegatee; referenced union organization is locked for trusted identity validation | REM-WP2.3 commands target one existing cooperative under D-19; no cohort, nested delegation or descendant cascade exists in Phase 1. Both race orders and immutable history are required in REM-WP2.4. |
 | Organization/cohort reassignment | Frozen | `organization`, `tenant` | No Phase 1 mutation command; app-role DML denied. Delegation-specific scope change remains owned by delegation command. |
 | Person/shared-identity/ineligibility conflict | Phase 2 only | No Phase 1 scope row | Original IMP-P2-WP2.7 defines its own contract and PostgreSQL race evidence. |
 | Policy/configuration version | Frozen during Phase 1 serving | `global_policy` or `tenant` for reads as applicable | No Phase 1 policy editor; app-role DML denied. Change requires reviewed offline migration/candidate. |
@@ -158,7 +158,7 @@ The REM-WP2.1 action catalogue is the final authority for whether a capacity rul
 
 ## 6. Required PostgreSQL evidence and owner allocation
 
-REM-WP2.6 owns DDL, bootstrap, RLS/privilege probes, canonical lock acquisition, frozen-source enforcement and rollback tests for the infrastructure. REM-WP2.4 owns serial-order barriers, authority outcomes, descendant delegation locking and immutable-history assertions after WP2.3 is implemented. The WP2.6 evidence record must be complete before WP2.3 starts; the WP2.4 record must reference that exact WP2.6 candidate and the WP2.3 mutation candidate. No test below is a pass claim in this specification.
+REM-WP2.6 owns DDL, bootstrap, RLS/privilege probes, canonical lock acquisition, frozen-source enforcement and rollback tests for the infrastructure. REM-WP2.4 owns serial-order barriers, authority outcomes for supported direct capacity/TA-scope mutations, and immutable-history assertions after WP2.3 is implemented. The WP2.6 evidence record must be complete before WP2.3 starts; the WP2.4 record must reference that exact WP2.6 candidate and the WP2.3 mutation candidate. No test below is a pass claim in this specification.
 
 TDD creates a red test that detects the current unlocked/stale-read behavior before introducing the scope table or locks. The red test must demonstrate a stale authorization result or a missing scope-version update, not merely a missing file or compile error. Use an isolated PostgreSQL 18 database, actual `symphony_app` for application operations, a migration owner only for fixture setup, two independent connections, explicit test barriers, and fresh-connection assertions.
 
@@ -167,7 +167,7 @@ Required cases:
 1. For each supported capacity and delegation mutation, protected-command-first: the command holds `FOR SHARE`; mutation's `FOR UPDATE` is visibly blocked; command commits before mutation; mutation then commits and increments each affected scope once.
 2. For each supported capacity and delegation mutation, mutation-first: mutation locks `FOR UPDATE`, changes source and increments version, commits; the later protected command obtains `FOR SHARE`, reads current source/version, and denies or allows according to the new fact.
 3. Two protected commands can concurrently hold `FOR SHARE` on the same scope; an authority mutation cannot pass until both commit/rollback.
-4. Delegation parent revoke locks every effective descendant actor/tenant scope in canonical order. Reversed caller input order yields the same lock acquisition order and does not deadlock.
+4. D-19's one-cooperative TA grant has no parent/descendant delegation chain to revoke. Verify its command contract and persisted schema remain direct-target and contain no cohort or nested-delegation input. For the supported TA revoke, prove the programme-manager/delegatee actor/tenant, cooperative, tenant and union validation scopes are locked in canonical order. Generic multi-scope order/deduplication and deadlock behavior are covered by the exact WP2.6 candidate and referenced here; do not manufacture descendant fixtures absent from the accepted model.
 5. Multi-organization/multi-tenant scope inputs are deduplicated and sorted. A cross-tenant organization key is rejected before source reads/writes.
 6. Every frozen source is unwritable as `symphony_app`; every corresponding mutation command/route registration fails the completeness/startup validator. Scope-row provisioning is also tested: tenant/organization/actor_tenant inserts succeed only for trusted same-tenant tuples; attempts to insert global_policy/actor rows or cross-tenant rows fail under the actual app role; missing global/actor rows fail closed; bootstrap-owner seeds pass uniqueness and completeness checks.
 7. App role cannot delete/truncate or directly insert nonzero-version scope rows; malformed scope types/keys fail database CHECK; version update other than exactly +1 fails; timestamp is database-generated.

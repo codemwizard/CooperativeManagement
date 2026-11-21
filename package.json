@@ -37,6 +37,7 @@
     "verify:wp2.2": "node tools/verify_wp2_2_closure.mjs",
     "verify:wp2.6": "node tools/verify_wp2_6_closure.mjs",
     "verify:wp2.3": "node tools/verify_wp2_3_closure.mjs",
+    "verify:wp2.4": "node tools/verify_wp2_4_closure.mjs",
     "verify:wp1.6:dependencies": "node tools/verify_wp1_6_dependencies.mjs",
     "verify:wp5.3": "node tools/verify_wp5_3_closure.mjs",
     "verify:phase1:predecessors": "node tools/verify_phase1_predecessors.mjs",

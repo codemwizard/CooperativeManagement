@@ -416,14 +416,14 @@ export function validateTenantPolicyManifest(manifest, matrix) {
 export function validateAuthorityDependencyInventory(inventory, migrationInventory) {
   const required = new Set([
     'tenant-membership', 'platform-role-assignment', 'appointment-and-source-status',
-    'capacity-grant-and-revocation', 'delegation-chain-and-revocation', 'organization-and-cohort-scope',
+    'capacity-grant-and-revocation', 'ta-scope-delegation-and-revocation', 'organization-and-cohort-scope',
     'identity-conflict-and-ineligibility-facts', 'policy-and-configuration-version',
   ]);
   const errors = [];
   const expectedLockOrder = ['command_aggregate', 'global_policy', 'organization', 'tenant', 'actor_tenant', 'actor'];
   const expectedScopes = ['global_policy', 'organization', 'tenant', 'actor_tenant', 'actor'];
-  if (inventory?.version !== 2 || inventory?.authority_contract !== 'phase1-authorization-capacity-v3') {
-    errors.push('authority inventory must use version 2 and phase1-authorization-capacity-v3');
+  if (inventory?.version !== 3 || inventory?.authority_contract !== 'phase1-authorization-capacity-v3') {
+    errors.push('authority inventory must use version 3 and phase1-authorization-capacity-v3');
   }
   const serialization = inventory?.serialization;
   if (serialization?.table !== 'symphony.authority_scope_versions') errors.push('authority serialization must use symphony.authority_scope_versions');

@@ -1,6 +1,7 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { createHmac, randomUUID } from 'node:crypto';
 import pg from 'pg';
+import { sql, type Transaction } from 'kysely';
 import { CommandBus } from '@symphony/domain';
 import type { CommandEnvelope } from '@symphony/domain';
 import { capacityDelegationCommandResultDataSchemas } from '@symphony/contracts';
@@ -10,13 +11,16 @@ import { PostgresCommandTransactionRunner } from '../repositories/postgres-comma
 import { PostgresRepository } from '../repositories/postgres-repository.js';
 import { PostgresCapacityDelegationPolicyStore, createCapacityDelegationHandlers } from '../repositories/postgres-capacity-delegation-policy-store.js';
 import type { AuthorityMutationAggregate } from '../repositories/postgres-capacity-delegation-policy-store.js';
+import { acquireAuthorityScopeLocks, authorityScopeKey } from '../repositories/postgres-authority-scope-locks.js';
+import type { AuthorityScopeKey, AuthorityScopeLockRequest } from '../repositories/postgres-authority-scope-locks.js';
+import type { SymphonyDatabase } from '../types/database.js';
 
 const adminUrl = process.env.PHASE1_TEST_ADMIN_DATABASE_URL;
 const appUrl = process.env.PHASE1_TEST_APP_DATABASE_URL;
 
 describe.skipIf(!adminUrl || !appUrl)('REM-WP2.3 PostgreSQL capacity and TA command persistence', () => {
   const admin = new pg.Pool({ connectionString: adminUrl, max: 3 });
-  const db = createDb(appUrl ?? '', { max: 2 });
+  const db = createDb(appUrl ?? '', { max: 6 });
   const recoveryDb = createDb(appUrl ?? '', { max: 1 });
   const tenantId = randomUUID();
   const actorId = randomUUID();
@@ -64,6 +68,10 @@ describe.skipIf(!adminUrl || !appUrl)('REM-WP2.3 PostgreSQL capacity and TA comm
     );
     expect(identity.rows[0]?.database_name.endsWith('_test')).toBe(true);
     expect(Number(identity.rows[0]?.server_version_num)).toBe(180000);
+    const runtimeIdentity = await sql<{ current_user: string; current_database: string }>`
+      SELECT current_user, current_database()
+    `.execute(db);
+    expect(runtimeIdentity.rows[0]).toEqual({ current_user: 'symphony_app', current_database: identity.rows[0]?.database_name });
     const migration = await admin.query<{ applied: boolean }>(
       "SELECT EXISTS(SELECT 1 FROM symphony.schema_migrations WHERE name='0032_wp2_3_acting_appointment_decision_and_termination_records.sql') AS applied",
     );
@@ -282,12 +290,18 @@ describe.skipIf(!adminUrl || !appUrl)('REM-WP2.3 PostgreSQL capacity and TA comm
     const activeFrom = new Date(Date.now() - 1_000).toISOString();
     const activeTo = new Date(Date.now() + 60_000).toISOString();
     const before = await organizationVersion();
+    const grantorActorVersion = await authorityVersion('actor_tenant', actorId, tenantId);
+    const granteeActorVersion = await authorityVersion('actor_tenant', delegateeId, tenantId);
+    const tenantVersion = await authorityVersion('tenant', tenantId, tenantId);
     const granted = await dispatch('GrantCapacity', {
       capacityGrantId: grantId, targetUserId: delegateeId, capacityType: 'field_agent', activeFrom, activeTo,
     }, targetOrganizationId, actorId);
     expect(granted).toMatchObject({ ok: true, data: { operation: 'granted', sourceId: grantId } });
     const afterGrant = await organizationVersion();
     expect(afterGrant).toBe(before + 1);
+    expect(await authorityVersion('actor_tenant', actorId, tenantId)).toBe(grantorActorVersion);
+    expect(await authorityVersion('actor_tenant', delegateeId, tenantId)).toBe(granteeActorVersion + 1);
+    expect(await authorityVersion('tenant', tenantId, tenantId)).toBe(tenantVersion + 1);
 
     const repeated = await dispatch('GrantCapacity', {
       capacityGrantId: repeatedGrantId, targetUserId: delegateeId, capacityType: 'field_agent', activeFrom, activeTo,
@@ -306,6 +320,8 @@ describe.skipIf(!adminUrl || !appUrl)('REM-WP2.3 PostgreSQL capacity and TA comm
     expect(revoked).toMatchObject({ ok: true, data: { operation: 'revoked', sourceId: grantId } });
     const afterRevoke = await organizationVersion();
     expect(afterRevoke).toBe(afterGrant + 1);
+    expect(await authorityVersion('actor_tenant', actorId, tenantId)).toBe(grantorActorVersion);
+    expect(await authorityVersion('actor_tenant', delegateeId, tenantId)).toBe(granteeActorVersion + 2);
     const repeatedRevoke = await dispatch('RevokeCapacity', { capacityGrantId: grantId }, targetOrganizationId, actorId, 2);
     expect(repeatedRevoke).toMatchObject({ ok: true, eventIds: [], data: { operation: 'unchanged', sourceId: grantId } });
     expect(await organizationVersion()).toBe(afterRevoke);
@@ -372,12 +388,20 @@ describe.skipIf(!adminUrl || !appUrl)('REM-WP2.3 PostgreSQL capacity and TA comm
     delegationIds.push(delegationId, repeatedId);
     const activeFrom = new Date(Date.now() - 1_000).toISOString();
     const activeTo = new Date(Date.now() + 60_000).toISOString();
+    const unionVersion = await authorityVersion('organization', unionOrganizationId, tenantId);
+    const managerActorVersion = await authorityVersion('actor_tenant', actorId, tenantId);
+    const delegateeActorVersion = await authorityVersion('actor_tenant', delegateeId, tenantId);
+    const tenantScopeVersion = await authorityVersion('tenant', tenantId, tenantId);
     const first = await dispatch('DelegateTaScope', {
       delegationId, operation: 'grant', delegateeUserId: delegateeId, unionOrganizationId,
       agreementRef: 'TEST-AGREEMENT-1', activeFrom, activeTo,
     }, targetOrganizationId, actorId);
     expect(first).toMatchObject({ ok: true, data: { operation: 'granted', sourceId: delegationId } });
     const versionAfterGrant = await organizationVersion();
+    expect(await authorityVersion('organization', unionOrganizationId, tenantId)).toBe(unionVersion);
+    expect(await authorityVersion('actor_tenant', actorId, tenantId)).toBe(managerActorVersion);
+    expect(await authorityVersion('actor_tenant', delegateeId, tenantId)).toBe(delegateeActorVersion + 1);
+    expect(await authorityVersion('tenant', tenantId, tenantId)).toBe(tenantScopeVersion + 1);
     const repeat = await dispatch('DelegateTaScope', {
       delegationId: repeatedId, operation: 'grant', delegateeUserId: delegateeId, unionOrganizationId,
       agreementRef: 'TEST-AGREEMENT-1', activeFrom, activeTo,
@@ -388,6 +412,9 @@ describe.skipIf(!adminUrl || !appUrl)('REM-WP2.3 PostgreSQL capacity and TA comm
     expect(revoke).toMatchObject({ ok: true, data: { operation: 'revoked', sourceId: delegationId } });
     const versionAfterRevoke = await organizationVersion();
     expect(versionAfterRevoke).toBe(versionAfterGrant + 1);
+    expect(await authorityVersion('organization', unionOrganizationId, tenantId)).toBe(unionVersion);
+    expect(await authorityVersion('actor_tenant', actorId, tenantId)).toBe(managerActorVersion);
+    expect(await authorityVersion('actor_tenant', delegateeId, tenantId)).toBe(delegateeActorVersion + 2);
     const repeatedRevoke = await dispatch('DelegateTaScope', { delegationId, operation: 'revoke' }, targetOrganizationId, actorId, 2);
     expect(repeatedRevoke).toMatchObject({ ok: true, eventIds: [], data: { operation: 'unchanged', sourceId: delegationId } });
     expect(await organizationVersion()).toBe(versionAfterRevoke);
@@ -437,10 +464,282 @@ describe.skipIf(!adminUrl || !appUrl)('REM-WP2.3 PostgreSQL capacity and TA comm
     expect(await organizationVersion()).toBe(before);
   });
 
+  it('linearizes a capacity grant after a protected read and increments only changed scopes', async () => {
+    const grantId = randomUUID();
+    capacityGrantIds.push(grantId);
+    const activeFrom = new Date(Date.now() - 1_000).toISOString();
+    const activeTo = new Date(Date.now() + 60_000).toISOString();
+    const reader = holdProtectedSnapshot({ tenantId, actorUserId: actorId, organizationIds: [targetOrganizationId],
+      affectedActorUserIds: [delegateeId], actionId: 'capacity.grant' }, async (trx) =>
+      (await trx.selectFrom('symphony.capacity_grants').select('id').where('id', '=', grantId).executeTakeFirst()) !== undefined);
+    const before = await reader.acquired;
+    expect(before.active).toBe(false);
+    const blocked = dispatchWhileProtectedSnapshotBlocked(before.pid, () => dispatch('GrantCapacity', {
+      capacityGrantId: grantId, targetUserId: delegateeId, capacityType: 'field_agent', activeFrom, activeTo,
+    }, targetOrganizationId, actorId));
+    await blocked.observed;
+    reader.release();
+    await reader.completed;
+    expect(await blocked.result).toMatchObject({ ok: true, data: { operation: 'granted', sourceId: grantId } });
+    const after = await openProtectedSnapshot({ tenantId, actorUserId: actorId, organizationIds: [targetOrganizationId],
+      affectedActorUserIds: [delegateeId], actionId: 'capacity.grant' }, async (trx) =>
+      (await trx.selectFrom('symphony.capacity_grants').select('id').where('id', '=', grantId).executeTakeFirst()) !== undefined);
+    expect(after.active).toBe(true);
+    expect(after.versions.get(authorityScopeKey({ scopeType: 'organization', tenantId, scopeId: targetOrganizationId })))
+      .toBe((before.versions.get(authorityScopeKey({ scopeType: 'organization', tenantId, scopeId: targetOrganizationId })) ?? 0) + 1);
+    expect(after.versions.get(authorityScopeKey({ scopeType: 'actor_tenant', tenantId, scopeId: delegateeId })))
+      .toBe((before.versions.get(authorityScopeKey({ scopeType: 'actor_tenant', tenantId, scopeId: delegateeId })) ?? 0) + 1);
+    expect(after.versions.get(authorityScopeKey({ scopeType: 'actor_tenant', tenantId, scopeId: actorId })))
+      .toBe(before.versions.get(authorityScopeKey({ scopeType: 'actor_tenant', tenantId, scopeId: actorId })));
+  });
+
+  it('linearizes capacity revocation after a protected read without rewriting its grant event', async () => {
+    const grantId = randomUUID();
+    capacityGrantIds.push(grantId);
+    const activeFrom = new Date(Date.now() - 1_000).toISOString();
+    const activeTo = new Date(Date.now() + 120_000).toISOString();
+    await dispatch('GrantCapacity', { capacityGrantId: grantId, targetUserId: delegateeId, capacityType: 'delegate', sourceRef: 'WP2.4-CAPACITY-REVOKE', activeFrom, activeTo }, targetOrganizationId, actorId);
+    const eventBefore = await readEventHistory(grantId);
+    const reader = holdProtectedSnapshot({ tenantId, actorUserId: actorId, organizationIds: [targetOrganizationId],
+      affectedActorUserIds: [delegateeId], actionId: 'capacity.revoke' }, async (trx) =>
+      (await trx.selectFrom('symphony.capacity_grants').select('revoked_at').where('id', '=', grantId).executeTakeFirst())?.revoked_at === null);
+    const before = await reader.acquired;
+    expect(before.active).toBe(true);
+    const blocked = dispatchWhileProtectedSnapshotBlocked(before.pid,
+      () => dispatch('RevokeCapacity', { capacityGrantId: grantId }, targetOrganizationId, actorId, 1));
+    await blocked.observed;
+    reader.release();
+    await reader.completed;
+    expect(await blocked.result).toMatchObject({ ok: true, data: { operation: 'revoked', sourceId: grantId } });
+    const after = await openProtectedSnapshot({ tenantId, actorUserId: actorId, organizationIds: [targetOrganizationId],
+      affectedActorUserIds: [delegateeId], actionId: 'capacity.revoke' }, async (trx) =>
+      (await trx.selectFrom('symphony.capacity_grants').select('revoked_at').where('id', '=', grantId).executeTakeFirst())?.revoked_at === null);
+    expect(after.active).toBe(false);
+    const history = await readEventHistory(grantId);
+    expect(history).toHaveLength(2);
+    expect(history[0]).toEqual(eventBefore[0]);
+    expect(history.map((event) => event.event_type)).toEqual(['CapacityGranted', 'CapacityRevoked']);
+  });
+
+  it('linearizes a TA-scope grant after a protected read and changes the cooperative, not union or grantor, scope versions', async () => {
+    const delegationId = randomUUID();
+    delegationIds.push(delegationId);
+    const activeFrom = new Date(Date.now() - 1_000).toISOString();
+    const activeTo = new Date(Date.now() + 60_000).toISOString();
+    const reader = holdProtectedSnapshot({ tenantId, actorUserId: actorId,
+      organizationIds: [targetOrganizationId, unionOrganizationId], affectedActorUserIds: [delegateeId], actionId: 'ta_scope.grant' }, async (trx) =>
+      (await trx.selectFrom('symphony.ta_scope_delegations').select('id').where('id', '=', delegationId).executeTakeFirst()) !== undefined);
+    const before = await reader.acquired;
+    expect(before.active).toBe(false);
+    const blocked = dispatchWhileProtectedSnapshotBlocked(before.pid, () => dispatch('DelegateTaScope', {
+      delegationId, operation: 'grant', delegateeUserId: delegateeId, unionOrganizationId,
+      agreementRef: 'WP2.4-GRANT-RACE', activeFrom, activeTo,
+    }, targetOrganizationId, actorId));
+    await blocked.observed;
+    reader.release();
+    await reader.completed;
+    expect(await blocked.result).toMatchObject({ ok: true, data: { operation: 'granted', sourceId: delegationId } });
+    const after = await openProtectedSnapshot({ tenantId, actorUserId: actorId,
+      organizationIds: [targetOrganizationId, unionOrganizationId], affectedActorUserIds: [delegateeId], actionId: 'ta_scope.grant' }, async (trx) =>
+      (await trx.selectFrom('symphony.ta_scope_delegations').select('id').where('id', '=', delegationId).executeTakeFirst()) !== undefined);
+    expect(after.active).toBe(true);
+    for (const [scopeType, scopeId, increment] of [
+      ['organization', targetOrganizationId, 1], ['tenant', tenantId, 1], ['actor_tenant', delegateeId, 1],
+      ['organization', unionOrganizationId, 0], ['actor_tenant', actorId, 0],
+    ] as const) {
+      const key = authorityScopeKey({ scopeType, tenantId: scopeType === 'actor_tenant' || scopeType === 'tenant' || scopeType === 'organization' ? tenantId : null, scopeId });
+      expect(after.versions.get(key)).toBe((before.versions.get(key) ?? 0) + increment);
+    }
+    await dispatch('DelegateTaScope', { delegationId, operation: 'revoke' }, targetOrganizationId, actorId, 1);
+  });
+
+  it('linearizes TA-scope revocation after a protected read without rewriting its grant event', async () => {
+    const delegationId = randomUUID();
+    delegationIds.push(delegationId);
+    const activeFrom = new Date(Date.now() - 1_000).toISOString();
+    const activeTo = new Date(Date.now() + 60_000).toISOString();
+    const grant = await dispatch('DelegateTaScope', { delegationId, operation: 'grant', delegateeUserId: delegateeId,
+      unionOrganizationId, agreementRef: 'WP2.4-REVOKE-RACE', activeFrom, activeTo }, targetOrganizationId, actorId);
+    expect(grant).toMatchObject({ ok: true, data: { operation: 'granted', sourceId: delegationId } });
+    const eventBefore = await readEventHistory(delegationId);
+    const reader = holdProtectedSnapshot({ tenantId, actorUserId: actorId,
+      organizationIds: [targetOrganizationId, unionOrganizationId], affectedActorUserIds: [delegateeId], actionId: 'ta_scope.revoke' }, async (trx) =>
+      (await trx.selectFrom('symphony.ta_scope_delegations').select('revoked_at').where('id', '=', delegationId).executeTakeFirst())?.revoked_at === null);
+    const before = await reader.acquired;
+    expect(before.active).toBe(true);
+    const blocked = dispatchWhileProtectedSnapshotBlocked(before.pid,
+      () => dispatch('DelegateTaScope', { delegationId, operation: 'revoke' }, targetOrganizationId, actorId, 1));
+    await blocked.observed;
+    reader.release();
+    await reader.completed;
+    expect(await blocked.result).toMatchObject({ ok: true, data: { operation: 'revoked', sourceId: delegationId } });
+    const after = await openProtectedSnapshot({ tenantId, actorUserId: actorId,
+      organizationIds: [targetOrganizationId, unionOrganizationId], affectedActorUserIds: [delegateeId], actionId: 'ta_scope.revoke' }, async (trx) =>
+      (await trx.selectFrom('symphony.ta_scope_delegations').select('revoked_at').where('id', '=', delegationId).executeTakeFirst())?.revoked_at === null);
+    expect(after.active).toBe(false);
+    const history = await readEventHistory(delegationId);
+    expect(history).toHaveLength(2);
+    expect(history[0]).toEqual(eventBefore[0]);
+    expect(history.map((event) => event.event_type)).toEqual(['TaScopeDelegated', 'TaScopeRevoked']);
+  });
+
+  it('commits capacity grant and revoke before later protected reads, which observe the new source state', async () => {
+    const grantId = randomUUID();
+    capacityGrantIds.push(grantId);
+    const activeFrom = new Date(Date.now() - 1_000).toISOString();
+    const activeTo = new Date(Date.now() + 180_000).toISOString();
+    const targetVersionBeforeGrant = await authorityVersion('organization', targetOrganizationId, tenantId);
+    const tenantVersionBeforeGrant = await authorityVersion('tenant', tenantId, tenantId);
+    const delegateeVersionBeforeGrant = await authorityVersion('actor_tenant', delegateeId, tenantId);
+    await dispatch('GrantCapacity', { capacityGrantId: grantId, targetUserId: delegateeId, capacityType: 'delegate', sourceRef: 'WP2.4-MUTATION-FIRST', activeFrom, activeTo }, targetOrganizationId, actorId);
+    const afterGrant = await openProtectedSnapshot({ tenantId, actorUserId: actorId, organizationIds: [targetOrganizationId],
+      affectedActorUserIds: [delegateeId], actionId: 'capacity.grant' }, async (trx) =>
+      (await trx.selectFrom('symphony.capacity_grants').select('revoked_at').where('id', '=', grantId).executeTakeFirst())?.revoked_at === null);
+    expect(afterGrant.active).toBe(true);
+    expect(afterGrant.versions.get(authorityScopeKey({ scopeType: 'organization', tenantId, scopeId: targetOrganizationId }))).toBe(targetVersionBeforeGrant + 1);
+    expect(afterGrant.versions.get(authorityScopeKey({ scopeType: 'tenant', tenantId, scopeId: tenantId }))).toBe(tenantVersionBeforeGrant + 1);
+    expect(afterGrant.versions.get(authorityScopeKey({ scopeType: 'actor_tenant', tenantId, scopeId: delegateeId }))).toBe(delegateeVersionBeforeGrant + 1);
+    await dispatch('RevokeCapacity', { capacityGrantId: grantId }, targetOrganizationId, actorId, 1);
+    const afterRevoke = await openProtectedSnapshot({ tenantId, actorUserId: actorId, organizationIds: [targetOrganizationId],
+      affectedActorUserIds: [delegateeId], actionId: 'capacity.revoke' }, async (trx) =>
+      (await trx.selectFrom('symphony.capacity_grants').select('revoked_at').where('id', '=', grantId).executeTakeFirst())?.revoked_at === null);
+    expect(afterRevoke.active).toBe(false);
+    expect(afterRevoke.versions.get(authorityScopeKey({ scopeType: 'organization', tenantId, scopeId: targetOrganizationId }))).toBe(targetVersionBeforeGrant + 2);
+    expect(afterRevoke.versions.get(authorityScopeKey({ scopeType: 'tenant', tenantId, scopeId: tenantId }))).toBe(tenantVersionBeforeGrant + 2);
+    expect(afterRevoke.versions.get(authorityScopeKey({ scopeType: 'actor_tenant', tenantId, scopeId: delegateeId }))).toBe(delegateeVersionBeforeGrant + 2);
+  });
+
+  it('commits TA-scope grant and revoke before later protected reads, which observe the new source state', async () => {
+    const delegationId = randomUUID();
+    delegationIds.push(delegationId);
+    const activeFrom = new Date(Date.now() - 1_000).toISOString();
+    const activeTo = new Date(Date.now() + 60_000).toISOString();
+    const targetVersionBeforeGrant = await authorityVersion('organization', targetOrganizationId, tenantId);
+    const tenantVersionBeforeGrant = await authorityVersion('tenant', tenantId, tenantId);
+    const delegateeVersionBeforeGrant = await authorityVersion('actor_tenant', delegateeId, tenantId);
+    await dispatch('DelegateTaScope', { delegationId, operation: 'grant', delegateeUserId: delegateeId,
+      unionOrganizationId, agreementRef: 'WP2.4-MUTATION-FIRST', activeFrom, activeTo }, targetOrganizationId, actorId);
+    const afterGrant = await openProtectedSnapshot({ tenantId, actorUserId: actorId,
+      organizationIds: [targetOrganizationId, unionOrganizationId], affectedActorUserIds: [delegateeId], actionId: 'ta_scope.grant' }, async (trx) =>
+      (await trx.selectFrom('symphony.ta_scope_delegations').select('revoked_at').where('id', '=', delegationId).executeTakeFirst())?.revoked_at === null);
+    expect(afterGrant.active).toBe(true);
+    expect(afterGrant.versions.get(authorityScopeKey({ scopeType: 'organization', tenantId, scopeId: targetOrganizationId }))).toBe(targetVersionBeforeGrant + 1);
+    expect(afterGrant.versions.get(authorityScopeKey({ scopeType: 'tenant', tenantId, scopeId: tenantId }))).toBe(tenantVersionBeforeGrant + 1);
+    expect(afterGrant.versions.get(authorityScopeKey({ scopeType: 'actor_tenant', tenantId, scopeId: delegateeId }))).toBe(delegateeVersionBeforeGrant + 1);
+    await dispatch('DelegateTaScope', { delegationId, operation: 'revoke' }, targetOrganizationId, actorId, 1);
+    const afterRevoke = await openProtectedSnapshot({ tenantId, actorUserId: actorId,
+      organizationIds: [targetOrganizationId, unionOrganizationId], affectedActorUserIds: [delegateeId], actionId: 'ta_scope.revoke' }, async (trx) =>
+      (await trx.selectFrom('symphony.ta_scope_delegations').select('revoked_at').where('id', '=', delegationId).executeTakeFirst())?.revoked_at === null);
+    expect(afterRevoke.active).toBe(false);
+    expect(afterRevoke.versions.get(authorityScopeKey({ scopeType: 'organization', tenantId, scopeId: targetOrganizationId }))).toBe(targetVersionBeforeGrant + 2);
+    expect(afterRevoke.versions.get(authorityScopeKey({ scopeType: 'tenant', tenantId, scopeId: tenantId }))).toBe(tenantVersionBeforeGrant + 2);
+    expect(afterRevoke.versions.get(authorityScopeKey({ scopeType: 'actor_tenant', tenantId, scopeId: delegateeId }))).toBe(delegateeVersionBeforeGrant + 2);
+  });
+
+  it('treats elapsed expiry as inactive without mutating source or advancing D-16 versions', async () => {
+    const grantId = randomUUID();
+    capacityGrantIds.push(grantId);
+    await admin.query(
+      `INSERT INTO symphony.capacity_grants(id,user_id,organization_id,capacity_type,granted_by_user_id,active_from,expires_at)
+       VALUES($1,$2,$3,'field_agent',$4,transaction_timestamp()-interval '1 minute',transaction_timestamp())`,
+      [grantId, delegateeId, targetOrganizationId, actorId],
+    );
+    const organizationVersionBeforeRead = await authorityVersion('organization', targetOrganizationId, tenantId);
+    const tenantVersionBeforeRead = await authorityVersion('tenant', tenantId, tenantId);
+    const actorVersionBeforeRead = await authorityVersion('actor_tenant', delegateeId, tenantId);
+    const expired = await openProtectedSnapshot({ tenantId, actorUserId: actorId, organizationIds: [targetOrganizationId],
+      affectedActorUserIds: [delegateeId], actionId: 'capacity.revoke' }, async (trx) => {
+      const row = await sql<{ expired: boolean }>`
+        SELECT active_from <= transaction_timestamp() AND expires_at <= transaction_timestamp() AS expired
+          FROM symphony.capacity_grants WHERE id = ${grantId}::uuid AND revoked_at IS NULL
+      `.execute(trx);
+      return row.rows[0]?.expired === true;
+    });
+    expect(expired.active).toBe(true);
+    expect(await authorityVersion('organization', targetOrganizationId, tenantId)).toBe(organizationVersionBeforeRead);
+    expect(await authorityVersion('tenant', tenantId, tenantId)).toBe(tenantVersionBeforeRead);
+    expect(await authorityVersion('actor_tenant', delegateeId, tenantId)).toBe(actorVersionBeforeRead);
+    const row = await admin.query<{ revoked_at: string | null }>('SELECT revoked_at FROM symphony.capacity_grants WHERE id=$1', [grantId]);
+    expect(row.rows[0]?.revoked_at).toBeNull();
+  });
+
   async function organizationVersion(): Promise<number> {
     const result = await admin.query<{ version: string }>(
       `SELECT version::text FROM symphony.authority_scope_versions
        WHERE scope_type='organization' AND tenant_id=$1 AND scope_id=$2`, [tenantId, targetOrganizationId],
+    );
+    return Number(result.rows[0]?.version ?? 0);
+  }
+
+  async function readEventHistory(aggregateId: string) {
+    const result = await admin.query<{ id: string; event_type: string; payload: unknown; sequence: number }>(
+      `SELECT id,event_type,payload,sequence FROM symphony.domain_events WHERE aggregate_id=$1 ORDER BY sequence`, [aggregateId],
+    );
+    return result.rows;
+  }
+
+  function holdProtectedSnapshot(
+    request: Omit<AuthorityScopeLockRequest, 'mode'>,
+    readSource: (trx: Transaction<SymphonyDatabase>) => Promise<boolean>,
+  ) {
+    let release!: () => void;
+    let signal!: (value: { pid: number; active: boolean; scopes: readonly AuthorityScopeKey[]; versions: ReadonlyMap<string, number> }) => void;
+    const gate = new Promise<void>((resolve) => { release = resolve; });
+    const acquired = new Promise<{ pid: number; active: boolean; scopes: readonly AuthorityScopeKey[]; versions: ReadonlyMap<string, number> }>((resolve) => { signal = resolve; });
+    const completed = db.transaction().execute(async (trx) => {
+      await sql`SELECT set_config('app.tenant_id', ${request.tenantId}, true)`.execute(trx);
+      await sql`SELECT set_config('app.actor_user_id', ${request.actorUserId}, true)`.execute(trx);
+      const backend = await sql<{ pid: number }>`SELECT pg_backend_pid() AS pid`.execute(trx);
+      const locks = await acquireAuthorityScopeLocks(trx, { ...request, mode: 'protected_read' });
+      const active = await readSource(trx);
+      signal({ pid: backend.rows[0]!.pid, active, scopes: locks.scopes, versions: locks.versions });
+      await gate;
+      return active;
+    });
+    return { acquired, completed, release: () => release() };
+  }
+
+  async function openProtectedSnapshot(
+    request: Omit<AuthorityScopeLockRequest, 'mode'>,
+    readSource: (trx: Transaction<SymphonyDatabase>) => Promise<boolean>,
+  ) {
+    const snapshot = holdProtectedSnapshot(request, readSource);
+    const value = await snapshot.acquired;
+    snapshot.release();
+    await snapshot.completed;
+    return value;
+  }
+
+  function dispatchWhileProtectedSnapshotBlocked<T>(readerPid: number, mutation: () => Promise<T>) {
+    let settled = false;
+    const pending = mutation().finally(() => { settled = true; });
+    const observed = waitForScopeMutationBlockedBy(readerPid).then((blocked) => {
+      if (!blocked) {
+        throw new Error(`Mutation was not observed blocked by reader PID ${readerPid}; settled=${settled}`);
+      }
+      expect(settled).toBe(false);
+    });
+    return { observed, result: pending };
+  }
+
+  async function waitForScopeMutationBlockedBy(readerPid: number): Promise<boolean> {
+    const deadline = Date.now() + 10_000;
+    while (Date.now() < deadline) {
+      const blocked = await admin.query<{ blockers: number[] }>(
+        `SELECT pg_blocking_pids(pid) AS blockers FROM pg_stat_activity
+          WHERE datname=current_database() AND pid <> pg_backend_pid()`,
+      );
+      if (blocked.rows.some((row) => row.blockers.includes(readerPid))) return true;
+      await new Promise((resolve) => setTimeout(resolve, 10));
+    }
+    return false;
+  }
+
+  async function authorityVersion(scopeType: string, scopeId: string, scopeTenantId: string | null): Promise<number> {
+    const result = await admin.query<{ version: string }>(
+      `SELECT version::text FROM symphony.authority_scope_versions
+        WHERE scope_type=$1 AND scope_id=$2::uuid AND tenant_id IS NOT DISTINCT FROM $3::uuid`,
+      [scopeType, scopeId, scopeTenantId],
     );
     return Number(result.rows[0]?.version ?? 0);
   }
