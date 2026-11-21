@@ -184,6 +184,34 @@ describe('API runtime profile and listener composition', () => {
     expect(JSON.parse(failedBody)).toEqual({ code: 'INTERNAL_ERROR' });
     expect(failedBody).not.toContain('sensitive internal detail');
   });
+
+  it('keeps real-data staging ready when the unsupported command API is not registered', async () => {
+    const config = loadApiRuntimeConfig({
+      RUNTIME_PROFILE: 'real-data-staging', APP_ENV: 'staging', DATA_MODE: 'real',
+      PUBLIC_ORIGIN: 'http://127.0.0.1',
+    });
+    const authentication: FastifyPluginAsync = async () => {};
+    const app = buildApiServer({
+      config,
+      routes: {
+        authentication,
+        commandsEnabled: false,
+        verifyCsrf: async () => true,
+        authorize: async () => undefined,
+        rotateSession: async () => undefined,
+      },
+      readinessChecks: [{ name: 'staging database', check: async () => true }],
+    });
+    await app.listen({ host: '127.0.0.1', port: 0 });
+    close = () => app.close();
+    const address = app.server.address() as AddressInfo;
+    const origin = `http://127.0.0.1:${address.port}`;
+
+    const ready = await fetch(`${origin}/health/ready`);
+    expect(ready.status).toBe(200);
+    expect(await ready.json()).toEqual({ status: 'ready' });
+    expect((await fetch(`${origin}/commands`, { method: 'GET' })).status).toBe(404);
+  });
 });
 
 describe('API authentication log redaction', () => {

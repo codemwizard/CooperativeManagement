@@ -252,6 +252,7 @@ describe.skipIf(!migrationBaseUrl || !adminDatabaseUrl || process.env['DATA_MODE
         const unionIds = [randomUUID(), randomUUID()];
         const managerIds = [randomUUID(), randomUUID()];
         const delegateeIds = [randomUUID(), randomUUID()];
+        const legacyDelegateIds: string[] = [];
         for (let index = 0; index < tenantIds.length; index += 1) {
           const tenantId = tenantIds[index]!;
           const orgId = orgIds[index]!;
@@ -269,16 +270,33 @@ describe.skipIf(!migrationBaseUrl || !adminDatabaseUrl || process.env['DATA_MODE
              VALUES($1,$2,$3,'active','cooperative'),($4,$2,$5,'active','union')`,
             [orgId, tenantId, `legacy-coop-${index}`, unionId, `legacy-union-${index}`],
           );
+          const chairPersonId = randomUUID();
+          await fixture.query('INSERT INTO symphony.persons(id,tenant_id,pseudonym_id) VALUES($1,$2,$3)',
+            [chairPersonId, tenantId, `legacy-chair-${tenantId}`]);
+          await fixture.query(`INSERT INTO symphony.user_person_links(tenant_id,user_id,person_id,source_ref,linked_by_user_id)
+            VALUES($1,$2,$3,'legacy-chair-link',$4)`,[tenantId,delegateeId,chairPersonId,managerId]);
+          await fixture.query(`INSERT INTO symphony.appointments(organization_id,person_id,position_id,started_at,source_ref)
+            VALUES($1,$2,'00000000-0000-4000-8000-000000000001','2025-01-01T00:00:00Z','legacy-chair-appointment')`,
+            [orgId,chairPersonId]);
           await fixture.query(
             `INSERT INTO symphony.capacity_grants(id,user_id,organization_id,capacity_type,granted_by_user_id,granted_at)
              VALUES($1,$2,$3,'field_agent',$4,'2025-01-01T00:00:00Z')`,
             [randomUUID(), delegateeId, orgId, managerId],
           );
+          const delegateGrantIds = [randomUUID(), randomUUID()];
+          legacyDelegateIds.push(...delegateGrantIds);
+          await fixture.query(
+            `INSERT INTO symphony.capacity_grants(id,user_id,organization_id,capacity_type,granted_by_user_id,granted_at)
+             VALUES($1,$2,$3,'delegate',$4,'2025-03-01T00:00:00Z'),
+                   ($5,$2,$3,'delegate',$4,'2025-03-01T00:00:00Z')`,
+            [delegateGrantIds[0], delegateeId, orgId, managerId, delegateGrantIds[1]],
+          );
           await fixture.query(
             `INSERT INTO symphony.ta_scope_delegations(id,tenant_id,programme_manager_user_id,union_organization_id,
                delegatee_user_id,target_organization_id,granted_at,expires_at,agreement_ref)
-             VALUES($1,$2,$3,$4,$5,$6,'2025-02-01T00:00:00Z','2026-02-01T00:00:00Z','legacy-agreement')`,
-            [randomUUID(), tenantId, managerId, unionId, delegateeId, orgId],
+             VALUES($1,$2,$3,$4,$5,$6,'2025-02-01T00:00:00Z','2026-02-01T00:00:00Z','legacy-agreement'),
+                   ($7,$2,$3,$4,$5,$6,'2025-02-01T00:00:00Z','2026-02-01T00:00:00Z','legacy-agreement')`,
+            [randomUUID(), tenantId, managerId, unionId, delegateeId, orgId, randomUUID()],
           );
         }
 
@@ -291,20 +309,87 @@ describe.skipIf(!migrationBaseUrl || !adminDatabaseUrl || process.env['DATA_MODE
             '0021_wp2_3_capacity_delegation_commands.sql',
             await fs.readFile(path.join(migrationDirectory, '0021_wp2_3_capacity_delegation_commands.sql'), 'utf8'),
           );
+          await executeSqlMigration(
+            upgradeClient,
+            '0022_backfill_all_actor_authority_scopes.sql',
+            await fs.readFile(path.join(migrationDirectory, '0022_backfill_all_actor_authority_scopes.sql'), 'utf8'),
+          );
         } finally { upgradeClient.release(); }
 
-        const backfilled = await fixture.query<{ capacity_count: number; capacity_dates: boolean; ta_count: number; ta_dates: boolean; capacity_forced: boolean; ta_forced: boolean }>(
+        const backfilled = await fixture.query<{
+          capacity_count: number; capacity_dates: boolean; legacy_delegate_count: number;
+          legacy_duplicate_capacity_count: number; ta_count: number; ta_dates: boolean;
+          legacy_ta_count: number; legacy_duplicate_ta_count: number;
+          actor_scope_count: number; appointment_only_actor_count: number;
+          capacity_forced: boolean; ta_forced: boolean; scope_forced: boolean;
+        }>(
           `SELECT
              (SELECT count(*)::int FROM symphony.capacity_grants) AS capacity_count,
              (SELECT bool_and(active_from=granted_at) FROM symphony.capacity_grants) AS capacity_dates,
+             (SELECT count(*)::int FROM symphony.capacity_grants WHERE capacity_type='delegate' AND legacy_provenance_missing) AS legacy_delegate_count,
+             (SELECT count(*)::int FROM symphony.capacity_grants WHERE capacity_type='delegate' AND legacy_record) AS legacy_duplicate_capacity_count,
              (SELECT count(*)::int FROM symphony.ta_scope_delegations) AS ta_count,
              (SELECT bool_and(active_from=granted_at) FROM symphony.ta_scope_delegations) AS ta_dates,
+          (SELECT count(*)::int FROM symphony.ta_scope_delegations WHERE legacy_record) AS legacy_ta_count,
+             (SELECT count(*)::int FROM symphony.ta_scope_delegations WHERE legacy_record) AS legacy_duplicate_ta_count,
+             (SELECT count(*)::int FROM symphony.authority_scope_versions WHERE scope_type='actor') AS actor_scope_count,
+             (SELECT count(DISTINCT user_link.user_id)::int
+                FROM symphony.user_person_links user_link
+                JOIN symphony.appointments appointment ON appointment.person_id=user_link.person_id
+                LEFT JOIN symphony.user_role_assignments role_assignment ON role_assignment.user_id=user_link.user_id
+               WHERE role_assignment.user_id IS NULL) AS appointment_only_actor_count,
              (SELECT relforcerowsecurity FROM pg_class WHERE oid='symphony.capacity_grants'::regclass) AS capacity_forced,
-             (SELECT relforcerowsecurity FROM pg_class WHERE oid='symphony.ta_scope_delegations'::regclass) AS ta_forced`,
+             (SELECT relforcerowsecurity FROM pg_class WHERE oid='symphony.ta_scope_delegations'::regclass) AS ta_forced,
+             (SELECT relforcerowsecurity FROM pg_class WHERE oid='symphony.authority_scope_versions'::regclass) AS scope_forced`,
         );
         expect(backfilled.rows[0]).toEqual({
-          capacity_count: 2, capacity_dates: true, ta_count: 2, ta_dates: true, capacity_forced: true, ta_forced: true,
+          capacity_count: 6, capacity_dates: true, legacy_delegate_count: 4,
+          legacy_duplicate_capacity_count: 4, ta_count: 4, ta_dates: true, legacy_ta_count: 4,
+          legacy_duplicate_ta_count: 4, actor_scope_count: 4, appointment_only_actor_count: 2,
+          capacity_forced: true, ta_forced: true, scope_forced: true,
         });
+        const newDelegate = await fixture.query<{ legacy_record: boolean; legacy_provenance_missing: boolean }>(
+          `INSERT INTO symphony.capacity_grants(id,user_id,organization_id,capacity_type,granted_by_user_id,
+             granted_at,active_from,expires_at,source_ref)
+           VALUES($1,$2,$3,'delegate',$4,'2027-01-01T00:00:00Z','2027-01-01T00:00:00Z',
+             '2028-01-01T00:00:00Z','post-migration-resolution')
+           RETURNING legacy_record,legacy_provenance_missing`,
+          [randomUUID(),delegateeIds[0],orgIds[0],managerIds[0]],
+        );
+        expect(newDelegate.rows).toEqual([{legacy_record:false,legacy_provenance_missing:false}]);
+
+        await fixture.query('SET ROLE symphony_app');
+        try {
+          await fixture.query('BEGIN');
+          await fixture.query("SELECT set_config('app.tenant_id',$1,true)",[tenantIds[0]]);
+          const legacyRevoke = await fixture.query(
+            `UPDATE symphony.capacity_grants SET revoked_at=clock_timestamp()
+              WHERE id=$1 RETURNING id`,[legacyDelegateIds[0]],
+          );
+          expect(legacyRevoke.rows).toHaveLength(1);
+          await fixture.query('ROLLBACK');
+        } catch (error) {
+          await fixture.query('ROLLBACK').catch(() => undefined);
+          throw error;
+        } finally {
+          await fixture.query('RESET ROLE');
+        }
+        await fixture.query('SET ROLE symphony_app');
+        try {
+          await fixture.query('BEGIN');
+          await fixture.query("SELECT set_config('app.actor_user_id',$1,true)",[delegateeIds[0]]);
+          const appointmentOnlyActorScope = await fixture.query(
+            `SELECT scope_id FROM symphony.authority_scope_versions
+              WHERE scope_type='actor' AND scope_id=$1::uuid`, [delegateeIds[0]],
+          );
+          expect(appointmentOnlyActorScope.rows).toEqual([{scope_id: delegateeIds[0]}]);
+          await fixture.query('COMMIT');
+        } catch (error) {
+          await fixture.query('ROLLBACK').catch(() => undefined);
+          throw error;
+        } finally {
+          await fixture.query('RESET ROLE');
+        }
       } finally {
         await migrationPool?.end();
         await fixture?.end();
