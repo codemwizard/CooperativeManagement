@@ -6,7 +6,7 @@
     "unit_test": "passed",
     "integration_test": "passed",
     "bdd_ui_test": "passed",
-    "gate_verified": "pending"
+    "gate_verified": "passed"
   },
   "commit": "86feb09f334f8c6374ea364850631b8eccbafc5a",
   "candidate": {
@@ -90,10 +90,10 @@
     }
   },
   "limitations": [
-    "WP2.3 implementation and mapped acceptance evidence are complete; exact closure verification for this status-reconciliation candidate is pending.",
+    "WP2.3 exact-candidate closure and WP1.6 predecessor dependency verification passed for the status-reconciliation candidate.",
     "No CI result exists for the immutable candidate SHA.",
     "Acting appointment/termination writes remain deferred under the four-command WP2.3 registration boundary."
   ],
   "unresolved_decisions": [],
-  "reviewer": "Exact-candidate closure verification pending after status reconciliation"
+  "reviewer": "Exact-candidate closure and WP1.6 predecessor dependency verifiers passed for the status-reconciliation candidate"
 }
