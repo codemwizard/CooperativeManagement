@@ -2,94 +2,99 @@
   "schema_version": 1,
   "task_id": "REM-WP2.3",
   "status": {
-    "implementation": "partial",
+    "implementation": "complete",
     "unit_test": "passed",
     "integration_test": "passed",
-    "bdd_ui_test": "failed",
+    "bdd_ui_test": "passed",
     "gate_verified": "pending"
   },
-  "commit": "0995648ba0bede7c7a5fd6d82f485d2ada201a97",
+  "commit": "c2764c6a2f7bc684f49cc8ea877f14ccc9a341f4",
   "candidate": {
     "status": "immutable implementation candidate",
-    "head_commit_before_implementation": "6ae7565dce7cba1a44dda84ba6897fba7da6bbdc",
-    "implementation_commit": "0995648ba0bede7c7a5fd6d82f485d2ada201a97"
+    "head_commit_before_implementation": "a0267a38eed5200e6637f104d1a90342d04b4b24",
+    "implementation_commit": "c2764c6a2f7bc684f49cc8ea877f14ccc9a341f4"
   },
   "environment": {
     "node": "v26.7.0",
     "npm": "v12.2.0",
-    "postgres": "PostgreSQL 18.0; isolated local *_test databases",
-    "database_role": "symphony_app for runtime, RLS and command assertions; isolated migration/test-admin role for fixtures",
+    "postgres": "PostgreSQL 18.0; per-scenario isolated local *_test databases",
+    "database_role": "symphony_app for runtime, RLS and command assertions; test-admin and migration roles for isolated fixtures",
     "data_mode": "test",
     "key_provider": "local-test"
   },
   "commands": [
     {
-      "command": "npm run verify:phase1:contracts (112 contract tests; feature sync and structural checks)",
+      "command": "npm run verify:phase1:contracts (112 tests, feature sync, graph and manifest checks)",
       "result": "passed",
-      "artifact": "evidence/phase1/wp2.3/phase1-contract-gate.log"
+      "artifact": "evidence/phase1/wp2.3/local/2026-11-21/phase1-contract-gate.log"
     },
     {
       "command": "npm run typecheck:v4",
       "result": "passed",
-      "artifact": "evidence/phase1/wp2.3/typecheck.log"
+      "artifact": "evidence/phase1/wp2.3/local/2026-11-21/typecheck.log"
     },
     {
-      "command": "npm run verify:wp2.1:matrix (four policy actions × 22 actor classes)",
+      "command": "npm run verify:wp2.1:matrix (4 actions x 22 actor classes)",
       "result": "passed",
-      "artifact": "evidence/phase1/wp2.3/wp2.1-matrix-verification.log"
+      "artifact": "evidence/phase1/wp2.3/local/2026-11-21/wp2.1-matrix-verification.log"
     },
     {
       "command": "npm run test:db:migrations (17 tests)",
       "result": "passed",
-      "artifact": "evidence/phase1/wp2.3/postgres-migration-gate.log"
+      "artifact": "evidence/phase1/wp2.3/local/2026-11-21/postgres-migration-gate.log"
     },
     {
-      "command": "npm run test:db --workspace @symphony/db (77 tests)",
+      "command": "node --env-file-if-exists=.env.local --env-file-if-exists=.env node_modules/vitest/vitest.mjs run --reporter=verbose --no-file-parallelism --root packages/db (77 tests)",
       "result": "passed",
-      "artifact": "evidence/phase1/wp2.3/postgres-full-suite.log"
+      "artifact": "evidence/phase1/wp2.3/local/2026-11-21/postgres-full-suite.log"
     },
     {
       "command": "npm run test:api (28 tests)",
       "result": "passed",
-      "artifact": "evidence/phase1/wp2.3/api-integration.log"
+      "artifact": "evidence/phase1/wp2.3/local/2026-11-21/api-integration.log"
     },
     {
-      "command": "npm run test:bdd:phase1 -- --work-package REM-WP1.6 (six mapped scenarios selected; zero executed)",
-      "result": "failed",
-      "artifact": "evidence/phase1/wp1.6/local/2026-11-21/verified-candidate-0995648.raw.log"
+      "command": "npm exec --workspace @symphony/domain vitest run src/authz/__tests__/policy.test.ts src/authz/__tests__/policy-matrix.test.ts src/authz/__tests__/capacity-service.test.ts (108 tests)",
+      "result": "passed",
+      "artifact": "evidence/phase1/wp2.3/local/2026-11-21/wp2.3-domain-policy-tests.log"
     },
     {
-      "command": "npm run verify:wp1.6:dependencies",
-      "result": "blocked",
-      "artifact": "evidence/phase1/wp2.3/wp1.6-dependency-gate.log"
+      "command": "npm run test:bdd:phase1 -- --work-package REM-WP1.6 (6 mapped IDs; 8 scenarios; 69 steps)",
+      "result": "passed",
+      "artifact": "evidence/phase1/wp1.6/local/2026-11-21/wp2.3-candidate-c2764c.mapped-runner.log"
     }
   ],
   "claims": {
-    "behavior_proved": "Strict GrantCapacity, RevokeCapacity and DelegateTaScope schemas and PostgreSQL handlers implement supported capacity and one-cooperative TA scope mutations, including source provenance, semantic no-op receipts, interval boundaries, transaction rollback and D-16 version effects. PostgreSQL resolver tests prove assisted-enrolment IFV eligibility and source-backed acting-office authority, including immutable early termination. Generic capacity commands cannot grant acting_officer.",
-    "path_proved": "Unit, PostgreSQL integration, migration and actual Fastify/PostgreSQL API command tests pass. The actual product resolver reads persisted source rows; app-role appointment source access remains SELECT-only. The WP1.6 Cucumber runner selected six mapped scenarios but executed zero because all six remain tagged @wip.",
-    "configuration_proved": "The local PostgreSQL 18 isolated test database applied migrations through 0033. Restricted symphony_app RLS/privilege behavior and the persisted command path were exercised in the database and API suites. No production hardware or live deployment qualification is claimed.",
+    "behavior_proved": "Strict GrantCapacity, RevokeCapacity and DelegateTaScope schemas and PostgreSQL handlers implement four capacity/TA-scope mutation actions with atomic source, event, outbox, receipt and D-16 effects. D-20 assisted-enrolment provenance is bound to the exact persisted session. D-21 acting-office source provenance and immutable termination records are resolved by the PostgreSQL policy/context paths; generic capacity commands reject acting_officer.",
+    "path_proved": "Focused policy tests, PostgreSQL migration/command/resolver suite, Fastify/PostgreSQL API integration, and six mapped WP1.6 scenarios run through persisted sessions and the real /commands HTTP composition. The mapped run passed 8 expanded scenarios and 69 steps, covering replay, changed-envelope rejection, cross-tenant denial/audit, read-only roles, rejected status injection with event-linked capability state, and forged role header rejection.",
+    "configuration_proved": "Isolated PostgreSQL 18 *_test databases; symphony_app for runtime and command assertions; restricted app-role database; DATA_MODE=test. No production hardware qualification is claimed.",
     "coverage_limitations": [
-      "No D-16-registered command currently creates or ends acting appointments; appointment and termination tables remain SELECT-only for symphony_app.",
-      "The six WP1.6 mapped Cucumber scenarios BDD-AUD-002, BDD-AUD-003, BDD-AUD-005, BDD-AUD-008, BDD-AUD-009 and BDD-AUD-014 are undiscovered because they remain @wip; no mapped acceptance pass is claimed.",
-      "External resolution/delegation source documents are preserved as evidence but their legal sufficiency, quorum, vote threshold, issuer authority and by-law compliance are not validated by this system path.",
-      "Independent exact-candidate WP2.3 verification and candidate-bound predecessor verification remain pending."
+      "Acting appointment and termination source tables remain SELECT-only. Their writers are outside WP2.3 registered capacity/TA-scope command families and require a separately registered D-16 command transaction before runtime write access.",
+      "External source documents preserve provenance only; legal sufficiency, quorum, vote threshold, issuing-body authority and by-law compliance are not verified.",
+      "The broad domain unit suite was attempted twice; three Argon2-dependent identity tests exceeded Vitest default five-second timeout. The WP2.3-focused domain policy set passed 108/108.",
+      "CI for candidate c2764c6a2f7bc684f49cc8ea877f14ccc9a341f4 has not yet run.",
+      "Independent final WP2.3 closure verification and the WP1.6 predecessor dependency gate remain pending."
     ],
     "predecessors": {
+      "REM-WP2.1": {
+        "result": "Passing D-19 policy matrix evidence; candidate is an ancestor of WP2.3 implementation candidate.",
+        "artifact": "evidence/phase1/wp2.1/task-evidence.json"
+      },
       "REM-WP2.2": {
-        "result": "Existing task record reports complete and gate passed; its commit is an ancestor of this candidate.",
+        "result": "Passing trusted authority resolver evidence; candidate is an ancestor of WP2.3 implementation candidate.",
         "artifact": "evidence/phase1/wp2.2/task-evidence.json"
       },
       "REM-WP2.6": {
-        "result": "Existing task record reports complete and gate passed; its commit is an ancestor of this candidate.",
+        "result": "Passing D-16 lock/version evidence; candidate is an ancestor of WP2.3 implementation candidate.",
         "artifact": "evidence/phase1/wp2.6/task-evidence.json"
       }
     }
   },
   "limitations": [
-    "This is an immutable implementation candidate with partial status, not a WP2.3 task PASS or gate PASS.",
-    "The WP1.6 dependency verifier cannot pass until its graph predecessors have acceptable candidate-bound evidence and mapped Cucumber acceptance executes successfully.",
-    "No CI run for implementation commit 0995648ba0bede7c7a5fd6d82f485d2ada201a97 is available yet."
+    "Implementation and mapped acceptance evidence are complete for the WP2.3 command scope, but gate_verified remains pending until the exact-candidate verifier and predecessor gate pass.",
+    "No CI result exists for the immutable candidate SHA.",
+    "Acting appointment/termination writes remain deferred under the four-command WP2.3 registration boundary."
   ],
   "unresolved_decisions": [],
-  "reviewer": "Independent review and authoritative WP2.3 gate verification pending"
+  "reviewer": "Exact-candidate WP2.3 verifier and graph dependency verification pending"
 }
