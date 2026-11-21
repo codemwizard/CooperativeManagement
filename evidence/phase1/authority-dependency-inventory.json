@@ -119,6 +119,8 @@
       "fact": "Any office/appointment required by the action is current, in scope, and supported by the accepted source status.",
       "source_tables": [
         "appointments",
+        "acting_officer_appointments",
+        "acting_officer_appointment_endings",
         "organizations"
       ],
       "mutable": true,

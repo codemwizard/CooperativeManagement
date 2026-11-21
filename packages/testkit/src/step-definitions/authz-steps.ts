@@ -33,7 +33,7 @@ const ACTIVE_FROM = '2026-01-01T00:00:00.000Z';
 const ACTIVE_TO = '2030-01-01T00:00:00.000Z';
 
 function phase1CapacityType(value: string): CapacityCommand['capacityType'] {
-  if (value === 'internal_verifier' || value === 'field_agent' || value === 'delegate' || value === 'acting_officer') return value;
+  if (value === 'internal_verifier' || value === 'field_agent' || value === 'delegate') return value;
   throw new Error(`Unknown Phase 1 capacity type: ${value}`);
 }
 

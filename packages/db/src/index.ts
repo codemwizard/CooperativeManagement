@@ -19,6 +19,8 @@ export type { EstablishPasswordInput, IssueTemporaryCredentialInput, TemporaryCr
 export { PostgresAuthSessionRepository } from './repositories/postgres-auth-session-repository.js';
 export type { AuthSessionRow, AuthSubject, LoginAttemptReservation } from './repositories/postgres-auth-session-repository.js';
 export { PostgresWorkspaceContextRepository } from './repositories/postgres-workspace-context-repository.js';
+export { PostgresCapacityDelegationPolicyStore, createCapacityDelegationHandlers } from './repositories/postgres-capacity-delegation-policy-store.js';
+export type { AuthorityMutationAggregate, CapacityDelegationMutationContext } from './repositories/postgres-capacity-delegation-policy-store.js';
 export { PostgresVerifiedFindingRepository } from './repositories/postgres-verified-finding-repository.js';
 export type { WorkspaceAuthorityFact, WorkspaceContextFacts } from './repositories/postgres-workspace-context-repository.js';
 

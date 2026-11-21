@@ -27,6 +27,8 @@
     "acceptance_policies",
     "aggregate_states",
     "appointments",
+    "acting_officer_appointments",
+    "acting_officer_appointment_endings",
     "approval_policies",
     "authentication_events",
     "bylaw_provisions",
@@ -95,6 +97,16 @@
       "table": "appointments",
       "disposition": "delete_all_rows_in_marked_isolated_test_database",
       "predicate": "TRUE only after DB marker/profile/role guard passes"
+    },
+    {
+      "table": "acting_officer_appointments",
+      "disposition": "delete_all_rows_in_marked_isolated_test_database",
+      "predicate": "TRUE only after DB marker/profile/role guard passes; remove immutable source rows only in the dedicated disposable-test purge transaction"
+    },
+    {
+      "table": "acting_officer_appointment_endings",
+      "disposition": "delete_all_rows_in_marked_isolated_test_database",
+      "predicate": "TRUE only after DB marker/profile/role guard passes; delete before referenced acting appointment and event in the dedicated disposable-test purge transaction"
     },
     {
       "table": "approval_policies",

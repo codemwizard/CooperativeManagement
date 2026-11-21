@@ -8,6 +8,8 @@ import { createAuthComposition } from './authentication-composition.js';
 import { checkAuthorityScopeReadiness, PostgresVerifiedFindingRepository, PostgresWorkspaceContextRepository } from '@symphony/db';
 import { createWorkspaceContextRoutes } from './routes/workspace-context.js';
 import { createWriteStream, type WriteStream } from 'node:fs';
+import { createPostgresCommandComposition } from './command-composition.js';
+import { createCommandRoutes } from './routes/commands.js';
 
 /** The runtime profile is checked before Fastify opens the listener. */
 export async function startApi(environment: NodeJS.ProcessEnv = process.env): Promise<void> {
@@ -34,6 +36,7 @@ export async function startApi(environment: NodeJS.ProcessEnv = process.env): Pr
   const authEvidenceLogPath = environment['WP5_5_API_LOG_PATH'];
   if (authEvidenceLogPath) authEvidenceLog = createWriteStream(authEvidenceLogPath, { flags: 'a' });
   const auth = createAuthComposition({ pool, config, throttleHmacKey });
+  const commands = createPostgresCommandComposition(environment);
   const workspaceContext = new PostgresWorkspaceContextRepository(pool);
   const verifiedFindings = new PostgresVerifiedFindingRepository(pool);
   const app = buildApiServer({
@@ -41,6 +44,7 @@ export async function startApi(environment: NodeJS.ProcessEnv = process.env): Pr
     routes: {
       authentication: auth.authentication, verifyCsrf: auth.verifyCsrf,
       authorize: auth.authorize, rotateSession: auth.rotateSession,
+      commands: createCommandRoutes(commands),
       workspace: createWorkspaceContextRoutes(workspaceContext, verifiedFindings),
     },
     ...(authEvidenceLog ? { logStream: authEvidenceLog } : {}),
@@ -52,6 +56,7 @@ export async function startApi(environment: NodeJS.ProcessEnv = process.env): Pr
   const shutdown = (): void => { void app.close().catch(() => undefined); };
   app.addHook('onClose', async () => {
     await pool.end();
+    await commands.close();
     if (authEvidenceLog) await new Promise<void>((resolveClose) => authEvidenceLog!.end(resolveClose));
     process.off('SIGTERM', shutdown);
     process.off('SIGINT', shutdown);

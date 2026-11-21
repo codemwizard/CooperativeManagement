@@ -1,26 +1,28 @@
 # REM-WP2.3 Capacity and delegation commands
 
-**Status:** Not implemented; no task-evidence record or pass is claimed.
+**Status (2026-11-21):** D-19 and the amended WP2.1 matrix are implemented. Strict command schemas and PostgreSQL grant/revoke handlers are implemented with migrations `0021`–`0027`. D-20 assisted enrolment records the exact open session, typed attestations, representative and approval decision in the atomic capacity grant. D-21/D-22 define source-backed acting appointments for any active cooperative office, distinguish the authorized Chairperson/Vice-chairperson decision-maker from the official recorder, and model early ending as a separate immutable record. The trusted resolver recognizes active acting office authority only for the linked authenticated person, active cooperative membership, interval, exact same-cooperative evidence, and no effective supersession or ending. PostgreSQL and API integration tests exercise the supported resolver and command paths. Acting appointment/ending writes remain SELECT-only until their D-16 command, audit, lock and scope-version transaction path is registered. WP1.6's six mapped Cucumber scenarios still fail discovery because they remain `@wip`; this is not a pass. Exact-candidate predecessor confirmation, evidence binding and authoritative WP2.3 verification remain outstanding. This is implementation-in-progress evidence, not a task PASS or gate PASS.
 **Entry:** REM-WP2.2 and REM-WP2.6 must have candidate-bound passing evidence.
-**Authority:** REM-WP2.1 policy matrix, D-17, `docs/phase1/API_CONTRACT.md`, `docs/phase1/COMMAND_TRANSACTION_CONTRACT.md`, and the D-16 serialization specification.
+**Authority:** REM-WP2.1 policy matrix v2, D-19 (which amends the relevant D-17 cohort-target and generic acting-officer grant language), `docs/phase1/API_CONTRACT.md`, `docs/phase1/COMMAND_TRANSACTION_CONTRACT.md`, and the D-16 serialization specification.
 
 ## Bounded scope
 
-Specify and implement the four Phase 1 policy action families from the frozen REM-WP2.1 matrix:
+Implement the four Phase 1 policy action families from the D-19 amended REM-WP2.1 matrix. The registered command discriminators are `GrantCapacity`, `RevokeCapacity` and `DelegateTaScope`; the latter has a strict `grant`/`revoke` operation discriminator.
 
 - capacity grant;
 - capacity revoke;
 - TA-scope delegation grant;
 - TA-scope delegation revoke.
 
-Those policy action IDs do not determine the HTTP command discriminator, schema version, aggregate target, payload/result schema, event names, projection keys or repeat-operation outcomes. Resolve each from approved contracts and record any missing product decision before implementation. Do not infer command registrations from legacy service names.
+Those policy action IDs do not by themselves determine HTTP registration. D-19 resolves the product semantics; this contract defines the registered command mapping. Do not infer command registrations from legacy service names.
 
-Use persisted actor, tenant, organization, appointment/capacity/delegation and cohort facts. Persist receipts, source mutation, immutable event, projection, outbox and D-16 scope-version changes atomically through the accepted REM-WP1 transaction path and REM-WP2.6 lock service. Revocation must not modify historical findings or create a Phase 2 finding workflow.
+Use persisted actor, tenant, organization, appointment/capacity/delegation and direct cooperative-scope facts. Persist command receipts, source mutation, immutable domain event, outbox and D-16 scope-version changes atomically through the accepted REM-WP1 transaction path and REM-WP2.6 lock service. The trusted workspace projection reads the source records; WP2.3 does not invent a second authority projection. Revocation must not modify historical findings or create a Phase 2 finding workflow.
 
-First-class cohort creation, status transitions, closure and historical treatment remain future work; this task may target an existing persisted cohort only after its eligibility semantics are specified by approved sources. No cohort-lifecycle behavior is implied by the TA-scope grant/revoke action family.
+First-class cohort creation, membership transitions, closure and historical treatment remain future work. A TA command targets one existing cooperative and does not create a cohort or imply group membership.
 
-## Required contract artifact
+## Contract artifact
 
-Before production implementation, create `capacity-delegation-command-contract.json` with, for each command: stable discriminator, schema version, strict request and result schemas, aggregate UUID target, actor/session/tenant provenance, allowed actor classes, organization/cohort scope, effective interval and boundary semantics, duplicate/replay/revoke outcomes, event and projection mapping, audit behavior, receipt semantics, affected D-16 scopes, and requirement/source trace.
+`capacity-delegation-command-contract.json` records the resolved command discriminators, schema version, strict request/result schemas, aggregate UUID target, actor/session/tenant provenance, allowed actor classes, direct cooperative target, effective interval and boundary semantics, duplicate/replay/revoke outcomes, event and authority read-model mapping, audit behavior, receipt semantics, affected D-16 scopes, and requirement/source trace.
 
-This README is a task boundary, not the command contract and not a completion record.
+Generic capacity commands accept `internal_verifier`, `field_agent` and `delegate`; `delegate` requires a documentary `sourceRef`. Generic commands reject `acting_officer`. D-20's assisted exception requires an authenticated `platform_enroller`, exact open session, persisted presence/NRC-sighting/consent-to-act attestations, and command-recorded representative approval. TA scope targets one existing cooperative and records union, delegatee, manager, agreement reference and half-open effective interval. `agreementRef` is preserved as documentary provenance only; no legal-validity check is claimed. Semantic repeats return a receipt without source/event/outbox/version writes; grant after expiry/revocation creates a new row; conflicts are terminal and non-mutating. Exact command payload/result schemas and event mapping are in `capacity-delegation-command-contract.json`.
+
+This README is a task boundary and status report, not a completion record. `POST /commands` now composes the three registered WP2.3 command discriminators through persisted-session authentication and the restricted PostgreSQL transaction path. WP1.6 mapped BDD acceptance and independent exact-candidate verification remain separate requirements.

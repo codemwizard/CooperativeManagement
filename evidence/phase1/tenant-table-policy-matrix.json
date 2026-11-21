@@ -180,6 +180,38 @@
       "status": "REM-WP1.5 applied and verified this approved table grant/policy row under the actual restricted symphony_app role in CI run 43683206104; the raw full-suite result is retained in the candidate evidence directory."
     },
     {
+      "table": "acting_officer_appointments",
+      "classification": "tenant_scoped",
+      "scope_basis": "Direct tenant_id; organization/person composite references; exact supporting evidence version is cooperative-bound.",
+      "scope_resolution": "row.tenant_id matches app.tenant_id and organization is same-tenant cooperative.",
+      "ordinary_runtime_role": "symphony_app",
+      "permitted_sql_operations": [
+        "SELECT"
+      ],
+      "delete_grant": false,
+      "required_rls": "ENABLE+FORCE",
+      "current_rls_enabled_and_forced": true,
+      "explicit_tenant_predicate": true,
+      "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
+      "access_policy": "D-21 immutable source-backed acting appointments. Resolver SELECT only. Runtime record/end command privileges remain frozen pending D-22 actor policy and D-16 writer registration.",
+      "status": "Created by migrations 0028 and 0032 with ENABLE+FORCE tenant RLS, same-cooperative office/evidence checks, immutable decision and recorder attribution, and SELECT-only app-role privilege; PostgreSQL candidate verification pending."
+    },
+    {
+      "table": "acting_officer_appointment_endings",
+      "classification": "tenant_scoped",
+      "scope_basis": "Direct tenant_id; appointment and organization composite references; exact supporting evidence version is cooperative-bound.",
+      "scope_resolution": "row.tenant_id matches app.tenant_id and the appointment and organization share the same tenant and cooperative.",
+      "ordinary_runtime_role": "symphony_app",
+      "permitted_sql_operations": ["SELECT"],
+      "delete_grant": false,
+      "required_rls": "ENABLE+FORCE",
+      "current_rls_enabled_and_forced": true,
+      "explicit_tenant_predicate": true,
+      "tenant_context": "SET LOCAL app.tenant_id from authenticated server context; never accept client-provided setting",
+      "access_policy": "D-22 immutable early-ending source record. Resolver SELECT only; no D-16 writer is registered.",
+      "status": "Created by migration 0032 with ENABLE+FORCE tenant RLS, appointment/evidence ownership and event-binding triggers, append-only source fields, and SELECT-only app-role privilege; PostgreSQL candidate verification pending."
+    },
+    {
       "table": "appointments",
       "classification": "tenant_scoped",
       "scope_basis": "Organization-scoped appointment; tenant inherited from organization.",
@@ -1235,7 +1267,7 @@
       "update_with_check",
       "mismatch_fixture_and_test"
     ],
-    "tenant_scoped_table_count": 45,
+    "tenant_scoped_table_count": 47,
     "rule": "The executable candidate expressions are in the REM-WP1.5 manifest and migrations 0013-0017. The original 37 tenant policies were verified in the historical PostgreSQL 18.0 candidate; later additions require task-specific restricted-role evidence. scope_resolution prose alone does not qualify."
   },
   "authority_source_boundary": {

@@ -1,12 +1,13 @@
 {
-  "contract": "phase1-authorization-policy-matrix-v1",
+  "contract": "phase1-authorization-policy-matrix-v2",
   "status": "frozen",
   "owner_ruling": {
-    "id": "D-17",
-    "date": "2026-11-17",
-    "capacity_rule": "Chairperson or Vice-Chairperson for the target organization may grant or revoke any Phase 1 capacity; an active acting_officer delegation for either position may act within that organization.",
-    "assisted_enrolment_exception": "A platform_enroller may grant only internal_verifier during an active assisted-enrolment session when the representative is present and their decision is recorded.",
-    "ta_scope_rule": "A programme_manager may grant or revoke TA scope only for a cohort in that manager's persisted scope."
+    "id": "D-19",
+    "supersedes": "D-17 TA cohort-target wording and generic acting_officer grantability only",
+    "date": "2026-11-21",
+    "capacity_rule": "Chairperson or Vice-Chairperson for the target cooperative may grant or revoke internal_verifier, field_agent, and sourced delegate capacities; a valid persisted acting_officer appointment/delegation for either office may exercise that office but generic capacity commands cannot create or revoke acting_officer.",
+    "assisted_enrolment_exception": "A platform_enroller may grant only internal_verifier when an open persisted session for the authenticated enroller and target cooperative identifies the representative and records the enroller's typed attestations of representative presence, NRC sighting and consent to act; the strict grant command records that representative's explicit grant decision against that session.",
+    "ta_scope_rule": "A programme_manager may grant or revoke TA scope for one eligible persisted cooperative per command only when that cooperative is in the manager's persisted ta_delegation scope; the delegatee must have an active union_ta assignment through the recorded union/federation. Agreement references are documentary only."
   },
   "sources": {
     "server_authorization": "03-specification-delta.md §9 REQ-AUD-008",
@@ -17,7 +18,7 @@
     "ta_scope": "DECISIONS.md ADR-020 and O-6",
     "owner_authority": "Implementation-Plan-V4/02-decision-register.md §7.6 D-17"
   },
-  "capacity_types": ["internal_verifier", "field_agent", "delegate", "acting_officer"],
+  "capacity_types": ["internal_verifier", "field_agent", "delegate"],
   "actor_classes": [
     { "id": "platform_admin", "kind": "platform_role" },
     { "id": "platform_enroller", "kind": "platform_role" },
@@ -46,14 +47,14 @@
     {
       "id": "capacity.grant",
       "resource": "organization_capacity",
-      "parameters": ["capacityType", "granteeUserId", "activeFrom", "activeTo"],
+      "parameters": ["capacityType", "granteeUserId", "activeFrom", "activeTo", "sourceRef when capacityType=delegate"],
       "allowed_actor_classes": ["chairperson", "vice_chairperson"],
       "conditional_actor_classes": {
         "acting_officer": "Active delegation names chairperson or vice_chairperson and matches target organization.",
         "platform_enroller": "capacityType is internal_verifier and an active assisted-enrolment session records representative presence and grant decision for the target organization."
       },
       "denied_actor_classes": ["platform_admin", "self_enroller", "secretary", "treasurer", "director", "committee_chair", "committee_member", "member", "internal_verifier", "field_agent", "delegate", "programme_manager", "ta", "pfi_analyst", "pfi_credit", "fund_manager", "external_verifier", "union_ta"],
-      "source_refs": ["D-17", "IFV-3", "INV-001", "INV-024", "REQ-AUD-008"]
+      "source_refs": ["D-17", "D-19", "IFV-3", "INV-001", "INV-024", "REQ-AUD-008"]
     },
     {
       "id": "capacity.revoke",
@@ -64,25 +65,25 @@
         "acting_officer": "Active delegation names chairperson or vice_chairperson and matches target organization."
       },
       "denied_actor_classes": ["platform_admin", "platform_enroller", "self_enroller", "secretary", "treasurer", "director", "committee_chair", "committee_member", "member", "internal_verifier", "field_agent", "delegate", "programme_manager", "ta", "pfi_analyst", "pfi_credit", "fund_manager", "external_verifier", "union_ta"],
-      "source_refs": ["D-17", "IFV-3", "INV-001", "INV-024", "REQ-AUD-008"]
+      "source_refs": ["D-17", "D-19", "IFV-3", "INV-001", "INV-024", "REQ-AUD-008"]
     },
     {
       "id": "ta_scope.grant",
-      "resource": "cohort_ta_delegation",
-      "parameters": ["delegateeUserId", "cohortId", "activeFrom", "activeTo"],
+      "resource": "cooperative_ta_delegation",
+      "parameters": ["delegateeUserId", "cooperativeOrganizationId", "unionOrganizationId", "agreementRef", "activeFrom", "activeTo"],
       "allowed_actor_classes": ["programme_manager"],
       "conditional_actor_classes": {},
       "denied_actor_classes": ["platform_admin", "platform_enroller", "self_enroller", "chairperson", "vice_chairperson", "secretary", "treasurer", "director", "committee_chair", "committee_member", "member", "internal_verifier", "field_agent", "delegate", "acting_officer", "ta", "pfi_analyst", "pfi_credit", "fund_manager", "external_verifier", "union_ta"],
-      "source_refs": ["D-17", "ADR-020", "O-6", "REQ-AUD-008"]
+      "source_refs": ["D-19", "ADR-020", "O-6", "REQ-AUD-008"]
     },
     {
       "id": "ta_scope.revoke",
-      "resource": "cohort_ta_delegation",
-      "parameters": ["delegateeUserId", "cohortId"],
+      "resource": "cooperative_ta_delegation",
+      "parameters": ["delegationId"],
       "allowed_actor_classes": ["programme_manager"],
       "conditional_actor_classes": {},
       "denied_actor_classes": ["platform_admin", "platform_enroller", "self_enroller", "chairperson", "vice_chairperson", "secretary", "treasurer", "director", "committee_chair", "committee_member", "member", "internal_verifier", "field_agent", "delegate", "acting_officer", "ta", "pfi_analyst", "pfi_credit", "fund_manager", "external_verifier", "union_ta"],
-      "source_refs": ["D-17", "ADR-020", "O-6", "REQ-AUD-008"]
+      "source_refs": ["D-19", "ADR-020", "O-6", "REQ-AUD-008"]
     }
   ],
   "precedence": [
@@ -104,7 +105,8 @@
     "missing_or_contradictory_authority_denies",
     "tenant_mismatch_denies",
     "same_tenant_wrong_organization_denies",
-    "wrong_or_missing_cohort_scope_denies",
+    "wrong_or_missing_cooperative_scope_denies",
+    "wrong_union_or_inactive_union_ta_assignment_denies",
     "authority_before_active_from_denies",
     "authority_at_active_from_allows_when_other_conditions_pass",
     "authority_before_active_to_allows_when_other_conditions_pass",

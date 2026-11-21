@@ -15,10 +15,10 @@ export function createCommandResultSchema<TData extends z.ZodTypeAny>(dataSchema
     event_ids: z.array(uuidSchema).readonly(),
     data: dataSchema,
   }).strict();
-  return z.discriminatedUnion('ok', [success, terminalConflictResultSchema]);
+  return z.union([success, terminalVersionConflictResultSchema, terminalDomainConflictResultSchema]);
 }
 
-export const terminalConflictResultSchema = z.object({
+const terminalVersionConflictResultSchema = z.object({
   schema_version: z.literal(COMMAND_RESULT_SCHEMA_VERSION),
   ok: z.literal(false),
   code: z.literal('VERSION_CONFLICT'),
@@ -27,6 +27,19 @@ export const terminalConflictResultSchema = z.object({
   observed_version: nonNegativeSafeInteger,
   reconciliation_id: uuidSchema.optional(),
 }).strict();
+
+const terminalDomainConflictResultSchema = z.object({
+  schema_version: z.literal(COMMAND_RESULT_SCHEMA_VERSION),
+  ok: z.literal(false),
+  code: z.literal('DOMAIN_CONFLICT'),
+  domain_code: z.literal('AUTHORITY_GRANT_CONFLICT'),
+  aggregate_id: uuidSchema,
+}).strict();
+
+export const terminalConflictResultSchema = z.union([
+  terminalVersionConflictResultSchema,
+  terminalDomainConflictResultSchema,
+]);
 
 const commandResultBaseSchema = createCommandResultSchema(safeDataObject);
 export type CommandResult = z.infer<typeof commandResultBaseSchema>;

@@ -224,7 +224,8 @@ describe.skipIf(!adminDatabaseUrl || !appDatabaseUrl)('WP1.4 terminal conflict r
     });
 
     const replay = await bus.dispatch(envelope, countedHandler, trustedPrincipal);
-    expect(replay).toEqual(first);
+    expect(first).not.toHaveProperty('replayed');
+    expect(replay).toMatchObject({ ...first, replayed: true });
     expect(handlerCalls).toBe(0);
     expect((await fixturePool.query('SELECT 1 FROM symphony.reconciliation_inbox WHERE tenant_id = $1 AND reconciliation_id = $2', [tenantId, reconciliationId])).rowCount).toBe(1);
     expect((await fixturePool.query('SELECT version, state FROM symphony.aggregate_states WHERE tenant_id = $1 AND id = $2', [tenantId, aggregateId])).rows[0]).toMatchObject({ version: '2', state: { value: 'current' } });
@@ -423,7 +424,12 @@ describe.skipIf(!adminDatabaseUrl || !appDatabaseUrl)('WP1.4 terminal conflict r
         return handler(command);
       }, { trustedPrincipal: { actorUserId: actorId, tenantId }, aggregateId });
       proxy.assertDropped();
-      expect(result).toEqual({ ok: false, code: 'STALE_VERSION', detail: 'Command version conflict' });
+      expect(result).toEqual({
+        ok: false,
+        code: 'STALE_VERSION',
+        detail: 'Command version conflict',
+        ...(committedOnFirstAttempt ? { replayed: true as const } : {}),
+      });
       expect(handlerCalls).toBe(0);
       const recoveredReceipt = await recoveryPool.query<{ command_id: string }>(
         'SELECT command_id FROM symphony.command_receipts WHERE tenant_id = $1 AND command_id = $2',

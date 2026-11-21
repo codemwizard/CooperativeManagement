@@ -9,6 +9,8 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { createAuthComposition } from '../authentication-composition.js';
 import { buildApiServer } from '../server.js';
 import { createWorkspaceContextRoutes } from '../routes/workspace-context.js';
+import { createPostgresCommandComposition } from '../command-composition.js';
+import { createCommandRoutes } from '../routes/commands.js';
 
 // These are test credentials only. The dedicated disposable database is dropped
 // after this suite; no local password or database URL is printed or persisted.
@@ -55,11 +57,17 @@ describe.skipIf(!enabled)('WP5.3 Fastify and PostgreSQL integration',()=>{
   let appPoolB:pg.Pool;
   let appA:import('fastify').FastifyInstance;
   let appB:import('fastify').FastifyInstance;
+  let commandComposition:ReturnType<typeof createPostgresCommandComposition>|undefined;
   let isolatedDatabase:string|undefined;
   let isolatedUrl:string|undefined;
+  let adminSecurityAttemptPolicyInstalled=false;
+  let adminActorScopePolicyInstalled=false;
+  let adminOutboxPolicyInstalled=false;
   let tenantId:string|undefined;
+  let tenantB:string|undefined;
   let userId:string|undefined;
   let organizationId:string|undefined;
+  let organizationB:string|undefined;
   let personId:string|undefined;
   let hmacKey:Buffer;
   let temporaryCredential:string;
@@ -83,12 +91,30 @@ describe.skipIf(!enabled)('WP5.3 Fastify and PostgreSQL integration',()=>{
     const migrated=await runMigration(isolatedUrl);
     if(migrated.status!==0)throw new Error(`WP5.3 isolated migration failed (${migrated.status}): ${migrated.stderr}\n${migrated.stdout}`);
     isolatedAdmin=new pg.Pool({connectionString:isolatedUrl,max:3});
+    await isolatedAdmin.query(`DO $policy$
+      BEGIN
+        EXECUTE format('CREATE POLICY wp16_test_admin_actor_scope_bootstrap ON symphony.authority_scope_versions FOR INSERT TO %I WITH CHECK (scope_type=''actor'' AND tenant_id IS NULL)',current_user);
+      END
+      $policy$`);
+    adminActorScopePolicyInstalled=true;
+    await isolatedAdmin.query(`DO $policy$
+      BEGIN
+        EXECUTE format('CREATE POLICY wp16_test_admin_outbox_inspection ON symphony.event_outbox FOR SELECT TO %I USING (true)',current_user);
+      END
+      $policy$`);
+    adminOutboxPolicyInstalled=true;
+    await isolatedAdmin.query(`DO $policy$
+      BEGIN
+        EXECUTE format('CREATE POLICY wp16_test_admin_security_attempt_inspection ON symphony.security_attempts FOR SELECT TO %I USING (true)',current_user);
+      END
+      $policy$`);
+    adminSecurityAttemptPolicyInstalled=true;
     const appUrl=new URL(appBaseUrl);appUrl.pathname=`/${isolatedDatabase}`;
     appPoolA=new pg.Pool({connectionString:appUrl.toString(),max:4});
     appPoolB=new pg.Pool({connectionString:appUrl.toString(),max:4});
     tenantId=randomUUID();userId=randomUUID();organizationId=randomUUID();personId=randomUUID();hmacKey=Buffer.alloc(32,0x53);
     await isolatedAdmin.query('INSERT INTO symphony.tenants(id,name) VALUES($1,$2)',[tenantId,'wp5.3-api-integration']);
-    const fixture=await appPoolA.connect();
+    const fixture=await isolatedAdmin.connect();
     try {
       await fixture.query('BEGIN');
       await fixture.query("SELECT set_config('app.tenant_id',$1,true)",[tenantId]);
@@ -96,9 +122,20 @@ describe.skipIf(!enabled)('WP5.3 Fastify and PostgreSQL integration',()=>{
         `INSERT INTO symphony.users(id,tenant_id,email,email_normalized,status)
          VALUES($1,$2,$3,$3,'active')`,[userId,tenantId,`wp53-${userId}@example.invalid`],
       );
+      await fixture.query("INSERT INTO symphony.authority_scope_versions(scope_type,tenant_id,scope_id) VALUES('actor',NULL,$1) ON CONFLICT DO NOTHING",[userId]);
       await fixture.query('COMMIT');
     } catch(error) { await fixture.query('ROLLBACK').catch(()=>undefined);throw error; }
     finally { fixture.release(); }
+    tenantB=randomUUID();organizationB=randomUUID();
+    await isolatedAdmin.query('INSERT INTO symphony.tenants(id,name) VALUES($1,$2)',[tenantB,'wp5.3-cross-tenant']);
+    const crossTenantFixture=await isolatedAdmin.connect();
+    try {
+      await crossTenantFixture.query('BEGIN');
+      await crossTenantFixture.query("SELECT set_config('app.tenant_id',$1,true)",[tenantB]);
+      await crossTenantFixture.query("INSERT INTO symphony.organizations(id,tenant_id,name,status,organization_kind) VALUES($1,$2,'cross-tenant cooperative','active','cooperative')",[organizationB,tenantB]);
+      await crossTenantFixture.query('COMMIT');
+    } catch(error) { await crossTenantFixture.query('ROLLBACK').catch(()=>undefined);throw error; }
+    finally { crossTenantFixture.release(); }
     const unionId=randomUUID();
     const membershipId=randomUUID();
     const roleId=randomUUID();
@@ -109,19 +146,21 @@ describe.skipIf(!enabled)('WP5.3 Fastify and PostgreSQL integration',()=>{
       await identityAdmin.query('BEGIN');
       await identityAdmin.query('SELECT set_config(\'app.tenant_id\',$1,true)',[tenantId]);
       await identityAdmin.query('INSERT INTO symphony.persons(id,tenant_id,pseudonym_id) VALUES($1,$2,$3)',[personId,tenantId,`person-${personId}`]);
-      await identityAdmin.query('INSERT INTO symphony.organizations(id,tenant_id,name,organization_kind) VALUES($1,$2,$3,\'cooperative\'),($4,$2,$5,\'union\')',[organizationId,tenantId,'WP2.2 cooperative',unionId,'WP2.2 union']);
+      await identityAdmin.query('INSERT INTO symphony.organizations(id,tenant_id,name,status,organization_kind) VALUES($1,$2,$3,\'active\',\'cooperative\'),($4,$2,$5,\'active\',\'union\')',[organizationId,tenantId,'WP2.2 cooperative',unionId,'WP2.2 union']);
       await identityAdmin.query(`INSERT INTO symphony.user_person_links(tenant_id,user_id,person_id,source_ref,linked_by_user_id)
         VALUES($1,$2,$3,'integration-fixture',$2)`,[tenantId,userId,personId]);
       await identityAdmin.query(`INSERT INTO symphony.organization_memberships(id,tenant_id,organization_id,person_id,status,joined_at,source_ref)
         VALUES($1,$2,$3,$4,'active',clock_timestamp()-interval '1 day','integration-fixture')`,[membershipId,tenantId,organizationId,personId]);
       await identityAdmin.query(`INSERT INTO symphony.appointments(organization_id,person_id,position_id,started_at,source_ref)
         VALUES($1,$2,'00000000-0000-4000-8000-000000000003',clock_timestamp()-interval '1 hour','integration-fixture')`,[organizationId,personId]);
+      await identityAdmin.query(`INSERT INTO symphony.appointments(organization_id,person_id,position_id,started_at,source_ref)
+        VALUES($1,$2,'00000000-0000-4000-8000-000000000001',clock_timestamp()-interval '1 hour','integration-fixture')`,[organizationId,personId]);
       await identityAdmin.query(`INSERT INTO symphony.appointments(organization_id,person_id,position_id,started_at,ended_at,source_ref)
         VALUES($1,$2,'00000000-0000-4000-8000-000000000002',clock_timestamp()-interval '2 hours',clock_timestamp()-interval '1 hour','expired-fixture')`,[organizationId,personId]);
-      await identityAdmin.query(`INSERT INTO symphony.capacity_grants(user_id,organization_id,capacity_type,granted_by_user_id,granted_at)
-        VALUES($1,$2,'internal_verifier',$1,clock_timestamp()-interval '1 hour')`,[userId,organizationId]);
-      await identityAdmin.query(`INSERT INTO symphony.capacity_grants(user_id,organization_id,capacity_type,granted_by_user_id,granted_at,revoked_at)
-        VALUES($1,$2,'field_agent',$1,clock_timestamp()-interval '2 hours',clock_timestamp()-interval '1 hour')`,[userId,organizationId]);
+      await identityAdmin.query(`INSERT INTO symphony.capacity_grants(user_id,organization_id,capacity_type,granted_by_user_id,granted_at,active_from)
+        VALUES($1,$2,'internal_verifier',$1,clock_timestamp()-interval '1 hour',clock_timestamp()-interval '1 hour')`,[userId,organizationId]);
+      await identityAdmin.query(`INSERT INTO symphony.capacity_grants(user_id,organization_id,capacity_type,granted_by_user_id,granted_at,active_from,revoked_at)
+        VALUES($1,$2,'field_agent',$1,clock_timestamp()-interval '2 hours',clock_timestamp()-interval '2 hours',clock_timestamp()-interval '1 hour')`,[userId,organizationId]);
       await identityAdmin.query('INSERT INTO symphony.platform_roles(id,code,name) VALUES($1,\'programme_manager\',\'Programme manager\')',[roleId]);
       await identityAdmin.query(`INSERT INTO symphony.user_role_assignments(user_id,platform_role_id,tenant_id,granted_at)
         VALUES($1,$2,$3,clock_timestamp()-interval '1 day')`,[userId,roleId,tenantId]);
@@ -129,8 +168,8 @@ describe.skipIf(!enabled)('WP5.3 Fastify and PostgreSQL integration',()=>{
         VALUES($1,$2,$3,$4,'ta_delegation',clock_timestamp()-interval '1 day','integration-fixture')`,[managerScopeId,tenantId,userId,organizationId]);
       await identityAdmin.query(`INSERT INTO symphony.institutional_role_assignments(tenant_id,user_id,institution_organization_id,role_code,granted_at,source_ref)
         VALUES($1,$2,$3,'union_ta',clock_timestamp()-interval '1 day','integration-fixture')`,[tenantId,userId,unionId]);
-      await identityAdmin.query(`INSERT INTO symphony.ta_scope_delegations(id,tenant_id,programme_manager_user_id,union_organization_id,delegatee_user_id,target_organization_id,granted_at,agreement_ref)
-        VALUES($1,$2,$3,$4,$3,$5,clock_timestamp()-interval '1 day','agreement-fixture')`,[taScopeId,tenantId,userId,unionId,organizationId]);
+      await identityAdmin.query(`INSERT INTO symphony.ta_scope_delegations(id,tenant_id,programme_manager_user_id,union_organization_id,delegatee_user_id,target_organization_id,granted_at,active_from,agreement_ref)
+        VALUES($1,$2,$3,$4,$3,$5,clock_timestamp()-interval '1 day',clock_timestamp()-interval '1 day','agreement-fixture')`,[taScopeId,tenantId,userId,unionId,organizationId]);
       await identityAdmin.query(`INSERT INTO symphony.enrolment_sessions(tenant_id,enroller_user_id,organization_id,started_at)
         VALUES($1,$2,$3,clock_timestamp()-interval '1 hour')`,[tenantId,userId,organizationId]);
       await identityAdmin.query('COMMIT');
@@ -145,16 +184,25 @@ describe.skipIf(!enabled)('WP5.3 Fastify and PostgreSQL integration',()=>{
     const authB=createAuthComposition({pool:appPoolB,config:profile,throttleHmacKey:hmacKey});
     const contextA=createWorkspaceContextRoutes(new PostgresWorkspaceContextRepository(appPoolA),new PostgresVerifiedFindingRepository(appPoolA));
     const contextB=createWorkspaceContextRoutes(new PostgresWorkspaceContextRepository(appPoolB),new PostgresVerifiedFindingRepository(appPoolB));
-    appA=buildApiServer({config:profile,routes:{authentication:authA.authentication,verifyCsrf:authA.verifyCsrf,authorize:authA.authorize,rotateSession:authA.rotateSession,workspace:contextA}});
+    const isolatedAppUrl=new URL(appBaseUrl);isolatedAppUrl.pathname=`/${isolatedDatabase}`;
+    commandComposition=createPostgresCommandComposition({
+      ...process.env, DATABASE_URL:isolatedAppUrl.toString(), COMMAND_DIGEST_HMAC_KEY:Buffer.alloc(32,0x44).toString('base64'),
+      NODE_ENV:'test', DATA_MODE:'test', SYNTHETIC_ONLY:'true',
+    });
+    appA=buildApiServer({config:profile,routes:{authentication:authA.authentication,verifyCsrf:authA.verifyCsrf,authorize:authA.authorize,rotateSession:authA.rotateSession,workspace:contextA,commands:createCommandRoutes(commandComposition)}});
     appB=buildApiServer({config:profile,routes:{authentication:authB.authentication,verifyCsrf:authB.verifyCsrf,authorize:authB.authorize,rotateSession:authB.rotateSession,workspace:contextB}});
     await Promise.all([appA.ready(),appB.ready()]);
   },60_000);
 
   afterAll(async()=>{
     await appA?.close().catch(()=>undefined);await appB?.close().catch(()=>undefined);
+    await commandComposition?.close().catch(()=>undefined);
     await appPoolA?.end().catch(()=>undefined);await appPoolB?.end().catch(()=>undefined);
     await isolatedAdmin?.end().catch(()=>undefined);
     if(admin&&isolatedDatabase){
+      if(adminSecurityAttemptPolicyInstalled)await isolatedAdmin?.query('DROP POLICY IF EXISTS wp16_test_admin_security_attempt_inspection ON symphony.security_attempts').catch(()=>undefined);
+      if(adminActorScopePolicyInstalled)await isolatedAdmin?.query('DROP POLICY IF EXISTS wp16_test_admin_actor_scope_bootstrap ON symphony.authority_scope_versions').catch(()=>undefined);
+      if(adminOutboxPolicyInstalled)await isolatedAdmin?.query('DROP POLICY IF EXISTS wp16_test_admin_outbox_inspection ON symphony.event_outbox').catch(()=>undefined);
       await admin.query('SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname=$1 AND pid<>pg_backend_pid()',[isolatedDatabase]).catch(()=>undefined);
       await admin.query(`DROP DATABASE IF EXISTS "${isolatedDatabase.replaceAll('"','""')}"`).catch(()=>undefined);
     }
@@ -206,7 +254,7 @@ describe.skipIf(!enabled)('WP5.3 Fastify and PostgreSQL integration',()=>{
     const facts=context.json<{data:{tenantId:string;userId:string;personId:string;facts:{kind:string;authority:string;organizationId:string|null;scopeOrganizationIds:string[]}[]}}>().data;
     expect(facts).toMatchObject({tenantId,userId,personId});
     expect(facts.facts.map((fact)=>`${fact.kind}:${fact.authority}`)).toEqual([
-      'appointment:secretary','capacity:internal_verifier','enrolment:self_enroller','institutional_role:union_ta',
+      'appointment:chairperson','appointment:secretary','capacity:internal_verifier','enrolment:self_enroller','institutional_role:union_ta',
       'membership:member','platform_role:programme_manager','platform_role:programme_manager_ta_delegation_scope',
     ]);
     expect(facts.facts.find((fact)=>fact.kind==='institutional_role')?.scopeOrganizationIds).toEqual([organizationId]);
@@ -219,6 +267,91 @@ describe.skipIf(!enabled)('WP5.3 Fastify and PostgreSQL integration',()=>{
     expect(findings.headers['cache-control']).toBe('no-store, private');
     expect(findings.json()).toEqual({data:[]});
     expect((await appA.inject({method:'GET',url:'/workspace/verified-findings?organizationId=invalid',headers:{cookie:cookie(freshLogin)}})).statusCode).toBe(400);
+
+    const targetUserId=randomUUID();
+    const targetFixture=await isolatedAdmin.connect();
+    try {
+      await targetFixture.query('BEGIN');
+      await targetFixture.query("SELECT set_config('app.tenant_id',$1,true)",[tenantId]);
+      await targetFixture.query('INSERT INTO symphony.users(id,tenant_id,email,email_normalized,status) VALUES($1,$2,$3,$3,\'active\')',
+        [targetUserId,tenantId,`wp16-target-${targetUserId}@example.invalid`]);
+      await targetFixture.query('COMMIT');
+    } catch(error) { await targetFixture.query('ROLLBACK').catch(()=>undefined);throw error; }
+    finally { targetFixture.release(); }
+    const freshSession=await appA.inject({method:'GET',url:'/auth/session',headers:{cookie:cookie(freshLogin)}});
+    expect(freshSession.statusCode).toBe(200);
+    const command={
+      commandId:randomUUID(), organizationId, occurredAt:new Date().toISOString(), expectedVersion:null,
+      schemaVersion:1, type:'GrantCapacity',
+      payload:{capacityGrantId:randomUUID(),targetUserId,capacityType:'field_agent',
+        activeFrom:new Date(Date.now()-60_000).toISOString(),activeTo:new Date(Date.now()+60*60_000).toISOString(),sourceRef:'wp1.6-http-fixture'},
+    };
+    const commandHeaders={cookie:cookie(freshLogin),origin:profile.publicOrigin,'x-csrf-token':freshSession.json<{csrfToken:string}>().csrfToken,'x-role':'platform_admin'};
+    const firstCommand=await appA.inject({method:'POST',url:'/commands',headers:commandHeaders,payload:command});
+    expect(firstCommand.statusCode).toBe(200);
+    expect(firstCommand.json()).toMatchObject({ok:true,replayed:false,data:{operation:'granted'}});
+    const repeatedCommand=await appA.inject({method:'POST',url:'/commands',headers:commandHeaders,payload:command});
+    expect(repeatedCommand.statusCode).toBe(200);
+    expect(repeatedCommand.json()).toMatchObject({ok:true,replayed:true,data:{operation:'granted'}});
+    const changedCommand=await appA.inject({method:'POST',url:'/commands',headers:commandHeaders,payload:{...command,payload:{...command.payload,activeTo:new Date(Date.now()+2*60*60_000).toISOString()}}});
+    expect(changedCommand.statusCode).toBe(409);
+    expect(changedCommand.json()).toEqual({ok:false,code:'IDEMPOTENCY_KEY_REUSED',replayed:false});
+    const forgedClaims=await appA.inject({method:'POST',url:'/commands',headers:commandHeaders,payload:{...command,tenantId:randomUUID(),actorUserId:randomUUID(),role:'platform_admin'}});
+    expect(forgedClaims.statusCode).toBe(400);
+    expect(forgedClaims.json()).toEqual({code:'INVALID_COMMAND'});
+    const duplicateKey=await appA.inject({method:'POST',url:'/commands',headers:{...commandHeaders,'content-type':'application/json'},
+      payload:`{"commandId":"${randomUUID()}","\\u0063ommandId":"${randomUUID()}"}`});
+    expect(duplicateKey.statusCode).toBe(400);
+    expect(duplicateKey.json()).toEqual({code:'INVALID_JSON'});
+    const appIdentity=await appPoolA.query<{current_user:string}>("SELECT current_user");
+    expect(appIdentity.rows[0]?.current_user).toBe('symphony_app');
+    const commandInspector=await isolatedAdmin.connect();
+    try {
+      await commandInspector.query('BEGIN');
+      await commandInspector.query("SELECT set_config('app.tenant_id',$1,true)",[tenantId]);
+      const commandRows=await commandInspector.query<{receipts:number;events:number;outbox:number;grants:number}>(
+        `SELECT (SELECT count(*)::int FROM symphony.command_receipts WHERE tenant_id=$1 AND command_id=$2) AS receipts,
+                (SELECT count(*)::int FROM symphony.domain_events WHERE tenant_id=$1 AND aggregate_id=$3) AS events,
+                (SELECT count(*)::int FROM symphony.event_outbox o JOIN symphony.domain_events e ON e.id=o.event_id WHERE e.tenant_id=$1 AND e.aggregate_id=$3) AS outbox,
+                (SELECT count(*)::int FROM symphony.capacity_grants WHERE user_id=$4 AND organization_id=$5) AS grants`,
+        [tenantId,command.commandId,command.payload.capacityGrantId,targetUserId,organizationId],
+      );
+      expect(commandRows.rows[0]).toEqual({receipts:1,events:1,outbox:1,grants:1});
+      await commandInspector.query('COMMIT');
+    } catch(error) { await commandInspector.query('ROLLBACK').catch(()=>undefined);throw error; }
+    finally { commandInspector.release(); }
+
+    const deniedEnvelope=(targetOrganizationId:string)=>({
+      ...command,commandId:randomUUID(),organizationId:targetOrganizationId,
+      payload:{...command.payload,capacityGrantId:randomUUID()},
+    });
+    const crossTenantCommand=deniedEnvelope(organizationB!);
+    const missingOrganizationCommand=deniedEnvelope(randomUUID());
+    const crossTenantDenial=await appA.inject({method:'POST',url:'/commands',headers:commandHeaders,payload:crossTenantCommand});
+    const missingOrganizationDenial=await appA.inject({method:'POST',url:'/commands',headers:commandHeaders,payload:missingOrganizationCommand});
+    expect(crossTenantDenial.statusCode).toBe(403);
+    expect(crossTenantDenial.body).toBe(missingOrganizationDenial.body);
+    expect(crossTenantDenial.json()).toEqual({ok:false,code:'NOT_AUTHORIZED',replayed:false});
+    const denialInspector=await isolatedAdmin.connect();
+    try {
+      await denialInspector.query('BEGIN');
+      await denialInspector.query("SELECT set_config('app.tenant_id',$1,true)",[tenantId]);
+      const audits=await denialInspector.query<{observed_command_id:string;observed_command_type:string;denial_code:string}>(
+        `SELECT observed_command_id,observed_command_type,denial_code FROM symphony.security_attempts
+          WHERE tenant_id=$1 AND actor_user_id=$2 AND observed_command_id=ANY($3::uuid[]) ORDER BY observed_command_id`,
+        [tenantId,userId,[crossTenantCommand.commandId,missingOrganizationCommand.commandId]],
+      );
+      expect(audits.rows).toHaveLength(2);
+      expect(audits.rows.map((row)=>row.observed_command_type)).toEqual(['GrantCapacity','GrantCapacity']);
+      expect(audits.rows.map((row)=>row.denial_code)).toEqual(['NOT_AUTHORISED_FOR_ORGANISATION','NOT_AUTHORISED_FOR_ORGANISATION']);
+      const deniedReceipts=await denialInspector.query<{count:number}>(
+        'SELECT count(*)::int AS count FROM symphony.command_receipts WHERE tenant_id=$1 AND command_id=ANY($2::uuid[])',
+        [tenantId,[crossTenantCommand.commandId,missingOrganizationCommand.commandId]],
+      );
+      expect(deniedReceipts.rows[0]?.count).toBe(0);
+      await denialInspector.query('COMMIT');
+    } catch(error) { await denialInspector.query('ROLLBACK').catch(()=>undefined);throw error; }
+    finally { denialInspector.release(); }
   },60_000);
 
   it('records generic failed attempts from two independent Fastify instances in one shared PostgreSQL throttle store',async()=>{

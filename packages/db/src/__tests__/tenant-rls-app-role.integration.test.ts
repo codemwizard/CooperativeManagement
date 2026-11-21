@@ -156,7 +156,7 @@ describe('WP1.5 actual restricted-role tenant isolation', () => {
     await Promise.all([db.destroy(), recoveryDb.destroy(), app.end(), admin.end()]);
   }, 30_000);
 
-  it('matches all migrated tables, all 45 PostgreSQL tenant policy expressions, the frozen manifest, and effective grants', async () => {
+  it('matches all migrated tables, all manifested PostgreSQL tenant policy expressions, the frozen manifest, and effective grants', async () => {
     const expectedTables = [...inventory.tables, ...inventory.planned_phase1_tables].map((row) => row.table).sort();
     const actual = await admin.query<{ table_name: string; table_owner: string; relrowsecurity: boolean; relforcerowsecurity: boolean }>(
       `SELECT c.relname AS table_name, pg_get_userbyid(c.relowner) AS table_owner,
@@ -170,7 +170,7 @@ describe('WP1.5 actual restricted-role tenant isolation', () => {
 
     const policies = new Map([...matrix.tables, ...matrix.planned_phase1_tables].map((row) => [row.table, row]));
     const tenantRows = [...policies.values()].filter((row) => row.classification === 'tenant_scoped');
-    expect(tenantRows).toHaveLength(45);
+    expect(tenantRows).toHaveLength(manifest.required_tenant_scoped_count);
     expect(manifest.table_count).toBe(tenantRows.length);
     expect(manifest.required_tenant_scoped_count).toBe(tenantRows.length);
     expect(tenantPolicyTableSetErrors(
@@ -338,6 +338,34 @@ describe('WP1.5 actual restricted-role tenant isolation', () => {
       { table_name: 'authority_scope_versions', column_name: 'scope_type', privilege_type: 'INSERT', grantee: 'symphony_app' },
       { table_name: 'authority_scope_versions', column_name: 'tenant_id', privilege_type: 'INSERT', grantee: 'symphony_app' },
       { table_name: 'authority_scope_versions', column_name: 'version', privilege_type: 'UPDATE', grantee: 'symphony_app' },
+      { table_name: 'capacity_grants', column_name: 'active_from', privilege_type: 'INSERT', grantee: 'symphony_app' },
+      { table_name: 'capacity_grants', column_name: 'assisted_session_id', privilege_type: 'INSERT', grantee: 'symphony_app' },
+      { table_name: 'capacity_grants', column_name: 'capacity_type', privilege_type: 'INSERT', grantee: 'symphony_app' },
+      { table_name: 'capacity_grants', column_name: 'expires_at', privilege_type: 'INSERT', grantee: 'symphony_app' },
+      { table_name: 'capacity_grants', column_name: 'granted_by_user_id', privilege_type: 'INSERT', grantee: 'symphony_app' },
+      { table_name: 'capacity_grants', column_name: 'id', privilege_type: 'INSERT', grantee: 'symphony_app' },
+      { table_name: 'capacity_grants', column_name: 'organization_id', privilege_type: 'INSERT', grantee: 'symphony_app' },
+      { table_name: 'capacity_grants', column_name: 'representative_decision', privilege_type: 'INSERT', grantee: 'symphony_app' },
+      { table_name: 'capacity_grants', column_name: 'representative_person_id', privilege_type: 'INSERT', grantee: 'symphony_app' },
+      { table_name: 'capacity_grants', column_name: 'revoked_at', privilege_type: 'UPDATE', grantee: 'symphony_app' },
+      { table_name: 'capacity_grants', column_name: 'revoked_event_id', privilege_type: 'UPDATE', grantee: 'symphony_app' },
+      { table_name: 'capacity_grants', column_name: 'source_event_id', privilege_type: 'INSERT', grantee: 'symphony_app' },
+      { table_name: 'capacity_grants', column_name: 'source_event_id', privilege_type: 'UPDATE', grantee: 'symphony_app' },
+      { table_name: 'capacity_grants', column_name: 'source_ref', privilege_type: 'INSERT', grantee: 'symphony_app' },
+      { table_name: 'capacity_grants', column_name: 'user_id', privilege_type: 'INSERT', grantee: 'symphony_app' },
+      { table_name: 'ta_scope_delegations', column_name: 'active_from', privilege_type: 'INSERT', grantee: 'symphony_app' },
+      { table_name: 'ta_scope_delegations', column_name: 'agreement_ref', privilege_type: 'INSERT', grantee: 'symphony_app' },
+      { table_name: 'ta_scope_delegations', column_name: 'delegatee_user_id', privilege_type: 'INSERT', grantee: 'symphony_app' },
+      { table_name: 'ta_scope_delegations', column_name: 'expires_at', privilege_type: 'INSERT', grantee: 'symphony_app' },
+      { table_name: 'ta_scope_delegations', column_name: 'id', privilege_type: 'INSERT', grantee: 'symphony_app' },
+      { table_name: 'ta_scope_delegations', column_name: 'programme_manager_user_id', privilege_type: 'INSERT', grantee: 'symphony_app' },
+      { table_name: 'ta_scope_delegations', column_name: 'revoked_at', privilege_type: 'UPDATE', grantee: 'symphony_app' },
+      { table_name: 'ta_scope_delegations', column_name: 'revoked_event_id', privilege_type: 'UPDATE', grantee: 'symphony_app' },
+      { table_name: 'ta_scope_delegations', column_name: 'source_event_id', privilege_type: 'INSERT', grantee: 'symphony_app' },
+      { table_name: 'ta_scope_delegations', column_name: 'source_event_id', privilege_type: 'UPDATE', grantee: 'symphony_app' },
+      { table_name: 'ta_scope_delegations', column_name: 'target_organization_id', privilege_type: 'INSERT', grantee: 'symphony_app' },
+      { table_name: 'ta_scope_delegations', column_name: 'tenant_id', privilege_type: 'INSERT', grantee: 'symphony_app' },
+      { table_name: 'ta_scope_delegations', column_name: 'union_organization_id', privilege_type: 'INSERT', grantee: 'symphony_app' },
     ]);
     const publicTableGrants = await admin.query(
       "SELECT 1 FROM information_schema.role_table_grants WHERE grantee='PUBLIC' AND table_schema='symphony' LIMIT 1",
@@ -477,7 +505,8 @@ describe('WP1.5 actual restricted-role tenant isolation', () => {
       'capacityGrant', 'delegation', 'enrolmentSession', 'approvalPolicy', 'organizationEnrollment',
       'handover', 'evidenceVersion', 'supportItem', 'admission', 'verificationAssignment',
       'finding', 'findingAttribution', 'userPersonLink', 'requirement', 'requirementLink', 'appointment', 'bylawDocument', 'bylawVersion', 'bylawProvision',
-      'temporaryCredential', 'passwordCredential',
+      'temporaryCredential', 'passwordCredential', 'actingAppointment', 'actingAppointmentEvent',
+      'actingAppointmentEnding', 'actingAppointmentEndingEvent',
     ].map((key) => [key, randomUUID()]));
     const fixtureRows: { table: string; id: string }[] = [];
     const insert = async (table: string, id: string, statement: string, values: unknown[]) => {
@@ -519,7 +548,7 @@ describe('WP1.5 actual restricted-role tenant isolation', () => {
          VALUES ($1,$2,$3,$4,$5,now(),1)`,
         [ids.event, tenantB, randomUUID(), 'Wp15TenantScopeFixture', 'Wp15FixtureCreated']);
       await insert('capacity_grants', ids.capacityGrant!,
-        'INSERT INTO symphony.capacity_grants (id,user_id,organization_id,capacity_type,granted_by_user_id,source_event_id) VALUES ($1,$2,$3,$4,$5,$6)',
+        'INSERT INTO symphony.capacity_grants (id,user_id,organization_id,capacity_type,granted_by_user_id,active_from,source_event_id) VALUES ($1,$2,$3,$4,$5,clock_timestamp(),$6)',
         [ids.capacityGrant, userB, organizationB, 'wp15_fixture', userB, ids.event]);
       await insert('delegations', ids.delegation!,
         'INSERT INTO symphony.delegations (id,delegator_user_id,delegatee_user_id,organization_id) VALUES ($1,$2,$3,$4)',
@@ -579,6 +608,28 @@ describe('WP1.5 actual restricted-role tenant isolation', () => {
       await insert('bylaw_provisions', ids.bylawProvision!,
         'INSERT INTO symphony.bylaw_provisions (id,bylaw_version_id,section_ref,text,confirmed_by_user_id) VALUES ($1,$2,$3,$4,$5)',
         [ids.bylawProvision, ids.bylawVersion, 'wp15-fixture', 'Synthetic policy fixture', userB]);
+      await insert('domain_events', ids.actingAppointmentEvent!,
+        `INSERT INTO symphony.domain_events (id,tenant_id,aggregate_id,aggregate_type,event_type,occurred_at,sequence)
+         VALUES ($1,$2,$3,'ActingOfficerAppointment','ActingOfficerAppointed',now(),1)`,
+        [ids.actingAppointmentEvent, tenantB, ids.actingAppointment]);
+      await insert('acting_officer_appointments', ids.actingAppointment!,
+        `INSERT INTO symphony.acting_officer_appointments (id,tenant_id,organization_id,person_id,position_code,
+           appointed_by_user_id,recorded_by_user_id,source_kind,source_reference,source_issuing_body,source_date,
+           supporting_evidence_version_id,effective_from,effective_to,source_event_id)
+         VALUES ($1,$2,$3,$4,'treasurer',$5,$5,'external_resolution',$6,'Synthetic cooperative board',CURRENT_DATE,
+           $7,now() - interval '1 minute',now() + interval '1 day',$8)`,
+        [ids.actingAppointment, tenantB, organizationB, ids.person, userB, `wp15-acting-${ids.actingAppointment}`, ids.evidenceVersion, ids.actingAppointmentEvent]);
+      await insert('domain_events', ids.actingAppointmentEndingEvent!,
+        `INSERT INTO symphony.domain_events (id,tenant_id,aggregate_id,aggregate_type,event_type,occurred_at,sequence)
+         VALUES ($1,$2,$3,'ActingOfficerAppointmentEnding','ActingOfficerAppointmentEnded',now(),1)`,
+        [ids.actingAppointmentEndingEvent, tenantB, ids.actingAppointmentEnding]);
+      await insert('acting_officer_appointment_endings', ids.actingAppointmentEnding!,
+        `INSERT INTO symphony.acting_officer_appointment_endings (id,tenant_id,organization_id,appointment_id,ended_at,
+           ended_by_user_id,recorded_by_user_id,source_kind,source_reference,source_issuing_body,source_date,
+           supporting_evidence_version_id,source_event_id)
+         VALUES ($1,$2,$3,$4,now(),$5,$5,'external_resolution',$6,'Synthetic cooperative board',CURRENT_DATE,$7,$8)`,
+        [ids.actingAppointmentEnding, tenantB, organizationB, ids.actingAppointment, userB,
+          `wp15-ending-${ids.actingAppointmentEnding}`, ids.evidenceVersion, ids.actingAppointmentEndingEvent]);
 
       const relationshipCoverage: { table: string; parentTables: string[]; id: string }[] = [
         { table: 'aggregate_states', parentTables: [], id: ids.state! },
@@ -599,6 +650,7 @@ describe('WP1.5 actual restricted-role tenant isolation', () => {
         { table: 'verification_finding_attributions', parentTables: ['verification_findings', 'verification_assignments', 'evidence_items', 'organizations'], id: attributionId },
         { table: 'evidence_requirement_links', parentTables: ['evidence_items', 'organizations'], id: ids.requirementLink! },
         { table: 'appointments', parentTables: ['organizations', 'persons'], id: ids.appointment! },
+        { table: 'acting_officer_appointment_endings', parentTables: ['organizations', 'acting_officer_appointments'], id: ids.actingAppointmentEnding! },
         { table: 'bylaw_versions', parentTables: ['bylaw_documents', 'organizations'], id: ids.bylawVersion! },
         { table: 'bylaw_provisions', parentTables: ['bylaw_versions', 'bylaw_documents', 'organizations', 'users'], id: ids.bylawProvision! },
       ];
@@ -629,12 +681,16 @@ describe('WP1.5 actual restricted-role tenant isolation', () => {
     } finally {
       for (const fixture of [...fixtureRows].reverse()) {
         if (fixture.table === 'verification_finding_attributions') await admin.query('ALTER TABLE symphony.verification_finding_attributions DISABLE TRIGGER verification_finding_attributions_immutability');
+        if (fixture.table === 'acting_officer_appointment_endings') await admin.query('ALTER TABLE symphony.acting_officer_appointment_endings DISABLE TRIGGER acting_appointment_ending_immutability');
+        if (fixture.table === 'acting_officer_appointments') await admin.query('ALTER TABLE symphony.acting_officer_appointments DISABLE TRIGGER acting_appointment_immutability');
         if (fixture.table === 'evidence_versions') await admin.query('ALTER TABLE symphony.evidence_versions DISABLE TRIGGER evidence_versions_immutability');
         if (fixture.table === 'domain_events') await admin.query('ALTER TABLE symphony.domain_events DISABLE TRIGGER domain_events_immutability');
         await admin.query(`DELETE FROM symphony.${fixture.table} WHERE id=$1`, [fixture.id]);
         if (fixture.table === 'evidence_versions') await admin.query('ALTER TABLE symphony.evidence_versions ENABLE TRIGGER evidence_versions_immutability');
         if (fixture.table === 'domain_events') await admin.query('ALTER TABLE symphony.domain_events ENABLE TRIGGER domain_events_immutability');
         if (fixture.table === 'verification_finding_attributions') await admin.query('ALTER TABLE symphony.verification_finding_attributions ENABLE TRIGGER verification_finding_attributions_immutability');
+        if (fixture.table === 'acting_officer_appointments') await admin.query('ALTER TABLE symphony.acting_officer_appointments ENABLE TRIGGER acting_appointment_immutability');
+        if (fixture.table === 'acting_officer_appointment_endings') await admin.query('ALTER TABLE symphony.acting_officer_appointment_endings ENABLE TRIGGER acting_appointment_ending_immutability');
       }
     }
   }, 30_000);

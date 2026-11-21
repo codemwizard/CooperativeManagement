@@ -55,7 +55,9 @@ export class PostgresWorkspaceContextRepository {
       const personId = linked.rows[0]?.person_id ?? null;
       const facts: WorkspaceAuthorityFact[] = [];
       const approvedPositionCodes = ['chairperson', 'vice_chairperson', 'secretary', 'treasurer', 'director', 'committee_chair', 'committee_member'];
-      const approvedCapacityCodes = ['internal_verifier', 'field_agent', 'delegate', 'acting_officer'];
+      // Acting-officer authority is not a generic capacity grant; it must come
+      // from a dedicated persisted acting appointment/delegation source.
+      const approvedCapacityCodes = ['internal_verifier', 'field_agent', 'delegate'];
 
       if (personId) {
         const memberships = await client.query<{
@@ -107,18 +109,19 @@ export class PostgresWorkspaceContextRepository {
 
         const capacities = await client.query<{
           id: string; organization_id: string; organization_name: string; organization_kind: WorkspaceAuthorityFact['organizationKind'];
-          capacity_type: string; granted_at: Date; revoked_at: Date | null;
+          capacity_type: string; active_from: Date; expires_at: Date | null; revoked_at: Date | null; source_ref: string | null;
         }>(
           `SELECT c.id, c.organization_id, o.name AS organization_name, o.organization_kind,
-                  c.capacity_type, c.granted_at, c.revoked_at
+                  c.capacity_type, c.active_from, c.expires_at, c.revoked_at, c.source_ref
              FROM symphony.capacity_grants c
              JOIN symphony.organizations o ON o.id = c.organization_id AND o.tenant_id = $1::uuid
                AND o.organization_kind = 'cooperative'
              JOIN symphony.organization_memberships m ON m.organization_id = c.organization_id
                AND m.person_id = $3::uuid AND m.tenant_id = $1::uuid AND m.status = 'active'
                AND m.joined_at <= transaction_timestamp() AND (m.ended_at IS NULL OR m.ended_at > transaction_timestamp())
-            WHERE c.user_id = $2::uuid AND c.granted_at <= transaction_timestamp()
+            WHERE c.user_id = $2::uuid AND c.active_from <= transaction_timestamp()
               AND c.capacity_type = ANY($4::text[])
+              AND (c.expires_at IS NULL OR c.expires_at > transaction_timestamp())
               AND (c.revoked_at IS NULL OR c.revoked_at > transaction_timestamp())
             ORDER BY o.name COLLATE "C", c.capacity_type COLLATE "C", c.id`, [tenantId, userId, personId, approvedCapacityCodes],
         );
@@ -126,8 +129,8 @@ export class PostgresWorkspaceContextRepository {
           sourceId: row.id, kind: 'capacity', authority: row.capacity_type, organizationId: row.organization_id,
           organizationName: row.organization_name, organizationKind: row.organization_kind, personId,
           membershipId: membershipsByOrganization.get(row.organization_id)?.id ?? null,
-          scopeOrganizationIds: [row.organization_id], scopeMode: 'organization', sourceRef: null,
-          effectiveAt: row.granted_at.toISOString(), expiresAt: row.revoked_at?.toISOString() ?? null,
+          scopeOrganizationIds: [row.organization_id], scopeMode: 'organization', sourceRef: row.source_ref,
+          effectiveAt: row.active_from.toISOString(), expiresAt: row.expires_at?.toISOString() ?? row.revoked_at?.toISOString() ?? null,
         });
       }
 

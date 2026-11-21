@@ -150,8 +150,8 @@ describe.skipIf(!adminUrl || !appUrl)('REM-WP2.6 PostgreSQL authority scope infr
   it('restricts the application role to D-16 scope columns and denies DML on frozen or not-yet-registered authority sources', async () => {
     const tableNames = [
       'tenants', 'users', 'user_role_assignments', 'platform_roles', 'organization_memberships', 'user_person_links',
-      'appointments', 'organizations', 'enrolment_sessions', 'enroller_assignments', 'institutional_role_assignments',
-      'ta_scope_delegations', 'programme_manager_scopes', 'capacity_grants', 'delegations', 'membership_rules',
+      'appointments', 'acting_officer_appointments', 'acting_officer_appointment_endings', 'organizations', 'enrolment_sessions', 'enroller_assignments', 'institutional_role_assignments',
+      'programme_manager_scopes', 'delegations', 'membership_rules',
       'acceptance_policies', 'enforcement_policies', 'approval_policies', 'retention_policies', 'precedence_policies',
       'duty_matrix_rows',
     ];
@@ -177,6 +177,33 @@ describe.skipIf(!adminUrl || !appUrl)('REM-WP2.6 PostgreSQL authority scope infr
       );
       expect(truncatePrivilege.rows[0]?.privilege, `${table} TRUNCATE`).toBe(false);
       await expect(app.query(`TRUNCATE symphony.${table}`), `${table} actual TRUNCATE`).rejects.toMatchObject({ code: '42501' });
+    }
+    for (const table of ['capacity_grants', 'ta_scope_delegations']) {
+      for (const privilege of ['INSERT', 'UPDATE']) {
+        const tablePrivilege = await app.query<{ privilege: boolean }>(
+          'SELECT has_table_privilege(current_user,$1,$2) AS privilege', [`symphony.${table}`, privilege],
+        );
+        expect(tablePrivilege.rows[0]?.privilege, `${table} table-level ${privilege}`).toBe(false);
+      }
+      for (const [privilege, allowedColumns] of [
+        ['INSERT', table === 'capacity_grants'
+          ? ['id', 'user_id', 'organization_id', 'capacity_type', 'granted_by_user_id', 'active_from', 'expires_at', 'source_ref', 'source_event_id', 'assisted_session_id', 'representative_person_id', 'representative_decision']
+          : ['id', 'tenant_id', 'programme_manager_user_id', 'union_organization_id', 'delegatee_user_id', 'target_organization_id', 'active_from', 'expires_at', 'agreement_ref', 'source_event_id']],
+        ['UPDATE', ['revoked_at', 'revoked_event_id', 'source_event_id']],
+      ] as const) {
+        for (const column of allowedColumns) {
+          const result = await app.query<{ privilege: boolean }>(
+            'SELECT has_column_privilege(current_user,$1,$2,$3) AS privilege', [`symphony.${table}`, column, privilege],
+          );
+          expect(result.rows[0]?.privilege, `${table}.${column} ${privilege}`).toBe(true);
+        }
+      }
+      for (const privilege of ['DELETE', 'TRUNCATE']) {
+        const result = await app.query<{ privilege: boolean }>(
+          'SELECT has_table_privilege(current_user,$1,$2) AS privilege', [`symphony.${table}`, privilege],
+        );
+        expect(result.rows[0]?.privilege).toBe(false);
+      }
     }
     const scopePrivileges = await app.query<{ select_ok: boolean; insert_ok: boolean; update_ok: boolean; delete_ok: boolean; truncate_ok: boolean }>(
       `SELECT has_table_privilege(current_user,'symphony.authority_scope_versions','SELECT') AS select_ok,
