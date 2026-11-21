@@ -263,12 +263,12 @@
         "REQ-UNI-001",
         "REQ-UNI-002"
       ],
-      "scenario": "Union TA sees assigned cohorts and capability gaps but no member PII",
+      "scenario": "Union TA sees assigned cooperative capability gaps without member PII",
       "owner_tasks": [
         "REM-WP2.2",
         "REM-WP2.3"
       ],
-      "required_path": "trusted delegated-scope API composition with full response canaries",
+      "required_path": "persisted one-cooperative TA grant, authenticated GET /workspace/context, authorized capability-gap workspace scope, unassigned-cooperative exclusion, and full response PII canaries",
       "assertion_rule": "Execute this exact tagged scenario with observable assertions on the specified product path; no mock, @wip, skip, tag removal, zero-step pass, or in-memory substitute.",
       "phase0_status": "mapped_and_deferred_to_owner_task"
     },
@@ -278,12 +278,12 @@
       "requirements": [
         "REQ-UNI-001"
       ],
-      "scenario": "Delegation is a chain and can be revoked",
+      "scenario": "Cooperative TA delegation can be revoked without erasing audit history",
       "owner_tasks": [
         "REM-WP2.3",
         "REM-WP2.4"
       ],
-      "required_path": "persisted delegation grant/revoke with both authorization serial orders and immutable audit",
+      "required_path": "persisted one-cooperative grant/revoke through POST /commands, authenticated GET /workspace/context before and after revocation in both serial orders, WP2.4 PostgreSQL barriers proving both concurrent orders, and immutable grant/revoke audit history",
       "assertion_rule": "Execute this exact tagged scenario with observable assertions on the specified product path; no mock, @wip, skip, tag removal, zero-step pass, or in-memory substitute.",
       "phase0_status": "mapped_and_deferred_to_owner_task"
     },

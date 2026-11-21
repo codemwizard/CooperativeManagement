@@ -1,0 +1,69 @@
+{
+  "schema_version": 1,
+  "task_id": "REM-WP2.5",
+  "status": {
+    "implementation": "complete",
+    "unit_test": "not_applicable",
+    "integration_test": "passed",
+    "bdd_ui_test": "passed",
+    "gate_verified": "pending"
+  },
+  "commit": "working-tree",
+  "environment": {
+    "node": "v26.7.0",
+    "npm": "v12.2.0",
+    "postgres": "PostgreSQL used by the live Phase 1 BDD HTTP scenario harness; scope verifier itself is repository-only",
+    "database_role": "test harness role from the local Phase 1 BDD environment",
+    "data_mode": "isolated synthetic cooperative, TA, and member records",
+    "key_provider": "local test configuration"
+  },
+  "commands": [
+    {
+      "command": "npm run verify:phase1:contracts (112 tests; feature synchronization; graph, manifest and task artifact structure)",
+      "result": "passed",
+      "artifact": "evidence/phase1/wp2.5-contract-check.log"
+    },
+    {
+      "command": "npm run test:bdd:phase1 -- --work-package REM-WP2.5 (2 mapped direct-cooperative scenarios; 2 scenarios and 22 steps passed)",
+      "result": "passed",
+      "artifact": "evidence/phase1/wp2.5/local/2026-11-21/wp25-cucumber-stdout.log"
+    },
+    {
+      "command": "WP2.5 live BDD report and runner validation summary",
+      "result": "passed",
+      "artifact": "evidence/phase1/wp2.5/local/2026-11-21/wp25-validator-summary.json"
+    },
+    {
+      "command": "node tools/verify_wp2_5_scope.mjs",
+      "result": "passed",
+      "artifact": "evidence/phase1/wp2.5-scope-audit.log"
+    },
+    {
+      "command": "npm run test:bdd:phase1 -- --work-package REM-WP1.6 (consumed retained mapped run; 6 IDs, 8 scenarios, 69 steps)",
+      "result": "passed",
+      "artifact": "evidence/phase1/wp1.6/local/2026-11-21/wp2.3-candidate-86feb09.mapped-runner.log"
+    },
+    {
+      "command": "REM-WP2.4 PostgreSQL TA grant/revoke serialization tests (13 passed, including protected-read-first and mutation-first orders)",
+      "result": "passed",
+      "artifact": "evidence/phase1/wp2.4/local/2026-11-21/postgres-capacity-ta-serialization.log"
+    }
+  ],
+  "claims": {
+    "behavior_proved": "BDD-UNI-001 and BDD-UNI-002 retain their Phase 1 IDs and security outcomes under D-19 direct-cooperative scope. The mapped scenarios prove assigned-cooperative TA access, denial for an unassigned cooperative, member PII exclusion, grant/revoke effects, and immutable historical command/audit records. No cohort entity or legal validation of agreement references is claimed.",
+    "path_proved": "The WP2.5 mapped scenarios use the live Fastify HTTP command and workspace-context paths backed by isolated PostgreSQL records. They also exercise workspace context presentation and cooperative navigation scope. WP2.4 retained PostgreSQL barrier tests demonstrate both protected-read-first and mutation-first serial orders.",
+    "configuration_proved": "The mapped BDD harness used its local Phase 1 test configuration and PostgreSQL-backed synthetic data. The WP2.5 scope/traceability audit is repository-only.",
+    "coverage_limitations": [
+      "The workspace capability-gap navigation surface is exercised for correct scope; no claim is made that a separate capability-gap domain dataset was introduced by WP2.5.",
+      "Agreement references are persisted provenance only; the application does not establish legal validity of an external agreement.",
+      "No Phase 2 Feature 05 verification scenario is claimed as Phase 1 acceptance.",
+      "The BDD evidence was generated against working-tree implementation based on HEAD 4c60304c608052e67f978224a430286e33511ccc; exact-candidate verification requires a clean committed evidence candidate."
+    ]
+  },
+  "limitations": [
+    "WP2.5 exact-candidate gate verification remains pending until these implementation and evidence changes are committed and the verifier is run against that exact candidate on a clean worktree.",
+    "WP1.6 mapped HTTP evidence is retained from candidate 86feb09f334f8c6374ea364850631b8eccbafc5a; WP2.4 serial-order evidence is retained from its passing PostgreSQL run."
+  ],
+  "unresolved_decisions": [],
+  "reviewer": "WP2.5 implementation audit; final exact-candidate verification remains pending"
+}

@@ -19,7 +19,7 @@ function parseArguments(args) {
     if (!workPackage || workPackage.startsWith('--')) throw new Error('--work-package requires a work-package ID');
     index += 1;
   }
-  if (workPackage && !['REM-WP1.6', 'REM-WP1'].includes(workPackage)) {
+  if (workPackage && !['REM-WP1.6', 'REM-WP1', 'REM-WP2.5'].includes(workPackage)) {
     throw new Error(`Unsupported work-package selector: ${workPackage}`);
   }
   return workPackage;
@@ -28,6 +28,8 @@ const workPackage = parseArguments(process.argv.slice(2));
 const wp1CumulativeIds = new Set(['BDD-AUD-001', 'BDD-AUD-002', 'BDD-AUD-003', 'BDD-AUD-004', 'BDD-AUD-005', 'BDD-AUD-006', 'BDD-AUD-010', 'BDD-AUD-015']);
 const selectedScenarios = workPackage === 'REM-WP1.6'
   ? manifest.scenarios.filter((scenario) => bddMap.scenarios.find((entry) => entry.id === scenario.id)?.owner_tasks?.includes(workPackage))
+  : workPackage === 'REM-WP2.5'
+    ? manifest.scenarios.filter((scenario) => ['BDD-UNI-001', 'BDD-UNI-002'].includes(scenario.id))
   : workPackage === 'REM-WP1'
     ? manifest.scenarios.filter((scenario) => wp1CumulativeIds.has(scenario.id))
     : manifest.scenarios;
@@ -54,7 +56,9 @@ const liveTelemetryIds = new Set(['BDD-AUD-007']);
 const defaultScenarioIds = selectedScenarios
   .filter((scenario) => !liveWorkspaceIds.has(scenario.id) && !liveAuthIds.has(scenario.id) && !liveTelemetryIds.has(scenario.id))
   .map((scenario) => `@${scenario.id}`);
-const defaultTagExpression = `(${defaultScenarioIds.join(' or ')}) and not @wip and not @phase6`;
+const defaultTagExpression = workPackage === 'REM-WP2.5'
+  ? `(${defaultScenarioIds.join(' or ')})`
+  : `(${defaultScenarioIds.join(' or ')}) and not @wip and not @phase6`;
 const liveAuthArtifactDirectory = path.join(artifactDirectory, 'wp5.5');
 const liveAuthReportPath = path.join(liveAuthArtifactDirectory, 'bdd-enr-004.json');
 const liveWorkspaceArtifactDirectory = path.join(artifactDirectory, 'wp6.1');
@@ -159,7 +163,7 @@ function runLiveTelemetryBdd() {
 const validatorSummary = { ...runMetadata, profile_exit_codes: {}, validation_errors: [], passed: false };
 try {
   if (workPackage) console.log(`Running ${workPackage}: ${selectedScenarios.length} mapped scenarios [${selectedScenarios.map((scenario) => scenario.id).join(', ')}]. Artifacts: ${artifactDirectory}`);
-  const defaultStatus = runCucumber('default', defaultReportPath, defaultTagExpression);
+  const defaultStatus = runCucumber(workPackage === 'REM-WP2.5' ? 'wp25' : 'default', defaultReportPath, defaultTagExpression);
   const authStatus = workPackage ? 0 : runLiveAuthBdd();
   const workspaceStatus = workPackage ? 0 : runLiveWorkspaceBdd();
   const telemetryStatus = workPackage ? 0 : runLiveTelemetryBdd();
