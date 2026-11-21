@@ -170,8 +170,8 @@ export async function seedWp6_1Fixture() {
     );
   }
   await admin.query(
-    `INSERT INTO symphony.capacity_grants(user_id,organization_id,capacity_type,granted_by_user_id,granted_at)
-     VALUES($1,$2,'internal_verifier',$1,clock_timestamp()-interval '1 hour')`, [userId, organizationId],
+    `INSERT INTO symphony.capacity_grants(user_id,organization_id,capacity_type,granted_by_user_id,granted_at,active_from)
+     VALUES($1,$2,'internal_verifier',$1,clock_timestamp()-interval '1 hour',clock_timestamp()-interval '1 hour')`, [userId, organizationId],
   );
   const programmeRole = await admin.query<{ id: string }>(
     `INSERT INTO symphony.platform_roles(code,name) VALUES('programme_manager','Programme manager')
@@ -191,8 +191,8 @@ export async function seedWp6_1Fixture() {
      VALUES($1,$2,$3,'union_ta',clock_timestamp()-interval '1 day','wp6.1-test-fixture')`, [tenantId, userId, unionId],
   );
   await admin.query(
-    `INSERT INTO symphony.ta_scope_delegations(id,tenant_id,programme_manager_user_id,union_organization_id,delegatee_user_id,target_organization_id,granted_at,agreement_ref)
-     VALUES($1,$2,$3,$4,$3,$5,clock_timestamp()-interval '1 day','wp6.1-test-agreement')`,
+    `INSERT INTO symphony.ta_scope_delegations(id,tenant_id,programme_manager_user_id,union_organization_id,delegatee_user_id,target_organization_id,granted_at,active_from,agreement_ref)
+     VALUES($1,$2,$3,$4,$3,$5,clock_timestamp()-interval '1 day',clock_timestamp()-interval '1 day','wp6.1-test-agreement')`,
     [taDelegationId, tenantId, userId, unionId, organizationId],
   );
   await admin.query(
