@@ -7,13 +7,13 @@ npm notice run vitest run tests/tooling/phase1_contracts.test.ts
 
  RUN  v2.1.9 C:/Workspace/GitHub/Prototype
 
- ✓ tests/tooling/phase1_contracts.test.ts (112 tests) 9365ms
-   ✓ REM-WP0.9 Phase 1 gate contract > proves a failing fixture command prevents later gate commands from running 6845ms
+ ✓ tests/tooling/phase1_contracts.test.ts (112 tests) 12713ms
+   ✓ REM-WP0.9 Phase 1 gate contract > proves a failing fixture command prevents later gate commands from running 10491ms
 
  Test Files  1 passed (1)
       Tests  112 passed (112)
-   Start at  13:05:56
-   Duration  11.38s (transform 286ms, setup 0ms, collect 983ms, tests 9.37s, environment 0ms, prepare 314ms)
+   Start at  13:24:37
+   Duration  14.62s (transform 267ms, setup 0ms, collect 836ms, tests 12.71s, environment 0ms, prepare 347ms)
 
 PASS 10 canonical/runnable Phase 1 feature pairs; only @wip status tags may differ.
 Phase 1 REM-WP0 contract artifacts are structurally valid.

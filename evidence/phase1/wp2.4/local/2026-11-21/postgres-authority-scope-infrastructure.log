@@ -4,12 +4,12 @@
  ✓ src/__tests__/postgres-authority-scope-locks.integration.test.ts > REM-WP2.6 PostgreSQL authority scope infrastructure > sets the transaction-local actor from the trusted command principal and passes the WP2.6 readiness boundary
  ✓ src/__tests__/postgres-authority-scope-locks.integration.test.ts > REM-WP2.6 PostgreSQL authority scope infrastructure > resolves persisted tenant/org/actor references and provisions the same canonical lock order for shuffled inputs
  ✓ src/__tests__/postgres-authority-scope-locks.integration.test.ts > REM-WP2.6 PostgreSQL authority scope infrastructure > rejects cross-tenant references and forbids protected-read version increments
- ✓ src/__tests__/postgres-authority-scope-locks.integration.test.ts > REM-WP2.6 PostgreSQL authority scope infrastructure > restricts the application role to D-16 scope columns and denies DML on frozen or not-yet-registered authority sources 6695ms
+ ✓ src/__tests__/postgres-authority-scope-locks.integration.test.ts > REM-WP2.6 PostgreSQL authority scope infrastructure > restricts the application role to D-16 scope columns and denies DML on frozen or not-yet-registered authority sources 6656ms
  ✓ src/__tests__/postgres-authority-scope-locks.integration.test.ts > REM-WP2.6 PostgreSQL authority scope infrastructure > increments changed scopes once and rolls the version back with the surrounding transaction
  ✓ src/__tests__/postgres-authority-scope-locks.integration.test.ts > REM-WP2.6 PostgreSQL authority scope infrastructure > allows concurrent protected readers and blocks a mutator until both release their FOR SHARE locks
 
  Test Files  1 passed (1)
       Tests  6 passed (6)
-   Start at  13:04:41
-   Duration  10.90s (transform 551ms, setup 0ms, collect 2.42s, tests 7.97s, environment 0ms, prepare 196ms)
+   Start at  13:23:23
+   Duration  10.97s (transform 966ms, setup 0ms, collect 2.45s, tests 7.93s, environment 0ms, prepare 229ms)
 
