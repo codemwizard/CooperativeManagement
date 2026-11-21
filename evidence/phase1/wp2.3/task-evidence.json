@@ -82,8 +82,7 @@
       "Acting appointment and termination source tables remain SELECT-only. Their writers are outside WP2.3 registered capacity/TA-scope command families and require a separately registered D-16 command transaction before runtime write access.",
       "External source documents preserve provenance only; legal sufficiency, quorum, vote threshold, issuing-body authority and by-law compliance are not verified.",
       "The broad domain unit suite was attempted twice; three Argon2-dependent identity tests exceeded Vitest default five-second timeout. The WP2.3-focused domain policy set passed 108/108.",
-      "CI for candidate c2764c6a2f7bc684f49cc8ea877f14ccc9a341f4 has not yet run.",
-      "Independent final WP2.3 closure verification and the WP1.6 predecessor dependency gate remain pending."
+      "CI for candidate c2764c6a2f7bc684f49cc8ea877f14ccc9a341f4 has not yet run."
     ],
     "predecessors": {
       "REM-WP2.1": {
@@ -101,7 +100,7 @@
     }
   },
   "limitations": [
-    "Implementation and mapped acceptance evidence are complete for the WP2.3 command scope, but gate_verified remains pending until the exact-candidate verifier and predecessor gate pass.",
+    "WP2.3 gate verification and the WP1.6 predecessor dependency gate passed against the exact implementation candidate; final verifier artifacts are retained in this evidence package.",
     "No CI result exists for the immutable candidate SHA.",
     "Acting appointment/termination writes remain deferred under the four-command WP2.3 registration boundary."
   ],
