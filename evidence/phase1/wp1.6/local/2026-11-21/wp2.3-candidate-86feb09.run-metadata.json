@@ -1,0 +1,15 @@
+{
+  "candidate": "86feb09f334f8c6374ea364850631b8eccbafc5a",
+  "work_package": "REM-WP1.6",
+  "selected_scenario_ids": [
+    "BDD-AUD-002",
+    "BDD-AUD-003",
+    "BDD-AUD-005",
+    "BDD-AUD-008",
+    "BDD-AUD-009",
+    "BDD-AUD-014"
+  ],
+  "branch": "codex/prototype14-remediation-resync",
+  "worktree_clean": true,
+  "started_at": "2026-11-21T08:43:32.800Z"
+}

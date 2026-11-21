@@ -6,13 +6,13 @@
     "unit_test": "passed",
     "integration_test": "passed",
     "bdd_ui_test": "passed",
-    "gate_verified": "passed"
+    "gate_verified": "pending"
   },
-  "commit": "c2764c6a2f7bc684f49cc8ea877f14ccc9a341f4",
+  "commit": "86feb09f334f8c6374ea364850631b8eccbafc5a",
   "candidate": {
     "status": "immutable implementation candidate",
     "head_commit_before_implementation": "a0267a38eed5200e6637f104d1a90342d04b4b24",
-    "implementation_commit": "c2764c6a2f7bc684f49cc8ea877f14ccc9a341f4"
+    "implementation_commit": "86feb09f334f8c6374ea364850631b8eccbafc5a"
   },
   "environment": {
     "node": "v26.7.0",
@@ -61,17 +61,7 @@
     {
       "command": "npm run test:bdd:phase1 -- --work-package REM-WP1.6 (6 mapped IDs; 8 scenarios; 69 steps)",
       "result": "passed",
-      "artifact": "evidence/phase1/wp1.6/local/2026-11-21/wp2.3-candidate-c2764c.mapped-runner.log"
-    },
-    {
-      "command": "npm run verify:wp2.3 -- c2764c6a2f7bc684f49cc8ea877f14ccc9a341f4",
-      "result": "passed",
-      "artifact": "evidence/phase1/wp2.3/local/2026-11-21/wp2.3-exact-candidate-closure.log"
-    },
-    {
-      "command": "npm run verify:wp1.6:dependencies",
-      "result": "passed",
-      "artifact": "evidence/phase1/wp2.3/local/2026-11-21/wp1.6-predecessor-dependency-gate.log"
+      "artifact": "evidence/phase1/wp1.6/local/2026-11-21/wp2.3-candidate-86feb09.mapped-runner.log"
     }
   ],
   "claims": {
@@ -82,7 +72,7 @@
       "Acting appointment and termination source tables remain SELECT-only. Their writers are outside WP2.3 registered capacity/TA-scope command families and require a separately registered D-16 command transaction before runtime write access.",
       "External source documents preserve provenance only; legal sufficiency, quorum, vote threshold, issuing-body authority and by-law compliance are not verified.",
       "The broad domain unit suite was attempted twice; three Argon2-dependent identity tests exceeded Vitest default five-second timeout. The WP2.3-focused domain policy set passed 108/108.",
-      "CI for candidate c2764c6a2f7bc684f49cc8ea877f14ccc9a341f4 has not yet run."
+      "CI for candidate 86feb09f334f8c6374ea364850631b8eccbafc5a has not yet run."
     ],
     "predecessors": {
       "REM-WP2.1": {
@@ -100,10 +90,10 @@
     }
   },
   "limitations": [
-    "WP2.3 gate verification and the WP1.6 predecessor dependency gate passed against the exact implementation candidate; final verifier artifacts are retained in this evidence package.",
+    "WP2.3 implementation and mapped acceptance evidence are complete; exact closure verification for this status-reconciliation candidate is pending.",
     "No CI result exists for the immutable candidate SHA.",
     "Acting appointment/termination writes remain deferred under the four-command WP2.3 registration boundary."
   ],
   "unresolved_decisions": [],
-  "reviewer": "WP2.3 exact-candidate closure verifier passed; WP1.6 predecessor dependency gate passed"
+  "reviewer": "Exact-candidate closure verification pending after status reconciliation"
 }
