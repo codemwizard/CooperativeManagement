@@ -6,7 +6,7 @@
     "unit_test": "passed",
     "integration_test": "passed",
     "bdd_ui_test": "passed",
-    "gate_verified": "pending"
+    "gate_verified": "passed"
   },
   "commit": "c2764c6a2f7bc684f49cc8ea877f14ccc9a341f4",
   "candidate": {
@@ -96,5 +96,5 @@
     "Acting appointment/termination writes remain deferred under the four-command WP2.3 registration boundary."
   ],
   "unresolved_decisions": [],
-  "reviewer": "Exact-candidate WP2.3 verifier and graph dependency verification pending"
+  "reviewer": "WP2.3 exact-candidate preflight passed; final verifier run recorded in closure report"
 }
