@@ -7,6 +7,7 @@ module.exports = {
       'packages/testkit/src/step-definitions/kernel-steps.ts',
       'packages/testkit/src/step-definitions/auth-steps.ts',
       'packages/testkit/src/step-definitions/authz-steps.ts',
+      'tools/wp16-command-live-steps.ts',
       'packages/testkit/src/step-definitions/privacy-steps.ts',
       'packages/testkit/src/step-definitions/data-mode-steps.ts',
       'packages/testkit/src/step-definitions/workspace-steps.ts',
@@ -42,5 +43,18 @@ module.exports = {
     ],
     format: ['progress'],
     tags: '@BDD-AUD-007 and not @wip',
+  },
+  wp25: {
+    paths: ['features/02_identity_privacy_and_access.feature'],
+    requireModule: [],
+    import: [
+      'packages/testkit/src/step-definitions/world.ts',
+      'packages/testkit/src/step-definitions/auth-steps.ts',
+      'tools/wp16-command-live-steps.ts',
+    ],
+    format: ['progress'],
+    // The mapped WP2.5 runner supplies the selected canonical scenario IDs.
+    // This profile deliberately does not add execution-only feature tags.
+    tags: '(@BDD-UNI-001 or @BDD-UNI-002)',
   },
 };

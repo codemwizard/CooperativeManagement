@@ -7,11 +7,11 @@ const unique = (values) => new Set(values).size === values.length;
 export function validateMatrix(matrix) {
   const errors = [];
 
-if (matrix.contract !== 'phase1-authorization-policy-matrix-v1' || matrix.status !== 'frozen') {
-  errors.push('matrix must declare the frozen v1 contract');
+if (matrix.contract !== 'phase1-authorization-policy-matrix-v2' || matrix.status !== 'frozen') {
+  errors.push('matrix must declare the frozen v2 contract');
 }
-if (matrix.owner_ruling?.id !== 'D-17' || !matrix.owner_ruling.date) {
-  errors.push('owner ruling D-17 with date is required');
+if (matrix.owner_ruling?.id !== 'D-19' || !matrix.owner_ruling.date) {
+  errors.push('owner ruling D-19 with date is required');
 }
 
 const actorIds = matrix.actor_classes?.map((actor) => actor.id) ?? [];
@@ -37,7 +37,8 @@ const requiredDimensions = [
   'missing_or_contradictory_authority_denies',
   'tenant_mismatch_denies',
   'same_tenant_wrong_organization_denies',
-  'wrong_or_missing_cohort_scope_denies',
+  'wrong_or_missing_cooperative_scope_denies',
+  'wrong_union_or_inactive_union_ta_assignment_denies',
   'authority_before_active_from_denies',
   'authority_at_active_from_allows_when_other_conditions_pass',
   'authority_before_active_to_allows_when_other_conditions_pass',
@@ -66,7 +67,7 @@ for (const action of matrix.actions ?? []) {
     errors.push(`${action.id}: at least one source reference is required`);
   }
   for (const ref of action.source_refs ?? []) {
-    if (!Object.values(matrix.sources ?? {}).includes(ref) && ref !== 'D-17' && ref !== 'IFV-3' && ref !== 'INV-001' && ref !== 'INV-024' && ref !== 'REQ-AUD-008' && ref !== 'ADR-020' && ref !== 'O-6') {
+  if (!Object.values(matrix.sources ?? {}).includes(ref) && ref !== 'D-17' && ref !== 'D-19' && ref !== 'IFV-3' && ref !== 'INV-001' && ref !== 'INV-024' && ref !== 'REQ-AUD-008' && ref !== 'ADR-020' && ref !== 'O-6') {
       errors.push(`${action.id}: unrecognized source reference ${ref}`);
     }
   }

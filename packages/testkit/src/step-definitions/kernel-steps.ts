@@ -322,8 +322,14 @@ After(async function (this: SymphonyWorld) {
 // ─── Background steps ──────────────────────────────────────────────────────────
 
 Given(
-  'two organisations {string} and {string}',
+  /^two organisations "([^"]+)" and "([^"]+)"(?: in separate tenants)?$/,
   function (this: SymphonyWorld, orgAName: string, orgBName: string) {
+    const live = (this as unknown as { _wp16Live?: { orgA: string; orgB: string; tenantA: string; tenantB: string } })._wp16Live;
+    if (live) {
+      this.organisations[orgAName] = { id: live.orgA, tenantId: live.tenantA };
+      this.organisations[orgBName] = { id: live.orgB, tenantId: live.tenantB };
+      return;
+    }
     const orgAId = makeOrgId(orgAName);
     const orgBId = makeOrgId(orgBName);
     this.organisations[orgAName] = { id: orgAId, tenantId: orgAId };
@@ -334,6 +340,15 @@ Given(
 Given(
   'an authenticated Secretary in {string}',
   function (this: SymphonyWorld, orgName: string) {
+    const live = (this as unknown as { _wp16Live?: { secretary: { userId: string; tenantId: string } } })._wp16Live;
+    if (live) {
+      const org = this.organisations[orgName];
+      if (!org) throw new Error(`Organisation "${orgName}" not registered`);
+      const actor = { userId: live.secretary.userId, tenantId: live.secretary.tenantId, role: 'Secretary' };
+      this.actors[`Secretary in ${orgName}`] = actor;
+      this.currentActor = actor;
+      return;
+    }
     const org = this.organisations[orgName];
     if (org === undefined) throw new Error(`Organisation "${orgName}" not registered`);
     const userId = makeUserId('Secretary', orgName);
@@ -822,6 +837,15 @@ When(
 
 Then('nothing in {string} changes', async function (this: SymphonyWorld, orgName: string) {
   assert.equal(orgName, 'Org B');
+  const live = (this as unknown as { _wp16Live?: { admin: pg.Pool; orgB: string; tenantB: string; orgBSnapshot?: unknown } })._wp16Live;
+  if (live) {
+    const counts = await live.admin.query(
+      `SELECT (SELECT count(*)::text FROM symphony.evidence_items WHERE organization_id=$1) evidence,
+              (SELECT count(*)::text FROM symphony.capacity_grants WHERE organization_id=$1) capacities,
+              (SELECT count(*)::text FROM symphony.domain_events WHERE tenant_id=$2) events`, [live.orgB, live.tenantB]);
+    assert.deepEqual(counts.rows[0], live.orgBSnapshot, 'Cross-tenant target organization must remain unchanged.');
+    return;
+  }
   const state = (this as unknown as Record<string, unknown>)['_wp15CrossOrganisationState'] as Wp15CrossOrganisationState;
   const afterSnapshot = await wp15EvidenceSnapshot(state);
   assert.deepEqual(afterSnapshot, state.beforeSnapshot, 'The Org B evidence row and version history must be unchanged');
@@ -843,6 +867,21 @@ async function appDbCanReadEvidenceById(appDb: Kysely<SymphonyDatabase>, tenantI
 }
 
 Then('the tenant mismatch is recorded in the security-attempt audit', async function (this: SymphonyWorld) {
+  const live = (this as unknown as { _wp16Live?: { admin: pg.Pool; auditCommandId?: string; tenantA: string; secretary: { userId: string }; lastResponse?: { statusCode: number; body: Record<string, unknown> } } })._wp16Live;
+  if (live) {
+    assert.ok(live.auditCommandId);
+    const rows = await live.admin.query<{ tenant_id: string; actor_user_id: string; observed_command_id: string; observed_command_type: string; denial_code: string }>(
+      `SELECT tenant_id,actor_user_id,observed_command_id,observed_command_type,denial_code
+         FROM symphony.security_attempts WHERE observed_command_id=$1`, [live.auditCommandId]);
+    assert.equal(rows.rowCount, 1);
+    assert.equal(rows.rows[0]!.tenant_id, live.tenantA);
+    assert.equal(rows.rows[0]!.actor_user_id, live.secretary.userId);
+    assert.equal(rows.rows[0]!.observed_command_type, 'GrantCapacity');
+    assert.equal(rows.rows[0]!.denial_code, 'NOT_AUTHORISED_FOR_ORGANISATION');
+    assert.equal(live.lastResponse?.statusCode, 403);
+    assert.deepEqual(live.lastResponse?.body, { ok: false, code: 'NOT_AUTHORIZED', replayed: false });
+    return;
+  }
   const state = (this as unknown as Record<string, unknown>)['_wp15CrossOrganisationState'] as Wp15CrossOrganisationState;
   const rows = await state.admin.query<{
     tenant_id: string; actor_user_id: string; observed_command_id: string;

@@ -33,7 +33,7 @@ const ACTIVE_FROM = '2026-01-01T00:00:00.000Z';
 const ACTIVE_TO = '2030-01-01T00:00:00.000Z';
 
 function phase1CapacityType(value: string): CapacityCommand['capacityType'] {
-  if (value === 'internal_verifier' || value === 'field_agent' || value === 'delegate' || value === 'acting_officer') return value;
+  if (value === 'internal_verifier' || value === 'field_agent' || value === 'delegate') return value;
   throw new Error(`Unknown Phase 1 capacity type: ${value}`);
 }
 
@@ -553,6 +553,15 @@ Then(
 Given(
   'a {string} with read-only scope on {string}',
   function (this: SymphonyWorld, role: string, orgName: string) {
+    if ((this as unknown as { _wp16Live?: unknown })._wp16Live) {
+      const actorUserId = userId(`${role}-user`);
+      const org = this.organisations[orgName];
+      if (!org) throw new Error(`Organisation "${orgName}" not registered`);
+      this.actors[`${role} in ${orgName}`] = { userId: actorUserId, tenantId: org.tenantId, role };
+      this.currentActor = this.actors[`${role} in ${orgName}`]!;
+      (this as unknown as { _wp16ReadonlyRole: string })._wp16ReadonlyRole = role;
+      return;
+    }
     const tenantId = orgId(orgName);
 
     if (!this.organisations[orgName]) {

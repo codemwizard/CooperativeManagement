@@ -477,8 +477,14 @@
       "source": "Implementation-Plan-V4/implementation/PHASE-1-REMEDIATION-PLAN-v2.md"
     },
     {
+      "id": "REM-WP2.6",
+      "title": "Authority scope serialization infrastructure",
+      "plan_id": "phase1-remediation",
+      "source": "Implementation-Plan-V4/implementation/PROTOTYPE-14-REMEDIATION-RESYNCHRONIZATION-PLAN.md"
+    },
+    {
       "id": "REM-WP2.3",
-      "title": "Capacity grant/revoke persistence",
+      "title": "Capacity and delegation command persistence",
       "plan_id": "phase1-remediation",
       "source": "Implementation-Plan-V4/implementation/PHASE-1-REMEDIATION-PLAN-v2.md"
     },
@@ -620,6 +626,7 @@
       "remediation_tasks": [
         "REM-WP2.1",
         "REM-WP2.2",
+        "REM-WP2.6",
         "REM-WP2.3",
         "REM-WP2.4",
         "REM-WP2.5"

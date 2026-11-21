@@ -2,7 +2,8 @@
 
 export type PolicyDecision = 'allow' | 'allow_with_label' | 'advise' | 'deny';
 
-export const CAPACITY_TYPES = ['internal_verifier', 'field_agent', 'delegate', 'acting_officer'] as const;
+/** Grantable by generic capacity commands; acting_officer remains source-backed actor authority only. */
+export const CAPACITY_TYPES = ['internal_verifier', 'field_agent', 'delegate'] as const;
 export type CapacityType = typeof CAPACITY_TYPES[number];
 
 export type PolicyAction =
@@ -12,6 +13,11 @@ export type PolicyAction =
       readonly granteeUserId: string;
       readonly activeFrom: string;
       readonly activeTo: string;
+      readonly sourceRef?: string;
+      readonly assistedEnrolment?: {
+        readonly sessionId: string;
+        readonly representativeDecision: 'approve_internal_verifier';
+      };
     }
   | {
       readonly type: 'capacity.revoke';
@@ -21,14 +27,16 @@ export type PolicyAction =
   | {
       readonly type: 'ta_scope.grant';
       readonly delegateeUserId: string;
-      readonly cohortId: string;
+      readonly cooperativeOrganizationId: string;
+      readonly unionOrganizationId: string;
+      readonly agreementRef: string;
       readonly activeFrom: string;
       readonly activeTo: string;
     }
   | {
       readonly type: 'ta_scope.revoke';
-      readonly delegateeUserId: string;
-      readonly cohortId: string;
+      readonly delegationId: string;
+      readonly cooperativeOrganizationId: string;
     };
 
 export interface Appointment {
@@ -73,8 +81,8 @@ export interface ActorContext {
   readonly appointments: readonly Appointment[];
   readonly capacities: readonly Capacity[];
   readonly delegations: readonly Delegation[];
-  /** Cohort IDs are resolved from current persisted programme-manager authority. */
-  readonly managedCohortIds?: readonly string[];
+  /** Cooperative organization IDs are resolved from current persisted programme-manager TA scope. */
+  readonly managedTaOrganizationIds?: readonly string[];
   /** Active assisted-enrolment sessions resolved by the trusted server context. */
   readonly assistedEnrollmentSessions?: readonly AssistedEnrollmentSession[];
 }
@@ -84,7 +92,6 @@ export interface PolicyTarget {
   readonly type: string;
   readonly tenantId: string;
   readonly organizationId?: string;
-  readonly cohortId?: string;
 }
 
 export interface PolicyContext {
@@ -138,37 +145,46 @@ function isAction(value: unknown): value is PolicyAction {
   if (!isRecord(value) || typeof value['type'] !== 'string') return false;
   switch (value['type']) {
     case 'capacity.grant':
-      return hasOnlyKeys(value, ['type', 'capacityType', 'granteeUserId', 'activeFrom', 'activeTo'])
+      return hasOnlyKeys(value, ['type', 'capacityType', 'granteeUserId', 'activeFrom', 'activeTo', 'sourceRef', 'assistedEnrolment'])
         && isCapacityType(value['capacityType'])
         && isNonEmptyString(value['granteeUserId'])
         && isInstant(value['activeFrom'])
-        && isInstant(value['activeTo']);
+        && isInstant(value['activeTo'])
+        && (value['capacityType'] !== 'delegate' || isNonEmptyString(value['sourceRef']))
+        && (value['sourceRef'] === undefined || isNonEmptyString(value['sourceRef']))
+        && (value['assistedEnrolment'] === undefined
+          || (value['capacityType'] === 'internal_verifier'
+            && isRecord(value['assistedEnrolment'])
+            && hasOnlyKeys(value['assistedEnrolment'], ['sessionId', 'representativeDecision'])
+            && isNonEmptyString(value['assistedEnrolment']['sessionId'])
+            && value['assistedEnrolment']['representativeDecision'] === 'approve_internal_verifier'));
     case 'capacity.revoke':
       return hasOnlyKeys(value, ['type', 'capacityType', 'granteeUserId'])
         && isCapacityType(value['capacityType'])
         && isNonEmptyString(value['granteeUserId']);
     case 'ta_scope.grant':
-      return hasOnlyKeys(value, ['type', 'delegateeUserId', 'cohortId', 'activeFrom', 'activeTo'])
+      return hasOnlyKeys(value, ['type', 'delegateeUserId', 'cooperativeOrganizationId', 'unionOrganizationId', 'agreementRef', 'activeFrom', 'activeTo'])
         && isNonEmptyString(value['delegateeUserId'])
-        && isNonEmptyString(value['cohortId'])
+        && isNonEmptyString(value['cooperativeOrganizationId'])
+        && isNonEmptyString(value['unionOrganizationId'])
+        && isNonEmptyString(value['agreementRef'])
         && isInstant(value['activeFrom'])
         && isInstant(value['activeTo']);
     case 'ta_scope.revoke':
-      return hasOnlyKeys(value, ['type', 'delegateeUserId', 'cohortId'])
-        && isNonEmptyString(value['delegateeUserId'])
-        && isNonEmptyString(value['cohortId']);
+      return hasOnlyKeys(value, ['type', 'delegationId', 'cooperativeOrganizationId'])
+        && isNonEmptyString(value['delegationId'])
+        && isNonEmptyString(value['cooperativeOrganizationId']);
     default:
       return false;
   }
 }
 
 function isTarget(value: unknown): value is PolicyTarget {
-  if (!isRecord(value) || !hasOnlyKeys(value, ['id', 'type', 'tenantId', 'organizationId', 'cohortId'])) return false;
+  if (!isRecord(value) || !hasOnlyKeys(value, ['id', 'type', 'tenantId', 'organizationId'])) return false;
   return isNonEmptyString(value['id'])
     && isNonEmptyString(value['type'])
     && isNonEmptyString(value['tenantId'])
-    && (value['organizationId'] === undefined || isNonEmptyString(value['organizationId']))
-    && (value['cohortId'] === undefined || isNonEmptyString(value['cohortId']));
+    && (value['organizationId'] === undefined || isNonEmptyString(value['organizationId']));
 }
 
 function isAppointment(value: unknown): value is Appointment {
@@ -203,14 +219,14 @@ function isAssistedEnrollmentSession(value: unknown): value is AssistedEnrollmen
 
 function isActorContext(value: unknown): value is ActorContext {
   if (!isRecord(value) || !hasOnlyKeys(value, [
-    'userId', 'tenantId', 'platformRoles', 'appointments', 'capacities', 'delegations', 'managedCohortIds', 'assistedEnrollmentSessions',
+    'userId', 'tenantId', 'platformRoles', 'appointments', 'capacities', 'delegations', 'managedTaOrganizationIds', 'assistedEnrollmentSessions',
   ])) return false;
   if (!isNonEmptyString(value['userId']) || !isNonEmptyString(value['tenantId']) || !isStringArray(value['platformRoles'])) return false;
   if (value['platformRoles'].some((role) => !PLATFORM_ROLE_CODES.has(role))) return false;
   if (!Array.isArray(value['appointments']) || !value['appointments'].every(isAppointment)) return false;
   if (!Array.isArray(value['capacities']) || !value['capacities'].every(isCapacity)) return false;
   if (!Array.isArray(value['delegations']) || !value['delegations'].every(isDelegation)) return false;
-  if (value['managedCohortIds'] !== undefined && !isStringArray(value['managedCohortIds'])) return false;
+  if (value['managedTaOrganizationIds'] !== undefined && !isStringArray(value['managedTaOrganizationIds'])) return false;
   if (value['assistedEnrollmentSessions'] !== undefined
     && (!Array.isArray(value['assistedEnrollmentSessions']) || !value['assistedEnrollmentSessions'].every(isAssistedEnrollmentSession))) return false;
   return true;
@@ -239,10 +255,12 @@ function hasCooperativeAuthority(actor: ActorContext, target: PolicyTarget, now:
   return officer || acting;
 }
 
-function hasAssistedIfvAuthority(actor: ActorContext, target: PolicyTarget, now: string): boolean {
+function hasAssistedIfvAuthority(actor: ActorContext, target: PolicyTarget, sessionId: string | undefined, now: string): boolean {
   if (!target.organizationId || !actor.platformRoles.includes('platform_enroller')) return false;
+  if (!sessionId) return false;
   return (actor.assistedEnrollmentSessions ?? []).some((session) =>
-    session.tenantId === target.tenantId
+    session.id === sessionId
+      && session.tenantId === target.tenantId
       && session.organizationId === target.organizationId
       && session.representativePresent
       && session.grantDecisionRecorded
@@ -264,22 +282,28 @@ export function decide(action: unknown, target: unknown, actor: unknown, context
     case 'capacity.grant': {
       if (target.type !== 'organization_capacity' || !target.organizationId) return 'deny';
       if (!hasValidInterval(action.activeFrom, action.activeTo) || Date.parse(action.activeTo) <= Date.parse(now)) return 'deny';
+      if (action.assistedEnrolment) {
+        return action.capacityType === 'internal_verifier'
+          && actor.platformRoles.includes('platform_enroller')
+          && hasAssistedIfvAuthority(actor, target, action.assistedEnrolment.sessionId, now)
+          ? 'allow'
+          : 'deny';
+      }
       if (hasCooperativeAuthority(actor, target, now)) return 'allow';
-      if (action.capacityType === 'internal_verifier' && hasAssistedIfvAuthority(actor, target, now)) return 'allow';
       return 'deny';
     }
     case 'capacity.revoke':
       if (target.type !== 'organization_capacity' || !target.organizationId) return 'deny';
       return hasCooperativeAuthority(actor, target, now) ? 'allow' : 'deny';
     case 'ta_scope.grant':
-      if (target.type !== 'cohort_ta_delegation' || target.cohortId !== action.cohortId) return 'deny';
+      if (target.type !== 'cooperative_ta_delegation' || target.organizationId !== action.cooperativeOrganizationId) return 'deny';
       if (!hasValidInterval(action.activeFrom, action.activeTo) || Date.parse(action.activeTo) <= Date.parse(now)) return 'deny';
       return actor.platformRoles.includes('programme_manager')
-        && (actor.managedCohortIds ?? []).includes(action.cohortId) ? 'allow' : 'deny';
+        && (actor.managedTaOrganizationIds ?? []).includes(action.cooperativeOrganizationId) ? 'allow' : 'deny';
     case 'ta_scope.revoke':
-      if (target.type !== 'cohort_ta_delegation' || target.cohortId !== action.cohortId) return 'deny';
+      if (target.type !== 'cooperative_ta_delegation' || target.organizationId !== action.cooperativeOrganizationId) return 'deny';
       return actor.platformRoles.includes('programme_manager')
-        && (actor.managedCohortIds ?? []).includes(action.cohortId) ? 'allow' : 'deny';
+        && (actor.managedTaOrganizationIds ?? []).includes(action.cooperativeOrganizationId) ? 'allow' : 'deny';
     default: {
       const exhaustive: never = action;
       return exhaustive;

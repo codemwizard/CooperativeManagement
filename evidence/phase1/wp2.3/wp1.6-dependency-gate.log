@@ -1,0 +1,25 @@
+npm notice run symphony-prototype@1.0.0 verify:wp1.6:dependencies
+npm notice run node tools/verify_wp1_6_dependencies.mjs
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+AssertionError [ERR_ASSERTION]: REM-WP2.3 implementation is not complete
++ actual - expected
+
++ 'partial'
+- 'complete'
+
+    at verify (file:///C:/Workspace/GitHub/Prototype/tools/verify_wp1_6_dependencies.mjs:61:12)
+    at validateWp16DependencyData (file:///C:/Workspace/GitHub/Prototype/tools/verify_wp1_6_dependencies.mjs:84:49)
+    at main (file:///C:/Workspace/GitHub/Prototype/tools/verify_wp1_6_dependencies.mjs:127:18)
+    at async file:///C:/Workspace/GitHub/Prototype/tools/verify_wp1_6_dependencies.mjs:147:65 {
+  generatedMessage: false,
+  code: 'ERR_ASSERTION',
+  actual: 'partial',
+  expected: 'complete',
+  operator: 'strictEqual',
+  diff: 'simple'
+}
+
+Node.js v26.7.0

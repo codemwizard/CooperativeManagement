@@ -9,6 +9,8 @@ export * from './auth.js';
 export * from './workspace-context.js';
 export * from './verified-finding.js';
 export * from './api-error.js';
+export * from './capacity-delegation-command.js';
+export * from './command-http.js';
 
 // Command envelope types (Phase 1 — WP-1.1)
 // export * from './command.js';

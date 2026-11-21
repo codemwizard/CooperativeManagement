@@ -1,0 +1,31 @@
+npm notice run symphony-prototype@1.0.0 test:db:migrations
+npm notice run node --env-file-if-exists=.env.local tools/run_migration_test_gate.mjs
+npm notice run @symphony/db@0.1.0 test:migrations
+npm notice run vitest run --reporter=verbose src/__tests__/migration-runner-config.test.ts src/__tests__/migration-executor.test.ts src/__tests__/migration-runner.integration.test.ts
+
+ RUN  v2.1.9 C:/Workspace/GitHub/Prototype/packages/db
+
+ ✓ src/__tests__/migration-runner.integration.test.ts > PostgreSQL migration runner integration > serializes concurrent clean installs and makes replay a no-op 2613ms
+ ✓ src/__tests__/migration-runner.integration.test.ts > PostgreSQL migration runner integration > upgrades from migration 0012 and rolls every migration 0013 effect back before a successful retry 5705ms
+ ✓ src/__tests__/migration-runner.integration.test.ts > PostgreSQL migration runner integration > rolls back a failed PostgreSQL migration without a ledger row and safely retries it
+ ✓ src/__tests__/migration-runner.integration.test.ts > PostgreSQL migration runner integration > retains required schema invariants and applies the Phase 0 global seeds 869ms
+ ✓ src/__tests__/migration-runner.integration.test.ts > PostgreSQL migration runner integration > installs the WP1.1 receipt schema constraints
+ ✓ src/__tests__/migration-runner.integration.test.ts > PostgreSQL migration runner integration > installs the minimized WP1.2 security-attempt table without business-command binding
+ ✓ src/__tests__/migration-runner.integration.test.ts > PostgreSQL migration runner integration > installs separate tenant-bound credential tables with fixed expiry, Argon2id hashes and no delete grant
+ ✓ src/__tests__/migration-runner.integration.test.ts > PostgreSQL migration runner integration > proves secret redaction while atomically consuming temporary credentials and establishing permanent passwords 736ms
+ ✓ src/__tests__/migration-runner.integration.test.ts > PostgreSQL migration runner integration > installs only encrypted reconciliation payload and forced tenant RLS
+ ✓ src/__tests__/migration-runner.integration.test.ts > PostgreSQL migration runner integration > persists opaque sessions, revokes all sessions at password change, and serializes shared throttle delays across pools 646ms
+ ✓ src/__tests__/migration-runner.integration.test.ts > PostgreSQL migration runner integration > aborts WP1.1 migration on a non-empty legacy receipt table without changing it
+ ✓ src/__tests__/migration-executor.test.ts > executeSqlMigration > commits the SQL and migration ledger row in one transaction
+ ✓ src/__tests__/migration-executor.test.ts > executeSqlMigration > rolls back a failed migration and never records it as applied
+ ✓ src/__tests__/migration-runner-config.test.ts > migration runner configuration safety > accepts and safely quotes only the canonical schema
+ ✓ src/__tests__/migration-runner-config.test.ts > migration runner configuration safety > rejects schema "public" before opening a database connection
+ ✓ src/__tests__/migration-runner-config.test.ts > migration runner configuration safety > rejects schema "symphony; DROP SCHEMA public CASCADE" before opening a database connection
+ ✓ src/__tests__/migration-runner-config.test.ts > migration runner configuration safety > rejects schema "\"symphony\"" before opening a database connection
+
+ Test Files  3 passed (3)
+      Tests  17 passed (17)
+   Start at  21:16:30
+   Duration  15.51s (transform 969ms, setup 0ms, collect 1.62s, tests 12.74s, environment 1ms, prepare 432ms)
+
+\n

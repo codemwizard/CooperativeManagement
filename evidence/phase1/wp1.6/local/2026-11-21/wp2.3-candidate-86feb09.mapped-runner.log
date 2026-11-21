@@ -1,0 +1,8 @@
+Command: npm run test:bdd:phase1 -- --work-package REM-WP1.6
+Candidate: 86feb09f334f8c6374ea364850631b8eccbafc5a
+Selected IDs: BDD-AUD-002, BDD-AUD-003, BDD-AUD-005, BDD-AUD-008, BDD-AUD-009, BDD-AUD-014
+Expanded Cucumber result: 8 scenarios (8 passed); 69 steps (69 passed).
+All 6 selected REM-WP1.6 scenarios were executed and passed.
+Validator summary: evidence/phase1/wp1.6/local/2026-11-21/wp2.3-candidate-86feb09.validator-summary.json
+Raw Cucumber stdout: evidence/phase1/wp1.6/local/2026-11-21/wp2.3-candidate-86feb09.raw.log
+Cucumber JSON: evidence/phase1/wp1.6/local/2026-11-21/wp2.3-candidate-86feb09.cucumber.json

@@ -19,7 +19,7 @@ An authenticated user can have zero, one, or several current workflow contexts. 
 
 - Programme manager is a persisted tenant-scoped platform role. The owner direction grants universal read-only projection visibility to organizations in the same tenant. No cross-tenant projection is returned. Persisted `ta_delegation` scope is separately returned for TA delegation workflows.
 - Union TA is a persisted institutional assignment on a union/federation, and its cooperative target scope is returned only through an active delegation whose programme manager still has the required role and persisted matching TA-delegation scope. All rows must be in the same tenant and within their effective interval.
-- The current scope record names cooperative organizations directly. A cohort aggregate/lifecycle and grant/revoke commands are deferred to WP2.3/WP2.4; this resolver does not infer a cohort from arbitrary client data.
+- The current scope record names cooperative organizations directly. D-19 resolves Phase 1 TA grants and revocations to one existing cooperative per command; a cohort aggregate/lifecycle is out of scope. The WP2.2 resolver remains read-only and does not infer a target from arbitrary client data.
 - Self-enroller context comes only from an open persisted enrolment session.
 
 ## API and privacy
@@ -38,6 +38,6 @@ The PostgreSQL-backed API integration verifies account/person mapping, membershi
 
 - This is a read model. Member activity and household write workflows, member enrollment/link lifecycle commands, and authority grant/revoke commands are not implemented here.
 - Universal programme-manager projection scope is the owner-directed interim rule. It should be narrowed through explicit agreements/organization scopes before production multi-party programme deployment.
-- Union TA scope currently targets direct cooperative IDs; a first-class cohort entity is not present.
+- Union TA scope targets direct cooperative IDs; D-19 confirms this as the Phase 1 mutation boundary. A first-class cohort entity remains future work.
 - Public display identity for official verifiers and the exact successful-verification vocabulary belong to WP6.3 and remain unresolved. This API does not expose verifier names or verification results.
 - Account-person link provenance is recorded as a source reference and linker ID; command-level approval/audit workflow is deferred to the relevant enrollment/authority command work.

@@ -56,6 +56,8 @@ export interface CapacityCommand {
   readonly capacityType: CapacityType;
   readonly activeFrom: string;
   readonly activeTo: string;
+  /** Required for delegate; identifies its recorded delegation or resolution source. */
+  readonly sourceRef?: string;
   readonly now: string;
 }
 
@@ -90,6 +92,9 @@ export class CapacityService {
     if (!cmd.capacityType || cmd.capacityType.trim().length === 0) {
       return { ok: false, code: 'INVALID_INPUT', detail: 'capacityType must not be empty' };
     }
+    if (cmd.capacityType === 'delegate' && !cmd.sourceRef?.trim()) {
+      return { ok: false, code: 'INVALID_INPUT', detail: 'delegate capacity requires source provenance' };
+    }
 
     const actor: ActorContext = {
       userId: cmd.actorUserId,
@@ -108,7 +113,7 @@ export class CapacityService {
     };
 
     const policyAction = cmd.type === 'GrantCapacity'
-      ? { type: 'capacity.grant' as const, capacityType: cmd.capacityType, granteeUserId: cmd.targetUserId, activeFrom: cmd.activeFrom, activeTo: cmd.activeTo }
+      ? { type: 'capacity.grant' as const, capacityType: cmd.capacityType, granteeUserId: cmd.targetUserId, activeFrom: cmd.activeFrom, activeTo: cmd.activeTo, ...(cmd.sourceRef ? { sourceRef: cmd.sourceRef } : {}) }
       : { type: 'capacity.revoke' as const, capacityType: cmd.capacityType, granteeUserId: cmd.targetUserId };
 
     const decision = decide(policyAction, target, actor, { now: cmd.now });

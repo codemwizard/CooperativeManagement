@@ -26,15 +26,18 @@ const envelope: CommandEnvelope<{ aggregateId: string; value: string }> = {
 
 function setup(allow: boolean, auditFails = false) {
   const contexts: CommandTransactionContext[] = [];
+  const handlerContexts: CommandTransactionContext[] = [];
+  const savedReceipts: CommandReceipt[] = [];
+  let repositorySaveCalls = 0;
   let rolledBack = false;
   let auditWasAfterRollback = false;
   const receiptStore: CommandReceiptStore = {
     get: async (_id, _tenant, context) => { if (context) contexts.push(context); return null; },
-    save: async (_receipt: CommandReceipt, context) => { if (context) contexts.push(context); return true; },
+    save: async (receipt: CommandReceipt, context) => { savedReceipts.push(receipt); if (context) contexts.push(context); return true; },
   };
   const repository: Repository<Aggregate> = {
     load: async (_id, _tenant, context) => { if (context) contexts.push(context); return null; },
-    save: async (_aggregate, _version, _events, _outbox, context) => { if (context) contexts.push(context); },
+    save: async (_aggregate, _version, _events, _outbox, context) => { repositorySaveCalls += 1; if (context) contexts.push(context); },
   };
   const policyStore: PolicyStore = {
     decide: async (_action, _target, _actor, _policyContext, context) => {
@@ -68,20 +71,37 @@ function setup(allow: boolean, auditFails = false) {
     },
     resultDataSchemas: { 'aggregate.create': z.object({ value: z.string() }).strict() },
   });
-  return { bus, contexts, auditCalls, get auditWasAfterRollback() { return auditWasAfterRollback; } };
+  return { bus, contexts, handlerContexts, savedReceipts, get repositorySaveCalls() { return repositorySaveCalls; }, auditCalls, get auditWasAfterRollback() { return auditWasAfterRollback; } };
 }
 
 describe('WP1.2-A transaction context and WP1.2-B denial audit boundary', () => {
   it('passes one context identity through receipt, aggregate, policy, and writes', async () => {
     const state = setup(true);
-    await state.bus.dispatch(envelope, (command) => ({
-      newState: { id: command.payload.aggregateId, tenantId: command.tenantId, version: 1, value: command.payload.value },
-      events: [],
-      data: { value: command.payload.value },
-    }), { trustedPrincipal: { actorUserId: envelope.actorUserId, tenantId: envelope.tenantId } });
+    await state.bus.dispatch(envelope, (command, context) => {
+      state.handlerContexts.push(context.transaction);
+      return {
+        newState: { id: command.payload.aggregateId, tenantId: command.tenantId, version: 1, value: command.payload.value },
+        events: [],
+        data: { value: command.payload.value },
+      };
+    }, { trustedPrincipal: { actorUserId: envelope.actorUserId, tenantId: envelope.tenantId } });
     expect(state.contexts.length).toBeGreaterThanOrEqual(5);
     expect(new Set(state.contexts.map((context) => context.transactionId)).size).toBe(1);
+    expect(state.handlerContexts).toHaveLength(1);
+    expect(state.handlerContexts[0]?.transactionId).toBe(state.contexts[0]?.transactionId);
     expect(state.auditCalls).toEqual([]);
+  });
+
+  it('runs same-transaction event binding only after the event-bearing repository save', async () => {
+    const state = setup(true);
+    let ranAfterSave = false;
+    const result = await state.bus.dispatch(envelope, (command) => ({
+      newState: { id: command.payload.aggregateId, tenantId: command.tenantId, version: 1, value: command.payload.value },
+      events: [], data: { value: command.payload.value },
+      afterPersistence: () => { ranAfterSave = state.repositorySaveCalls === 1; },
+    }), { trustedPrincipal: { actorUserId: envelope.actorUserId, tenantId: envelope.tenantId } });
+    expect(result.ok).toBe(true);
+    expect(ranAfterSave).toBe(true);
   });
 
   it('rolls back the command transaction before recording a denial without policy detail', async () => {
@@ -92,6 +112,30 @@ describe('WP1.2-A transaction context and WP1.2-B denial audit boundary', () => 
     expect(state.auditWasAfterRollback).toBe(true);
     expect(state.auditCalls).toEqual(['AUTHORIZATION_DENIED']);
     expect(result).toEqual({ ok: false, code: 'UNAUTHORIZED', detail: 'Not authorized' });
+  });
+
+  it('commits a semantic no-op receipt without aggregate, event, or outbox writes', async () => {
+    const state = setup(true);
+    const result = await state.bus.dispatch(envelope, (command) => ({
+      newState: { id: command.payload.aggregateId, tenantId: command.tenantId, version: 0, value: command.payload.value },
+      events: [], data: { value: command.payload.value }, persistAggregate: false,
+    }), { trustedPrincipal: { actorUserId: envelope.actorUserId, tenantId: envelope.tenantId } });
+    expect(result.ok).toBe(true);
+    expect(state.savedReceipts).toHaveLength(1);
+    expect(state.repositorySaveCalls).toBe(0);
+    expect(state.savedReceipts[0]?.safe_result).toMatchObject({ ok: true, event_ids: [] });
+  });
+
+  it('stores an accepted authority conflict as a terminal domain receipt without business writes', async () => {
+    const state = setup(true);
+    const result = await state.bus.dispatch(envelope, (command) => ({
+      newState: { id: command.payload.aggregateId, tenantId: command.tenantId, version: 0, value: command.payload.value },
+      events: [], data: { value: command.payload.value }, persistAggregate: false,
+      terminalRejection: { code: 'AUTHORITY_GRANT_CONFLICT' },
+    }), { trustedPrincipal: { actorUserId: envelope.actorUserId, tenantId: envelope.tenantId } });
+    expect(result).toMatchObject({ ok: false, code: 'DOMAIN_VIOLATION' });
+    expect(state.savedReceipts[0]?.safe_result).toMatchObject({ ok: false, code: 'DOMAIN_CONFLICT', domain_code: 'AUTHORITY_GRANT_CONFLICT' });
+    expect(state.repositorySaveCalls).toBe(0);
   });
 
   it('returns a retryable classification when the required audit write fails', async () => {

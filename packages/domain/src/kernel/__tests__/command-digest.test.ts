@@ -55,6 +55,13 @@ describe('WP1.1 command semantic digest', () => {
       .not.toBe(semanticCommandCanonicalJson(command));
   });
 
+  it('binds the organization target to the semantic digest when the HTTP envelope supplies it', () => {
+    const targeted = { ...command, organization_id: '70ec2ccd-1c76-4cc9-8cc9-5b24d19e2e9d' };
+    expect(semanticCommandCanonicalJson(targeted)).not.toBe(semanticCommandCanonicalJson(command));
+    expect(semanticCommandCanonicalJson({ ...targeted, organization_id: '66cb10c4-2711-45f6-9142-55feb5440a74' }))
+      .not.toBe(semanticCommandCanonicalJson(targeted));
+  });
+
   it('uses the active key version and returns a 32-byte HMAC digest', async () => {
     const provider = new TestDigestKeyProvider('wp0-fixture-v1', { 'wp0-fixture-v1': 'wp0-contract-test-key-v1' });
     const result = await computeCommandDigest(command, provider);

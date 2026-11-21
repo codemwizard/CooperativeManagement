@@ -56,6 +56,8 @@ export interface CommandTransactionRunner {
     tenantId: string,
     work: (context: CommandTransactionContext) => Promise<T>,
     recovery?: CommandTransactionRecovery<T>,
+    /** Trusted principal identity; supplied by CommandBus after principal/envelope equality is checked. */
+    actorUserId?: string,
   ): Promise<T>;
 }
 
@@ -133,7 +135,7 @@ export type PolicyDecision =
 export interface PolicyStore {
   decide(
     action: string,
-    target: { readonly id: string; readonly type: string; readonly tenantId: string },
+    target: { readonly id: string; readonly type: string; readonly tenantId: string; readonly organizationId?: string },
     actor: { readonly userId: string; readonly tenantId: string },
     policyContext: Readonly<Record<string, unknown>> | undefined,
     transaction?: CommandTransactionContext

@@ -267,7 +267,9 @@ describe('CommandBus', () => {
     });
     const parsedTerminal = terminalConflictResultSchema.safeParse(terminalReceipt?.safe_result);
     expect(parsedTerminal.success).toBe(true);
-    const reconciliationId = parsedTerminal.success ? parsedTerminal.data.reconciliation_id : undefined;
+    const reconciliationId = parsedTerminal.success && parsedTerminal.data.code === 'VERSION_CONFLICT'
+      ? parsedTerminal.data.reconciliation_id
+      : undefined;
     expect(reconciliationId).toBeDefined();
     const item = reconciliationInboxStore.items.get(reconciliationId ?? '');
     expect(item).toBeDefined();

@@ -14,6 +14,7 @@ export interface CommandDigestInput {
   readonly command_id: string;
   readonly command_type: string;
   readonly command_schema_version: number;
+  readonly organization_id?: string;
   readonly expected_aggregate_version?: number | null;
   readonly payload: Readonly<Record<string, JsonValue>>;
   readonly canonicalization_version?: typeof COMMAND_DIGEST_CANONICALIZATION_VERSION;
@@ -36,6 +37,7 @@ const inputSchema = z.object({
   command_id: z.string().min(1),
   command_type: z.string().min(1),
   command_schema_version: z.number().int().safe().positive(),
+  organization_id: z.string().uuid().optional(),
   expected_aggregate_version: z.number().int().safe().nonnegative().nullable().optional(),
   payload: z.record(z.unknown()),
   canonicalization_version: z.literal(COMMAND_DIGEST_CANONICALIZATION_VERSION).optional(),
@@ -105,6 +107,7 @@ export function semanticCommandEnvelope(input: CommandDigestInput): Readonly<Rec
     command_type: parsed.command_type,
     command_schema_version: parsed.command_schema_version,
   };
+  if (parsed.organization_id !== undefined) semantic.organization_id = parsed.organization_id;
   if (Object.hasOwn(parsed, 'expected_aggregate_version')) {
     const version = parsed.expected_aggregate_version;
     if (version === undefined) throw new TypeError('expected_aggregate_version must be omitted or a JSON number/null');

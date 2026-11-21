@@ -1,0 +1,83 @@
+{
+  "contract_id": "phase1-capacity-delegation-commands",
+  "version": 1,
+  "status": "owner_approved_implementation_in_progress",
+  "task_id": "REM-WP2.3",
+  "decision": "D-19",
+  "authority_sources": [
+    "Implementation-Plan-V4/02-decision-register.md#d-19",
+    "evidence/phase1/wp2.1/phase1-authorization-policy-matrix.json",
+    "docs/phase1/API_CONTRACT.md",
+    "docs/phase1/COMMAND_TRANSACTION_CONTRACT.md",
+    "docs/phase1/AUTHORIZATION_CAPACITY_CONTRACT.md",
+    "evidence/phase1/wp2.4/authority-scope-serialization-spec.md",
+    "evidence/phase1/wp2.2/trusted-authority-contract.md"
+  ],
+  "command_registry": [
+    { "type": "GrantCapacity", "schemaVersion": 1, "action": "capacity.grant", "payload_schema": "grantCapacityPayloadSchema", "aggregate_uuid": "payload.capacityGrantId" },
+    { "type": "RevokeCapacity", "schemaVersion": 1, "action": "capacity.revoke", "payload_schema": "revokeCapacityPayloadSchema", "aggregate_uuid": "payload.capacityGrantId" },
+    { "type": "DelegateTaScope", "schemaVersion": 1, "operation_discriminator": "payload.operation", "actions": { "grant": "ta_scope.grant", "revoke": "ta_scope.revoke" }, "payload_schema": "delegateTaScopePayloadSchema", "aggregate_uuid": "payload.delegationId" }
+  ],
+  "shared_envelope": {
+    "source": "docs/phase1/API_CONTRACT.md#command-api",
+    "fields": ["commandId", "organizationId", "occurredAt", "deviceId", "expectedVersion", "type", "schemaVersion", "payload"],
+    "organizationId": "The existing cooperative target, resolved and ownership-checked from PostgreSQL inside the tenant transaction.",
+    "actor_tenant": "Authenticated actor and tenant come from the persisted session; request-supplied authority claims are rejected by strict schemas.",
+    "receipt": "The shared WP1 receipt binds tenant, command ID, actor, command type/schema, canonical payload and expected version. Exact command replay returns that receipt without reevaluating authority or mutating state.",
+    "atomicity": "Source mutation, aggregate state, immutable domain event, outbox, D-16 changed-scope versions and receipt commit or roll back in one WP1 command transaction. Successful semantic no-op operations persist a safe receipt but no source mutation, event, outbox message or D-16 increment."
+  },
+  "payloads": {
+    "GrantCapacity": {
+      "strict_fields": ["capacityGrantId", "targetUserId", "capacityType", "activeFrom", "activeTo", "sourceRef?", "assistedEnrolment?"],
+      "capacityType": ["internal_verifier", "field_agent", "delegate"],
+      "delegate_source": "sourceRef is required for delegate and is stored as documentary provenance. Generic commands reject acting_officer.",
+      "interval": "activeFrom < activeTo and activeTo > database transaction time; effective interval is [activeFrom, activeTo).",
+      "actor_authority": "Active Chairperson/Vice-Chairperson appointment or active, source-backed acting appointment for those offices in this cooperative; platform_enroller may grant only internal_verifier when the exact open session is tenant/cooperative/enroller-bound and has typed presence, NRC-sighted and consent-to-act attestations; the command records approve_internal_verifier for that session's representative."
+    },
+    "RevokeCapacity": {
+      "strict_fields": ["capacityGrantId"],
+      "target": "Resolve the exact existing capacity grant by ID; never revoke by broad user/capacity lookup.",
+      "actor_authority": "Active Chairperson/Vice-Chairperson appointment or active, source-backed acting appointment for those offices in this cooperative."
+    },
+    "DelegateTaScope.grant": {
+      "strict_fields": ["delegationId", "operation=grant", "delegateeUserId", "unionOrganizationId", "agreementRef", "activeFrom", "activeTo"],
+      "target": "Outer organizationId and the persisted target_organization_id identify one existing eligible cooperative. No cohort or implied group membership.",
+      "persisted_checks": ["authenticated actor has programme_manager role", "actor has active persisted ta_delegation scope over target cooperative", "delegatee is active in tenant", "union is a same-tenant union or federation", "delegatee has active union_ta institutional assignment with that union"],
+      "agreement": "Persist agreementRef as documentary reference only; no agreement register exists, so legal validity is not asserted.",
+      "interval": "activeFrom < activeTo and activeTo > database transaction time; effective interval is [activeFrom, activeTo)."
+    },
+    "DelegateTaScope.revoke": {
+      "strict_fields": ["delegationId", "operation=revoke"],
+      "target": "Resolve and revoke exactly one persisted delegation ID; verify its cooperative target is the outer organizationId and manager retains active persisted scope over that target.",
+      "actor_authority": "Active programme_manager role and persisted ta_delegation scope for that cooperative."
+    }
+  },
+  "lifecycle": {
+    "same_command_id": "WP1 semantic replay; return original stored result without reauthorization, source mutation, event, or scope version increment.",
+    "identical_active_grant": "Successful semantic no-op receipt; no new source row, event, outbox, or D-16 version increment. Capacity identity compares tenant, grantee, cooperative, capacity type, effective interval and source reference. TA identity compares tenant, union, delegatee, cooperative, agreement reference and effective interval; the granting manager is provenance, not part of the semantic identity. An exact future interval repeat is also a no-op to avoid duplicate scheduled sources.",
+    "conflicting_active_grant": "Deterministic conflict; never silently return a grant with different source, agreement, or interval as identical.",
+    "repeated_revoke": "Successful semantic no-op receipt only for the same already-revoked source row; no new event or version increment.",
+    "grant_after_expiry_or_revocation": "Create a new immutable source row and event, then increment each changed D-16 scope exactly once.",
+    "target_denial": "Missing and cross-tenant target map to the same generic NOT_AUTHORIZED denial; no business receipt or mutation.",
+    "timestamps": "Database transaction time records granted/revoked timestamps; effective times are explicit payload values."
+  },
+  "events": {
+    "names": ["CapacityGranted", "CapacityRevoked", "TaScopeDelegated", "TaScopeRevoked"],
+    "payload": "Tenant-bound source ID, actor, grantee/delegatee, target organization, capacity or union, effective times, and documentary provenance; no client authority claims.",
+    "revocation": "Append-only event and revoked timestamp; never rewrite historical findings or prior events."
+  },
+  "projection_and_locks": {
+    "capacity_table": "symphony.capacity_grants with active_from, expires_at, source_ref, source_event_id and revoked_event_id; only registered command writers receive scoped DML. Insert starts with a null source_event_id; the same transaction binds the immutable event after repository persistence to satisfy tenant RLS.",
+    "ta_table": "symphony.ta_scope_delegations with active_from, expires_at, agreement_ref, source_event_id and revoked_event_id; direct cooperative target. Event references are bound after event persistence within the same transaction.",
+    "scope_set": "Capacity changes lock target organization, tenant, actor_tenant for grantor and grantee, plus fixed D-16 global/actor dependencies required by the inventory. TA changes lock target cooperative, union/federation, tenant, actor_tenant for manager and delegatee, plus required fixed D-16 dependencies.",
+    "order": "Command target aggregate first, then canonical D-16 ordered scope set via WP2.6. Resolve immutable source identity before authority locks only under the command-target lock; read mutable authority/source state only after all authority locks are acquired.",
+    "increments": "Increment exactly the changed mutable scopes once with the source write. No-op, conflict and denial increment none."
+  },
+  "known_limitations": [
+    "Agreement references are documentary text and are not verified against a registry.",
+    "No dedicated acting-officer appointment/delegation mutation model is included; generic capacity commands cannot create acting_officer. Acting authority remains usable only when the trusted context supplies a valid source-backed record.",
+    "The assisted-enrolment session fact source is frozen for runtime writes; session-start and attestation production workflow is outside WP2.3. The registered GrantCapacity command records the representative's approval atomically with the IFV grant.",
+    "WP2.4 still owns PostgreSQL two-order race/barrier evidence after WP2.3 source mutation exists."
+  ],
+  "implementation_gate": "Owner contract is resolved by D-19. Implementation and exact-candidate WP2.3 gate evidence remain pending."
+}

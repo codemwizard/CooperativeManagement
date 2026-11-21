@@ -217,6 +217,103 @@ describe.skipIf(!migrationBaseUrl || !adminDatabaseUrl || process.env['DATA_MODE
       expect(roleCapabilities.rows).toEqual([{ migrator_can_set_writer: true, app_can_set_writer: false }]);
     }, 90_000);
 
+    it('backfills legacy authority intervals across tenants while restoring forced RLS', async () => {
+      const upgradeName = `symphony_wp23_interval_${randomUUID().replaceAll('-', '').slice(0, 16)}_test`;
+      const quotedDatabase = `"${upgradeName.replaceAll('"', '""')}"`;
+      const admin = new pg.Client({ connectionString: adminDatabaseUrl });
+      await admin.connect();
+      let migrationPool: pg.Pool | undefined;
+      let fixture: pg.Client | undefined;
+      try {
+        await admin.query(`CREATE DATABASE ${quotedDatabase}`);
+        const migrationUser = decodeURIComponent(new URL(migrationBaseUrl!).username);
+        await admin.query(`GRANT CONNECT, CREATE ON DATABASE ${quotedDatabase} TO "${migrationUser.replaceAll('"', '""')}"`);
+        const migrationUrl = new URL(migrationBaseUrl!);
+        migrationUrl.pathname = `/${upgradeName}`;
+        migrationPool = new pg.Pool({ connectionString: migrationUrl.toString(), max: 1 });
+        const migrationClient = await migrationPool.connect();
+        try {
+          await migrationClient.query('CREATE SCHEMA symphony');
+          await migrationClient.query(`CREATE TABLE symphony.schema_migrations (
+            name TEXT PRIMARY KEY, applied_at TIMESTAMPTZ NOT NULL DEFAULT now()
+          )`);
+          const files = (await fs.readdir(migrationDirectory)).filter((name) => name.endsWith('.sql')).sort();
+          for (const file of files.filter((name) => name < '0021_wp2_3_capacity_delegation_commands.sql')) {
+            await executeSqlMigration(migrationClient, file, await fs.readFile(path.join(migrationDirectory, file), 'utf8'));
+          }
+        } finally { migrationClient.release(); }
+
+        const fixtureUrl = new URL(adminDatabaseUrl!);
+        fixtureUrl.pathname = `/${upgradeName}`;
+        fixture = new pg.Client({ connectionString: fixtureUrl.toString() });
+        await fixture.connect();
+        const tenantIds = [randomUUID(), randomUUID()];
+        const orgIds = [randomUUID(), randomUUID()];
+        const unionIds = [randomUUID(), randomUUID()];
+        const managerIds = [randomUUID(), randomUUID()];
+        const delegateeIds = [randomUUID(), randomUUID()];
+        for (let index = 0; index < tenantIds.length; index += 1) {
+          const tenantId = tenantIds[index]!;
+          const orgId = orgIds[index]!;
+          const unionId = unionIds[index]!;
+          const managerId = managerIds[index]!;
+          const delegateeId = delegateeIds[index]!;
+          await fixture.query('INSERT INTO symphony.tenants(id,name) VALUES($1,$2)', [tenantId, `legacy-rsl-${index}-${tenantId}`]);
+          await fixture.query(
+            `INSERT INTO symphony.users(id,tenant_id,email,email_normalized,status)
+             VALUES($1,$3,$4,$4,'active'),($2,$3,$5,$5,'active')`,
+            [managerId, delegateeId, tenantId, `legacy-manager-${tenantId}@example.invalid`, `legacy-ta-${tenantId}@example.invalid`],
+          );
+          await fixture.query(
+            `INSERT INTO symphony.organizations(id,tenant_id,name,status,organization_kind)
+             VALUES($1,$2,$3,'active','cooperative'),($4,$2,$5,'active','union')`,
+            [orgId, tenantId, `legacy-coop-${index}`, unionId, `legacy-union-${index}`],
+          );
+          await fixture.query(
+            `INSERT INTO symphony.capacity_grants(id,user_id,organization_id,capacity_type,granted_by_user_id,granted_at)
+             VALUES($1,$2,$3,'field_agent',$4,'2025-01-01T00:00:00Z')`,
+            [randomUUID(), delegateeId, orgId, managerId],
+          );
+          await fixture.query(
+            `INSERT INTO symphony.ta_scope_delegations(id,tenant_id,programme_manager_user_id,union_organization_id,
+               delegatee_user_id,target_organization_id,granted_at,expires_at,agreement_ref)
+             VALUES($1,$2,$3,$4,$5,$6,'2025-02-01T00:00:00Z','2026-02-01T00:00:00Z','legacy-agreement')`,
+            [randomUUID(), tenantId, managerId, unionId, delegateeId, orgId],
+          );
+        }
+
+        const upgradeClient = await migrationPool.connect();
+        try {
+          const identity = await upgradeClient.query<{ current_user: string }>('SELECT current_user');
+          expect(identity.rows[0]?.current_user).toBe(decodeURIComponent(new URL(migrationBaseUrl!).username));
+          await executeSqlMigration(
+            upgradeClient,
+            '0021_wp2_3_capacity_delegation_commands.sql',
+            await fs.readFile(path.join(migrationDirectory, '0021_wp2_3_capacity_delegation_commands.sql'), 'utf8'),
+          );
+        } finally { upgradeClient.release(); }
+
+        const backfilled = await fixture.query<{ capacity_count: number; capacity_dates: boolean; ta_count: number; ta_dates: boolean; capacity_forced: boolean; ta_forced: boolean }>(
+          `SELECT
+             (SELECT count(*)::int FROM symphony.capacity_grants) AS capacity_count,
+             (SELECT bool_and(active_from=granted_at) FROM symphony.capacity_grants) AS capacity_dates,
+             (SELECT count(*)::int FROM symphony.ta_scope_delegations) AS ta_count,
+             (SELECT bool_and(active_from=granted_at) FROM symphony.ta_scope_delegations) AS ta_dates,
+             (SELECT relforcerowsecurity FROM pg_class WHERE oid='symphony.capacity_grants'::regclass) AS capacity_forced,
+             (SELECT relforcerowsecurity FROM pg_class WHERE oid='symphony.ta_scope_delegations'::regclass) AS ta_forced`,
+        );
+        expect(backfilled.rows[0]).toEqual({
+          capacity_count: 2, capacity_dates: true, ta_count: 2, ta_dates: true, capacity_forced: true, ta_forced: true,
+        });
+      } finally {
+        await migrationPool?.end();
+        await fixture?.end();
+        await admin.query('SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname=$1 AND pid<>pg_backend_pid()', [upgradeName]).catch(() => undefined);
+        await admin.query(`DROP DATABASE IF EXISTS ${quotedDatabase}`).catch(() => undefined);
+        await admin.end();
+      }
+    }, 120_000);
+
     it('upgrades from migration 0012 and rolls every migration 0013 effect back before a successful retry', async () => {
       const upgradeDatabaseName = `symphony_wp15_upgrade_${randomUUID().replaceAll('-', '').slice(0, 16)}_test`;
       const quotedDatabase = `"${upgradeDatabaseName.replaceAll('"', '""')}"`;

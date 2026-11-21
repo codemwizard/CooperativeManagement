@@ -1,0 +1,22 @@
+
+ RUN  v2.1.9 C:/Workspace/GitHub/Prototype/packages/db
+
+ ✓ src/__tests__/postgres-capacity-delegation-command.integration.test.ts > REM-WP2.3 PostgreSQL capacity and TA command persistence > recognizes acting authority only from a current same-cooperative appointment with exact immutable evidence provenance 389ms
+ ✓ src/__tests__/postgres-capacity-delegation-command.integration.test.ts > REM-WP2.3 PostgreSQL capacity and TA command persistence > stops resolving an acting office at its immutable, source-backed termination time
+ ✓ src/__tests__/postgres-capacity-delegation-command.integration.test.ts > REM-WP2.3 PostgreSQL capacity and TA command persistence > persists capacity grant, semantic no-op, and exact revoke atomically with events, receipts, outbox, and D-16 versions 360ms
+ ✓ src/__tests__/postgres-capacity-delegation-command.integration.test.ts > REM-WP2.3 PostgreSQL capacity and TA command persistence > authorizes assisted IFV grants from the exact persisted session and records the representative decision atomically
+ ✓ src/__tests__/postgres-capacity-delegation-command.integration.test.ts > REM-WP2.3 PostgreSQL capacity and TA command persistence > persists one cooperative TA delegation and treats a semantic repeat as a no-op
+ ✓ src/__tests__/postgres-capacity-delegation-command.integration.test.ts > REM-WP2.3 PostgreSQL capacity and TA command persistence > rolls back source, receipt, event, outbox and D-16 versions when event binding fails
+ ✓ src/__tests__/postgres-capacity-delegation-command.integration.test.ts > REM-WP2.3 PostgreSQL capacity and TA command persistence > linearizes a capacity grant after a protected read and increments only changed scopes 368ms
+ ✓ src/__tests__/postgres-capacity-delegation-command.integration.test.ts > REM-WP2.3 PostgreSQL capacity and TA command persistence > linearizes capacity revocation after a protected read without rewriting its grant event
+ ✓ src/__tests__/postgres-capacity-delegation-command.integration.test.ts > REM-WP2.3 PostgreSQL capacity and TA command persistence > linearizes a TA-scope grant after a protected read and changes the cooperative, not union or grantor, scope versions
+ ✓ src/__tests__/postgres-capacity-delegation-command.integration.test.ts > REM-WP2.3 PostgreSQL capacity and TA command persistence > linearizes TA-scope revocation after a protected read without rewriting its grant event
+ ✓ src/__tests__/postgres-capacity-delegation-command.integration.test.ts > REM-WP2.3 PostgreSQL capacity and TA command persistence > commits capacity grant and revoke before later protected reads, which observe the new source state
+ ✓ src/__tests__/postgres-capacity-delegation-command.integration.test.ts > REM-WP2.3 PostgreSQL capacity and TA command persistence > commits TA-scope grant and revoke before later protected reads, which observe the new source state
+ ✓ src/__tests__/postgres-capacity-delegation-command.integration.test.ts > REM-WP2.3 PostgreSQL capacity and TA command persistence > treats elapsed expiry as inactive without mutating source or advancing D-16 versions
+
+ Test Files  1 passed (1)
+      Tests  13 passed (13)
+   Start at  13:22:41
+   Duration  9.49s (transform 1.17s, setup 0ms, collect 3.69s, tests 4.42s, environment 0ms, prepare 593ms)
+

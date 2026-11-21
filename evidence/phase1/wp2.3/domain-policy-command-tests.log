@@ -1,0 +1,126 @@
+npm notice run @symphony/domain@0.1.0 test:unit
+npm notice run vitest run --reporter=verbose src/authz/__tests__/policy-matrix.test.ts src/authz/__tests__/capacity-delegation-command-contract.test.ts src/kernel/__tests__/command-digest.test.ts src/kernel/__tests__/command-bus-transaction.test.ts
+
+ RUN  v2.1.9 C:/Workspace/GitHub/Prototype/packages/domain
+
+ ✓ src/authz/__tests__/policy-matrix.test.ts > WP2.1 policy default-deny red cases > denies an unregistered action
+ ✓ src/authz/__tests__/policy-matrix.test.ts > WP2.1 policy default-deny red cases > denies a grant request with an unregistered capacity type
+ ✓ src/authz/__tests__/policy-matrix.test.ts > WP2.1 policy default-deny red cases > denies a Secretary attempting a capacity revocation
+ ✓ src/authz/__tests__/policy-matrix.test.ts > WP2.1 policy boundaries > denies tenant and same-tenant organization mismatches
+ ✓ src/authz/__tests__/policy-matrix.test.ts > WP2.1 policy boundaries > applies the half-open authority and grant intervals at equality boundaries
+ ✓ src/authz/__tests__/policy-matrix.test.ts > WP2.1 policy boundaries > denies expired officer authority and malformed authority rows
+ ✓ src/authz/__tests__/policy-matrix.test.ts > WP2.1 policy boundaries > requires programme-manager persisted cooperative scope for TA delegation
+ ✓ src/authz/__tests__/policy-matrix.test.ts > WP2.1 policy boundaries > rejects generic acting_officer grants while retaining source-backed acting authority
+ ✓ src/authz/__tests__/policy-matrix.test.ts > WP2.1 policy boundaries > requires source provenance for generic delegate capacity
+ ✓ src/authz/__tests__/policy-matrix.test.ts > WP2.1 policy boundaries > denies institutional roles before cooperative officer authority
+ ✓ src/authz/__tests__/policy-matrix.test.ts > WP2.1 canonical matrix decisions > capacity.grant decision row: platform_admin
+ ✓ src/authz/__tests__/policy-matrix.test.ts > WP2.1 canonical matrix decisions > capacity.grant decision row: platform_enroller
+ ✓ src/authz/__tests__/policy-matrix.test.ts > WP2.1 canonical matrix decisions > capacity.grant decision row: self_enroller
+ ✓ src/authz/__tests__/policy-matrix.test.ts > WP2.1 canonical matrix decisions > capacity.grant decision row: chairperson
+ ✓ src/authz/__tests__/policy-matrix.test.ts > WP2.1 canonical matrix decisions > capacity.grant decision row: vice_chairperson
+ ✓ src/authz/__tests__/policy-matrix.test.ts > WP2.1 canonical matrix decisions > capacity.grant decision row: secretary
+ ✓ src/authz/__tests__/policy-matrix.test.ts > WP2.1 canonical matrix decisions > capacity.grant decision row: treasurer
+ ✓ src/authz/__tests__/policy-matrix.test.ts > WP2.1 canonical matrix decisions > capacity.grant decision row: director
+ ✓ src/authz/__tests__/policy-matrix.test.ts > WP2.1 canonical matrix decisions > capacity.grant decision row: committee_chair
+ ✓ src/authz/__tests__/policy-matrix.test.ts > WP2.1 canonical matrix decisions > capacity.grant decision row: committee_member
+ ✓ src/authz/__tests__/policy-matrix.test.ts > WP2.1 canonical matrix decisions > capacity.grant decision row: member
+ ✓ src/authz/__tests__/policy-matrix.test.ts > WP2.1 canonical matrix decisions > capacity.grant decision row: internal_verifier
+ ✓ src/authz/__tests__/policy-matrix.test.ts > WP2.1 canonical matrix decisions > capacity.grant decision row: field_agent
+ ✓ src/authz/__tests__/policy-matrix.test.ts > WP2.1 canonical matrix decisions > capacity.grant decision row: delegate
+ ✓ src/authz/__tests__/policy-matrix.test.ts > WP2.1 canonical matrix decisions > capacity.grant decision row: acting_officer
+ ✓ src/authz/__tests__/policy-matrix.test.ts > WP2.1 canonical matrix decisions > capacity.grant decision row: programme_manager
+ ✓ src/authz/__tests__/policy-matrix.test.ts > WP2.1 canonical matrix decisions > capacity.grant decision row: ta
+ ✓ src/authz/__tests__/policy-matrix.test.ts > WP2.1 canonical matrix decisions > capacity.grant decision row: pfi_analyst
+ ✓ src/authz/__tests__/policy-matrix.test.ts > WP2.1 canonical matrix decisions > capacity.grant decision row: pfi_credit
+ ✓ src/authz/__tests__/policy-matrix.test.ts > WP2.1 canonical matrix decisions > capacity.grant decision row: fund_manager
+ ✓ src/authz/__tests__/policy-matrix.test.ts > WP2.1 canonical matrix decisions > capacity.grant decision row: external_verifier
+ ✓ src/authz/__tests__/policy-matrix.test.ts > WP2.1 canonical matrix decisions > capacity.grant decision row: union_ta
+ ✓ src/authz/__tests__/policy-matrix.test.ts > WP2.1 canonical matrix decisions > capacity.revoke decision row: platform_admin
+ ✓ src/authz/__tests__/policy-matrix.test.ts > WP2.1 canonical matrix decisions > capacity.revoke decision row: platform_enroller
+ ✓ src/authz/__tests__/policy-matrix.test.ts > WP2.1 canonical matrix decisions > capacity.revoke decision row: self_enroller
+ ✓ src/authz/__tests__/policy-matrix.test.ts > WP2.1 canonical matrix decisions > capacity.revoke decision row: chairperson
+ ✓ src/authz/__tests__/policy-matrix.test.ts > WP2.1 canonical matrix decisions > capacity.revoke decision row: vice_chairperson
+ ✓ src/authz/__tests__/policy-matrix.test.ts > WP2.1 canonical matrix decisions > capacity.revoke decision row: secretary
+ ✓ src/authz/__tests__/policy-matrix.test.ts > WP2.1 canonical matrix decisions > capacity.revoke decision row: treasurer
+ ✓ src/authz/__tests__/policy-matrix.test.ts > WP2.1 canonical matrix decisions > capacity.revoke decision row: director
+ ✓ src/authz/__tests__/policy-matrix.test.ts > WP2.1 canonical matrix decisions > capacity.revoke decision row: committee_chair
+ ✓ src/authz/__tests__/policy-matrix.test.ts > WP2.1 canonical matrix decisions > capacity.revoke decision row: committee_member
+ ✓ src/authz/__tests__/policy-matrix.test.ts > WP2.1 canonical matrix decisions > capacity.revoke decision row: member
+ ✓ src/authz/__tests__/policy-matrix.test.ts > WP2.1 canonical matrix decisions > capacity.revoke decision row: internal_verifier
+ ✓ src/authz/__tests__/policy-matrix.test.ts > WP2.1 canonical matrix decisions > capacity.revoke decision row: field_agent
+ ✓ src/authz/__tests__/policy-matrix.test.ts > WP2.1 canonical matrix decisions > capacity.revoke decision row: delegate
+ ✓ src/authz/__tests__/policy-matrix.test.ts > WP2.1 canonical matrix decisions > capacity.revoke decision row: acting_officer
+ ✓ src/authz/__tests__/policy-matrix.test.ts > WP2.1 canonical matrix decisions > capacity.revoke decision row: programme_manager
+ ✓ src/authz/__tests__/policy-matrix.test.ts > WP2.1 canonical matrix decisions > capacity.revoke decision row: ta
+ ✓ src/authz/__tests__/policy-matrix.test.ts > WP2.1 canonical matrix decisions > capacity.revoke decision row: pfi_analyst
+ ✓ src/authz/__tests__/policy-matrix.test.ts > WP2.1 canonical matrix decisions > capacity.revoke decision row: pfi_credit
+ ✓ src/authz/__tests__/policy-matrix.test.ts > WP2.1 canonical matrix decisions > capacity.revoke decision row: fund_manager
+ ✓ src/authz/__tests__/policy-matrix.test.ts > WP2.1 canonical matrix decisions > capacity.revoke decision row: external_verifier
+ ✓ src/authz/__tests__/policy-matrix.test.ts > WP2.1 canonical matrix decisions > capacity.revoke decision row: union_ta
+ ✓ src/authz/__tests__/policy-matrix.test.ts > WP2.1 canonical matrix decisions > ta_scope.grant decision row: platform_admin
+ ✓ src/authz/__tests__/policy-matrix.test.ts > WP2.1 canonical matrix decisions > ta_scope.grant decision row: platform_enroller
+ ✓ src/authz/__tests__/policy-matrix.test.ts > WP2.1 canonical matrix decisions > ta_scope.grant decision row: self_enroller
+ ✓ src/authz/__tests__/policy-matrix.test.ts > WP2.1 canonical matrix decisions > ta_scope.grant decision row: chairperson
+ ✓ src/authz/__tests__/policy-matrix.test.ts > WP2.1 canonical matrix decisions > ta_scope.grant decision row: vice_chairperson
+ ✓ src/authz/__tests__/policy-matrix.test.ts > WP2.1 canonical matrix decisions > ta_scope.grant decision row: secretary
+ ✓ src/authz/__tests__/policy-matrix.test.ts > WP2.1 canonical matrix decisions > ta_scope.grant decision row: treasurer
+ ✓ src/authz/__tests__/policy-matrix.test.ts > WP2.1 canonical matrix decisions > ta_scope.grant decision row: director
+ ✓ src/authz/__tests__/policy-matrix.test.ts > WP2.1 canonical matrix decisions > ta_scope.grant decision row: committee_chair
+ ✓ src/authz/__tests__/policy-matrix.test.ts > WP2.1 canonical matrix decisions > ta_scope.grant decision row: committee_member
+ ✓ src/authz/__tests__/policy-matrix.test.ts > WP2.1 canonical matrix decisions > ta_scope.grant decision row: member
+ ✓ src/authz/__tests__/policy-matrix.test.ts > WP2.1 canonical matrix decisions > ta_scope.grant decision row: internal_verifier
+ ✓ src/authz/__tests__/policy-matrix.test.ts > WP2.1 canonical matrix decisions > ta_scope.grant decision row: field_agent
+ ✓ src/authz/__tests__/policy-matrix.test.ts > WP2.1 canonical matrix decisions > ta_scope.grant decision row: delegate
+ ✓ src/authz/__tests__/policy-matrix.test.ts > WP2.1 canonical matrix decisions > ta_scope.grant decision row: acting_officer
+ ✓ src/authz/__tests__/policy-matrix.test.ts > WP2.1 canonical matrix decisions > ta_scope.grant decision row: programme_manager
+ ✓ src/authz/__tests__/policy-matrix.test.ts > WP2.1 canonical matrix decisions > ta_scope.grant decision row: ta
+ ✓ src/authz/__tests__/policy-matrix.test.ts > WP2.1 canonical matrix decisions > ta_scope.grant decision row: pfi_analyst
+ ✓ src/authz/__tests__/policy-matrix.test.ts > WP2.1 canonical matrix decisions > ta_scope.grant decision row: pfi_credit
+ ✓ src/authz/__tests__/policy-matrix.test.ts > WP2.1 canonical matrix decisions > ta_scope.grant decision row: fund_manager
+ ✓ src/authz/__tests__/policy-matrix.test.ts > WP2.1 canonical matrix decisions > ta_scope.grant decision row: external_verifier
+ ✓ src/authz/__tests__/policy-matrix.test.ts > WP2.1 canonical matrix decisions > ta_scope.grant decision row: union_ta
+ ✓ src/authz/__tests__/policy-matrix.test.ts > WP2.1 canonical matrix decisions > ta_scope.revoke decision row: platform_admin
+ ✓ src/authz/__tests__/policy-matrix.test.ts > WP2.1 canonical matrix decisions > ta_scope.revoke decision row: platform_enroller
+ ✓ src/authz/__tests__/policy-matrix.test.ts > WP2.1 canonical matrix decisions > ta_scope.revoke decision row: self_enroller
+ ✓ src/authz/__tests__/policy-matrix.test.ts > WP2.1 canonical matrix decisions > ta_scope.revoke decision row: chairperson
+ ✓ src/authz/__tests__/policy-matrix.test.ts > WP2.1 canonical matrix decisions > ta_scope.revoke decision row: vice_chairperson
+ ✓ src/authz/__tests__/policy-matrix.test.ts > WP2.1 canonical matrix decisions > ta_scope.revoke decision row: secretary
+ ✓ src/authz/__tests__/policy-matrix.test.ts > WP2.1 canonical matrix decisions > ta_scope.revoke decision row: treasurer
+ ✓ src/authz/__tests__/policy-matrix.test.ts > WP2.1 canonical matrix decisions > ta_scope.revoke decision row: director
+ ✓ src/authz/__tests__/policy-matrix.test.ts > WP2.1 canonical matrix decisions > ta_scope.revoke decision row: committee_chair
+ ✓ src/authz/__tests__/policy-matrix.test.ts > WP2.1 canonical matrix decisions > ta_scope.revoke decision row: committee_member
+ ✓ src/authz/__tests__/policy-matrix.test.ts > WP2.1 canonical matrix decisions > ta_scope.revoke decision row: member
+ ✓ src/authz/__tests__/policy-matrix.test.ts > WP2.1 canonical matrix decisions > ta_scope.revoke decision row: internal_verifier
+ ✓ src/authz/__tests__/policy-matrix.test.ts > WP2.1 canonical matrix decisions > ta_scope.revoke decision row: field_agent
+ ✓ src/authz/__tests__/policy-matrix.test.ts > WP2.1 canonical matrix decisions > ta_scope.revoke decision row: delegate
+ ✓ src/authz/__tests__/policy-matrix.test.ts > WP2.1 canonical matrix decisions > ta_scope.revoke decision row: acting_officer
+ ✓ src/authz/__tests__/policy-matrix.test.ts > WP2.1 canonical matrix decisions > ta_scope.revoke decision row: programme_manager
+ ✓ src/authz/__tests__/policy-matrix.test.ts > WP2.1 canonical matrix decisions > ta_scope.revoke decision row: ta
+ ✓ src/authz/__tests__/policy-matrix.test.ts > WP2.1 canonical matrix decisions > ta_scope.revoke decision row: pfi_analyst
+ ✓ src/authz/__tests__/policy-matrix.test.ts > WP2.1 canonical matrix decisions > ta_scope.revoke decision row: pfi_credit
+ ✓ src/authz/__tests__/policy-matrix.test.ts > WP2.1 canonical matrix decisions > ta_scope.revoke decision row: fund_manager
+ ✓ src/authz/__tests__/policy-matrix.test.ts > WP2.1 canonical matrix decisions > ta_scope.revoke decision row: external_verifier
+ ✓ src/authz/__tests__/policy-matrix.test.ts > WP2.1 canonical matrix decisions > ta_scope.revoke decision row: union_ta
+ ✓ src/kernel/__tests__/command-digest.test.ts > WP1.1 command semantic digest > keeps the digest implementation and persisted receipt version labels aligned
+ ✓ src/kernel/__tests__/command-digest.test.ts > WP1.1 command semantic digest > matches the approved RFC 8785 canonical semantic-envelope vector
+ ✓ src/kernel/__tests__/command-digest.test.ts > WP1.1 command semantic digest > excludes lookup and transport metadata while retaining semantic changes
+ ✓ src/kernel/__tests__/command-digest.test.ts > WP1.1 command semantic digest > binds the organization target to the semantic digest when the HTTP envelope supplies it
+ ✓ src/kernel/__tests__/command-digest.test.ts > WP1.1 command semantic digest > uses the active key version and returns a 32-byte HMAC digest
+ ✓ src/kernel/__tests__/command-digest.test.ts > WP1.1 command semantic digest > replays with the stored historical key version and fails closed when it is unavailable
+ ✓ src/kernel/__tests__/command-digest.test.ts > WP1.1 command semantic digest > rejects invalid JSON values and unavailable canonicalization versions
+ ✓ src/kernel/__tests__/command-bus-transaction.test.ts > WP1.2-A transaction context and WP1.2-B denial audit boundary > passes one context identity through receipt, aggregate, policy, and writes
+ ✓ src/kernel/__tests__/command-bus-transaction.test.ts > WP1.2-A transaction context and WP1.2-B denial audit boundary > runs same-transaction event binding only after the event-bearing repository save
+ ✓ src/kernel/__tests__/command-bus-transaction.test.ts > WP1.2-A transaction context and WP1.2-B denial audit boundary > rolls back the command transaction before recording a denial without policy detail
+ ✓ src/kernel/__tests__/command-bus-transaction.test.ts > WP1.2-A transaction context and WP1.2-B denial audit boundary > commits a semantic no-op receipt without aggregate, event, or outbox writes
+ ✓ src/kernel/__tests__/command-bus-transaction.test.ts > WP1.2-A transaction context and WP1.2-B denial audit boundary > stores an accepted authority conflict as a terminal domain receipt without business writes
+ ✓ src/kernel/__tests__/command-bus-transaction.test.ts > WP1.2-A transaction context and WP1.2-B denial audit boundary > returns a retryable classification when the required audit write fails
+ ✓ src/kernel/__tests__/command-bus-transaction.test.ts > WP1.2-A transaction context and WP1.2-B denial audit boundary > fails closed without trusted actor and tenant context and audits mismatched context as the trusted actor
+ ✓ src/authz/__tests__/capacity-delegation-command-contract.test.ts > D-19 capacity and TA command schemas > rejects generic acting_officer grants and requires delegate source provenance
+ ✓ src/authz/__tests__/capacity-delegation-command-contract.test.ts > D-19 capacity and TA command schemas > strictly distinguishes TA grant and revoke payloads and rejects invalid intervals
+ ✓ src/authz/__tests__/capacity-delegation-command-contract.test.ts > D-19 capacity and TA command schemas > binds a strict command request to one cooperative target and supports creation preconditions
+
+ Test Files  4 passed (4)
+      Tests  115 passed (115)
+   Start at  05:36:48
+   Duration  3.49s (transform 1.71s, setup 0ms, collect 2.39s, tests 98ms, environment 2ms, prepare 2.33s)
+

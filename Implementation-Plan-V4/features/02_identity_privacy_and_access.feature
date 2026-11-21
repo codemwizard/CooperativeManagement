@@ -123,20 +123,24 @@ Feature: Identity, privacy and access
     And a purge audit record is written
 
   @REQ-UNI-001 @REQ-UNI-002 @BDD-UNI-001 @hard
-  Scenario: Union TA sees assigned cohorts and capability gaps but no member PII
-    Given the programme manager delegates TA scope for cohort "Eastern Honey" to union "Chipata Union"
-    When a union TA user opens the capability gaps for a cooperative in that cohort
-    Then they see the full capability gaps
-    And no member names, NRCs or sensitive data appear
-    When they open a cooperative outside the cohort
-    Then they see "Outside your cohort"
+  Scenario: Union TA sees assigned cooperative capability gaps without member PII
+    Given the Programme Manager delegates TA scope for cooperative "Org A" through the union to the assigned Union TA
+    When the assigned Union TA opens the capability-gap workflow for cooperative "Org A"
+    Then the trusted context includes "Org A" in the assigned cooperative scope
+    And the complete workspace response excludes the member PII canaries
+    When the assigned Union TA checks capability-gap scope for unassigned cooperative "Org C"
+    Then "Org C" is absent from the assigned cooperative scope
 
   @REQ-UNI-001 @BDD-UNI-002 @hard
-  Scenario: Delegation is a chain and can be revoked
-    Given a delegation from programme manager to union and from union to a TA officer
-    When the programme manager revokes the union's delegation
-    Then the TA officer loses access to the cohort
-    And past TA actions remain in the audit trail
+  Scenario: Cooperative TA delegation can be revoked without erasing audit history
+    Given the Programme Manager delegates TA scope for cooperative "Org A" through the union to the assigned Union TA
+    When the Union TA opens the capability-gap workflow before revocation
+    Then the trusted context includes "Org A" in the assigned cooperative scope
+    When the Programme Manager revokes the delegation for cooperative "Org A"
+    Then the Union TA loses access to cooperative "Org A"
+    And the delegation grant and revoke audit actions remain immutable
+    When the Programme Manager grants and revokes a new delegation before the Union TA opens its context
+    Then the Union TA still has no access to cooperative "Org A"
 
   @REQ-ID-002 @BDD-ID-001 @hard @SC-003
   Scenario: The registration certificate officers are history, not the current board
@@ -205,7 +209,7 @@ Feature: Identity, privacy and access
     And the screen shows "Minor members: platform capability not enabled; legal reviewer to advise"
     And the rejection does not claim the Act forbids minors, because s.24 permits them
 
-  @REQ-ID-008 @BDD-PRV-021 @wip
+  @REQ-ID-008 @BDD-PRV-021
   Scenario: Enabling minor membership needs a recorded legal review
     When the programme manager records the legal reviewer's advice and sets policy "allow_minor_members" on
     Then minor members can be added with the lawful basis and guardian consent rules from that advice

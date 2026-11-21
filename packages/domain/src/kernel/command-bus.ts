@@ -45,6 +45,8 @@ import {
 
 export interface CommandHandlerContext<TAggregate extends AggregateRoot> {
   readonly aggregate: TAggregate | null;
+  /** The same transaction used for receipt, policy, aggregate, event and outbox operations. */
+  readonly transaction: CommandTransactionContext;
   readonly clock: Clock;
   readonly idGen: IdGen;
 }
@@ -54,6 +56,14 @@ export interface DomainTransitionResult<TAggregate extends AggregateRoot, TData 
   readonly events: readonly DomainEvent[];
   readonly outbox?: readonly OutboxMessage[];
   readonly data: TData;
+  /** Accepted semantic no-op: receipt persists, but no aggregate/event/outbox write occurs. */
+  readonly persistAggregate?: boolean;
+  /** Same-transaction source mutations. Runs only after this command wins receipt insertion. */
+  readonly beforePersistence?: () => Promise<void> | void;
+  /** Same-transaction writes that must follow persisted events, such as binding a source row to its event. */
+  readonly afterPersistence?: () => Promise<void> | void;
+  /** Accepted deterministic business conflict; it commits a terminal safe receipt without business writes. */
+  readonly terminalRejection?: { readonly code: 'AUTHORITY_GRANT_CONFLICT' };
 }
 
 export type DomainCommandHandler<
@@ -121,7 +131,7 @@ export class CommandBus<TAggregate extends AggregateRoot> {
           const receipt = await this.deps.receiptStore.get(envelope.commandId, envelope.tenantId, transaction);
           return receipt === null ? null : this.replayReceipt<TData, TPayload>(receipt, envelope);
         },
-      });
+      }, envelope.actorUserId);
     } catch (error: unknown) {
       if (error instanceof OptimisticConcurrencyError) {
         return { ok: false, code: 'STALE_VERSION', detail: error.message };
@@ -159,17 +169,7 @@ export class CommandBus<TAggregate extends AggregateRoot> {
 
     // 3. Resolve aggregateId and load existing aggregate
     let targetAggregateId = options.aggregateId;
-    if (
-      targetAggregateId === undefined &&
-      typeof envelope.payload === 'object' &&
-      envelope.payload !== null &&
-      'aggregateId' in envelope.payload
-    ) {
-      const candidate = (envelope.payload as { readonly aggregateId: unknown }).aggregateId;
-      if (typeof candidate === 'string') {
-        targetAggregateId = candidate;
-      }
-    }
+    if (targetAggregateId === undefined) targetAggregateId = aggregateTargetFrom(envelope.payload);
 
     let existingAggregate: TAggregate | null = null;
     if (targetAggregateId !== undefined) {
@@ -185,6 +185,7 @@ export class CommandBus<TAggregate extends AggregateRoot> {
         id: targetAggregateId ?? envelope.commandId,
         type: envelope.type,
         tenantId: envelope.tenantId,
+        ...(envelope.organizationId ? { organizationId: envelope.organizationId } : {}),
       },
       {
         userId: envelope.actorUserId,
@@ -210,17 +211,20 @@ export class CommandBus<TAggregate extends AggregateRoot> {
     // 5. Execute domain transition handler
     const context: CommandHandlerContext<TAggregate> = {
       aggregate: existingAggregate,
+      transaction,
       clock: this.deps.clock,
       idGen: this.deps.idGen,
     };
 
     const transition = await handler(envelope, context);
-    const result: CommandResult<TData> = {
-      ok: true,
-      aggregateVersion: transition.newState.version,
-      eventIds: transition.events.map((e) => e.id),
-      data: transition.data,
-    };
+    const result: CommandResult<TData> = transition.terminalRejection
+      ? { ok: false, code: 'DOMAIN_VIOLATION', detail: 'The requested authority conflicts with an active grant' }
+      : {
+          ok: true,
+          aggregateVersion: transition.newState.version,
+          eventIds: transition.events.map((e) => e.id),
+          data: transition.data,
+        };
 
     // 6. Atomic save with optimistic concurrency check (INV-019)
     const digest = await computeCommandDigest({
@@ -229,6 +233,7 @@ export class CommandBus<TAggregate extends AggregateRoot> {
       command_id: envelope.commandId,
       command_type: envelope.type,
       command_schema_version: envelope.schemaVersion,
+      ...(envelope.organizationId ? { organization_id: envelope.organizationId } : {}),
       expected_aggregate_version: envelope.expectedVersion,
       payload: envelope.payload as Readonly<Record<string, import('./command-digest.js').JsonValue>>,
     }, this.deps.digestKeyProvider);
@@ -241,9 +246,15 @@ export class CommandBus<TAggregate extends AggregateRoot> {
       canonicalization_version: digest.canonicalization_version,
       digest_key_version: digest.key_version,
       semantic_digest: digest.semantic_digest,
-      result_classification: 'committed_success',
+      result_classification: transition.terminalRejection ? 'terminal_rejection' : 'committed_success',
       result_schema_version: 'command-result-v1',
-      safe_result: {
+      safe_result: transition.terminalRejection ? {
+        schema_version: 'command-result-v1',
+        ok: false,
+        code: 'DOMAIN_CONFLICT',
+        domain_code: transition.terminalRejection.code,
+        aggregate_id: targetAggregateId ?? envelope.commandId,
+      } : {
         schema_version: 'command-result-v1',
         ok: true,
         aggregate_version: transition.newState.version,
@@ -259,13 +270,30 @@ export class CommandBus<TAggregate extends AggregateRoot> {
       if (winner === null) throw new RetryableCommandTransactionError();
       return this.replayReceipt<TData, TPayload>(winner, envelope);
     }
-    await this.deps.repository.save(
-      transition.newState,
-      envelope.expectedVersion,
-      transition.events,
-      transition.outbox ?? [],
-      transaction
-    );
+    if (transition.persistAggregate === false || transition.terminalRejection !== undefined) {
+      if (transition.events.length > 0 || (transition.outbox?.length ?? 0) > 0) {
+        throw new TypeError('A non-mutating command cannot emit events or outbox messages');
+      }
+      if (transition.terminalRejection && transition.persistAggregate !== false) {
+        throw new TypeError('A terminal business conflict cannot persist aggregate state');
+      }
+      if (transition.afterPersistence !== undefined) {
+        throw new TypeError('A non-mutating command cannot run after-persistence writes');
+      }
+      if (transition.beforePersistence !== undefined) {
+        throw new TypeError('A non-mutating command cannot run source-persistence writes');
+      }
+    } else {
+      await transition.beforePersistence?.();
+      await this.deps.repository.save(
+        transition.newState,
+        envelope.expectedVersion,
+        transition.events,
+        transition.outbox ?? [],
+        transaction
+      );
+      await transition.afterPersistence?.();
+    }
 
     return result;
   }
@@ -322,6 +350,7 @@ export class CommandBus<TAggregate extends AggregateRoot> {
       command_id: envelope.commandId,
       command_type: envelope.type,
       command_schema_version: envelope.schemaVersion,
+      ...(envelope.organizationId ? { organization_id: envelope.organizationId } : {}),
       expected_aggregate_version: envelope.expectedVersion,
       payload: envelope.payload as Readonly<Record<string, import('./command-digest.js').JsonValue>>,
     }, this.deps.digestKeyProvider);
@@ -368,7 +397,9 @@ export class CommandBus<TAggregate extends AggregateRoot> {
       tombstoned_at: null,
     };
     await inboxStore.save(inboxItem, transaction);
-    return { ok: false, code: 'STALE_VERSION', detail: 'Command version conflict' };
+    return {
+      ok: false, code: 'STALE_VERSION', detail: 'Command version conflict', reconciliationId,
+    };
   }
 
   private async replayReceipt<TData, TPayload>(
@@ -387,6 +418,7 @@ export class CommandBus<TAggregate extends AggregateRoot> {
         command_id: envelope.commandId,
         command_type: envelope.type,
         command_schema_version: schemaVersion,
+        ...(envelope.organizationId ? { organization_id: envelope.organizationId } : {}),
         expected_aggregate_version: envelope.expectedVersion,
         payload: envelope.payload as Readonly<Record<string, import('./command-digest.js').JsonValue>>,
       }, this.deps.digestKeyProvider, receipt.digest_key_version, receipt.semantic_digest);
@@ -395,10 +427,17 @@ export class CommandBus<TAggregate extends AggregateRoot> {
     }
     const validated = createCommandReceiptSchema(this.deps.resultDataSchemas).parse(receipt);
     if (!validated.safe_result.ok) {
-      return { ok: false, code: 'STALE_VERSION', detail: 'Command version conflict' };
+      if (validated.safe_result.code === 'DOMAIN_CONFLICT') {
+        return { ok: false, replayed: true, code: 'DOMAIN_VIOLATION', detail: 'The requested authority conflicts with an active grant' };
+      }
+      return {
+        ok: false, replayed: true, code: 'STALE_VERSION', detail: 'Command version conflict',
+        ...(validated.safe_result.reconciliation_id ? { reconciliationId: validated.safe_result.reconciliation_id } : {}),
+      };
     }
     return {
       ok: true,
+      replayed: true,
       aggregateVersion: validated.safe_result.aggregate_version,
       eventIds: validated.safe_result.event_ids,
       data: validated.safe_result.data as TData,
@@ -421,4 +460,14 @@ function asDenialCode(reason: string): SecurityAttemptDenialCode {
     default:
       return 'AUTHORIZATION_DENIED';
   }
+}
+
+function aggregateTargetFrom(payload: unknown): string | undefined {
+  if (typeof payload !== 'object' || payload === null) return undefined;
+  const record = payload as Readonly<Record<string, unknown>>;
+  for (const key of ['aggregateId', 'capacityGrantId', 'delegationId']) {
+    const value = record[key];
+    if (typeof value === 'string') return value;
+  }
+  return undefined;
 }

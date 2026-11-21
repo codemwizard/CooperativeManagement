@@ -1,0 +1,3 @@
+npm run verify:wp1.6:dependencies
+PASS REM-WP1.6 predecessor gate at 60cf2e2e0b8eba3971fe15a6e6fb080329d8ec59.
+PASS 26 direct/transitive task records, schema, artifacts and candidate ancestry.

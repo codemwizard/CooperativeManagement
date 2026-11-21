@@ -1,0 +1,90 @@
+{
+  "schema_version": 1,
+  "task_id": "REM-WP2.6",
+  "status": {
+    "implementation": "complete",
+    "unit_test": "passed",
+    "integration_test": "passed",
+    "bdd_ui_test": "not_applicable",
+    "gate_verified": "passed"
+  },
+  "commit": "1b195317eaa342c91efabb2f987bb6b87daaec6c",
+  "candidate": {
+    "status": "immutable implementation candidate",
+    "head_commit_before_implementation": "5c6eb42912405c60198a461b999bba64363dc0be",
+    "implementation_commit": "1b195317eaa342c91efabb2f987bb6b87daaec6c"
+  },
+  "environment": {
+    "node": "v26.7.0",
+    "npm": "v12.2.0",
+    "postgres": "PostgreSQL 18.0; isolated database symphony_phase1_test",
+    "database_role": "symphony_app for runtime privileges, RLS and lock assertions; migration/test-admin roles for migration setup",
+    "data_mode": "test",
+    "key_provider": "local-test"
+  },
+  "commands": [
+    {
+      "command": "node --env-file-if-exists=.env.local --import tsx packages/db/src/migrate.ts (migration apply verification; migrations 0019 and 0020 applied to isolated test database)",
+      "result": "passed",
+      "artifact": "evidence/phase1/wp2.6/local/2026-11-20/migration-apply.raw.log"
+    },
+    {
+      "command": "node --env-file-if-exists=../../.env.local ../../node_modules/vitest/vitest.mjs run --config vitest.config.ts --reporter=verbose (PostgreSQL database suite, from packages/db; 13 files, 71 tests passed)",
+      "result": "passed",
+      "artifact": "evidence/phase1/wp2.6/local/2026-11-20/postgres-db-suite.raw.log"
+    },
+    {
+      "command": "npm run test:db:migrations (PostgreSQL 18 migration suite; 17 tests passed)",
+      "result": "passed",
+      "artifact": "evidence/phase1/wp2.6/local/2026-11-20/migration-suite.raw.log"
+    },
+    {
+      "command": "npm run verify:phase1:contracts",
+      "result": "passed",
+      "artifact": "evidence/phase1/wp2.6/local/2026-11-20/phase1-contract-verification.raw.log"
+    },
+    {
+      "command": "npm run typecheck:v4",
+      "result": "passed",
+      "artifact": "evidence/phase1/wp2.6/local/2026-11-20/typecheck-v4.raw.log"
+    },
+    {
+      "result": "passed",
+      "command": "node tools/verify_wp2_6_closure.mjs 1b195317eaa342c91efabb2f987bb6b87daaec6c --preflight",
+      "artifact": "evidence/phase1/wp2.6/local/2026-11-20/preflight.raw.log"
+    },
+    {
+      "artifact": "evidence/phase1/wp2.6/local/2026-11-20/closure-verification.raw.log",
+      "command": "node tools/verify_wp2_6_closure.mjs 1b195317eaa342c91efabb2f987bb6b87daaec6c",
+      "result": "passed"
+    }
+  ],
+  "claims": {
+    "behavior_proved": "PostgreSQL 18 acceptance proves transaction-local authenticated actor context; persisted trusted scope resolution; canonical lock ordering and same-tenant provisioning; fail-closed tenant/actor mismatch; read-mode version immutability; exact scope-table privilege boundary; application-role DML denial on frozen authority source tables; one-time mutation version increments with transaction rollback; and concurrent protected readers blocking an authority mutator until release.",
+    "path_proved": "Migrations 0019 and 0020 were applied in the isolated PostgreSQL test database. The full DB workspace suite executed the new acceptance against symphony_app and passed 13 files / 71 tests. The exact tested implementation snapshot is committed as candidate 1b195317eaa342c91efabb2f987bb6b87daaec6c; retained raw outputs and SHA-256 values are listed in the local verification manifest.",
+    "configuration_proved": "Node v26.7.0, npm 12.2.0, PostgreSQL 18.0, isolated synthetic/test database, and restricted symphony_app runtime role. Migration setup used the configured migration/test-admin path; no real data was used.",
+    "coverage_limitations": [
+      "This task proves D-16 infrastructure, protected-reader locks, atomic versioning and runtime freeze enforcement. It does not prove supported capacity/delegation command persistence or authority grant/revoke behavior.",
+      "The PostgreSQL race and immutable-history outcomes for implemented authority mutation paths belong to REM-WP2.4 after REM-WP2.3 exists."
+    ],
+    "predecessors": {
+      "REM-WP0.4": {
+        "result": "passed",
+        "artifact": "evidence/phase1/tasks.json"
+      },
+      "REM-WP2.1": {
+        "result": "passed",
+        "artifact": "evidence/phase1/wp2.1/task-evidence.json"
+      },
+      "REM-WP2.2": {
+        "result": "passed",
+        "artifact": "evidence/phase1/wp2.2/task-evidence.json"
+      }
+    }
+  },
+  "limitations": [
+    "Capacity and delegation application-role DML remains denied until REM-WP2.3 defines, registers and validates supported mutation writers."
+  ],
+  "unresolved_decisions": [],
+  "reviewer": "WP2.6 exact-candidate verifier passed; independent review remains separate."
+}

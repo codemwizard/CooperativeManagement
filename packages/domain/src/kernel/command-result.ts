@@ -13,18 +13,25 @@ export type CommandErrorCode =
   | 'UNAUTHORIZED'
   | 'PRECONDITION_FAILED'
   | 'DOMAIN_VIOLATION'
+  | 'DOMAIN_CONFLICT'
   | 'NOT_FOUND'
   | 'COMMAND_TEMPORARILY_UNAVAILABLE';
 
 export type CommandResult<T> =
   | {
       readonly ok: true;
+      /** Transport metadata; never persisted in the immutable receipt. */
+      readonly replayed?: true;
       readonly aggregateVersion: number;
       readonly eventIds: readonly string[];
       readonly data: T;
     }
   | {
       readonly ok: false;
+      /** Present only when a previously committed terminal receipt was replayed. */
+      readonly replayed?: true;
       readonly code: CommandErrorCode;
       readonly detail: string;
+      /** Opaque reference returned for a persisted terminal VERSION_CONFLICT only. */
+      readonly reconciliationId?: string;
     };

@@ -1,0 +1,1115 @@
+[
+  {
+    "description": "  Every write is a command that commits state, event and outbox atomically, is idempotent,\n  detects stale writes, isolates tenants and never trusts the client for standing or authority.",
+    "elements": [
+      {
+        "description": "",
+        "id": "commands,-audit-trail-and-integrity;the-same-command-id-with-the-same-payload-returns-the-original-result",
+        "keyword": "Scenario",
+        "line": 18,
+        "name": "The same command id with the same payload returns the original result",
+        "steps": [
+          {
+            "result": {
+              "status": "passed",
+              "duration": 8332073200
+            },
+            "keyword": "Before",
+            "hidden": true
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 717000
+            },
+            "arguments": [],
+            "keyword": "Given ",
+            "line": 7,
+            "name": "two organisations \"Org A\" and \"Org B\" in separate tenants",
+            "match": {
+              "location": "packages\\testkit\\src\\step-definitions\\kernel-steps.ts:324"
+            }
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 411000
+            },
+            "arguments": [],
+            "keyword": "And ",
+            "line": 8,
+            "name": "an authenticated Secretary in \"Org A\"",
+            "match": {
+              "location": "packages\\testkit\\src\\step-definitions\\kernel-steps.ts:340"
+            }
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 273857800
+            },
+            "arguments": [],
+            "keyword": "Given ",
+            "line": 19,
+            "name": "a persisted Chairperson session in \"Org A\"",
+            "match": {
+              "location": "tools\\wp16-command-live-steps.ts:108"
+            }
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 300566900
+            },
+            "arguments": [],
+            "keyword": "And ",
+            "line": 20,
+            "name": "a registered GrantCapacity command has been applied",
+            "match": {
+              "location": "tools\\wp16-command-live-steps.ts:112"
+            }
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 15265999
+            },
+            "arguments": [],
+            "keyword": "When ",
+            "line": 21,
+            "name": "the same registered command is submitted again",
+            "match": {
+              "location": "tools\\wp16-command-live-steps.ts:125"
+            }
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 1421699
+            },
+            "arguments": [],
+            "keyword": "Then ",
+            "line": 22,
+            "name": "the HTTP result is a replay of the original command result",
+            "match": {
+              "location": "tools\\wp16-command-live-steps.ts:130"
+            }
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 1269599
+            },
+            "arguments": [],
+            "keyword": "And ",
+            "line": 23,
+            "name": "no additional event is written for the replay",
+            "match": {
+              "location": "tools\\wp16-command-live-steps.ts:135"
+            }
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 379324799
+            },
+            "keyword": "After",
+            "hidden": true
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 403099
+            },
+            "keyword": "After",
+            "hidden": true
+          }
+        ],
+        "tags": [
+          {
+            "name": "@phase1",
+            "line": 1
+          },
+          {
+            "name": "@area-AUD",
+            "line": 1
+          },
+          {
+            "name": "@REQ-AUD-002",
+            "line": 17
+          },
+          {
+            "name": "@BDD-AUD-002",
+            "line": 17
+          },
+          {
+            "name": "@hard",
+            "line": 17
+          },
+          {
+            "name": "@SC-016",
+            "line": 17
+          },
+          {
+            "name": "@wp16-live",
+            "line": 17
+          }
+        ],
+        "type": "scenario"
+      },
+      {
+        "description": "",
+        "id": "commands,-audit-trail-and-integrity;the-same-command-id-with-a-different-payload-is-rejected",
+        "keyword": "Scenario",
+        "line": 26,
+        "name": "The same command id with a different payload is rejected",
+        "steps": [
+          {
+            "result": {
+              "status": "passed",
+              "duration": 3344480400
+            },
+            "keyword": "Before",
+            "hidden": true
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 190300
+            },
+            "arguments": [],
+            "keyword": "Given ",
+            "line": 7,
+            "name": "two organisations \"Org A\" and \"Org B\" in separate tenants",
+            "match": {
+              "location": "packages\\testkit\\src\\step-definitions\\kernel-steps.ts:324"
+            }
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 137999
+            },
+            "arguments": [],
+            "keyword": "And ",
+            "line": 8,
+            "name": "an authenticated Secretary in \"Org A\"",
+            "match": {
+              "location": "packages\\testkit\\src\\step-definitions\\kernel-steps.ts:340"
+            }
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 97444299
+            },
+            "arguments": [],
+            "keyword": "Given ",
+            "line": 27,
+            "name": "a persisted Chairperson session in \"Org A\"",
+            "match": {
+              "location": "tools\\wp16-command-live-steps.ts:108"
+            }
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 206838499
+            },
+            "arguments": [],
+            "keyword": "And ",
+            "line": 28,
+            "name": "a registered GrantCapacity command has been applied",
+            "match": {
+              "location": "tools\\wp16-command-live-steps.ts:112"
+            }
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 14695499
+            },
+            "arguments": [],
+            "keyword": "When ",
+            "line": 29,
+            "name": "a registered command reuses the id with a different payload",
+            "match": {
+              "location": "tools\\wp16-command-live-steps.ts:139"
+            }
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 254800
+            },
+            "arguments": [],
+            "keyword": "Then ",
+            "line": 30,
+            "name": "the HTTP command result is \"IDEMPOTENCY_KEY_REUSED\"",
+            "match": {
+              "location": "tools\\wp16-command-live-steps.ts:144"
+            }
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 273995899
+            },
+            "keyword": "After",
+            "hidden": true
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 122499
+            },
+            "keyword": "After",
+            "hidden": true
+          }
+        ],
+        "tags": [
+          {
+            "name": "@phase1",
+            "line": 1
+          },
+          {
+            "name": "@area-AUD",
+            "line": 1
+          },
+          {
+            "name": "@REQ-AUD-002",
+            "line": 25
+          },
+          {
+            "name": "@BDD-AUD-003",
+            "line": 25
+          },
+          {
+            "name": "@hard",
+            "line": 25
+          },
+          {
+            "name": "@SC-016",
+            "line": 25
+          },
+          {
+            "name": "@wp16-live",
+            "line": 25
+          }
+        ],
+        "type": "scenario"
+      },
+      {
+        "description": "",
+        "id": "commands,-audit-trail-and-integrity;a-command-cannot-touch-another-organisation",
+        "keyword": "Scenario",
+        "line": 41,
+        "name": "A command cannot touch another organisation",
+        "steps": [
+          {
+            "result": {
+              "status": "passed",
+              "duration": 2552312099
+            },
+            "keyword": "Before",
+            "hidden": true
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 152699
+            },
+            "arguments": [],
+            "keyword": "Given ",
+            "line": 7,
+            "name": "two organisations \"Org A\" and \"Org B\" in separate tenants",
+            "match": {
+              "location": "packages\\testkit\\src\\step-definitions\\kernel-steps.ts:324"
+            }
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 78999
+            },
+            "arguments": [],
+            "keyword": "And ",
+            "line": 8,
+            "name": "an authenticated Secretary in \"Org A\"",
+            "match": {
+              "location": "packages\\testkit\\src\\step-definitions\\kernel-steps.ts:340"
+            }
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 212939399
+            },
+            "arguments": [],
+            "keyword": "When ",
+            "line": 42,
+            "name": "the Secretary in \"Org A\" submits GrantCapacity for \"Org B\"",
+            "match": {
+              "location": "tools\\wp16-command-live-steps.ts:149"
+            }
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 137999
+            },
+            "arguments": [],
+            "keyword": "Then ",
+            "line": 43,
+            "name": "the HTTP command result is \"NOT_AUTHORIZED\"",
+            "match": {
+              "location": "tools\\wp16-command-live-steps.ts:144"
+            }
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 1229400
+            },
+            "arguments": [],
+            "keyword": "And ",
+            "line": 44,
+            "name": "nothing in \"Org B\" changes",
+            "match": {
+              "location": "packages\\testkit\\src\\step-definitions\\kernel-steps.ts:838"
+            }
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 2689200
+            },
+            "arguments": [],
+            "keyword": "And ",
+            "line": 45,
+            "name": "the tenant mismatch is recorded in the security-attempt audit",
+            "match": {
+              "location": "packages\\testkit\\src\\step-definitions\\kernel-steps.ts:869"
+            }
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 275885999
+            },
+            "keyword": "After",
+            "hidden": true
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 125700
+            },
+            "keyword": "After",
+            "hidden": true
+          }
+        ],
+        "tags": [
+          {
+            "name": "@phase1",
+            "line": 1
+          },
+          {
+            "name": "@area-AUD",
+            "line": 1
+          },
+          {
+            "name": "@REQ-AUD-004",
+            "line": 40
+          },
+          {
+            "name": "@BDD-AUD-005",
+            "line": 40
+          },
+          {
+            "name": "@hard",
+            "line": 40
+          },
+          {
+            "name": "@SC-015",
+            "line": 40
+          },
+          {
+            "name": "@wp16-live",
+            "line": 40
+          }
+        ],
+        "type": "scenario"
+      },
+      {
+        "description": "",
+        "id": "commands,-audit-trail-and-integrity;read-only-institutions-cannot-mutate-cooperative-source-records",
+        "keyword": "Scenario Outline",
+        "line": 66,
+        "name": "Read-only institutions cannot mutate cooperative source records",
+        "steps": [
+          {
+            "result": {
+              "status": "passed",
+              "duration": 2827068800
+            },
+            "keyword": "Before",
+            "hidden": true
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 103999
+            },
+            "arguments": [],
+            "keyword": "Given ",
+            "line": 7,
+            "name": "two organisations \"Org A\" and \"Org B\" in separate tenants",
+            "match": {
+              "location": "packages\\testkit\\src\\step-definitions\\kernel-steps.ts:324"
+            }
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 110799
+            },
+            "arguments": [],
+            "keyword": "And ",
+            "line": 8,
+            "name": "an authenticated Secretary in \"Org A\"",
+            "match": {
+              "location": "packages\\testkit\\src\\step-definitions\\kernel-steps.ts:340"
+            }
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 403899
+            },
+            "arguments": [],
+            "keyword": "Given ",
+            "line": 60,
+            "name": "a \"pfi_analyst\" with read-only scope on \"Org A\"",
+            "match": {
+              "location": "packages\\testkit\\src\\step-definitions\\authz-steps.ts:553"
+            }
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 376125500
+            },
+            "arguments": [],
+            "keyword": "When ",
+            "line": 61,
+            "name": "they submit the registered \"GrantCapacity\" command",
+            "match": {
+              "location": "tools\\wp16-command-live-steps.ts:159"
+            }
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 242200
+            },
+            "arguments": [],
+            "keyword": "Then ",
+            "line": 62,
+            "name": "the HTTP command result is \"NOT_AUTHORIZED\"",
+            "match": {
+              "location": "tools\\wp16-command-live-steps.ts:144"
+            }
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 249314800
+            },
+            "keyword": "After",
+            "hidden": true
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 66599
+            },
+            "keyword": "After",
+            "hidden": true
+          }
+        ],
+        "tags": [
+          {
+            "name": "@phase1",
+            "line": 1
+          },
+          {
+            "name": "@area-AUD",
+            "line": 1
+          },
+          {
+            "name": "@REQ-AUD-006",
+            "line": 58
+          },
+          {
+            "name": "@BDD-AUD-008",
+            "line": 58
+          },
+          {
+            "name": "@hard",
+            "line": 58
+          },
+          {
+            "name": "@SC-019",
+            "line": 58
+          },
+          {
+            "name": "@wp16-live",
+            "line": 58
+          }
+        ],
+        "type": "scenario"
+      },
+      {
+        "description": "",
+        "id": "commands,-audit-trail-and-integrity;read-only-institutions-cannot-mutate-cooperative-source-records",
+        "keyword": "Scenario Outline",
+        "line": 67,
+        "name": "Read-only institutions cannot mutate cooperative source records",
+        "steps": [
+          {
+            "result": {
+              "status": "passed",
+              "duration": 2702232900
+            },
+            "keyword": "Before",
+            "hidden": true
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 158299
+            },
+            "arguments": [],
+            "keyword": "Given ",
+            "line": 7,
+            "name": "two organisations \"Org A\" and \"Org B\" in separate tenants",
+            "match": {
+              "location": "packages\\testkit\\src\\step-definitions\\kernel-steps.ts:324"
+            }
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 81899
+            },
+            "arguments": [],
+            "keyword": "And ",
+            "line": 8,
+            "name": "an authenticated Secretary in \"Org A\"",
+            "match": {
+              "location": "packages\\testkit\\src\\step-definitions\\kernel-steps.ts:340"
+            }
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 86999
+            },
+            "arguments": [],
+            "keyword": "Given ",
+            "line": 60,
+            "name": "a \"union_ta\" with read-only scope on \"Org A\"",
+            "match": {
+              "location": "packages\\testkit\\src\\step-definitions\\authz-steps.ts:553"
+            }
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 468985200
+            },
+            "arguments": [],
+            "keyword": "When ",
+            "line": 61,
+            "name": "they submit the registered \"GrantCapacity\" command",
+            "match": {
+              "location": "tools\\wp16-command-live-steps.ts:159"
+            }
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 2052900
+            },
+            "arguments": [],
+            "keyword": "Then ",
+            "line": 62,
+            "name": "the HTTP command result is \"NOT_AUTHORIZED\"",
+            "match": {
+              "location": "tools\\wp16-command-live-steps.ts:144"
+            }
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 473566699
+            },
+            "keyword": "After",
+            "hidden": true
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 65300
+            },
+            "keyword": "After",
+            "hidden": true
+          }
+        ],
+        "tags": [
+          {
+            "name": "@phase1",
+            "line": 1
+          },
+          {
+            "name": "@area-AUD",
+            "line": 1
+          },
+          {
+            "name": "@REQ-AUD-006",
+            "line": 58
+          },
+          {
+            "name": "@BDD-AUD-008",
+            "line": 58
+          },
+          {
+            "name": "@hard",
+            "line": 58
+          },
+          {
+            "name": "@SC-019",
+            "line": 58
+          },
+          {
+            "name": "@wp16-live",
+            "line": 58
+          }
+        ],
+        "type": "scenario"
+      },
+      {
+        "description": "",
+        "id": "commands,-audit-trail-and-integrity;read-only-institutions-cannot-mutate-cooperative-source-records",
+        "keyword": "Scenario Outline",
+        "line": 68,
+        "name": "Read-only institutions cannot mutate cooperative source records",
+        "steps": [
+          {
+            "result": {
+              "status": "passed",
+              "duration": 4218074400
+            },
+            "keyword": "Before",
+            "hidden": true
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 162299
+            },
+            "arguments": [],
+            "keyword": "Given ",
+            "line": 7,
+            "name": "two organisations \"Org A\" and \"Org B\" in separate tenants",
+            "match": {
+              "location": "packages\\testkit\\src\\step-definitions\\kernel-steps.ts:324"
+            }
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 142299
+            },
+            "arguments": [],
+            "keyword": "And ",
+            "line": 8,
+            "name": "an authenticated Secretary in \"Org A\"",
+            "match": {
+              "location": "packages\\testkit\\src\\step-definitions\\kernel-steps.ts:340"
+            }
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 171699
+            },
+            "arguments": [],
+            "keyword": "Given ",
+            "line": 60,
+            "name": "a \"fund_manager\" with read-only scope on \"Org A\"",
+            "match": {
+              "location": "packages\\testkit\\src\\step-definitions\\authz-steps.ts:553"
+            }
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 450297100
+            },
+            "arguments": [],
+            "keyword": "When ",
+            "line": 61,
+            "name": "they submit the registered \"GrantCapacity\" command",
+            "match": {
+              "location": "tools\\wp16-command-live-steps.ts:159"
+            }
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 162899
+            },
+            "arguments": [],
+            "keyword": "Then ",
+            "line": 62,
+            "name": "the HTTP command result is \"NOT_AUTHORIZED\"",
+            "match": {
+              "location": "tools\\wp16-command-live-steps.ts:144"
+            }
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 353542900
+            },
+            "keyword": "After",
+            "hidden": true
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 84000
+            },
+            "keyword": "After",
+            "hidden": true
+          }
+        ],
+        "tags": [
+          {
+            "name": "@phase1",
+            "line": 1
+          },
+          {
+            "name": "@area-AUD",
+            "line": 1
+          },
+          {
+            "name": "@REQ-AUD-006",
+            "line": 58
+          },
+          {
+            "name": "@BDD-AUD-008",
+            "line": 58
+          },
+          {
+            "name": "@hard",
+            "line": 58
+          },
+          {
+            "name": "@SC-019",
+            "line": 58
+          },
+          {
+            "name": "@wp16-live",
+            "line": 58
+          }
+        ],
+        "type": "scenario"
+      },
+      {
+        "description": "",
+        "id": "commands,-audit-trail-and-integrity;the-client-cannot-set-verified,-authority-or-approval-states",
+        "keyword": "Scenario",
+        "line": 71,
+        "name": "The client cannot set verified, authority or approval states",
+        "steps": [
+          {
+            "result": {
+              "status": "passed",
+              "duration": 4802118099
+            },
+            "keyword": "Before",
+            "hidden": true
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 238900
+            },
+            "arguments": [],
+            "keyword": "Given ",
+            "line": 7,
+            "name": "two organisations \"Org A\" and \"Org B\" in separate tenants",
+            "match": {
+              "location": "packages\\testkit\\src\\step-definitions\\kernel-steps.ts:324"
+            }
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 118799
+            },
+            "arguments": [],
+            "keyword": "And ",
+            "line": 8,
+            "name": "an authenticated Secretary in \"Org A\"",
+            "match": {
+              "location": "packages\\testkit\\src\\step-definitions\\kernel-steps.ts:340"
+            }
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 127477899
+            },
+            "arguments": [],
+            "keyword": "Given ",
+            "line": 72,
+            "name": "a persisted Chairperson session in \"Org A\"",
+            "match": {
+              "location": "tools\\wp16-command-live-steps.ts:108"
+            }
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 389383999
+            },
+            "arguments": [],
+            "keyword": "When ",
+            "line": 73,
+            "name": "a client submits a registered command with injected \"status\": \"approved_official\"",
+            "match": {
+              "location": "tools\\wp16-command-live-steps.ts:167"
+            }
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 277099
+            },
+            "arguments": [],
+            "keyword": "Then ",
+            "line": 74,
+            "name": "the client-supplied status is rejected by the command schema",
+            "match": {
+              "location": "tools\\wp16-command-live-steps.ts:178"
+            }
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 19327199
+            },
+            "arguments": [],
+            "keyword": "And ",
+            "line": 75,
+            "name": "the persisted capacity remains linked to its committed domain event",
+            "match": {
+              "location": "tools\\wp16-command-live-steps.ts:182"
+            }
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 513994599
+            },
+            "keyword": "After",
+            "hidden": true
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 108499
+            },
+            "keyword": "After",
+            "hidden": true
+          }
+        ],
+        "tags": [
+          {
+            "name": "@phase1",
+            "line": 1
+          },
+          {
+            "name": "@area-AUD",
+            "line": 1
+          },
+          {
+            "name": "@REQ-AUD-006",
+            "line": 70
+          },
+          {
+            "name": "@BDD-AUD-009",
+            "line": 70
+          },
+          {
+            "name": "@hard",
+            "line": 70
+          },
+          {
+            "name": "@INV-021",
+            "line": 70
+          },
+          {
+            "name": "@wp16-live",
+            "line": 70
+          }
+        ],
+        "type": "scenario"
+      },
+      {
+        "description": "",
+        "id": "commands,-audit-trail-and-integrity;authorisation-is-enforced-on-the-server-for-every-command",
+        "keyword": "Scenario",
+        "line": 103,
+        "name": "Authorisation is enforced on the server for every command",
+        "steps": [
+          {
+            "result": {
+              "status": "passed",
+              "duration": 4092324300
+            },
+            "keyword": "Before",
+            "hidden": true
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 220099
+            },
+            "arguments": [],
+            "keyword": "Given ",
+            "line": 7,
+            "name": "two organisations \"Org A\" and \"Org B\" in separate tenants",
+            "match": {
+              "location": "packages\\testkit\\src\\step-definitions\\kernel-steps.ts:324"
+            }
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 135999
+            },
+            "arguments": [],
+            "keyword": "And ",
+            "line": 8,
+            "name": "an authenticated Secretary in \"Org A\"",
+            "match": {
+              "location": "packages\\testkit\\src\\step-definitions\\kernel-steps.ts:340"
+            }
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 344357800
+            },
+            "arguments": [],
+            "keyword": "When ",
+            "line": 104,
+            "name": "a Secretary sends GrantCapacity with a forged platform-admin role header",
+            "match": {
+              "location": "tools\\wp16-command-live-steps.ts:209"
+            }
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 63282099
+            },
+            "arguments": [],
+            "keyword": "Then ",
+            "line": 105,
+            "name": "the same authenticated Secretary is denied without the forged header",
+            "match": {
+              "location": "tools\\wp16-command-live-steps.ts:215"
+            }
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 14103799
+            },
+            "arguments": [],
+            "keyword": "And ",
+            "line": 106,
+            "name": "no business command state was written",
+            "match": {
+              "location": "tools\\wp16-command-live-steps.ts:222"
+            }
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 483301100
+            },
+            "keyword": "After",
+            "hidden": true
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 91200
+            },
+            "keyword": "After",
+            "hidden": true
+          }
+        ],
+        "tags": [
+          {
+            "name": "@phase1",
+            "line": 1
+          },
+          {
+            "name": "@area-AUD",
+            "line": 1
+          },
+          {
+            "name": "@REQ-AUD-008",
+            "line": 102
+          },
+          {
+            "name": "@BDD-AUD-014",
+            "line": 102
+          },
+          {
+            "name": "@hard",
+            "line": 102
+          },
+          {
+            "name": "@wp16-live",
+            "line": 102
+          }
+        ],
+        "type": "scenario"
+      }
+    ],
+    "id": "commands,-audit-trail-and-integrity",
+    "line": 2,
+    "keyword": "Feature",
+    "name": "Commands, audit trail and integrity",
+    "tags": [
+      {
+        "name": "@phase1",
+        "line": 1
+      },
+      {
+        "name": "@area-AUD",
+        "line": 1
+      }
+    ],
+    "uri": "features\\09_commands_audit_and_integrity.feature"
+  }
+]
