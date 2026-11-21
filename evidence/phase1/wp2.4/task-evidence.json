@@ -8,11 +8,11 @@
     "bdd_ui_test": "not_applicable",
     "gate_verified": "pending"
   },
-  "commit": "5cd896f8c92a944acd1eae3c655c901ba5c37d62",
+  "commit": "5cd896fdbbb0dcc6262315df18a362e99f6e9d07",
   "candidate": {
     "status": "immutable implementation candidate",
     "head_commit_before_implementation": "88370d01a278425ca90b61c91f1ab8219d14ade9",
-    "implementation_commit": "5cd896f8c92a944acd1eae3c655c901ba5c37d62"
+    "implementation_commit": "5cd896fdbbb0dcc6262315df18a362e99f6e9d07"
   },
   "environment": {
     "node": "v26.7.0",
@@ -63,7 +63,7 @@
       "The expiry case proves an elapsed persisted source is inactive and does not independently increment versions. It does not add a clock-injection API or claim a legally valid source instrument.",
       "WP2.6 owns generic multi-scope canonical ordering, dual-reader barriers, cross-tenant rejection, schema/privilege enforcement, and rollback. WP2.4 references the exact WP2.6 predecessor and reruns its applicable integration suite rather than claiming those behaviors as new WP2.4 implementation.",
       "No browser/UI BDD is in scope for the serialization task.",
-      "CI has not run for candidate 5cd896f8c92a944acd1eae3c655c901ba5c37d62. The recorded result is local candidate verification."
+      "CI has not run for candidate 5cd896fdbbb0dcc6262315df18a362e99f6e9d07. The recorded result is local candidate verification."
     ],
     "predecessors": {
       "REM-WP0.4": {
@@ -89,7 +89,7 @@
     }
   },
   "limitations": [
-    "The WP2.4 task record is bound to immutable implementation candidate 5cd896f8c92a944acd1eae3c655c901ba5c37d62. Gate status remains pending until the preflight and final exact-candidate verifier pass.",
+    "The WP2.4 task record is bound to immutable implementation candidate 5cd896fdbbb0dcc6262315df18a362e99f6e9d07. Gate status remains pending until the preflight and final exact-candidate verifier pass.",
     "The implementation candidate is local; no remote CI result is available."
   ],
   "unresolved_decisions": [],
