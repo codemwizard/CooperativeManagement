@@ -52,6 +52,11 @@
       "command": "npm run verify:arch (180 modules, 412 dependencies)",
       "result": "passed",
       "artifact": "evidence/phase1/wp2.4/local/2026-11-21/architecture-verification.log"
+    },
+    {
+      "command": "node tools/verify_wp2_4_closure.mjs e9b9cf9249a5d533ce8e3a665762d3d1adcfcf1c (final exact-candidate closure verification after successful preflight)",
+      "result": "passed",
+      "artifact": "evidence/phase1/wp2.4/local/2026-11-21/wp2.4-exact-candidate-closure.log"
     }
   ],
   "claims": {

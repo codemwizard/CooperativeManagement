@@ -1,0 +1,2 @@
+PASS REM-WP2.4 implementation candidate e9b9cf9249a5d533ce8e3a665762d3d1adcfcf1c; evidence HEAD 02d85f3c33785951886023daa90737ccd8b4b896.
+PASS exact predecessor candidates, PostgreSQL serial orders, immutable history, expiry/version behavior, and D-16 infrastructure evidence.
