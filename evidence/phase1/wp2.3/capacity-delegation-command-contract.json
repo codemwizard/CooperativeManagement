@@ -76,7 +76,6 @@
   "known_limitations": [
     "Agreement references are documentary text and are not verified against a registry.",
     "No dedicated acting-officer appointment/delegation mutation model is included; generic capacity commands cannot create acting_officer. Acting authority remains usable only when the trusted context supplies a valid source-backed record.",
-    "The current PostgreSQL command policy store fails closed for source-backed acting-officer actors because it cannot resolve a typed acting appointment/delegation from existing persisted records.",
     "The assisted-enrolment session fact source is frozen for runtime writes; session-start and attestation production workflow is outside WP2.3. The registered GrantCapacity command records the representative's approval atomically with the IFV grant.",
     "WP2.4 still owns PostgreSQL two-order race/barrier evidence after WP2.3 source mutation exists."
   ],

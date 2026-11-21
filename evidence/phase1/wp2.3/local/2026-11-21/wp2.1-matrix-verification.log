@@ -1,0 +1,14 @@
+npm notice run symphony-prototype@1.0.0 verify:wp2.1:matrix
+npm notice run node tools/verify_wp2_1_policy_matrix.mjs && node --test tools/__tests__/verify_wp2_1_policy_matrix.test.mjs
+WP2.1 authorization matrix valid: 4 actions × 22 actor classes; 15 required boundary dimensions.
+✔ canonical matrix is exhaustive and source traced (11.0135ms)
+✔ missing, duplicated, unknown, or untraced actor decisions fail completeness (4.8436ms)
+✔ missing boundary dimensions fail completeness (0.9872ms)
+ℹ tests 3
+ℹ suites 0
+ℹ pass 3
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 264.0685

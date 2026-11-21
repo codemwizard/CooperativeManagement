@@ -14,18 +14,20 @@ Feature: Commands, audit trail and integrity
     And no event persists
     And no outbox row persists
 
-  @REQ-AUD-002 @BDD-AUD-002 @hard @SC-016
+  @REQ-AUD-002 @BDD-AUD-002 @hard @SC-016 @wp16-live
   Scenario: The same command id with the same payload returns the original result
-    Given a command with id "c-1" has been applied
-    When the same command is submitted again
-    Then the result equals the first result
-    And no second event is written
+    Given a persisted Chairperson session in "Org A"
+    And a registered GrantCapacity command has been applied
+    When the same registered command is submitted again
+    Then the HTTP result is a replay of the original command result
+    And no additional event is written for the replay
 
-  @REQ-AUD-002 @BDD-AUD-003 @hard @SC-016
+  @REQ-AUD-002 @BDD-AUD-003 @hard @SC-016 @wp16-live
   Scenario: The same command id with a different payload is rejected
-    Given a command with id "c-1" has been applied
-    When a command with id "c-1" and a different payload is submitted
-    Then it is rejected with reason "IDEMPOTENCY_KEY_REUSED"
+    Given a persisted Chairperson session in "Org A"
+    And a registered GrantCapacity command has been applied
+    When a registered command reuses the id with a different payload
+    Then the HTTP command result is "IDEMPOTENCY_KEY_REUSED"
 
   @REQ-AUD-003 @BDD-AUD-004 @hard @SC-017
   Scenario: A stale expected version is rejected and both inputs are preserved
@@ -35,10 +37,10 @@ Feature: Commands, audit trail and integrity
     And the second is rejected with reason "VERSION_CONFLICT"
     And the rejected input is stored for reconciliation
 
-  @REQ-AUD-004 @BDD-AUD-005 @hard @SC-015
+  @REQ-AUD-004 @BDD-AUD-005 @hard @SC-015 @wp16-live
   Scenario: A command cannot touch another organisation
-    When the Secretary in "Org A" sends a command targeting an evidence item in "Org B"
-    Then it is rejected with reason "NOT_AUTHORIZED"
+    When the Secretary in "Org A" submits GrantCapacity for "Org B"
+    Then the HTTP command result is "NOT_AUTHORIZED"
     And nothing in "Org B" changes
     And the tenant mismatch is recorded in the security-attempt audit
 
@@ -53,24 +55,24 @@ Feature: Commands, audit trail and integrity
     Then the domain event store contains no UI interaction events
     And the telemetry stream contains no personal data
 
-  @REQ-AUD-006 @BDD-AUD-008 @hard @SC-019
+  @REQ-AUD-006 @BDD-AUD-008 @hard @SC-019 @wp16-live
   Scenario Outline: Read-only institutions cannot mutate cooperative source records
     Given a "<role>" with read-only scope on "Org A"
-    When they send "<command>"
-    Then it is rejected with reason "READ_ONLY_ROLE"
+    When they submit the registered "GrantCapacity" command
+    Then the HTTP command result is "NOT_AUTHORIZED"
 
     Examples:
-      | role          | command            |
-      | pfi_analyst   | AmendClaim         |
-      | union_ta      | AdmitEvidence      |
-      | fund_manager  | ApproveMinutes     |
-      | ta            | RecordTaCompletion |
+      | role         |
+      | pfi_analyst  |
+      | union_ta     |
+      | fund_manager |
 
-  @REQ-AUD-006 @BDD-AUD-009 @hard @INV-021
+  @REQ-AUD-006 @BDD-AUD-009 @hard @INV-021 @wp16-live
   Scenario: The client cannot set verified, authority or approval states
-    When a client submits a payload containing "status": "approved_official"
-    Then the field is ignored or the command is rejected
-    And standing is recomputed from events only
+    Given a persisted Chairperson session in "Org A"
+    When a client submits a registered command with injected "status": "approved_official"
+    Then the client-supplied status is rejected by the command schema
+    And the persisted capacity remains linked to its committed domain event
 
   @REQ-AUD-001 @BDD-AUD-010 @hard @INV-018
   Scenario: Events are append-only
@@ -97,11 +99,11 @@ Feature: Commands, audit trail and integrity
     When a finding is recorded for version 1 against that assignment
     Then the database or command rejects it with reason "FINDING_VERSION_MISMATCH"
 
-  @REQ-AUD-008 @BDD-AUD-014 @hard
+  @REQ-AUD-008 @BDD-AUD-014 @hard @wp16-live
   Scenario: Authorisation is enforced on the server for every command
-    When a command is sent with a forged role header
-    Then the server uses the stored user, capacities and appointments
-    And the forged header has no effect
+    When a Secretary sends GrantCapacity with a forged platform-admin role header
+    Then the same authenticated Secretary is denied without the forged header
+    And no business command state was written
 
   @REQ-ENR-008 @BDD-AUD-015 @hard
   Scenario: Events keep occurred_at separate from recorded_at

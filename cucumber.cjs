@@ -7,6 +7,7 @@ module.exports = {
       'packages/testkit/src/step-definitions/kernel-steps.ts',
       'packages/testkit/src/step-definitions/auth-steps.ts',
       'packages/testkit/src/step-definitions/authz-steps.ts',
+      'tools/wp16-command-live-steps.ts',
       'packages/testkit/src/step-definitions/privacy-steps.ts',
       'packages/testkit/src/step-definitions/data-mode-steps.ts',
       'packages/testkit/src/step-definitions/workspace-steps.ts',

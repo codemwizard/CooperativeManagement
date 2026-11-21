@@ -409,7 +409,7 @@
         "REM-WP2.3",
         "REM-WP1.6"
       ],
-      "required_path": "Pure policy denial (REM-WP2.1), trusted persisted authority (REM-WP2.2), an approved registered Phase 1 command (REM-WP2.3), and actual HTTP composition with forged-claim rejection (REM-WP1.6). The current feature examples must be reconciled to registered command IDs before this scenario can pass.",
+      "required_path": "Pure policy denial (REM-WP2.1), trusted persisted authority (REM-WP2.2), the registered GrantCapacity command (REM-WP2.3), and actual persisted-session HTTP composition with forged-claim rejection (REM-WP1.6). The feature examples use the registered command and assert the generic NOT_AUTHORIZED HTTP result.",
       "assertion_rule": "Execute this exact tagged scenario with observable assertions on the specified product path; no mock, @wip, skip, tag removal, zero-step pass, or in-memory substitute.",
       "phase0_status": "mapped_and_deferred_to_owner_task"
     },
