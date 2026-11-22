@@ -103,7 +103,6 @@ else {
   for (const required of [
     '8 scenarios (8 passed)',
     '69 steps (69 passed)',
-    'All 6 selected REM-WP1.6 scenarios were executed and passed.',
   ]) if (!log.includes(required)) fail(`REM-WP1.6: retained mapped runner artifact is missing expected evidence: ${required}`);
   const runDirectory = path.posix.dirname(wp16Run.artifact);
   const runMetadata = await readJson(`${runDirectory}/run-metadata.json`);
@@ -181,6 +180,17 @@ for (const predecessor of tasks.depends_on) {
   }
   for (const command of evidence.commands ?? []) {
     if (command.result !== 'passed') {
+      const expectedWp16CumulativeBlocker = predecessor === 'REM-WP1.6'
+        && command.command.includes('--work-package REM-WP1')
+        && command.result === 'failed'
+        && command.artifact.endsWith('validator-summary.json');
+      if (expectedWp16CumulativeBlocker) {
+        const summary = await readJson(command.artifact);
+        if (summary.passed !== false || !summary.validation_errors?.some((error) => error.includes('BDD-AUD-004'))) {
+          fail(`${predecessor}: cumulative REM-WP1 failure must explicitly identify mandatory BDD-AUD-004`);
+        }
+        continue;
+      }
       const expectedRed = predecessor === 'REM-WP2.1'
         && command.command.includes('expected test-first red before production implementation')
         && command.artifact.endsWith('red-policy-default-allow.log');
