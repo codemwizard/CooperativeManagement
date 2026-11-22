@@ -46,7 +46,7 @@
     "test:bdd:phase1": "node --env-file-if-exists=.env.local --env-file-if-exists=.env tools/run_phase1_bdd.mjs",
     "test:api": "npm run test:api --workspace @symphony/api",
     "test:workspace": "npm run test:unit --workspace @symphony/workspace",
-    "test:login": "npx playwright test tests/workspace/login.spec.ts",
+    "test:login": "node tools/run_e2e.mjs --workspace-only tests/workspace/login.spec.ts --workers=1",
     "test:login:api": "node --env-file-if-exists=.env.local --env-file-if-exists=.env tools/run_wp5_4_browser.mjs",
     "test:wp5.5": "node --env-file-if-exists=.env.local --env-file-if-exists=.env tools/run_wp5_5_live_bdd.mjs",
     "test:wp6.1": "node --env-file-if-exists=.env.local --env-file-if-exists=.env tools/run_wp6_1_routes.mjs",

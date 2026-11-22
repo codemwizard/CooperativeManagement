@@ -30,8 +30,8 @@ interface RunnerResult {
   stderr: string;
 }
 
-function runMigrationProcess(): Promise<RunnerResult> {
-  if (testDatabaseUrl === undefined || testDatabaseUrl === '') {
+function runMigrationProcess(databaseUrl = testDatabaseUrl): Promise<RunnerResult> {
+  if (databaseUrl === undefined || databaseUrl === '') {
     throw new Error('MIGRATION_TEST_DATABASE_URL is required for migration integration tests.');
   }
 
@@ -40,7 +40,7 @@ function runMigrationProcess(): Promise<RunnerResult> {
       cwd: path.resolve(path.dirname(runnerPath), '..'),
       env: {
         ...process.env,
-        DATABASE_URL: testDatabaseUrl,
+        DATABASE_URL: databaseUrl,
         DATABASE_SCHEMA: 'symphony',
       },
       stdio: ['ignore', 'pipe', 'pipe'],
@@ -159,7 +159,7 @@ describe.skipIf(!migrationBaseUrl || !adminDatabaseUrl || process.env['DATA_MODE
       expect(applied.rows.map((row) => row.name)).toEqual(expectedFiles);
 
       const appliedLogCount = firstRun
-        .flatMap((result) => result.stdout.match(/— applied/g) ?? []).length;
+        .flatMap((result) => result.stdout.match(/— (?:applied|recorded as superseded)/g) ?? []).length;
       expect(appliedLogCount).toBe(expectedFiles.length);
 
       const replay = await runMigrationProcess();
@@ -304,10 +304,17 @@ describe.skipIf(!migrationBaseUrl || !adminDatabaseUrl || process.env['DATA_MODE
         try {
           const identity = await upgradeClient.query<{ current_user: string }>('SELECT current_user');
           expect(identity.rows[0]?.current_user).toBe(decodeURIComponent(new URL(migrationBaseUrl!).username));
-          for (const file of migrationFiles.filter((name) => name >= '0021_wp2_3_capacity_delegation_commands.sql')) {
-            await executeSqlMigration(upgradeClient, file, await fs.readFile(path.join(migrationDirectory, file), 'utf8'));
-          }
+          await executeSqlMigration(
+            upgradeClient,
+            '0021_wp2_3_capacity_delegation_commands.sql',
+            await fs.readFile(path.join(migrationDirectory, '0021_wp2_3_capacity_delegation_commands.sql'), 'utf8'),
+          );
         } finally { upgradeClient.release(); }
+
+        const upgradeRun = await runMigrationProcess(migrationUrl.toString());
+        expect(`${upgradeRun.stdout}\n${upgradeRun.stderr}`).not.toContain('Migration runner failed:');
+        expect(upgradeRun.status).toBe(0);
+        expect(upgradeRun.stdout).toContain('0022_wp2_3_ta_semantic_identity.sql — recorded as superseded');
 
         const migrationLedger = await fixture.query<{ applied_migrations: number }>(
           'SELECT count(*)::int AS applied_migrations FROM symphony.schema_migrations',
@@ -417,6 +424,136 @@ describe.skipIf(!migrationBaseUrl || !adminDatabaseUrl || process.env['DATA_MODE
         await admin.end();
       }
     }, 120_000);
+
+    it('repairs the original recorded TA index without rebuilding an already-correct index', async () => {
+      const upgradeName = `symphony_wp22_recorded_${randomUUID().replaceAll('-', '').slice(0, 16)}_test`;
+      const quotedDatabase = `"${upgradeName.replaceAll('"', '""')}"`;
+      const admin = new pg.Client({ connectionString: adminDatabaseUrl });
+      const migrationRole = decodeURIComponent(new URL(migrationBaseUrl!).username);
+      const quotedMigrationRole = `"${migrationRole.replaceAll('"', '""')}"`;
+      let client: pg.Client | undefined;
+      try {
+        await admin.connect();
+        await admin.query(`CREATE DATABASE ${quotedDatabase}`);
+        await admin.query(`GRANT CONNECT, CREATE ON DATABASE ${quotedDatabase} TO ${quotedMigrationRole}`);
+
+        const upgradeUrl = new URL(migrationBaseUrl!);
+        upgradeUrl.pathname = `/${upgradeName}`;
+        client = new pg.Client({ connectionString: upgradeUrl.toString() });
+        await client.connect();
+        await client.query('CREATE SCHEMA symphony');
+        await client.query(`
+          CREATE TABLE symphony.schema_migrations (
+            name TEXT PRIMARY KEY,
+            applied_at TIMESTAMPTZ NOT NULL DEFAULT now()
+          )
+        `);
+        await client.query(`
+          CREATE TABLE symphony.ta_scope_delegations (
+            tenant_id uuid NOT NULL,
+            union_organization_id uuid NOT NULL,
+            delegatee_user_id uuid NOT NULL,
+            target_organization_id uuid NOT NULL,
+            active_from timestamptz NOT NULL,
+            expires_at timestamptz,
+            agreement_ref text NOT NULL,
+            revoked_at timestamptz,
+            legacy_record boolean NOT NULL DEFAULT false
+          )
+        `);
+        await client.query(`
+          CREATE UNIQUE INDEX ta_scope_active_semantic_key
+            ON symphony.ta_scope_delegations (
+              tenant_id, union_organization_id, delegatee_user_id,
+              target_organization_id, active_from,
+              COALESCE(expires_at, 'infinity'::timestamptz), agreement_ref
+            ) WHERE revoked_at IS NULL
+        `);
+        const ids = Array.from({ length: 4 }, () => randomUUID());
+        await client.query(
+          `INSERT INTO symphony.ta_scope_delegations (
+             tenant_id, union_organization_id, delegatee_user_id, target_organization_id,
+             active_from, expires_at, agreement_ref, legacy_record
+           ) VALUES ($1,$2,$3,$4,'2025-01-01T00:00:00Z','2026-01-01T00:00:00Z','recorded-old-index',true)`,
+          [...ids],
+        );
+
+        const migrationFiles = (await fs.readdir(migrationDirectory))
+          .filter((name) => name.endsWith('.sql'))
+          .sort();
+        expect(migrationFiles).toContain('0022_wp2_3_ta_semantic_identity.sql');
+        expect(migrationFiles).toContain('0034_preserve_legacy_ta_semantic_identity.sql');
+        await client.query(
+          'INSERT INTO symphony.schema_migrations(name) SELECT unnest($1::text[])',
+          [migrationFiles.filter((name) => name !== '0034_preserve_legacy_ta_semantic_identity.sql')],
+        );
+
+        const firstRun = await runMigrationProcess(upgradeUrl.toString());
+        expect(`${firstRun.stdout}\n${firstRun.stderr}`).not.toContain('Migration runner failed:');
+        expect(firstRun.status).toBe(0);
+        expect(firstRun.stdout).toContain('0022_wp2_3_ta_semantic_identity.sql — already applied');
+        expect(firstRun.stdout).toContain('0034_preserve_legacy_ta_semantic_identity.sql — applied');
+
+        const repairedIndex = await client.query<{ oid: string; predicate: string }>(
+          `SELECT index_row.indexrelid::text AS oid,
+                  pg_get_expr(index_row.indpred,index_row.indrelid) AS predicate
+             FROM pg_catalog.pg_index AS index_row
+             JOIN pg_catalog.pg_class AS index_class ON index_class.oid=index_row.indexrelid
+             JOIN pg_catalog.pg_namespace AS index_namespace ON index_namespace.oid=index_class.relnamespace
+            WHERE index_namespace.nspname='symphony'
+              AND index_class.relname='ta_scope_active_semantic_key'`,
+        );
+        expect(repairedIndex.rows).toHaveLength(1);
+        expect(repairedIndex.rows[0]?.predicate).toMatch(/revoked_at IS NULL.*NOT legacy_record/i);
+
+        await client.query(
+          `INSERT INTO symphony.ta_scope_delegations (
+             tenant_id, union_organization_id, delegatee_user_id, target_organization_id,
+             active_from, expires_at, agreement_ref, legacy_record
+           ) VALUES
+             ($1,$2,$3,$4,'2027-01-01T00:00:00Z','2028-01-01T00:00:00Z','duplicate-legacy',true),
+             ($1,$2,$3,$4,'2027-01-01T00:00:00Z','2028-01-01T00:00:00Z','duplicate-legacy',true)`,
+          ids,
+        );
+        await client.query(
+          `INSERT INTO symphony.ta_scope_delegations (
+             tenant_id, union_organization_id, delegatee_user_id, target_organization_id,
+             active_from, expires_at, agreement_ref, legacy_record
+           ) VALUES ($1,$2,$3,$4,'2027-01-01T00:00:00Z','2028-01-01T00:00:00Z','duplicate-legacy',false)`,
+          ids,
+        );
+        await expect(client.query(
+          `INSERT INTO symphony.ta_scope_delegations (
+             tenant_id, union_organization_id, delegatee_user_id, target_organization_id,
+             active_from, expires_at, agreement_ref, legacy_record
+           ) VALUES ($1,$2,$3,$4,'2027-01-01T00:00:00Z','2028-01-01T00:00:00Z','duplicate-legacy',false)`,
+          ids,
+        )).rejects.toMatchObject({ code: '23505' });
+
+        await client.query('DELETE FROM symphony.schema_migrations WHERE name=$1', [
+          '0034_preserve_legacy_ta_semantic_identity.sql',
+        ]);
+        const noOpRun = await runMigrationProcess(upgradeUrl.toString());
+        expect(`${noOpRun.stdout}\n${noOpRun.stderr}`).not.toContain('Migration runner failed:');
+        expect(noOpRun.status).toBe(0);
+        expect(noOpRun.stdout).toContain('0034_preserve_legacy_ta_semantic_identity.sql — applied');
+        const indexAfterNoOp = await client.query<{ oid: string }>(
+          `SELECT index_row.indexrelid::text AS oid
+             FROM pg_catalog.pg_index AS index_row
+             JOIN pg_catalog.pg_class AS index_class ON index_class.oid=index_row.indexrelid
+             JOIN pg_catalog.pg_namespace AS index_namespace ON index_namespace.oid=index_class.relnamespace
+            WHERE index_namespace.nspname='symphony'
+              AND index_class.relname='ta_scope_active_semantic_key'`,
+        );
+        expect(indexAfterNoOp.rows).toEqual([{ oid: repairedIndex.rows[0]!.oid }]);
+      } finally {
+        await client?.end().catch(() => undefined);
+        await admin.connect().catch(() => undefined);
+        await admin.query('SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname=$1 AND pid<>pg_backend_pid()', [upgradeName]).catch(() => undefined);
+        await admin.query(`DROP DATABASE IF EXISTS ${quotedDatabase}`).catch(() => undefined);
+        await admin.end().catch(() => undefined);
+      }
+    }, 90_000);
 
     it('upgrades from migration 0012 and rolls every migration 0013 effect back before a successful retry', async () => {
       const upgradeDatabaseName = `symphony_wp15_upgrade_${randomUUID().replaceAll('-', '').slice(0, 16)}_test`;
