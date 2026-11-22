@@ -45,6 +45,18 @@ test.describe('Login page', () => {
         body: JSON.stringify({ forcedChangeRequired: false }),
       });
     });
+    // After successful login, the protected workspace route performs its own
+    // session check. The initial check remains unauthenticated; subsequent
+    // checks represent the session established by the mocked login response.
+    await page.route('**/auth/session', async (route) => route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        authenticated: true,
+        forcedChangeRequired: false,
+        csrfToken: 'test-csrf-token-1234567890123456',
+      }),
+    }));
     await page.click('button[type="submit"]');
 
     // Should redirect to /workspace after successful login
