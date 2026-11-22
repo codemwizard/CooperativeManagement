@@ -7,7 +7,7 @@
     "unit_test": "not_applicable",
     "integration_test": "passed",
     "bdd_ui_test": "passed",
-    "gate_verified": "pending"
+    "gate_verified": "passed"
   },
   "candidate": {
     "status": "immutable implementation candidate",
@@ -84,7 +84,7 @@
     }
   },
   "limitations": [
-    "Gate remains pending until the exact-candidate verifier passes against a clean evidence commit; the implementation remains bounded to the local test profile.",
+    "The exact-candidate verifier preflight passed; final verification is now being run against the committed evidence-only candidate. The implementation remains bounded to the local test profile.",
     "The test profile does not establish production Secure-cookie, TLS, deployment origin, production database or production concurrency behavior.",
     "An earlier local DB invocation without CI migration-role bootstrap failed two WP1.5 migration-runner tests. The rerun with temporary role membership passed all 86 DB tests; cleanup revoked the membership. The older failure remains historical and is superseded by the cited passing run.",
     "The run is focused WP5.4 evidence and is not the integrated Phase 1 or REM-WP7.2 gate."
