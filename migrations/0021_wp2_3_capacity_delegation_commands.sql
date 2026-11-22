@@ -6,6 +6,8 @@ ALTER TABLE symphony.capacity_grants
   ADD COLUMN active_from timestamptz,
   ADD COLUMN expires_at timestamptz,
   ADD COLUMN source_ref text,
+  ADD COLUMN legacy_record boolean NOT NULL DEFAULT false,
+  ADD COLUMN legacy_provenance_missing boolean NOT NULL DEFAULT false,
   ADD COLUMN revoked_event_id uuid REFERENCES symphony.domain_events(id)
     DEFERRABLE INITIALLY DEFERRED;
 
@@ -19,27 +21,40 @@ ALTER TABLE symphony.capacity_grants NO FORCE ROW LEVEL SECURITY;
 ALTER TABLE symphony.ta_scope_delegations NO FORCE ROW LEVEL SECURITY;
 
 UPDATE symphony.capacity_grants SET active_from = granted_at WHERE active_from IS NULL;
+-- Preserve historical rows exactly. Old delegate grants had no provenance
+-- field, so mark that absence explicitly instead of inventing a source.
+UPDATE symphony.capacity_grants
+   SET legacy_record = true,
+       legacy_provenance_missing = capacity_type = 'delegate'
+         AND NULLIF(btrim(source_ref), '') IS NULL;
 ALTER TABLE symphony.capacity_grants
   ALTER COLUMN granted_at SET DEFAULT transaction_timestamp(),
   ALTER COLUMN active_from SET NOT NULL,
   ADD CONSTRAINT capacity_grants_interval_ck CHECK (expires_at IS NULL OR expires_at > active_from),
   ADD CONSTRAINT capacity_grants_source_ref_ck CHECK (
     capacity_type <> 'delegate' OR (source_ref IS NOT NULL AND length(btrim(source_ref)) > 0)
+      OR legacy_provenance_missing
+  ),
+  ADD CONSTRAINT capacity_grants_legacy_provenance_ck CHECK (
+    NOT legacy_provenance_missing OR
+      (legacy_record AND capacity_type = 'delegate' AND NULLIF(btrim(source_ref), '') IS NULL)
   );
 CREATE UNIQUE INDEX capacity_grants_active_semantic_key
   ON symphony.capacity_grants (
     organization_id, user_id, capacity_type, active_from,
     COALESCE(expires_at, 'infinity'::timestamptz), COALESCE(source_ref, '')
-  ) WHERE revoked_at IS NULL;
+  ) WHERE revoked_at IS NULL AND NOT legacy_record;
 CREATE INDEX capacity_grants_active_authority_lookup
   ON symphony.capacity_grants (organization_id, user_id, capacity_type, active_from, expires_at)
   WHERE revoked_at IS NULL;
 
 ALTER TABLE symphony.ta_scope_delegations
   ADD COLUMN active_from timestamptz,
+  ADD COLUMN legacy_record boolean NOT NULL DEFAULT false,
   ADD COLUMN source_event_id uuid REFERENCES symphony.domain_events(id),
   ADD COLUMN revoked_event_id uuid REFERENCES symphony.domain_events(id);
 UPDATE symphony.ta_scope_delegations SET active_from = granted_at WHERE active_from IS NULL;
+UPDATE symphony.ta_scope_delegations SET legacy_record = true;
 ALTER TABLE symphony.ta_scope_delegations
   ALTER COLUMN granted_at SET DEFAULT transaction_timestamp(),
   ALTER COLUMN active_from SET NOT NULL,
@@ -54,7 +69,7 @@ CREATE UNIQUE INDEX ta_scope_active_semantic_key
     tenant_id, union_organization_id,
     delegatee_user_id, target_organization_id, active_from,
     COALESCE(expires_at, 'infinity'::timestamptz), agreement_ref
-  ) WHERE revoked_at IS NULL;
+  ) WHERE revoked_at IS NULL AND NOT legacy_record;
 
 -- Existing tenant RLS continues to bind all operations to app.tenant_id.
 -- Revoke the old table-level blanket and grant only command-path columns.
@@ -81,5 +96,11 @@ COMMENT ON COLUMN symphony.capacity_grants.active_from IS
   'D-19 effective start of the half-open [active_from, expires_at) capacity interval.';
 COMMENT ON COLUMN symphony.capacity_grants.source_ref IS
   'Documentary provenance reference; required for delegate capacity. It is not proof of an external record’s legal validity.';
+COMMENT ON COLUMN symphony.capacity_grants.legacy_provenance_missing IS
+  'True only for pre-WP2.3 delegate grants whose source provenance was not stored; does not assert that provenance exists.';
+COMMENT ON COLUMN symphony.capacity_grants.legacy_record IS
+  'True for rows present before WP2.3 command uniqueness was introduced; retained historical duplicates remain revocable.';
 COMMENT ON COLUMN symphony.ta_scope_delegations.active_from IS
   'D-19 effective start of the half-open [active_from, expires_at) TA interval.';
+COMMENT ON COLUMN symphony.ta_scope_delegations.legacy_record IS
+  'True for rows present before WP2.3 command uniqueness was introduced; retained historical duplicates remain revocable.';

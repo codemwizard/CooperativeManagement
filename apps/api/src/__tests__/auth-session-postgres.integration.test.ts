@@ -69,6 +69,7 @@ describe.skipIf(!enabled)('WP5.3 Fastify and PostgreSQL integration',()=>{
   let organizationId:string|undefined;
   let organizationB:string|undefined;
   let personId:string|undefined;
+  let taScopeId:string;
   let hmacKey:Buffer;
   let temporaryCredential:string;
   const profile={runtimeProfile:'test' as const,appEnv:'test',dataMode:'test',publicOrigin:'http://localhost:5174',host:'127.0.0.1',port:3000};
@@ -140,7 +141,7 @@ describe.skipIf(!enabled)('WP5.3 Fastify and PostgreSQL integration',()=>{
     const membershipId=randomUUID();
     const roleId=randomUUID();
     const managerScopeId=randomUUID();
-    const taScopeId=randomUUID();
+    taScopeId=randomUUID();
     const identityAdmin=await isolatedAdmin.connect();
     try {
       await identityAdmin.query('BEGIN');
@@ -260,6 +261,26 @@ describe.skipIf(!enabled)('WP5.3 Fastify and PostgreSQL integration',()=>{
     expect(facts.facts.find((fact)=>fact.kind==='institutional_role')?.scopeOrganizationIds).toEqual([organizationId]);
     expect(facts.facts.some((fact)=>fact.authority==='vice_chairperson' || fact.authority==='field_agent')).toBe(false);
     expect(context.body).not.toContain('@example.invalid');
+    await isolatedAdmin.query('BEGIN');
+    try {
+      await isolatedAdmin.query("SELECT set_config('app.tenant_id',$1,true)",[tenantId]);
+      await isolatedAdmin.query(`UPDATE symphony.ta_scope_delegations
+        SET active_from=clock_timestamp()+interval '1 hour' WHERE id=$1`,[taScopeId]);
+      await isolatedAdmin.query('COMMIT');
+    } catch(error) { await isolatedAdmin.query('ROLLBACK').catch(()=>undefined);throw error; }
+    const scheduledTaContext=await appA.inject({method:'GET',url:'/workspace/context',headers:{cookie:cookie(freshLogin)}});
+    expect(scheduledTaContext.statusCode).toBe(200);
+    expect(scheduledTaContext.json<{data:typeof facts}>().data.facts.some((fact)=>fact.kind==='institutional_role')).toBe(false);
+    await isolatedAdmin.query('BEGIN');
+    try {
+      await isolatedAdmin.query("SELECT set_config('app.tenant_id',$1,true)",[tenantId]);
+      await isolatedAdmin.query(`UPDATE symphony.ta_scope_delegations
+        SET active_from=clock_timestamp()-interval '1 hour' WHERE id=$1`,[taScopeId]);
+      await isolatedAdmin.query('COMMIT');
+    } catch(error) { await isolatedAdmin.query('ROLLBACK').catch(()=>undefined);throw error; }
+    const effectiveTaContext=await appA.inject({method:'GET',url:'/workspace/context',headers:{cookie:cookie(freshLogin)}});
+    expect(effectiveTaContext.statusCode).toBe(200);
+    expect(effectiveTaContext.json<{data:typeof facts}>().data.facts.find((fact)=>fact.kind==='institutional_role')?.scopeOrganizationIds).toEqual([organizationId]);
     const unauthenticatedFindings=await appA.inject({method:'GET',url:`/workspace/verified-findings?organizationId=${organizationId}`});
     expect(unauthenticatedFindings.statusCode).toBe(401);
     const findings=await appA.inject({method:'GET',url:`/workspace/verified-findings?organizationId=${organizationId}`,headers:{cookie:cookie(freshLogin)}});

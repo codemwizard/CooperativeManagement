@@ -194,6 +194,7 @@ export class PostgresWorkspaceContextRepository {
              AND i.organization_kind IN ('union', 'federation')
            JOIN symphony.ta_scope_delegations d ON d.tenant_id = a.tenant_id
              AND d.delegatee_user_id = a.user_id AND d.union_organization_id = a.institution_organization_id
+             AND d.active_from <= transaction_timestamp()
              AND d.granted_at <= transaction_timestamp()
              AND (d.expires_at IS NULL OR d.expires_at > transaction_timestamp())
              AND (d.revoked_at IS NULL OR d.revoked_at > transaction_timestamp())

@@ -5,6 +5,8 @@ import type { ApiRuntimeConfig } from './runtime-config.js';
 export interface ApiRouteComposition {
   readonly authentication?: FastifyPluginAsync;
   readonly commands?: FastifyPluginAsync;
+  /** False when the runtime deliberately has no approved command adapters. */
+  readonly commandsEnabled?: boolean;
   readonly workspace?: FastifyPluginAsync;
   /** Session/pre-auth-token validation is supplied by the authentication composition. */
   verifyCsrf?(request: FastifyRequest): Promise<boolean>;
@@ -113,8 +115,10 @@ export function buildApiServer(options: ApiServerOptions): FastifyInstance {
 
   app.get('/health/ready', async (_request, reply) => {
     reply.header('Cache-Control', 'no-store, private');
+    const commandRouteReady = options.routes?.commandsEnabled === false
+      || options.routes?.commands !== undefined;
     const routeCompositionReady = options.routes?.authentication !== undefined
-      && options.routes.commands !== undefined
+      && commandRouteReady
       && options.routes.verifyCsrf !== undefined
       && (options.routes.authorize !== undefined || options.config.runtimeProfile === 'test')
       && (options.routes.rotateSession !== undefined || options.config.runtimeProfile === 'test');

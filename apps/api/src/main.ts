@@ -36,7 +36,8 @@ export async function startApi(environment: NodeJS.ProcessEnv = process.env): Pr
   const authEvidenceLogPath = environment['WP5_5_API_LOG_PATH'];
   if (authEvidenceLogPath) authEvidenceLog = createWriteStream(authEvidenceLogPath, { flags: 'a' });
   const auth = createAuthComposition({ pool, config, throttleHmacKey });
-  const commands = createPostgresCommandComposition(environment);
+  const commandApiEnabled = isSyntheticCommandRuntime(config.runtimeProfile, environment);
+  const commands = commandApiEnabled ? createPostgresCommandComposition(environment) : undefined;
   const workspaceContext = new PostgresWorkspaceContextRepository(pool);
   const verifiedFindings = new PostgresVerifiedFindingRepository(pool);
   const app = buildApiServer({
@@ -44,7 +45,8 @@ export async function startApi(environment: NodeJS.ProcessEnv = process.env): Pr
     routes: {
       authentication: auth.authentication, verifyCsrf: auth.verifyCsrf,
       authorize: auth.authorize, rotateSession: auth.rotateSession,
-      commands: createCommandRoutes(commands),
+      ...(commands ? { commands: createCommandRoutes(commands) } : {}),
+      commandsEnabled: commandApiEnabled,
       workspace: createWorkspaceContextRoutes(workspaceContext, verifiedFindings),
     },
     ...(authEvidenceLog ? { logStream: authEvidenceLog } : {}),
@@ -56,7 +58,7 @@ export async function startApi(environment: NodeJS.ProcessEnv = process.env): Pr
   const shutdown = (): void => { void app.close().catch(() => undefined); };
   app.addHook('onClose', async () => {
     await pool.end();
-    await commands.close();
+    await commands?.close();
     if (authEvidenceLog) await new Promise<void>((resolveClose) => authEvidenceLog!.end(resolveClose));
     process.off('SIGTERM', shutdown);
     process.off('SIGINT', shutdown);
@@ -69,6 +71,17 @@ export async function startApi(environment: NodeJS.ProcessEnv = process.env): Pr
     await app.close();
     throw error;
   }
+}
+
+/** Command handlers currently have approved encryption and denial-audit adapters only in synthetic test mode. */
+export function isSyntheticCommandRuntime(
+  runtimeProfile: string,
+  environment: NodeJS.ProcessEnv,
+): boolean {
+  return runtimeProfile === 'test'
+    && environment['NODE_ENV'] === 'test'
+    && environment['DATA_MODE'] === 'test'
+    && environment['SYNTHETIC_ONLY'] === 'true';
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1])).href) {
