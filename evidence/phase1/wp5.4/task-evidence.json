@@ -82,6 +82,11 @@
       "command": "node evidence/phase1/wp5.4/verify-exact-candidate.mjs fe6db7259d7292dd65792d8c3983d914be5bda0f --preflight",
       "result": "passed",
       "artifact": "evidence/phase1/wp5.4/local/2026-11-22/candidate-fe6db72/wp54-preflight-verification.log"
+    },
+    {
+      "command": "node evidence/phase1/wp5.4/verify-exact-candidate.mjs fe6db7259d7292dd65792d8c3983d914be5bda0f (final exact-candidate verifier)",
+      "result": "passed",
+      "artifact": "evidence/phase1/wp5.4/local/2026-11-22/candidate-fe6db72/wp54-final-verification.log"
     }
   ],
   "claims": {
@@ -94,7 +99,6 @@
     }
   },
   "limitations": [
-    "Final exact-candidate verification result is recorded in the next evidence update after the clean final run.",
     "Production Secure-cookie, TLS, origin, database, traffic and concurrency behavior are not established by local test evidence.",
     "This is focused WP5.4 evidence, not the integrated Phase 1 or REM-WP7.2 gate."
   ],
