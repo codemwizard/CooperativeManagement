@@ -6,4 +6,4 @@ CREATE UNIQUE INDEX ta_scope_active_semantic_key
     tenant_id, union_organization_id, delegatee_user_id,
     target_organization_id, active_from,
     COALESCE(expires_at, 'infinity'::timestamptz), agreement_ref
-  ) WHERE revoked_at IS NULL;
+  ) WHERE revoked_at IS NULL AND NOT legacy_record;

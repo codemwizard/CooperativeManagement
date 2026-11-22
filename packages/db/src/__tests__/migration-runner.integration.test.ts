@@ -231,14 +231,14 @@ describe.skipIf(!migrationBaseUrl || !adminDatabaseUrl || process.env['DATA_MODE
         const migrationUrl = new URL(migrationBaseUrl!);
         migrationUrl.pathname = `/${upgradeName}`;
         migrationPool = new pg.Pool({ connectionString: migrationUrl.toString(), max: 1 });
+        const migrationFiles = (await fs.readdir(migrationDirectory)).filter((name) => name.endsWith('.sql')).sort();
         const migrationClient = await migrationPool.connect();
         try {
           await migrationClient.query('CREATE SCHEMA symphony');
           await migrationClient.query(`CREATE TABLE symphony.schema_migrations (
             name TEXT PRIMARY KEY, applied_at TIMESTAMPTZ NOT NULL DEFAULT now()
           )`);
-          const files = (await fs.readdir(migrationDirectory)).filter((name) => name.endsWith('.sql')).sort();
-          for (const file of files.filter((name) => name < '0021_wp2_3_capacity_delegation_commands.sql')) {
+          for (const file of migrationFiles.filter((name) => name < '0021_wp2_3_capacity_delegation_commands.sql')) {
             await executeSqlMigration(migrationClient, file, await fs.readFile(path.join(migrationDirectory, file), 'utf8'));
           }
         } finally { migrationClient.release(); }
@@ -304,22 +304,20 @@ describe.skipIf(!migrationBaseUrl || !adminDatabaseUrl || process.env['DATA_MODE
         try {
           const identity = await upgradeClient.query<{ current_user: string }>('SELECT current_user');
           expect(identity.rows[0]?.current_user).toBe(decodeURIComponent(new URL(migrationBaseUrl!).username));
-          await executeSqlMigration(
-            upgradeClient,
-            '0021_wp2_3_capacity_delegation_commands.sql',
-            await fs.readFile(path.join(migrationDirectory, '0021_wp2_3_capacity_delegation_commands.sql'), 'utf8'),
-          );
-          await executeSqlMigration(
-            upgradeClient,
-            '0022_backfill_all_actor_authority_scopes.sql',
-            await fs.readFile(path.join(migrationDirectory, '0022_backfill_all_actor_authority_scopes.sql'), 'utf8'),
-          );
+          for (const file of migrationFiles.filter((name) => name >= '0021_wp2_3_capacity_delegation_commands.sql')) {
+            await executeSqlMigration(upgradeClient, file, await fs.readFile(path.join(migrationDirectory, file), 'utf8'));
+          }
         } finally { upgradeClient.release(); }
 
+        const migrationLedger = await fixture.query<{ applied_migrations: number }>(
+          'SELECT count(*)::int AS applied_migrations FROM symphony.schema_migrations',
+        );
+        expect(migrationLedger.rows[0]?.applied_migrations).toBe(migrationFiles.length);
         const backfilled = await fixture.query<{
           capacity_count: number; capacity_dates: boolean; legacy_delegate_count: number;
           legacy_duplicate_capacity_count: number; ta_count: number; ta_dates: boolean;
           legacy_ta_count: number; legacy_duplicate_ta_count: number;
+          ta_index_excludes_legacy: boolean;
           actor_scope_count: number; appointment_only_actor_count: number;
           capacity_forced: boolean; ta_forced: boolean; scope_forced: boolean;
         }>(
@@ -332,6 +330,8 @@ describe.skipIf(!migrationBaseUrl || !adminDatabaseUrl || process.env['DATA_MODE
              (SELECT bool_and(active_from=granted_at) FROM symphony.ta_scope_delegations) AS ta_dates,
           (SELECT count(*)::int FROM symphony.ta_scope_delegations WHERE legacy_record) AS legacy_ta_count,
              (SELECT count(*)::int FROM symphony.ta_scope_delegations WHERE legacy_record) AS legacy_duplicate_ta_count,
+             (SELECT indexdef LIKE '%NOT legacy_record%'
+                FROM pg_indexes WHERE schemaname='symphony' AND indexname='ta_scope_active_semantic_key') AS ta_index_excludes_legacy,
              (SELECT count(*)::int FROM symphony.authority_scope_versions WHERE scope_type='actor') AS actor_scope_count,
              (SELECT count(DISTINCT user_link.user_id)::int
                 FROM symphony.user_person_links user_link
@@ -345,7 +345,8 @@ describe.skipIf(!migrationBaseUrl || !adminDatabaseUrl || process.env['DATA_MODE
         expect(backfilled.rows[0]).toEqual({
           capacity_count: 6, capacity_dates: true, legacy_delegate_count: 4,
           legacy_duplicate_capacity_count: 4, ta_count: 4, ta_dates: true, legacy_ta_count: 4,
-          legacy_duplicate_ta_count: 4, actor_scope_count: 4, appointment_only_actor_count: 2,
+          legacy_duplicate_ta_count: 4, ta_index_excludes_legacy: true,
+          actor_scope_count: 4, appointment_only_actor_count: 2,
           capacity_forced: true, ta_forced: true, scope_forced: true,
         });
         const newDelegate = await fixture.query<{ legacy_record: boolean; legacy_provenance_missing: boolean }>(
@@ -357,6 +358,24 @@ describe.skipIf(!migrationBaseUrl || !adminDatabaseUrl || process.env['DATA_MODE
           [randomUUID(),delegateeIds[0],orgIds[0],managerIds[0]],
         );
         expect(newDelegate.rows).toEqual([{legacy_record:false,legacy_provenance_missing:false}]);
+
+        const newTaDelegationId=randomUUID();
+        const newTaValues=[tenantIds[0],managerIds[0],unionIds[0],delegateeIds[0],orgIds[0]];
+        const newTa = await fixture.query<{legacy_record:boolean}>(
+          `INSERT INTO symphony.ta_scope_delegations(id,tenant_id,programme_manager_user_id,union_organization_id,
+             delegatee_user_id,target_organization_id,granted_at,active_from,expires_at,agreement_ref)
+           VALUES($1,$2,$3,$4,$5,$6,'2027-01-01T00:00:00Z','2027-01-01T00:00:00Z',
+             '2028-01-01T00:00:00Z','new-ta-agreement') RETURNING legacy_record`,
+          [newTaDelegationId,...newTaValues],
+        );
+        expect(newTa.rows).toEqual([{legacy_record:false}]);
+        await expect(fixture.query(
+          `INSERT INTO symphony.ta_scope_delegations(id,tenant_id,programme_manager_user_id,union_organization_id,
+             delegatee_user_id,target_organization_id,granted_at,active_from,expires_at,agreement_ref)
+           VALUES($1,$2,$3,$4,$5,$6,'2027-01-01T00:00:00Z','2027-01-01T00:00:00Z',
+             '2028-01-01T00:00:00Z','new-ta-agreement')`,
+          [randomUUID(),...newTaValues],
+        )).rejects.toMatchObject({code:'23505'});
 
         await fixture.query('SET ROLE symphony_app');
         try {
