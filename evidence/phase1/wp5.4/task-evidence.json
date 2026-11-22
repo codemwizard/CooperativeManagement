@@ -67,7 +67,7 @@
       "command": "npm run test:phase0-contract",
       "result": "passed",
       "artifact": "evidence/phase1/wp5.4/local/2026-11-22/phase0-contract.log"
-    },
+    }
   ],
   "claims": {
     "behavior_proved": "Accessible workspace login and forced password-change screens call the real shared API through the same-origin proxy. Real persisted temporary credentials exercise forced-change-only route enforcement, password establishment, session revocation, fresh permanent-password login, refresh persistence, non-enumerating unknown-account errors, HttpOnly session-cookie attributes, response-body token absence, keyboard form submission, visible mismatch feedback, API log redaction and authentication-event canary absence.",
