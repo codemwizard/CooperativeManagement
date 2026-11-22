@@ -7,7 +7,7 @@
     "unit_test": "passed",
     "integration_test": "passed",
     "bdd_ui_test": "passed",
-    "gate_verified": "pending"
+    "gate_verified": "passed"
   },
   "candidate": {
     "status": "immutable implementation candidate",
@@ -75,7 +75,7 @@
     }
   },
   "limitations": [
-    "WP5.5 gate remains pending until WP5.4 final exact-candidate verification passes and WP5.5 preflight/final verification complete.",
+    "Final exact-candidate verifier output is recorded after its clean run.",
     "Only focused BDD-ENR-004 and the three required login checks are claimed. The integrated 41-scenario Phase 1 and REM-WP7.2 gates remain outstanding.",
     "Local test profile only; production deployment, TLS, database and expected-load qualification are not claimed."
   ],
