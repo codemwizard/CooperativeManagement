@@ -57,6 +57,11 @@
       "command": "npm run verify:phase1:contracts (112 tests)",
       "result": "passed",
       "artifact": "evidence/phase1/wp5.4/local/2026-11-22/candidate-fe6db72/phase1-contracts.log"
+    },
+    {
+      "command": "node evidence/phase1/wp5.5/verify-exact-candidate.mjs fe6db7259d7292dd65792d8c3983d914be5bda0f --preflight",
+      "result": "passed",
+      "artifact": "evidence/phase1/wp5.5/local/2026-11-22/candidate-fe6db72/wp55-preflight-verification.log"
     }
   ],
   "claims": {
