@@ -77,6 +77,11 @@
       "command": "WP1.5 role-finalization verification",
       "result": "passed",
       "artifact": "evidence/phase1/wp5.4/local/2026-11-22/candidate-fe6db72/role-finalization.log"
+    },
+    {
+      "command": "node evidence/phase1/wp5.4/verify-exact-candidate.mjs fe6db7259d7292dd65792d8c3983d914be5bda0f --preflight",
+      "result": "passed",
+      "artifact": "evidence/phase1/wp5.4/local/2026-11-22/candidate-fe6db72/wp54-preflight-verification.log"
     }
   ],
   "claims": {

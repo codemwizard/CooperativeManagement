@@ -72,7 +72,6 @@ assert.ok(wp16RunCommand && wp16RunCommand.result === 'passed', 'WP1.6 must reta
 const source = await readFile(wp16RunCommand.artifact, 'utf8');
 assert.match(source, /8 scenarios \(8 passed\)/);
 assert.match(source, /69 steps \(69 passed\)/);
-const { dirname } = await import('node:path');
 const wp16RunDirectory = dirname(wp16RunCommand.artifact);
 const wp16Metadata = JSON.parse(await readFile(`${wp16RunDirectory}/run-metadata.json`, 'utf8'));
 assert.equal(wp16Metadata.candidate, wp16Evidence.commit);
