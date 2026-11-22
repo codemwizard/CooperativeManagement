@@ -1,0 +1,99 @@
+{
+  "schema_version": 1,
+  "task_id": "REM-WP1.6",
+  "commit": "fe6db7259d7292dd65792d8c3983d914be5bda0f",
+  "status": {
+    "implementation": "complete",
+    "unit_test": "passed",
+    "integration_test": "passed",
+    "bdd_ui_test": "passed",
+    "gate_verified": "pending"
+  },
+  "environment": {
+    "node": "v26.7.0",
+    "npm": "v12.2.0",
+    "postgres": "PostgreSQL 18.0",
+    "database_role": "symphony_app for application paths; postgres for isolated synthetic fixture setup and cleanup; temporary outbox-writer membership used only by test migrations and revoked afterward",
+    "data_mode": "test",
+    "key_provider": "local-test"
+  },
+  "commands": [
+    {
+      "command": "npm run verify:wp1.6:dependencies",
+      "result": "passed",
+      "artifact": "evidence/phase1/wp1.6/local/2026-11-22/candidate-fe6db72/dependency-gate.log"
+    },
+    {
+      "command": "npm run test:bdd:phase1 -- --work-package REM-WP1.6 (6 IDs; 8 scenarios; 69 steps; actual session/API/PostgreSQL path)",
+      "result": "passed",
+      "artifact": "evidence/phase1/wp1.6/local/2026-11-22/candidate-fe6db72/cucumber-default.stdout.log"
+    },
+    {
+      "command": "REM-WP1.6 live Cucumber runner metadata and report validator",
+      "result": "passed",
+      "artifact": "evidence/phase1/wp1.6/local/2026-11-22/candidate-fe6db72/validator-summary.json"
+    },
+    {
+      "command": "npm run test:api --workspace @symphony/api",
+      "result": "passed",
+      "artifact": "evidence/phase1/wp5.4/local/2026-11-22/candidate-fe6db72/api-suite.log"
+    },
+    {
+      "command": "npm run test:db --workspace @symphony/db",
+      "result": "passed",
+      "artifact": "evidence/phase1/wp5.4/local/2026-11-22/candidate-fe6db72/postgres-db-suite.log"
+    },
+    {
+      "command": "npm run verify:phase1:contracts",
+      "result": "passed",
+      "artifact": "evidence/phase1/wp5.4/local/2026-11-22/candidate-fe6db72/phase1-contracts.log"
+    },
+    {
+      "command": "npm run typecheck:v4",
+      "result": "passed",
+      "artifact": "evidence/phase1/wp5.4/local/2026-11-22/candidate-fe6db72/typecheck-v4.log"
+    },
+    {
+      "command": "npm run verify:arch",
+      "result": "passed",
+      "artifact": "evidence/phase1/wp5.4/local/2026-11-22/candidate-fe6db72/architecture.log"
+    },
+    {
+      "command": "npm run verify:trace",
+      "result": "passed",
+      "artifact": "evidence/phase1/wp5.5/local/2026-11-22/candidate-fe6db72/traceability.log"
+    },
+    {
+      "command": "npm run verify:phase0",
+      "result": "passed",
+      "artifact": "evidence/phase1/wp1.6/local/2026-11-22/candidate-fe6db72/phase0-gate.log"
+    },
+    {
+      "command": "npm run test:bdd:phase1 -- --work-package REM-WP1 (separate cumulative acceptance)",
+      "result": "failed",
+      "artifact": "evidence/phase1/wp1.6/local/2026-11-22/cumulative-fe6db72/validator-summary.json"
+    },
+    {
+      "command": "Temporary test-only outbox-writer membership cleanup",
+      "result": "passed",
+      "artifact": "evidence/phase1/wp1.6/local/2026-11-22/candidate-fe6db72/role-membership-remediation.log"
+    }
+  ],
+  "claims": {
+    "behavior_proved": "The six REM-WP1.6-owned mapped BDD IDs (BDD-AUD-002, BDD-AUD-003, BDD-AUD-005, BDD-AUD-008, BDD-AUD-009 and BDD-AUD-014) passed as eight expanded scenarios and 69 steps through persisted-session authentication, the actual command HTTP endpoint and PostgreSQL-backed composition.",
+    "path_proved": "Candidate fe6db7259d7292dd65792d8c3983d914be5bda0f was tested from an isolated clean worktree. Runner metadata binds the mapped report to that candidate and records a clean start. API, PostgreSQL, typecheck, architecture, contract, traceability and Phase 0 artifacts are retained.",
+    "configuration_proved": "Local test profile only, Node 26.7.0, npm 12.2.0 and PostgreSQL 18.0. Restricted application requests use symphony_app; privileged roles are limited to isolated fixture setup, cleanup and temporary test migration membership.",
+    "coverage_limitations": [
+      "The separate cumulative REM-WP1 acceptance failed because mandatory BDD-AUD-004 remains @wip; seven other scenarios and 51 steps passed. The implementation plan prohibits removing the tag or treating the cumulative selector as green.",
+      "No contemporaneous red-run artifacts from the original WP1.6 implementation were available. A red result cannot be reconstructed retrospectively.",
+      "Independent review has not been performed."
+    ]
+  },
+  "limitations": [
+    "REM-WP1.6 gate remains pending because the cumulative mandatory acceptance is incomplete and the required contemporaneous red artifacts are absent.",
+    "The standalone mapped WP1.6 BDD run passes; this is separate from the failed cumulative REM-WP1 run and does not close WP2.5's predecessor requirement.",
+    "No production deployment, production database, production traffic or non-test key custody is claimed."
+  ],
+  "unresolved_decisions": [],
+  "reviewer": "Candidate-bound implementation and test evidence recorded by the implementer; exact-candidate gate remains pending and independent review is not recorded."
+}

@@ -1,0 +1,15 @@
+{
+  "candidate": "fe6db7259d7292dd65792d8c3983d914be5bda0f",
+  "work_package": "REM-WP1.6",
+  "selected_scenario_ids": [
+    "BDD-AUD-002",
+    "BDD-AUD-003",
+    "BDD-AUD-005",
+    "BDD-AUD-008",
+    "BDD-AUD-009",
+    "BDD-AUD-014"
+  ],
+  "branch": "",
+  "worktree_clean": true,
+  "started_at": "2026-11-22T06:53:14.843Z"
+}

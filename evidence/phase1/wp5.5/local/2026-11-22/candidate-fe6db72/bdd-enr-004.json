@@ -1,0 +1,234 @@
+[
+  {
+    "description": "  A cooperative is registered on Symphony by a placeholder initiator (self-enroller) or by a platform\n  enroller acting as the cooperative's proxy. Authority passes to institutionally recognised officers.",
+    "elements": [
+      {
+        "description": "",
+        "id": "cooperative-enrolment-and-handover;temporary-credentials-are-single-use,-expire-and-force-a-change",
+        "keyword": "Scenario",
+        "line": 38,
+        "name": "Temporary credentials are single use, expire and force a change",
+        "steps": [
+          {
+            "result": {
+              "status": "passed",
+              "duration": 4870998400
+            },
+            "keyword": "Before",
+            "hidden": true
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 402099
+            },
+            "arguments": [],
+            "keyword": "Given ",
+            "line": 7,
+            "name": "the platform is in test-data mode",
+            "match": {
+              "location": "packages\\testkit\\src\\step-definitions\\auth-steps.ts:49"
+            }
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 521700
+            },
+            "arguments": [],
+            "keyword": "And ",
+            "line": 8,
+            "name": "the stage of every new organisation is \"S0 Enrolment\"",
+            "match": {
+              "location": "packages\\testkit\\src\\step-definitions\\auth-steps.ts:55"
+            }
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 647799
+            },
+            "arguments": [],
+            "keyword": "Given ",
+            "line": 39,
+            "name": "a Secretary account with a temporary password created 73 hours ago",
+            "match": {
+              "location": "packages\\testkit\\src\\step-definitions\\auth-steps.ts:157"
+            }
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 226391799
+            },
+            "arguments": [],
+            "keyword": "When ",
+            "line": 40,
+            "name": "the Secretary logs in with the temporary password",
+            "match": {
+              "location": "packages\\testkit\\src\\step-definitions\\auth-steps.ts:198"
+            }
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 210138199
+            },
+            "arguments": [],
+            "keyword": "Then ",
+            "line": 41,
+            "name": "login is rejected with the generic authentication failure",
+            "match": {
+              "location": "packages\\testkit\\src\\step-definitions\\auth-steps.ts:243"
+            }
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 416899
+            },
+            "arguments": [],
+            "keyword": "Given ",
+            "line": 42,
+            "name": "a Secretary account with a fresh temporary password",
+            "match": {
+              "location": "packages\\testkit\\src\\step-definitions\\auth-steps.ts:179"
+            }
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 69280000
+            },
+            "arguments": [],
+            "keyword": "When ",
+            "line": 43,
+            "name": "the Secretary logs in with the temporary password",
+            "match": {
+              "location": "packages\\testkit\\src\\step-definitions\\auth-steps.ts:198"
+            }
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 347007100
+            },
+            "arguments": [],
+            "keyword": "Then ",
+            "line": 44,
+            "name": "the Secretary must change the password before any other action",
+            "match": {
+              "location": "packages\\testkit\\src\\step-definitions\\auth-steps.ts:255"
+            }
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 6463400
+            },
+            "arguments": [],
+            "keyword": "And ",
+            "line": 45,
+            "name": "an authentication event \"first_login\" is recorded",
+            "match": {
+              "location": "packages\\testkit\\src\\step-definitions\\auth-steps.ts:277"
+            }
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 514017300
+            },
+            "arguments": [],
+            "keyword": "And ",
+            "line": 46,
+            "name": "the temporary password cannot be used again",
+            "match": {
+              "location": "packages\\testkit\\src\\step-definitions\\auth-steps.ts:307"
+            }
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 250236500
+            },
+            "arguments": [],
+            "keyword": "And ",
+            "line": 47,
+            "name": "the Secretary can sign in with the new password",
+            "match": {
+              "location": "packages\\testkit\\src\\step-definitions\\auth-steps.ts:346"
+            }
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 4392400
+            },
+            "arguments": [],
+            "keyword": "And ",
+            "line": 48,
+            "name": "no password value appears in any event or log",
+            "match": {
+              "location": "packages\\testkit\\src\\step-definitions\\auth-steps.ts:363"
+            }
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 397034399
+            },
+            "keyword": "After",
+            "hidden": true
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 413099
+            },
+            "keyword": "After",
+            "hidden": true
+          }
+        ],
+        "tags": [
+          {
+            "name": "@phase2",
+            "line": 1
+          },
+          {
+            "name": "@area-ENR",
+            "line": 1
+          },
+          {
+            "name": "@REQ-ENR-010",
+            "line": 37
+          },
+          {
+            "name": "@BDD-ENR-004",
+            "line": 37
+          },
+          {
+            "name": "@hard",
+            "line": 37
+          }
+        ],
+        "type": "scenario"
+      }
+    ],
+    "id": "cooperative-enrolment-and-handover",
+    "line": 2,
+    "keyword": "Feature",
+    "name": "Cooperative enrolment and handover",
+    "tags": [
+      {
+        "name": "@phase2",
+        "line": 1
+      },
+      {
+        "name": "@area-ENR",
+        "line": 1
+      }
+    ],
+    "uri": "features\\01_enrollment_and_handover.feature"
+  }
+]

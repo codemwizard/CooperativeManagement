@@ -1,6 +1,8 @@
 import assert from 'node:assert/strict';
 import { execFileSync, spawnSync } from 'node:child_process';
 import { access, readFile } from 'node:fs/promises';
+import path from 'node:path';
+import { validatePhase1BddReport } from './phase1-contracts.js';
 
 const root = new URL('../', import.meta.url);
 const read = (relativePath) => readFile(new URL(relativePath, root), 'utf8');
@@ -27,7 +29,8 @@ if (candidate) {
   assert.equal(spawnSync('git', ['merge-base', '--is-ancestor', candidate, head], { stdio: 'ignore' }).status, 0,
     'Implementation candidate must be an ancestor of the evidence HEAD');
   for (const file of git('diff', '--name-only', `${candidate}..${head}`).split(/\r?\n/).filter(Boolean)) {
-    assert.match(file, /^evidence\/phase1\/wp2\.5\//, `Post-candidate change is outside WP2.5 evidence: ${file}`);
+    assert.match(file, /^(?:evidence\/phase1\/(?:wp1\.6|wp2\.5|wp5\.4|wp5\.5)\/|tools\/verify_wp2_5_scope\.mjs$|Implementation-Plan-V4\/implementation\/WP2-WP5-IMPLEMENTATION-READINESS-PLAN\.md$)/,
+      `Post-candidate change is outside the bounded Phase 1 evidence/status-verifier set: ${file}`);
   }
 }
 
@@ -89,20 +92,34 @@ if (!d19.includes('BDD-UNI-001 and BDD-UNI-002 remain in the frozen Phase 1 acce
 }
 
 const wp23 = await readJson('evidence/phase1/wp2.3/task-evidence.json');
-const wp16Run = wp23.commands.find((command) => command.command.includes('--work-package REM-WP1.6'));
-if (!wp16Run || wp16Run.result !== 'passed') fail('REM-WP1.6: WP2.3 evidence does not contain a passing mapped BDD runner result');
+const wp16Evidence = await readJson('evidence/phase1/wp1.6/task-evidence.json');
+if (wp16Evidence.task_id !== 'REM-WP1.6' || wp16Evidence.status?.gate_verified !== 'passed') {
+  fail('REM-WP1.6: a passing standalone task-evidence record is required; mapped BDD output alone is not gate closure');
+}
+const wp16Run = wp16Evidence.commands.find((command) => command.command.includes('--work-package REM-WP1.6'));
+if (!wp16Run || wp16Run.result !== 'passed') fail('REM-WP1.6: standalone evidence does not contain a passing mapped BDD runner result');
 else {
   const log = await read(wp16Run.artifact);
   for (const required of [
-    'Candidate: 86feb09f334f8c6374ea364850631b8eccbafc5a',
-    'BDD-AUD-002, BDD-AUD-003, BDD-AUD-005, BDD-AUD-008, BDD-AUD-009, BDD-AUD-014',
     '8 scenarios (8 passed)',
     '69 steps (69 passed)',
     'All 6 selected REM-WP1.6 scenarios were executed and passed.',
   ]) if (!log.includes(required)) fail(`REM-WP1.6: retained mapped runner artifact is missing expected evidence: ${required}`);
-  const candidateMatch = /Candidate: ([0-9a-f]{40})/.exec(log);
-  if (!candidateMatch || spawnSync('git', ['merge-base', '--is-ancestor', candidateMatch[1], head], { stdio: 'ignore' }).status !== 0) {
-    fail('REM-WP1.6: mapped scenario evidence candidate is missing or is not an ancestor of current HEAD');
+  const runDirectory = path.posix.dirname(wp16Run.artifact);
+  const runMetadata = await readJson(`${runDirectory}/run-metadata.json`);
+  const runSummary = await readJson(`${runDirectory}/validator-summary.json`);
+  const wp16Candidate = wp16Evidence.commit ?? wp16Evidence.candidate?.implementation_commit;
+  if (runMetadata.candidate !== wp16Candidate || runMetadata.work_package !== 'REM-WP1.6'
+      || runMetadata.worktree_clean !== true || runSummary.passed !== true
+      || runSummary.exit_code !== 0 || runSummary.validation_errors?.length !== 0) {
+    fail('REM-WP1.6: runner metadata or validator summary is not a clean candidate-bound pass');
+  }
+  const report = await readJson(`${runDirectory}/default-cucumber.json`);
+  const selected = manifest.scenarios.filter((scenario) => runMetadata.selected_scenario_ids?.includes(scenario.id));
+  const reportErrors = validatePhase1BddReport(report, { ...manifest, scenarios: selected });
+  if (reportErrors.length) fail(`REM-WP1.6: raw Cucumber report validation failed: ${reportErrors.join('; ')}`);
+  if (candidate && spawnSync('git', ['merge-base', '--is-ancestor', wp16Candidate, candidate], { stdio: 'ignore' }).status !== 0) {
+    fail('REM-WP1.6: mapped scenario implementation candidate is not an ancestor of the WP2.5 candidate');
   }
 }
 
@@ -111,18 +128,23 @@ if (wp25Evidence.task_id !== 'REM-WP2.5') fail('WP2.5 task evidence has an unexp
 const wp25Bdd = wp25Evidence.commands.find((command) => command.command.includes('--work-package REM-WP2.5'));
 if (!wp25Bdd || wp25Bdd.result !== 'passed') fail('WP2.5: passing mapped BDD-UNI-001/002 run is missing from task evidence');
 else {
+  const runDirectory = path.posix.dirname(wp25Bdd.artifact);
   const runLog = await read(wp25Bdd.artifact);
   for (const expectedText of [
     '2 scenarios (2 passed)',
     '22 steps (22 passed)',
   ]) if (!runLog.includes(expectedText)) fail(`WP2.5 mapped run artifact is missing: ${expectedText}`);
-  const validatorPath = 'evidence/phase1/wp2.5/local/2026-11-21/wp25-validator-summary.json';
-  const validator = await readJson(validatorPath);
-  if (validator.work_package !== 'REM-WP2.5'
-      || validator.selected_scenario_ids?.join(',') !== 'BDD-UNI-001,BDD-UNI-002'
-      || validator.passed !== true
-      || validator.exit_code !== 0
-      || validator.validation_errors?.length !== 0) {
+  const metadata = await readJson(`${runDirectory}/run-metadata.json`);
+  const validator = await readJson(`${runDirectory}/validator-summary.json`);
+  const report = await readJson(`${runDirectory}/default-cucumber.json`);
+  const selected = manifest.scenarios.filter((scenario) => metadata.selected_scenario_ids?.includes(scenario.id));
+  const reportErrors = validatePhase1BddReport(report, { ...manifest, scenarios: selected });
+  if (metadata.work_package !== 'REM-WP2.5'
+      || metadata.candidate !== (wp25Evidence.commit ?? wp25Evidence.candidate?.implementation_commit)
+      || metadata.worktree_clean !== true
+      || metadata.selected_scenario_ids?.join(',') !== 'BDD-UNI-001,BDD-UNI-002'
+      || validator.passed !== true || validator.exit_code !== 0
+      || validator.validation_errors?.length !== 0 || reportErrors.length !== 0) {
     fail('WP2.5 runner validator summary does not prove both mapped scenarios passed without validation errors');
   }
 }
@@ -141,7 +163,6 @@ else {
 }
 
 for (const predecessor of tasks.depends_on) {
-  if (predecessor === 'REM-WP1.6') continue;
   const match = /^REM-WP(\d+(?:\.\d+)?)$/.exec(predecessor);
   if (!match) {
     fail(`Unsupported WP2.5 predecessor ${predecessor}`);
@@ -154,8 +175,9 @@ for (const predecessor of tasks.depends_on) {
     if (!accepted.includes(evidence.status?.[key])) fail(`${predecessor}: ${key} is ${evidence.status?.[key] ?? 'missing'}`);
   }
   const sha = evidence.commit ?? evidence.candidate?.implementation_commit;
-  if (!/^[0-9a-f]{40}$/.test(sha ?? '') || spawnSync('git', ['merge-base', '--is-ancestor', sha, head], { stdio: 'ignore' }).status !== 0) {
-    fail(`${predecessor}: passing candidate is absent or is not an ancestor of current HEAD`);
+  const ancestorTarget = predecessor === 'REM-WP1.6' ? candidate ?? head : head;
+  if (!/^[0-9a-f]{40}$/.test(sha ?? '') || spawnSync('git', ['merge-base', '--is-ancestor', sha, ancestorTarget], { stdio: 'ignore' }).status !== 0) {
+    fail(`${predecessor}: passing candidate is absent or is not an ancestor of the WP2.5 implementation candidate`);
   }
   for (const command of evidence.commands ?? []) {
     if (command.result !== 'passed') {

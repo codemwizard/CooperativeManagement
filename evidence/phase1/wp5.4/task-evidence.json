@@ -1,18 +1,18 @@
 {
   "schema_version": 1,
   "task_id": "REM-WP5.4",
-  "commit": "76bec16d50e34a9b3ade73a82b640b8a8cb7d07d",
+  "commit": "fe6db7259d7292dd65792d8c3983d914be5bda0f",
   "status": {
     "implementation": "complete",
     "unit_test": "not_applicable",
     "integration_test": "passed",
     "bdd_ui_test": "passed",
-    "gate_verified": "passed"
+    "gate_verified": "pending"
   },
   "candidate": {
     "status": "immutable implementation candidate",
     "head_commit_before_implementation": "d70d7ee35b1aaaa0a1350feb01394ac25ba96896",
-    "implementation_commit": "76bec16d50e34a9b3ade73a82b640b8a8cb7d07d"
+    "implementation_commit": "fe6db7259d7292dd65792d8c3983d914be5bda0f"
   },
   "environment": {
     "node": "v26.7.0",
@@ -24,75 +24,74 @@
   },
   "commands": [
     {
-      "command": "npm run test:login:api (isolated ports 43181/43182; 2 browser-to-API scenarios against PostgreSQL)",
+      "command": "npm run test:login:api (2 browser-to-API PostgreSQL scenarios)",
       "result": "passed",
-      "artifact": "evidence/phase1/wp5.4/local/2026-11-22/browser-command.log"
+      "artifact": "evidence/phase1/wp5.4/local/2026-11-22/candidate-fe6db72/browser-command.log"
     },
     {
-      "command": "Captured API log canary and route assertions in tests/workspace/login-api.spec.ts",
+      "command": "API log redaction canary assertions",
       "result": "passed",
-      "artifact": "evidence/phase1/wp5.4/local/2026-11-22/api-redacted.raw.log"
+      "artifact": "evidence/phase1/wp5.4/local/2026-11-22/candidate-fe6db72/api-redacted.raw.log"
     },
     {
-      "command": "axe-core WCAG 2.0/2.1 AA and best-practice scan from the login browser journey",
+      "command": "npm run test:api --workspace @symphony/api (7 files, 29 tests)",
       "result": "passed",
-      "artifact": "evidence/phase1/wp5.4/local/2026-11-22/browser-command.log"
+      "artifact": "evidence/phase1/wp5.4/local/2026-11-22/candidate-fe6db72/api-suite.log"
+    },
+    {
+      "command": "npm run test:db --workspace @symphony/db (14 files, 87 tests)",
+      "result": "passed",
+      "artifact": "evidence/phase1/wp5.4/local/2026-11-22/candidate-fe6db72/postgres-db-suite.log"
     },
     {
       "command": "npm run typecheck:v4",
       "result": "passed",
-      "artifact": "evidence/phase1/wp5.4/local/2026-11-22/typecheck-v4.log"
+      "artifact": "evidence/phase1/wp5.4/local/2026-11-22/candidate-fe6db72/typecheck-v4.log"
     },
     {
       "command": "npm run verify:arch",
       "result": "passed",
-      "artifact": "evidence/phase1/wp5.4/local/2026-11-22/architecture.log"
+      "artifact": "evidence/phase1/wp5.4/local/2026-11-22/candidate-fe6db72/architecture.log"
     },
     {
-      "command": "npm run test:phase1:contracts",
+      "command": "npm run verify:phase1:contracts (112 tests)",
       "result": "passed",
-      "artifact": "evidence/phase1/wp5.4/local/2026-11-22/phase1-contracts.log"
-    },
-    {
-      "command": "API Vitest suite with repository env files loaded",
-      "result": "passed",
-      "artifact": "evidence/phase1/wp5.4/local/2026-11-22/api-suite.log"
-    },
-    {
-      "command": "PostgreSQL DB workspace suite with CI-equivalent temporary migration-role membership (14 files, 86 tests)",
-      "result": "passed",
-      "artifact": "evidence/phase1/wp5.4/local/2026-11-22/postgres-db-suite.log"
+      "artifact": "evidence/phase1/wp5.4/local/2026-11-22/candidate-fe6db72/phase1-contracts.log"
     },
     {
       "command": "npm run test:phase0-contract",
       "result": "passed",
-      "artifact": "evidence/phase1/wp5.4/local/2026-11-22/phase0-contract.log"
+      "artifact": "evidence/phase1/wp5.4/local/2026-11-22/candidate-fe6db72/phase0-contract.log"
     },
     {
-      "command": "node evidence/phase1/wp5.4/verify-exact-candidate.mjs 76bec16d50e34a9b3ade73a82b640b8a8cb7d07d --preflight",
+      "command": "WP5.4 runtime-environment.json",
       "result": "passed",
-      "artifact": "evidence/phase1/wp5.4/local/2026-11-22/wp54-preflight-verification.log"
+      "artifact": "evidence/phase1/wp5.4/local/2026-11-22/candidate-fe6db72/runtime-environment.json"
     },
     {
-      "command": "node evidence/phase1/wp5.4/verify-exact-candidate.mjs 76bec16d50e34a9b3ade73a82b640b8a8cb7d07d",
+      "command": "Temporary test-only migration role membership cleanup",
       "result": "passed",
-      "artifact": "evidence/phase1/wp5.4/local/2026-11-22/wp54-final-verification.log"
+      "artifact": "evidence/phase1/wp5.4/local/2026-11-22/candidate-fe6db72/role-membership-remediation.log"
+    },
+    {
+      "command": "WP1.5 role finalization",
+      "result": "passed",
+      "artifact": "evidence/phase1/wp5.4/local/2026-11-22/candidate-fe6db72/role-finalization.log"
     }
   ],
   "claims": {
-    "behavior_proved": "Accessible workspace login and forced password-change screens call the real shared API through the same-origin proxy. Real persisted temporary credentials exercise forced-change-only route enforcement, password establishment, session revocation, fresh permanent-password login, refresh persistence, non-enumerating unknown-account errors, HttpOnly session-cookie attributes, response-body token absence, keyboard form submission, visible mismatch feedback, API log redaction and authentication-event canary absence.",
-    "path_proved": "Two focused Playwright scenarios ran with a real Vite workspace, Fastify API and isolated PostgreSQL database. No auth-route interception is used. Axe scans passed on login and forced-change screens.",
-    "configuration_proved": "Clean detached candidate worktree at 76bec16d50e34a9b3ade73a82b640b8a8cb7d07d; Node v26.7.0, npm 12.2.0 and PostgreSQL 18.0. The full DB suite used temporary CI-equivalent migrator role membership and revoked it afterward. Local test profile only. The test session cookie is intentionally not Secure on HTTP loopback; production Secure-cookie behavior was not exercised.",
+    "behavior_proved": "Accessible login and forced password-change journeys use the real workspace, API and isolated PostgreSQL; persisted credentials, session revocation, fresh login, non-enumerating errors, HttpOnly cookie behavior, response token absence, keyboard/error states and API secret redaction are covered.",
+    "path_proved": "Two real-stack browser-to-API scenarios and the complete PostgreSQL/API suites passed on the immutable implementation candidate. The login suite includes all three carried-forward login checks, and axe scans passed.",
+    "configuration_proved": "Candidate fe6db7259d7292dd65792d8c3983d914be5bda0f; Node v26.7.0, npm 12.2.0, PostgreSQL 18.0; isolated test database only. Temporary migration-role membership was revoked and final role state verified.",
     "predecessors": {
       "REM-WP5.3": "Gate passed for implementation candidate 6ba1885035b330122570bf4602d88bcd19f73fc1; see evidence/phase1/wp5.3/task-evidence.json and its retained final verifier output.",
       "REM-WP6.1": "Gate passed for implementation candidate 0f6bb5cbe91eb7b7f7795b3be3ceb1f9357c799a; BDD-UXW-001 through BDD-UXW-004 passed; see evidence/phase1/wp6.1/task-evidence.json."
     }
   },
   "limitations": [
-    "The exact-candidate verifier passed on the committed evidence-only candidate. The implementation remains bounded to the local test profile.",
-    "The test profile does not establish production Secure-cookie, TLS, deployment origin, production database or production concurrency behavior.",
-    "An earlier local DB invocation without CI migration-role bootstrap failed two WP1.5 migration-runner tests. The rerun with temporary role membership passed all 86 DB tests; cleanup revoked the membership. The older failure remains historical and is superseded by the cited passing run.",
-    "The run is focused WP5.4 evidence and is not the integrated Phase 1 or REM-WP7.2 gate."
+    "Final exact-candidate verification is pending; preflight passed on candidate fe6db7259d7292dd65792d8c3983d914be5bda0f.",
+    "Production Secure-cookie, TLS, origin, database, traffic and concurrency behavior are not established by local test evidence.",
+    "This is focused WP5.4 evidence, not the integrated Phase 1 or REM-WP7.2 gate."
   ],
   "unresolved_decisions": [],
   "reviewer": "Candidate-bound local implementation and acceptance evidence; independent security review not performed.",

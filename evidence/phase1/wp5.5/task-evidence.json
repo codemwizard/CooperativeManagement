@@ -1,18 +1,18 @@
 {
   "schema_version": 1,
   "task_id": "REM-WP5.5",
-  "commit": "76bec16d50e34a9b3ade73a82b640b8a8cb7d07d",
+  "commit": "fe6db7259d7292dd65792d8c3983d914be5bda0f",
   "status": {
     "implementation": "complete",
     "unit_test": "passed",
     "integration_test": "passed",
     "bdd_ui_test": "passed",
-    "gate_verified": "passed"
+    "gate_verified": "pending"
   },
   "candidate": {
     "status": "immutable implementation candidate",
     "head_commit_before_implementation": "d70d7ee35b1aaaa0a1350feb01394ac25ba96896",
-    "implementation_commit": "76bec16d50e34a9b3ade73a82b640b8a8cb7d07d"
+    "implementation_commit": "fe6db7259d7292dd65792d8c3983d914be5bda0f"
   },
   "environment": {
     "node": "v26.7.0",
@@ -24,56 +24,55 @@
   },
   "commands": [
     {
-      "command": "npm run test:wp5.5 (isolated ports 43183/43184; mapped BDD-ENR-004, 15 steps)",
+      "command": "npm run test:wp5.5 (BDD-ENR-004; 15 steps)",
       "result": "passed",
-      "artifact": "evidence/phase1/wp5.5/local/2026-11-22/live-bdd-command.log"
+      "artifact": "evidence/phase1/wp5.5/local/2026-11-22/candidate-fe6db72/live-bdd-command.log"
     },
     {
-      "command": "Cucumber JSON report validated against frozen Phase 1 BDD manifest and owner mapping",
+      "command": "Frozen BDD report validation",
       "result": "passed",
-      "artifact": "evidence/phase1/wp5.5/local/2026-11-22/bdd-enr-004.json"
+      "artifact": "evidence/phase1/wp5.5/local/2026-11-22/candidate-fe6db72/bdd-enr-004.json"
     },
     {
-      "command": "Live authentication event and API-log canary assertions",
+      "command": "Authentication event/API log secret-canary assertions",
       "result": "passed",
-      "artifact": "evidence/phase1/wp5.5/local/2026-11-22/api-redacted.raw.log"
+      "artifact": "evidence/phase1/wp5.5/local/2026-11-22/candidate-fe6db72/api-redacted.raw.log"
     },
     {
-      "command": "npm run test:phase1:contracts",
+      "command": "npm run test:login (three required Playwright login cases)",
       "result": "passed",
-      "artifact": "evidence/phase1/wp5.4/local/2026-11-22/phase1-contracts.log"
+      "artifact": "evidence/phase1/wp5.5/local/2026-11-22/candidate-fe6db72/login-playwright.log"
     },
     {
-      "command": "node tools/phase1-contracts.js",
+      "command": "npm run verify:trace",
       "result": "passed",
-      "artifact": "evidence/phase1/wp5.4/local/2026-11-22/phase1-contracts.log"
+      "artifact": "evidence/phase1/wp5.5/local/2026-11-22/candidate-fe6db72/traceability.log"
     },
     {
-      "command": "node evidence/phase1/wp5.5/verify-exact-candidate.mjs 76bec16d50e34a9b3ade73a82b640b8a8cb7d07d --preflight",
+      "command": "WP5.5 runtime environment",
       "result": "passed",
-      "artifact": "evidence/phase1/wp5.5/local/2026-11-22/wp55-preflight-verification.log"
+      "artifact": "evidence/phase1/wp5.5/local/2026-11-22/candidate-fe6db72/runtime-environment.json"
     },
     {
-      "command": "node evidence/phase1/wp5.5/verify-exact-candidate.mjs 76bec16d50e34a9b3ade73a82b640b8a8cb7d07d",
+      "command": "npm run verify:phase1:contracts (112 tests)",
       "result": "passed",
-      "artifact": "evidence/phase1/wp5.5/local/2026-11-22/wp55-final-verification.log"
+      "artifact": "evidence/phase1/wp5.4/local/2026-11-22/candidate-fe6db72/phase1-contracts.log"
     }
   ],
   "claims": {
     "behavior_proved": "The frozen BDD-ENR-004 temporary-credential journey exercises actual persisted credentials, expiry and forced-change behavior, browser navigation, password establishment, revoked temporary login, fresh permanent-password login, session cookie and refresh; no API route interception or in-memory repository is used. Authentication events and captured API logs are checked for unique password canaries.",
-    "path_proved": "One exact owner-mapped scenario ran from the clean detached candidate worktree at 76bec16d50e34a9b3ade73a82b640b8a8cb7d07d against local Vite workspace, Fastify API and isolated PostgreSQL services. The runner checks service readiness, validates its Cucumber JSON against the frozen manifest, captures a nonempty redacted API log and tears down its child services.",
+    "path_proved": "BDD-ENR-004 passed through the actual Vite workspace, Fastify API and PostgreSQL path; all three required login Playwright cases passed; verify:trace passed. Candidate-bound runner metadata and report are retained.",
     "scope_limit": "Focused WP5.5 BDD evidence only; not all 41 Phase 1 scenarios, not the aggregate REM-WP7.2 gate, and not a full integrated regression suite.",
     "predecessors": {
       "REM-WP5.2": "Closed evidence is recorded in evidence/phase1/wp5.2/task-evidence.json.",
       "REM-WP5.3": "Gate passed for implementation candidate 6ba1885035b330122570bf4602d88bcd19f73fc1; see evidence/phase1/wp5.3/task-evidence.json.",
-      "REM-WP5.4": "Gate passed on immutable implementation candidate 76bec16d50e34a9b3ade73a82b640b8a8cb7d07d; see evidence/phase1/wp5.4/task-evidence.json and its final verifier output."
+      "REM-WP5.4": "Candidate-bound focused acceptance is recorded for fe6db7259d7292dd65792d8c3983d914be5bda0f; its final gate status is pending until exact-candidate verification."
     }
   },
   "limitations": [
-    "The final exact-candidate verifier passed on the committed WP5.5 evidence state.",
-    "REM-WP5.2, REM-WP5.3 and REM-WP5.4 predecessor gates are passed.",
-    "Only BDD-ENR-004 is owned by this focused WP5.5 run. The full 41-scenario integrated Phase 1 and REM-WP7.2 gate remains outstanding.",
-    "Local test profile only; production deployment, TLS, production database and expected-load qualification are not claimed."
+    "WP5.5 gate remains pending until WP5.4 final exact-candidate verification passes and WP5.5 preflight/final verification complete.",
+    "Only focused BDD-ENR-004 and the three required login checks are claimed. The integrated 41-scenario Phase 1 and REM-WP7.2 gates remain outstanding.",
+    "Local test profile only; production deployment, TLS, database and expected-load qualification are not claimed."
   ],
   "unresolved_decisions": [],
   "reviewer": "Local implementation and acceptance evidence; independent security review not performed.",

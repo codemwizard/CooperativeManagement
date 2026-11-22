@@ -1,0 +1,188 @@
+npm notice run @symphony/api@0.1.0 test:api
+npm notice run vitest run --reporter=verbose
+
+ RUN  v2.1.9 C:/Workspace/GitHub/Prototype/artifacts/exact-candidates/phase1-flags-fe6db72/apps/api
+
+ ✓ src/__tests__/server-composition.test.ts > shared authentication contracts > rejects unknown login fields and accepts the shared request shape
+ ✓ src/__tests__/server-composition.test.ts > shared authentication contracts > measures password length in Unicode code points without trimming
+{"level":30,"time":1795330725058,"pid":5668,"hostname":"DESKTOP-VV0116A","reqId":"req-1","req":{"method":"GET","url":"/auth/csrf","host":"localhost:80","remoteAddress":"127.0.0.1"},"msg":"incoming request"}
+{"level":30,"time":1795330725090,"pid":5668,"hostname":"DESKTOP-VV0116A","reqId":"req-1","res":{"statusCode":200},"responseTime":28.21140000000014,"msg":"request completed"}
+{"level":30,"time":1795330725143,"pid":5668,"hostname":"DESKTOP-VV0116A","reqId":"req-2","req":{"method":"POST","url":"/auth/login","host":"localhost:80","remoteAddress":"127.0.0.1"},"msg":"incoming request"}
+{"level":30,"time":1795330725372,"pid":5668,"hostname":"DESKTOP-VV0116A","reqId":"req-2","res":{"statusCode":401},"responseTime":228.64989999999943,"msg":"request completed"}
+{"level":30,"time":1795330725373,"pid":5668,"hostname":"DESKTOP-VV0116A","reqId":"req-3","req":{"method":"POST","url":"/auth/login","host":"localhost:80","remoteAddress":"127.0.0.1"},"msg":"incoming request"}
+{"level":30,"time":1795330725480,"pid":5668,"hostname":"DESKTOP-VV0116A","reqId":"req-3","res":{"statusCode":401},"responseTime":106.82359999999971,"msg":"request completed"}
+{"level":30,"time":1795330725484,"pid":5668,"hostname":"DESKTOP-VV0116A","reqId":"req-4","req":{"method":"POST","url":"/auth/login","host":"localhost:80","remoteAddress":"127.0.0.1"},"msg":"incoming request"}
+{"level":30,"time":1795330725486,"pid":5668,"hostname":"DESKTOP-VV0116A","reqId":"req-4","res":{"statusCode":403},"responseTime":1.2662000000000262,"msg":"request completed"}
+{"level":30,"time":1795330725487,"pid":5668,"hostname":"DESKTOP-VV0116A","reqId":"req-5","req":{"method":"POST","url":"/auth/login","host":"localhost:80","remoteAddress":"127.0.0.1"},"msg":"incoming request"}
+{"level":30,"time":1795330725564,"pid":5668,"hostname":"DESKTOP-VV0116A","reqId":"req-5","res":{"statusCode":200},"responseTime":76.65590000000066,"msg":"request completed"}
+{"level":30,"time":1795330725567,"pid":5668,"hostname":"DESKTOP-VV0116A","reqId":"req-6","req":{"method":"GET","url":"/auth/session","host":"localhost:80","remoteAddress":"127.0.0.1"},"msg":"incoming request"}
+{"level":30,"time":1795330725568,"pid":5668,"hostname":"DESKTOP-VV0116A","reqId":"req-6","res":{"statusCode":200},"responseTime":1.004399999999805,"msg":"request completed"}
+{"level":30,"time":1795330725570,"pid":5668,"hostname":"DESKTOP-VV0116A","reqId":"req-7","req":{"method":"GET","url":"/private","host":"localhost:80","remoteAddress":"127.0.0.1"},"msg":"incoming request"}
+{"level":30,"time":1795330725571,"pid":5668,"hostname":"DESKTOP-VV0116A","reqId":"req-7","res":{"statusCode":403},"responseTime":0.5201999999999316,"msg":"request completed"}
+{"level":30,"time":1795330725571,"pid":5668,"hostname":"DESKTOP-VV0116A","reqId":"req-8","req":{"method":"POST","url":"/auth/change-password","host":"localhost:80","remoteAddress":"127.0.0.1"},"msg":"incoming request"}
+{"level":30,"time":1795330725572,"pid":5668,"hostname":"DESKTOP-VV0116A","reqId":"req-8","res":{"statusCode":403},"responseTime":0.46669999999994616,"msg":"request completed"}
+{"level":30,"time":1795330725573,"pid":5668,"hostname":"DESKTOP-VV0116A","reqId":"req-9","req":{"method":"POST","url":"/auth/change-password","host":"localhost:80","remoteAddress":"127.0.0.1"},"msg":"incoming request"}
+{"level":30,"time":1795330725745,"pid":5668,"hostname":"DESKTOP-VV0116A","reqId":"req-9","res":{"statusCode":200},"responseTime":172.34680000000026,"msg":"request completed"}
+{"level":30,"time":1795330725747,"pid":5668,"hostname":"DESKTOP-VV0116A","reqId":"req-a","req":{"method":"GET","url":"/auth/session","host":"localhost:80","remoteAddress":"127.0.0.1"},"msg":"incoming request"}
+{"level":30,"time":1795330725749,"pid":5668,"hostname":"DESKTOP-VV0116A","reqId":"req-a","res":{"statusCode":401},"responseTime":1.2892999999994572,"msg":"request completed"}
+{"level":30,"time":1795330725750,"pid":5668,"hostname":"DESKTOP-VV0116A","reqId":"req-b","req":{"method":"GET","url":"/auth/csrf","host":"localhost:80","remoteAddress":"127.0.0.1"},"msg":"incoming request"}
+{"level":30,"time":1795330725750,"pid":5668,"hostname":"DESKTOP-VV0116A","reqId":"req-b","res":{"statusCode":200},"responseTime":0.6295000000000073,"msg":"request completed"}
+{"level":30,"time":1795330725751,"pid":5668,"hostname":"DESKTOP-VV0116A","reqId":"req-c","req":{"method":"POST","url":"/auth/login","host":"localhost:80","remoteAddress":"127.0.0.1"},"msg":"incoming request"}
+{"level":30,"time":1795330725848,"pid":5668,"hostname":"DESKTOP-VV0116A","reqId":"req-c","res":{"statusCode":200},"responseTime":97.4345000000003,"msg":"request completed"}
+{"level":30,"time":1795330725849,"pid":5668,"hostname":"DESKTOP-VV0116A","reqId":"req-d","req":{"method":"GET","url":"/private","host":"localhost:80","remoteAddress":"127.0.0.1"},"msg":"incoming request"}
+{"level":30,"time":1795330725851,"pid":5668,"hostname":"DESKTOP-VV0116A","reqId":"req-d","res":{"statusCode":200},"responseTime":0.961500000000342,"msg":"request completed"}
+{"level":30,"time":1795330725853,"pid":5668,"hostname":"DESKTOP-VV0116A","reqId":"req-e","req":{"method":"GET","url":"/auth/csrf","host":"localhost:80","remoteAddress":"127.0.0.1"},"msg":"incoming request"}
+{"level":30,"time":1795330725854,"pid":5668,"hostname":"DESKTOP-VV0116A","reqId":"req-e","res":{"statusCode":200},"responseTime":0.6557000000002517,"msg":"request completed"}
+{"level":30,"time":1795330725854,"pid":5668,"hostname":"DESKTOP-VV0116A","reqId":"req-f","req":{"method":"POST","url":"/auth/login","host":"localhost:80","remoteAddress":"127.0.0.1"},"msg":"incoming request"}
+ ✓ src/__tests__/auth-session-composition.test.ts > persisted authentication API composition > enforces CSRF and Origin, forced-change allowlist, session rotation, all-session revocation and fresh login 1019ms
+{"level":30,"time":1795330725918,"pid":5668,"hostname":"DESKTOP-VV0116A","reqId":"req-f","res":{"statusCode":200},"responseTime":64.22159999999985,"msg":"request completed"}
+{"level":30,"time":1795330725919,"pid":5668,"hostname":"DESKTOP-VV0116A","reqId":"req-g","req":{"method":"GET","url":"/auth/csrf","host":"localhost:80","remoteAddress":"127.0.0.1"},"msg":"incoming request"}
+{"level":30,"time":1795330725919,"pid":5668,"hostname":"DESKTOP-VV0116A","reqId":"req-g","res":{"statusCode":200},"responseTime":0.4013999999997395,"msg":"request completed"}
+{"level":30,"time":1795330725919,"pid":5668,"hostname":"DESKTOP-VV0116A","reqId":"req-h","req":{"method":"POST","url":"/auth/login","host":"localhost:80","remoteAddress":"127.0.0.1"},"msg":"incoming request"}
+{"level":30,"time":1795330726004,"pid":5668,"hostname":"DESKTOP-VV0116A","reqId":"req-h","res":{"statusCode":200},"responseTime":84.4322000000002,"msg":"request completed"}
+{"level":30,"time":1795330726004,"pid":5668,"hostname":"DESKTOP-VV0116A","reqId":"req-i","req":{"method":"GET","url":"/private","host":"localhost:80","remoteAddress":"127.0.0.1"},"msg":"incoming request"}
+{"level":30,"time":1795330726005,"pid":5668,"hostname":"DESKTOP-VV0116A","reqId":"req-i","res":{"statusCode":200},"responseTime":0.48919999999998254,"msg":"request completed"}
+{"level":30,"time":1795330726006,"pid":5668,"hostname":"DESKTOP-VV0116A","reqId":"req-j","req":{"method":"GET","url":"/private","host":"localhost:80","remoteAddress":"127.0.0.1"},"msg":"incoming request"}
+{"level":30,"time":1795330726008,"pid":5668,"hostname":"DESKTOP-VV0116A","reqId":"req-j","res":{"statusCode":200},"responseTime":2.2478000000000975,"msg":"request completed"}
+{"level":30,"time":1795330726008,"pid":5668,"hostname":"DESKTOP-VV0116A","reqId":"req-k","req":{"method":"GET","url":"/auth/session","host":"localhost:80","remoteAddress":"127.0.0.1"},"msg":"incoming request"}
+{"level":30,"time":1795330726009,"pid":5668,"hostname":"DESKTOP-VV0116A","reqId":"req-k","res":{"statusCode":200},"responseTime":0.4501000000000204,"msg":"request completed"}
+{"level":30,"time":1795330726009,"pid":5668,"hostname":"DESKTOP-VV0116A","reqId":"req-l","req":{"method":"POST","url":"/rotate","host":"localhost:80","remoteAddress":"127.0.0.1"},"msg":"incoming request"}
+{"level":30,"time":1795330726010,"pid":5668,"hostname":"DESKTOP-VV0116A","reqId":"req-l","res":{"statusCode":200},"responseTime":0.8247000000001208,"msg":"request completed"}
+{"level":30,"time":1795330726010,"pid":5668,"hostname":"DESKTOP-VV0116A","reqId":"req-m","req":{"method":"GET","url":"/private","host":"localhost:80","remoteAddress":"127.0.0.1"},"msg":"incoming request"}
+{"level":30,"time":1795330726011,"pid":5668,"hostname":"DESKTOP-VV0116A","reqId":"req-m","res":{"statusCode":401},"responseTime":0.35159999999996217,"msg":"request completed"}
+{"level":30,"time":1795330726014,"pid":5668,"hostname":"DESKTOP-VV0116A","reqId":"req-n","req":{"method":"GET","url":"/private","host":"localhost:80","remoteAddress":"127.0.0.1"},"msg":"incoming request"}
+{"level":30,"time":1795330726015,"pid":5668,"hostname":"DESKTOP-VV0116A","reqId":"req-n","res":{"statusCode":200},"responseTime":0.4701999999997497,"msg":"request completed"}
+{"level":30,"time":1795330726015,"pid":5668,"hostname":"DESKTOP-VV0116A","reqId":"req-o","req":{"method":"POST","url":"/auth/logout","host":"localhost:80","remoteAddress":"127.0.0.1"},"msg":"incoming request"}
+{"level":30,"time":1795330726016,"pid":5668,"hostname":"DESKTOP-VV0116A","reqId":"req-o","res":{"statusCode":200},"responseTime":0.6202000000002954,"msg":"request completed"}
+{"level":30,"time":1795330726016,"pid":5668,"hostname":"DESKTOP-VV0116A","reqId":"req-p","req":{"method":"GET","url":"/private","host":"localhost:80","remoteAddress":"127.0.0.1"},"msg":"incoming request"}
+{"level":30,"time":1795330726017,"pid":5668,"hostname":"DESKTOP-VV0116A","reqId":"req-p","res":{"statusCode":401},"responseTime":0.3269000000000233,"msg":"request completed"}
+{"level":30,"time":1795330726017,"pid":5668,"hostname":"DESKTOP-VV0116A","reqId":"req-q","req":{"method":"GET","url":"/private","host":"localhost:80","remoteAddress":"127.0.0.1"},"msg":"incoming request"}
+{"level":30,"time":1795330726018,"pid":5668,"hostname":"DESKTOP-VV0116A","reqId":"req-q","res":{"statusCode":200},"responseTime":0.5189000000000306,"msg":"request completed"}
+ ✓ src/__tests__/auth-session-composition.test.ts > persisted authentication API composition > allows concurrent sessions and logout revokes only the current session
+ ✓ src/__tests__/server-composition.test.ts > API runtime profile and listener composition > starts the shipped entrypoint only after profile validation and keeps the real process unready
+{"level":30,"time":1795330728861,"pid":8312,"hostname":"DESKTOP-VV0116A","msg":"Server listening at http://127.0.0.1:50389"}
+ ✓ src/__tests__/server-composition.test.ts > API runtime profile and listener composition > starts the shipped entrypoint only after profile validation and keeps the real process unready 5650ms
+ ✓ src/__tests__/server-composition.test.ts > API runtime profile and listener composition > fails closed when the profile is missing or contradicts APP_ENV/DATA_MODE
+{"level":30,"time":1795330728886,"pid":8312,"hostname":"DESKTOP-VV0116A","reqId":"req-1","req":{"method":"GET","url":"/health/live","host":"127.0.0.1:50389","remoteAddress":"127.0.0.1","remotePort":50390},"msg":"incoming request"}
+{"level":30,"time":1795330728901,"pid":8312,"hostname":"DESKTOP-VV0116A","reqId":"req-1","res":{"statusCode":200},"responseTime":9.483900000001086,"msg":"request completed"}
+{"level":30,"time":1795330728921,"pid":8312,"hostname":"DESKTOP-VV0116A","msg":"Server listening at http://127.0.0.1:50392"}
+ ✓ src/__tests__/server-composition.test.ts > API runtime profile and listener composition > serves health from a real listener and stays unready until required routes and checks exist 825ms
+{"level":30,"time":1795330728910,"pid":8312,"hostname":"DESKTOP-VV0116A","reqId":"req-2","req":{"method":"GET","url":"/health/ready","host":"127.0.0.1:50389","remoteAddress":"127.0.0.1","remotePort":50391},"msg":"incoming request"}
+{"level":30,"time":1795330728911,"pid":8312,"hostname":"DESKTOP-VV0116A","reqId":"req-2","res":{"statusCode":503},"responseTime":0.7998999999999796,"msg":"request completed"}
+{"level":30,"time":1795330728945,"pid":8312,"hostname":"DESKTOP-VV0116A","reqId":"req-1","req":{"method":"GET","url":"/health/live","host":"127.0.0.1:50392","remoteAddress":"127.0.0.1","remotePort":50393},"msg":"incoming request"}
+{"level":30,"time":1795330728946,"pid":8312,"hostname":"DESKTOP-VV0116A","reqId":"req-1","res":{"statusCode":415},"responseTime":0.9675000000006548,"msg":"request completed"}
+{"level":30,"time":1795330728951,"pid":8312,"hostname":"DESKTOP-VV0116A","reqId":"req-2","req":{"method":"POST","url":"/unknown","host":"127.0.0.1:50392","remoteAddress":"127.0.0.1","remotePort":50394},"msg":"incoming request"}
+{"level":30,"time":1795330728952,"pid":8312,"hostname":"DESKTOP-VV0116A","reqId":"req-2","res":{"statusCode":403},"responseTime":0.5560999999997875,"msg":"request completed"}
+{"level":30,"time":1795330728955,"pid":8312,"hostname":"DESKTOP-VV0116A","reqId":"req-3","req":{"method":"POST","url":"/unknown","host":"127.0.0.1:50392","remoteAddress":"127.0.0.1","remotePort":50393},"msg":"incoming request"}
+{"level":30,"time":1795330728956,"pid":8312,"hostname":"DESKTOP-VV0116A","reqId":"req-3","res":{"statusCode":403},"responseTime":0.8131000000012136,"msg":"request completed"}
+{"level":30,"time":1795330729086,"pid":8312,"hostname":"DESKTOP-VV0116A","msg":"Server listening at http://127.0.0.1:50395"}
+ ✓ src/__tests__/server-composition.test.ts > API runtime profile and listener composition > rejects unsupported encodings and unsafe requests without the configured Origin and CSRF token
+{"level":30,"time":1795330729092,"pid":8312,"hostname":"DESKTOP-VV0116A","reqId":"req-1","req":{"method":"GET","url":"/health/ready","host":"127.0.0.1:50395","remoteAddress":"127.0.0.1","remotePort":50396},"msg":"incoming request"}
+{"level":30,"time":1795330729094,"pid":8312,"hostname":"DESKTOP-VV0116A","reqId":"req-1","res":{"statusCode":200},"responseTime":1.4592000000011467,"msg":"request completed"}
+{"level":30,"time":1795330729119,"pid":8312,"hostname":"DESKTOP-VV0116A","reqId":"req-2","req":{"method":"POST","url":"/strict","host":"127.0.0.1:50395","remoteAddress":"127.0.0.1","remotePort":50397},"msg":"incoming request"}
+{"level":30,"time":1795330729123,"pid":8312,"hostname":"DESKTOP-VV0116A","reqId":"req-2","res":{"statusCode":400},"responseTime":4.272699999999531,"msg":"request completed"}
+{"level":30,"time":1795330729135,"pid":8312,"hostname":"DESKTOP-VV0116A","reqId":"req-3","req":{"method":"POST","url":"/strict","host":"127.0.0.1:50395","remoteAddress":"127.0.0.1","remotePort":50396},"msg":"incoming request"}
+{"level":30,"time":1795330729138,"pid":8312,"hostname":"DESKTOP-VV0116A","reqId":"req-3","res":{"statusCode":400},"responseTime":2.4799999999995634,"msg":"request completed"}
+{"level":30,"time":1795330729158,"pid":8312,"hostname":"DESKTOP-VV0116A","reqId":"req-4","req":{"method":"POST","url":"/strict","host":"127.0.0.1:50395","remoteAddress":"127.0.0.1","remotePort":50397},"msg":"incoming request"}
+{"level":30,"time":1795330729159,"pid":8312,"hostname":"DESKTOP-VV0116A","reqId":"req-4","res":{"statusCode":413},"responseTime":1.1548000000002503,"msg":"request completed"}
+{"level":30,"time":1795330729173,"pid":8312,"hostname":"DESKTOP-VV0116A","reqId":"req-5","req":{"method":"GET","url":"/failure","host":"127.0.0.1:50395","remoteAddress":"127.0.0.1","remotePort":50398},"msg":"incoming request"}
+{"level":30,"time":1795330729175,"pid":8312,"hostname":"DESKTOP-VV0116A","reqId":"req-5","res":{"statusCode":500},"responseTime":1.4799000000002707,"msg":"request completed"}
+{"level":30,"time":1795330729190,"pid":8312,"hostname":"DESKTOP-VV0116A","msg":"Server listening at http://127.0.0.1:50399"}
+ ✓ src/__tests__/server-composition.test.ts > API runtime profile and listener composition > maps malformed requests and unexpected errors to stable non-disclosing responses
+{"level":30,"time":1795330729195,"pid":8312,"hostname":"DESKTOP-VV0116A","reqId":"req-1","req":{"method":"GET","url":"/health/ready","host":"127.0.0.1:50399","remoteAddress":"127.0.0.1","remotePort":50400},"msg":"incoming request"}
+{"level":30,"time":1795330729197,"pid":8312,"hostname":"DESKTOP-VV0116A","reqId":"req-1","res":{"statusCode":200},"responseTime":0.875899999999092,"msg":"request completed"}
+{"level":30,"time":1795330729204,"pid":8312,"hostname":"DESKTOP-VV0116A","reqId":"req-2","req":{"method":"GET","url":"/commands","host":"127.0.0.1:50399","remoteAddress":"127.0.0.1","remotePort":50401},"msg":"incoming request"}
+{"level":30,"time":1795330729204,"pid":8312,"hostname":"DESKTOP-VV0116A","reqId":"req-2","msg":"Route GET:/commands not found"}
+{"level":30,"time":1795330729204,"pid":8312,"hostname":"DESKTOP-VV0116A","reqId":"req-2","res":{"statusCode":404},"responseTime":0.8011000000005879,"msg":"request completed"}
+ ✓ src/__tests__/server-composition.test.ts > API runtime profile and listener composition > keeps real-data staging ready when the unsupported command API is not registered
+ ✓ src/__tests__/server-composition.test.ts > API authentication log redaction > does not emit unique credential and password canaries in application logs
+{"level":30,"time":1795330729649,"pid":8096,"hostname":"DESKTOP-VV0116A","reqId":"req-1","req":{"method":"GET","url":"/auth/csrf","host":"localhost:80","remoteAddress":"127.0.0.1"},"msg":"incoming request"}
+{"level":30,"time":1795330729668,"pid":8096,"hostname":"DESKTOP-VV0116A","reqId":"req-1","res":{"statusCode":200},"responseTime":16.153399999999237,"msg":"request completed"}
+{"level":30,"time":1795330729669,"pid":8096,"hostname":"DESKTOP-VV0116A","reqId":"req-2","req":{"method":"POST","url":"/auth/login","host":"localhost:80","remoteAddress":"127.0.0.1"},"msg":"incoming request"}
+ ✓ src/__tests__/auth-routes.test.ts > POST /auth/login > validTempCredential_returns200WithoutBearerToken 1422ms
+{"level":30,"time":1795330729798,"pid":8096,"hostname":"DESKTOP-VV0116A","reqId":"req-2","res":{"statusCode":200},"responseTime":129.03679999999986,"msg":"request completed"}
+{"level":30,"time":1795330729801,"pid":8096,"hostname":"DESKTOP-VV0116A","reqId":"req-3","req":{"method":"GET","url":"/workspace/context","host":"localhost:80","remoteAddress":"127.0.0.1"},"msg":"incoming request"}
+{"level":30,"time":1795330729812,"pid":8096,"hostname":"DESKTOP-VV0116A","reqId":"req-3","res":{"statusCode":403},"responseTime":10.988999999999578,"msg":"request completed"}
+{"level":30,"time":1795330729823,"pid":8096,"hostname":"DESKTOP-VV0116A","reqId":"req-4","req":{"method":"GET","url":"/auth/session","host":"localhost:80","remoteAddress":"127.0.0.1"},"msg":"incoming request"}
+{"level":30,"time":1795330729840,"pid":8096,"hostname":"DESKTOP-VV0116A","reqId":"req-4","res":{"statusCode":200},"responseTime":16.858799999999974,"msg":"request completed"}
+{"level":30,"time":1795330729841,"pid":8096,"hostname":"DESKTOP-VV0116A","reqId":"req-5","req":{"method":"GET","url":"/not-allowlisted","host":"localhost:80","remoteAddress":"127.0.0.1"},"msg":"incoming request"}
+{"level":30,"time":1795330729850,"pid":8096,"hostname":"DESKTOP-VV0116A","reqId":"req-5","res":{"statusCode":403},"responseTime":8.50590000000011,"msg":"request completed"}
+{"level":30,"time":1795330729851,"pid":8096,"hostname":"DESKTOP-VV0116A","reqId":"req-6","req":{"method":"POST","url":"/auth/change-password","host":"localhost:80","remoteAddress":"127.0.0.1"},"msg":"incoming request"}
+ ✓ src/__tests__/auth-routes.test.ts > POST /auth/login > expiredCredential_returnsGenericAuthenticationFailure
+{"level":30,"time":1795330730027,"pid":8096,"hostname":"DESKTOP-VV0116A","reqId":"req-6","res":{"statusCode":200},"responseTime":176.04370000000017,"msg":"request completed"}
+{"level":30,"time":1795330730028,"pid":8096,"hostname":"DESKTOP-VV0116A","reqId":"req-7","req":{"method":"GET","url":"/auth/session","host":"localhost:80","remoteAddress":"127.0.0.1"},"msg":"incoming request"}
+{"level":30,"time":1795330730031,"pid":8096,"hostname":"DESKTOP-VV0116A","reqId":"req-7","res":{"statusCode":401},"responseTime":2.5771999999997206,"msg":"request completed"}
+{"level":30,"time":1795330730040,"pid":8096,"hostname":"DESKTOP-VV0116A","reqId":"req-8","req":{"method":"GET","url":"/auth/csrf","host":"localhost:80","remoteAddress":"127.0.0.1"},"msg":"incoming request"}
+{"level":30,"time":1795330730048,"pid":8096,"hostname":"DESKTOP-VV0116A","reqId":"req-8","res":{"statusCode":200},"responseTime":6.998499999999694,"msg":"request completed"}
+{"level":30,"time":1795330730048,"pid":8096,"hostname":"DESKTOP-VV0116A","reqId":"req-9","req":{"method":"POST","url":"/auth/login","host":"localhost:80","remoteAddress":"127.0.0.1"},"msg":"incoming request"}
+{"level":30,"time":1795330730143,"pid":8096,"hostname":"DESKTOP-VV0116A","reqId":"req-9","res":{"statusCode":200},"responseTime":95.14520000000084,"msg":"request completed"}
+{"level":30,"time":1795330730145,"pid":8096,"hostname":"DESKTOP-VV0116A","reqId":"req-a","req":{"method":"GET","url":"/workspace/context?userId=14add355-6c70-4490-a8f4-929e63aeb903","host":"localhost:80","remoteAddress":"127.0.0.1"},"msg":"incoming request"}
+{"level":30,"time":1795330730287,"pid":8096,"hostname":"DESKTOP-VV0116A","reqId":"req-a","res":{"statusCode":200},"responseTime":142.0668000000005,"msg":"request completed"}
+{"level":30,"time":1795330730297,"pid":8096,"hostname":"DESKTOP-VV0116A","reqId":"req-b","req":{"method":"GET","url":"/workspace/context","host":"localhost:80","remoteAddress":"127.0.0.1"},"msg":"incoming request"}
+{"level":30,"time":1795330730348,"pid":8096,"hostname":"DESKTOP-VV0116A","reqId":"req-b","res":{"statusCode":200},"responseTime":50.51610000000073,"msg":"request completed"}
+{"level":30,"time":1795330730355,"pid":8096,"hostname":"DESKTOP-VV0116A","reqId":"req-c","req":{"method":"GET","url":"/workspace/context","host":"localhost:80","remoteAddress":"127.0.0.1"},"msg":"incoming request"}
+{"level":30,"time":1795330730399,"pid":8096,"hostname":"DESKTOP-VV0116A","reqId":"req-c","res":{"statusCode":200},"responseTime":43.69090000000142,"msg":"request completed"}
+{"level":30,"time":1795330730400,"pid":8096,"hostname":"DESKTOP-VV0116A","reqId":"req-d","req":{"method":"GET","url":"/workspace/verified-findings?organizationId=8f459557-c070-449d-8df4-c4d55072fdaa","host":"localhost:80","remoteAddress":"127.0.0.1"},"msg":"incoming request"}
+{"level":30,"time":1795330730400,"pid":8096,"hostname":"DESKTOP-VV0116A","reqId":"req-d","res":{"statusCode":401},"responseTime":0.34619999999995343,"msg":"request completed"}
+{"level":30,"time":1795330730401,"pid":8096,"hostname":"DESKTOP-VV0116A","reqId":"req-e","req":{"method":"GET","url":"/workspace/verified-findings?organizationId=8f459557-c070-449d-8df4-c4d55072fdaa","host":"localhost:80","remoteAddress":"127.0.0.1"},"msg":"incoming request"}
+{"level":30,"time":1795330730572,"pid":8096,"hostname":"DESKTOP-VV0116A","reqId":"req-e","res":{"statusCode":200},"responseTime":170.65269999999873,"msg":"request completed"}
+{"level":30,"time":1795330730572,"pid":8096,"hostname":"DESKTOP-VV0116A","reqId":"req-f","req":{"method":"GET","url":"/workspace/verified-findings?organizationId=invalid","host":"localhost:80","remoteAddress":"127.0.0.1"},"msg":"incoming request"}
+{"level":30,"time":1795330730582,"pid":8096,"hostname":"DESKTOP-VV0116A","reqId":"req-f","res":{"statusCode":400},"responseTime":9.088999999999942,"msg":"request completed"}
+{"level":30,"time":1795330730655,"pid":8096,"hostname":"DESKTOP-VV0116A","reqId":"req-g","req":{"method":"GET","url":"/auth/session","host":"localhost:80","remoteAddress":"127.0.0.1"},"msg":"incoming request"}
+ ✓ src/__tests__/auth-routes.test.ts > POST /auth/login > sameCredentialTwice_secondCallUsesGenericAuthenticationFailure 686ms
+{"level":30,"time":1795330730671,"pid":8096,"hostname":"DESKTOP-VV0116A","reqId":"req-g","res":{"statusCode":200},"responseTime":16.00749999999971,"msg":"request completed"}
+{"level":30,"time":1795330730672,"pid":8096,"hostname":"DESKTOP-VV0116A","reqId":"req-h","req":{"method":"GET","url":"/workspace/verified-findings?organizationId=8f459557-c070-449d-8df4-c4d55072fdaa","host":"localhost:80","remoteAddress":"127.0.0.1"},"msg":"incoming request"}
+{"level":30,"time":1795330730773,"pid":8096,"hostname":"DESKTOP-VV0116A","reqId":"req-h","res":{"statusCode":200},"responseTime":101.2559999999994,"msg":"request completed"}
+{"level":30,"time":1795330730785,"pid":8096,"hostname":"DESKTOP-VV0116A","reqId":"req-i","req":{"method":"GET","url":"/workspace/verified-findings?organizationId=8f459557-c070-449d-8df4-c4d55072fdaa","host":"localhost:80","remoteAddress":"127.0.0.1"},"msg":"incoming request"}
+{"level":30,"time":1795330730879,"pid":8096,"hostname":"DESKTOP-VV0116A","reqId":"req-i","res":{"statusCode":200},"responseTime":92.97609999999986,"msg":"request completed"}
+{"level":30,"time":1795330730889,"pid":8096,"hostname":"DESKTOP-VV0116A","reqId":"req-j","req":{"method":"GET","url":"/workspace/verified-findings?organizationId=8f459557-c070-449d-8df4-c4d55072fdaa","host":"localhost:80","remoteAddress":"127.0.0.1"},"msg":"incoming request"}
+{"level":30,"time":1795330730986,"pid":8096,"hostname":"DESKTOP-VV0116A","reqId":"req-j","res":{"statusCode":200},"responseTime":97.23899999999958,"msg":"request completed"}
+{"level":30,"time":1795330730992,"pid":8096,"hostname":"DESKTOP-VV0116A","reqId":"req-k","req":{"method":"POST","url":"/commands","host":"localhost:80","remoteAddress":"127.0.0.1"},"msg":"incoming request"}
+{"level":30,"time":1795330731384,"pid":8096,"hostname":"DESKTOP-VV0116A","reqId":"req-k","res":{"statusCode":200},"responseTime":392.11019999999917,"msg":"request completed"}
+{"level":30,"time":1795330731385,"pid":8096,"hostname":"DESKTOP-VV0116A","reqId":"req-l","req":{"method":"POST","url":"/commands","host":"localhost:80","remoteAddress":"127.0.0.1"},"msg":"incoming request"}
+{"level":30,"time":1795330731400,"pid":8096,"hostname":"DESKTOP-VV0116A","reqId":"req-l","res":{"statusCode":200},"responseTime":14.614599999998973,"msg":"request completed"}
+{"level":30,"time":1795330731401,"pid":8096,"hostname":"DESKTOP-VV0116A","reqId":"req-m","req":{"method":"POST","url":"/commands","host":"localhost:80","remoteAddress":"127.0.0.1"},"msg":"incoming request"}
+{"level":30,"time":1795330731475,"pid":8096,"hostname":"DESKTOP-VV0116A","reqId":"req-m","res":{"statusCode":409},"responseTime":74.70709999999963,"msg":"request completed"}
+{"level":30,"time":1795330731476,"pid":8096,"hostname":"DESKTOP-VV0116A","reqId":"req-n","req":{"method":"POST","url":"/commands","host":"localhost:80","remoteAddress":"127.0.0.1"},"msg":"incoming request"}
+{"level":30,"time":1795330731488,"pid":8096,"hostname":"DESKTOP-VV0116A","reqId":"req-n","res":{"statusCode":409},"responseTime":11.168400000000474,"msg":"request completed"}
+{"level":30,"time":1795330731498,"pid":8096,"hostname":"DESKTOP-VV0116A","reqId":"req-o","req":{"method":"POST","url":"/commands","host":"localhost:80","remoteAddress":"127.0.0.1"},"msg":"incoming request"}
+{"level":30,"time":1795330731508,"pid":8096,"hostname":"DESKTOP-VV0116A","reqId":"req-o","res":{"statusCode":409},"responseTime":10.063399999999092,"msg":"request completed"}
+{"level":30,"time":1795330731509,"pid":8096,"hostname":"DESKTOP-VV0116A","reqId":"req-p","req":{"method":"POST","url":"/commands","host":"localhost:80","remoteAddress":"127.0.0.1"},"msg":"incoming request"}
+{"level":30,"time":1795330731515,"pid":8096,"hostname":"DESKTOP-VV0116A","reqId":"req-p","res":{"statusCode":400},"responseTime":6.065300000000207,"msg":"request completed"}
+{"level":30,"time":1795330731516,"pid":8096,"hostname":"DESKTOP-VV0116A","reqId":"req-q","req":{"method":"POST","url":"/commands","host":"localhost:80","remoteAddress":"127.0.0.1"},"msg":"incoming request"}
+{"level":30,"time":1795330731523,"pid":8096,"hostname":"DESKTOP-VV0116A","reqId":"req-q","res":{"statusCode":400},"responseTime":6.554200000000492,"msg":"request completed"}
+{"level":30,"time":1795330731534,"pid":8096,"hostname":"DESKTOP-VV0116A","reqId":"req-r","req":{"method":"POST","url":"/commands","host":"localhost:80","remoteAddress":"127.0.0.1"},"msg":"incoming request"}
+{"level":30,"time":1795330731559,"pid":8096,"hostname":"DESKTOP-VV0116A","reqId":"req-r","res":{"statusCode":403},"responseTime":25.274100000000544,"msg":"request completed"}
+{"level":30,"time":1795330731560,"pid":8096,"hostname":"DESKTOP-VV0116A","reqId":"req-s","req":{"method":"POST","url":"/commands","host":"localhost:80","remoteAddress":"127.0.0.1"},"msg":"incoming request"}
+{"level":30,"time":1795330731584,"pid":8096,"hostname":"DESKTOP-VV0116A","reqId":"req-s","res":{"statusCode":403},"responseTime":24.491799999999785,"msg":"request completed"}
+{"level":30,"time":1795330731593,"pid":8096,"hostname":"DESKTOP-VV0116A","reqId":"req-t","req":{"method":"GET","url":"/auth/csrf","host":"localhost:80","remoteAddress":"127.0.0.1"},"msg":"incoming request"}
+{"level":30,"time":1795330731595,"pid":8096,"hostname":"DESKTOP-VV0116A","reqId":"req-t","res":{"statusCode":200},"responseTime":2.158100000000559,"msg":"request completed"}
+{"level":30,"time":1795330731596,"pid":8096,"hostname":"DESKTOP-VV0116A","reqId":"req-1","req":{"method":"GET","url":"/auth/csrf","host":"localhost:80","remoteAddress":"127.0.0.1"},"msg":"incoming request"}
+ ✓ src/__tests__/auth-session-postgres.integration.test.ts > WP5.3 Fastify and PostgreSQL integration > runs temp login, forced-change denial, all-session revocation and fresh login through the actual app-role database path 2018ms
+{"level":30,"time":1795330731727,"pid":8096,"hostname":"DESKTOP-VV0116A","reqId":"req-1","res":{"statusCode":200},"responseTime":131.59970000000067,"msg":"request completed"}
+{"level":30,"time":1795330731728,"pid":8096,"hostname":"DESKTOP-VV0116A","reqId":"req-u","req":{"method":"POST","url":"/auth/login","host":"localhost:80","remoteAddress":"127.0.0.1"},"msg":"incoming request"}
+{"level":30,"time":1795330731729,"pid":8096,"hostname":"DESKTOP-VV0116A","reqId":"req-2","req":{"method":"POST","url":"/auth/login","host":"localhost:80","remoteAddress":"127.0.0.1"},"msg":"incoming request"}
+{"level":30,"time":1795330731881,"pid":8096,"hostname":"DESKTOP-VV0116A","reqId":"req-u","res":{"statusCode":401},"responseTime":153.1221999999998,"msg":"request completed"}
+{"level":30,"time":1795330731987,"pid":8096,"hostname":"DESKTOP-VV0116A","reqId":"req-2","res":{"statusCode":401},"responseTime":258.1293000000005,"msg":"request completed"}
+ ✓ src/__tests__/auth-session-postgres.integration.test.ts > WP5.3 Fastify and PostgreSQL integration > records generic failed attempts from two independent Fastify instances in one shared PostgreSQL throttle store 405ms
+ ✓ src/__tests__/auth-routes.test.ts > POST /auth/login > responseBody_containsNoNrcPattern 1823ms
+ ✓ src/__tests__/auth-routes.test.ts > POST /auth/login > unknownUser_usesGenericAuthenticationError
+ ✓ src/__tests__/auth-routes.test.ts > POST /auth/change-password legacy adapter > stores a permanent password separately without issuing a temporary credential 815ms
+ ✓ src/__tests__/outbox-worker.test.ts > OutboxWorker > undeliveredRecord_isPolled
+ ✓ src/__tests__/outbox-worker.test.ts > OutboxWorker > undeliveredRecord_isPolled 554ms
+ ✓ src/__tests__/outbox-worker.test.ts > OutboxWorker > deliveredRecord_isNotReturned
+ ✓ src/__tests__/outbox-worker.test.ts > OutboxWorker > deliveredRecord_isNotReturned
+ ✓ src/__tests__/masking-serialiser.test.ts > maskMemberRecord > unionRole_response_containsNoPII
+ ✓ src/__tests__/masking-serialiser.test.ts > maskMemberRecord > institutionalRole_response_containsNoPII
+ ✓ src/__tests__/masking-serialiser.test.ts > maskMemberRecord > cooperativeOfficer_response_containsOwnData
+ ✓ src/__tests__/masking-serialiser.test.ts > maskMemberRecord > publicInspection_showsOnlyStatutoryFields
+ ✓ src/__tests__/masking-serialiser.test.ts > scrubNrcFromString > removes NRC pattern from log strings
+ ✓ src/__tests__/commands-parser.test.ts > command raw JSON parser > rejects duplicate keys after decoding JSON escapes at every object depth
+ ✓ src/__tests__/commands-parser.test.ts > command raw JSON parser > rejects malformed UTF-8 and unpaired surrogate escapes while accepting a valid pair
+ ✓ src/__tests__/commands-parser.test.ts > command raw JSON parser > rejects invalid JSON numeric forms and trailing data before materializing the request
+
+ Test Files  7 passed (7)
+      Tests  29 passed (29)
+   Start at  08:58:39
+   Duration  16.50s (transform 3.10s, setup 0ms, collect 14.88s, tests 24.46s, environment 3ms, prepare 2.71s)
+

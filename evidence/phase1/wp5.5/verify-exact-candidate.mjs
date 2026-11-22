@@ -10,7 +10,7 @@ const head = git('rev-parse', 'HEAD');
 assert.equal(git('status', '--porcelain'), '', 'WP5.5 exact-candidate verification requires a clean worktree');
 assert.equal(spawnSync('git', ['merge-base', '--is-ancestor', candidate, head], { stdio: 'ignore' }).status, 0, 'WP5.5 implementation candidate must be an ancestor of evidence HEAD');
 for (const changed of git('diff', '--name-only', `${candidate}..${head}`).split(/\r?\n/).filter(Boolean)) {
-  assert.match(changed, /^evidence\/phase1\/(?:wp2\.5|wp5\.4|wp5\.5)\//, `post-candidate change is outside WP2.5/WP5.4/WP5.5 evidence: ${changed}`);
+  assert.match(changed, /^(?:evidence\/phase1\/(?:wp1\.6|wp2\.5|wp5\.4|wp5\.5)\/|tools\/verify_wp2_5_scope\.mjs$|Implementation-Plan-V4\/implementation\/WP2-WP5-IMPLEMENTATION-READINESS-PLAN\.md$)/, `post-candidate change is outside the bounded Phase 1 evidence/status-verifier set: ${changed}`);
 }
 
 const evidence = JSON.parse(await readFile('evidence/phase1/wp5.5/task-evidence.json', 'utf8'));
@@ -34,7 +34,10 @@ for (const predecessor of ['REM-WP5.2', 'REM-WP5.3', 'REM-WP5.4']) {
   assert.equal(spawnSync('git', ['merge-base', '--is-ancestor', sha, candidate], { stdio: 'ignore' }).status, 0, `${predecessor} must be an ancestor of WP5.5 candidate`);
 }
 
-const base = 'evidence/phase1/wp5.5/local/2026-11-22';
+const bddCommand = evidence.commands.find((item) => item.command.includes('npm run test:wp5.5'));
+assert.ok(bddCommand && bddCommand.result === 'passed', 'passing live WP5.5 BDD command is missing');
+const { dirname } = await import('node:path');
+const base = dirname(bddCommand.artifact);
 const report = JSON.parse(await readFile(`${base}/bdd-enr-004.json`, 'utf8'));
 const manifest = JSON.parse(await readFile('evidence/phase1/bdd-scenarios.json', 'utf8'));
 const scenario = manifest.scenarios.find((item) => item.id === 'BDD-ENR-004');
@@ -54,12 +57,27 @@ assert.match(command, /1 scenario \(1 passed\)/);
 assert.match(command, /15 steps \(15 passed\)/);
 const apiLog = await readFile(`${base}/api-redacted.raw.log`, 'utf8');
 assert.ok(apiLog.length > 0, 'WP5.5 API log must be nonempty');
-assert.match(await readFile(`${base}/runtime-environment.json`, 'utf8'), /"data_mode": "test"/);
+const runtimeEnvironment = JSON.parse(await readFile(`${base}/runtime-environment.json`, 'utf8'));
+assert.equal(runtimeEnvironment.data_mode, 'test');
+const loginRegression = evidence.commands.find((item) => item.command.includes('npm run test:login'));
+assert.ok(loginRegression && loginRegression.result === 'passed', 'three carried-forward Playwright login checks must pass');
+const loginLog = await readFile(loginRegression.artifact, 'utf8');
+assert.match(loginLog, /3 passed/);
+for (const testName of [
+  'validCredentials_redirectsToWorkspace',
+  'invalidCredentials_showsErrorMessage',
+  'temporaryCredential_promptsPasswordChange',
+]) assert.ok(loginLog.includes(testName), `carried-forward login test is missing: ${testName}`);
+const traceCommand = evidence.commands.find((item) => item.command.includes('npm run verify:trace'));
+assert.ok(traceCommand && traceCommand.result === 'passed', 'verify:trace must pass');
+const traceLog = await readFile(traceCommand.artifact, 'utf8');
+assert.match(traceLog, /Traceability gate passed/);
+assert.doesNotMatch(traceLog, /Traceability gate FAILED/);
 for (const file of [`${base}/api-redacted.raw.log`, `${base}/runtime-environment.json`]) await access(file);
 for (const item of evidence.commands) {
   assert.equal(item.result, 'passed', `unpassed WP5.5 command: ${item.command}`);
   await access(item.artifact);
 }
 console.log(`${preflight ? 'PREFLIGHT PASS' : 'PASS'} REM-WP5.5 exact implementation candidate ${candidate}; evidence HEAD ${head}.`);
-console.log('PASS BDD-ENR-004 through live workspace/API/PostgreSQL (15 steps), report validation, redacted API log, and closed WP5.2/WP5.3/WP5.4 predecessors.');
+console.log('PASS BDD-ENR-004 (15 steps), all 3 carried-forward login Playwright checks, verify:trace, report validation, and closed WP5.2/WP5.3/WP5.4 predecessors.');
 if (preflight) console.log('WP5.5 gate remains pending until final exact-candidate verification.');

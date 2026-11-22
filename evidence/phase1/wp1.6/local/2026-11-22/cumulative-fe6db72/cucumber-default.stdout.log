@@ -1,0 +1,33 @@
+..........{"level":30,"time":1795331872551,"pid":20168,"hostname":"DESKTOP-VV0116A","reqId":"req-1","req":{"method":"GET","url":"/auth/csrf","host":"localhost:80","remoteAddress":"127.0.0.1"},"msg":"incoming request"}
+{"level":30,"time":1795331872587,"pid":20168,"hostname":"DESKTOP-VV0116A","reqId":"req-1","res":{"statusCode":200},"responseTime":33.873600000000806,"msg":"request completed"}
+{"level":30,"time":1795331872598,"pid":20168,"hostname":"DESKTOP-VV0116A","reqId":"req-2","req":{"method":"POST","url":"/auth/login","host":"localhost:80","remoteAddress":"127.0.0.1"},"msg":"incoming request"}
+{"level":30,"time":1795331872738,"pid":20168,"hostname":"DESKTOP-VV0116A","reqId":"req-2","res":{"statusCode":200},"responseTime":139.5557000000008,"msg":"request completed"}
+{"level":30,"time":1795331872738,"pid":20168,"hostname":"DESKTOP-VV0116A","reqId":"req-3","req":{"method":"GET","url":"/auth/session","host":"localhost:80","remoteAddress":"127.0.0.1"},"msg":"incoming request"}
+{"level":30,"time":1795331872755,"pid":20168,"hostname":"DESKTOP-VV0116A","reqId":"req-3","res":{"statusCode":200},"responseTime":16.707800000000134,"msg":"request completed"}
+.{"level":30,"time":1795331872759,"pid":20168,"hostname":"DESKTOP-VV0116A","reqId":"req-4","req":{"method":"POST","url":"/commands","host":"localhost:80","remoteAddress":"127.0.0.1"},"msg":"incoming request"}
+{"level":30,"time":1795331872964,"pid":20168,"hostname":"DESKTOP-VV0116A","reqId":"req-4","res":{"statusCode":200},"responseTime":204.53439999999864,"msg":"request completed"}
+.{"level":30,"time":1795331872965,"pid":20168,"hostname":"DESKTOP-VV0116A","reqId":"req-5","req":{"method":"POST","url":"/commands","host":"localhost:80","remoteAddress":"127.0.0.1"},"msg":"incoming request"}
+{"level":30,"time":1795331872976,"pid":20168,"hostname":"DESKTOP-VV0116A","reqId":"req-5","res":{"statusCode":200},"responseTime":11.423800000000483,"msg":"request completed"}
+........{"level":30,"time":1795331876394,"pid":20168,"hostname":"DESKTOP-VV0116A","reqId":"req-1","req":{"method":"GET","url":"/auth/csrf","host":"localhost:80","remoteAddress":"127.0.0.1"},"msg":"incoming request"}
+{"level":30,"time":1795331876402,"pid":20168,"hostname":"DESKTOP-VV0116A","reqId":"req-1","res":{"statusCode":200},"responseTime":7.694000000003143,"msg":"request completed"}
+{"level":30,"time":1795331876402,"pid":20168,"hostname":"DESKTOP-VV0116A","reqId":"req-2","req":{"method":"POST","url":"/auth/login","host":"localhost:80","remoteAddress":"127.0.0.1"},"msg":"incoming request"}
+{"level":30,"time":1795331876481,"pid":20168,"hostname":"DESKTOP-VV0116A","reqId":"req-2","res":{"statusCode":200},"responseTime":79.36130000000048,"msg":"request completed"}
+{"level":30,"time":1795331876482,"pid":20168,"hostname":"DESKTOP-VV0116A","reqId":"req-3","req":{"method":"GET","url":"/auth/session","host":"localhost:80","remoteAddress":"127.0.0.1"},"msg":"incoming request"}
+{"level":30,"time":1795331876494,"pid":20168,"hostname":"DESKTOP-VV0116A","reqId":"req-3","res":{"statusCode":200},"responseTime":12.454099999999016,"msg":"request completed"}
+.{"level":30,"time":1795331876500,"pid":20168,"hostname":"DESKTOP-VV0116A","reqId":"req-4","req":{"method":"POST","url":"/commands","host":"localhost:80","remoteAddress":"127.0.0.1"},"msg":"incoming request"}
+{"level":30,"time":1795331876717,"pid":20168,"hostname":"DESKTOP-VV0116A","reqId":"req-4","res":{"statusCode":200},"responseTime":217.04369999999835,"msg":"request completed"}
+.{"level":30,"time":1795331876718,"pid":20168,"hostname":"DESKTOP-VV0116A","reqId":"req-5","req":{"method":"POST","url":"/commands","host":"localhost:80","remoteAddress":"127.0.0.1"},"msg":"incoming request"}
+{"level":30,"time":1795331876735,"pid":20168,"hostname":"DESKTOP-VV0116A","reqId":"req-5","res":{"statusCode":409},"responseTime":16.775300000001153,"msg":"request completed"}
+.......{"level":30,"time":1795331879760,"pid":20168,"hostname":"DESKTOP-VV0116A","reqId":"req-1","req":{"method":"GET","url":"/auth/csrf","host":"localhost:80","remoteAddress":"127.0.0.1"},"msg":"incoming request"}
+{"level":30,"time":1795331879768,"pid":20168,"hostname":"DESKTOP-VV0116A","reqId":"req-1","res":{"statusCode":200},"responseTime":8.081899999997404,"msg":"request completed"}
+{"level":30,"time":1795331879769,"pid":20168,"hostname":"DESKTOP-VV0116A","reqId":"req-2","req":{"method":"POST","url":"/auth/login","host":"localhost:80","remoteAddress":"127.0.0.1"},"msg":"incoming request"}
+{"level":30,"time":1795331879852,"pid":20168,"hostname":"DESKTOP-VV0116A","reqId":"req-2","res":{"statusCode":200},"responseTime":83.73570000000109,"msg":"request completed"}
+{"level":30,"time":1795331879853,"pid":20168,"hostname":"DESKTOP-VV0116A","reqId":"req-3","req":{"method":"GET","url":"/auth/session","host":"localhost:80","remoteAddress":"127.0.0.1"},"msg":"incoming request"}
+{"level":30,"time":1795331879868,"pid":20168,"hostname":"DESKTOP-VV0116A","reqId":"req-3","res":{"statusCode":200},"responseTime":15.679699999996956,"msg":"request completed"}
+{"level":30,"time":1795331879880,"pid":20168,"hostname":"DESKTOP-VV0116A","reqId":"req-4","req":{"method":"POST","url":"/commands","host":"localhost:80","remoteAddress":"127.0.0.1"},"msg":"incoming request"}
+{"level":30,"time":1795331879969,"pid":20168,"hostname":"DESKTOP-VV0116A","reqId":"req-4","res":{"statusCode":403},"responseTime":88.62459999999919,"msg":"request completed"}
+......................
+
+7 scenarios (7 passed)
+51 steps (51 passed)
+0m 13.925s (0m 13.867s executing your code)

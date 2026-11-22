@@ -1,0 +1,11 @@
+{
+  "candidate": "fe6db7259d7292dd65792d8c3983d914be5bda0f",
+  "work_package": "REM-WP2.5",
+  "selected_scenario_ids": [
+    "BDD-UNI-001",
+    "BDD-UNI-002"
+  ],
+  "branch": "",
+  "worktree_clean": true,
+  "started_at": "2026-11-22T07:10:39.137Z"
+}
