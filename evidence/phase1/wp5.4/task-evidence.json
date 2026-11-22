@@ -67,6 +67,11 @@
       "command": "npm run test:phase0-contract",
       "result": "passed",
       "artifact": "evidence/phase1/wp5.4/local/2026-11-22/phase0-contract.log"
+    },
+    {
+      "command": "node evidence/phase1/wp5.4/verify-exact-candidate.mjs 76bec16d50e34a9b3ade73a82b640b8a8cb7d07d --preflight",
+      "result": "passed",
+      "artifact": "evidence/phase1/wp5.4/local/2026-11-22/wp54-preflight-verification.log"
     }
   ],
   "claims": {
