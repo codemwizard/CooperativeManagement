@@ -52,6 +52,11 @@
       "command": "node evidence/phase1/wp5.5/verify-exact-candidate.mjs 76bec16d50e34a9b3ade73a82b640b8a8cb7d07d --preflight",
       "result": "passed",
       "artifact": "evidence/phase1/wp5.5/local/2026-11-22/wp55-preflight-verification.log"
+    },
+    {
+      "command": "node evidence/phase1/wp5.5/verify-exact-candidate.mjs 76bec16d50e34a9b3ade73a82b640b8a8cb7d07d",
+      "result": "passed",
+      "artifact": "evidence/phase1/wp5.5/local/2026-11-22/wp55-final-verification.log"
     }
   ],
   "claims": {
@@ -65,7 +70,7 @@
     }
   },
   "limitations": [
-    "The WP5.5 preflight passed; final exact-candidate verification is being run against this committed evidence-only record.",
+    "The final exact-candidate verifier passed on the committed WP5.5 evidence state.",
     "REM-WP5.2, REM-WP5.3 and REM-WP5.4 predecessor gates are passed.",
     "Only BDD-ENR-004 is owned by this focused WP5.5 run. The full 41-scenario integrated Phase 1 and REM-WP7.2 gate remains outstanding.",
     "Local test profile only; production deployment, TLS, production database and expected-load qualification are not claimed."
