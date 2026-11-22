@@ -1,0 +1,12 @@
+npm notice run symphony-prototype@1.0.0 test:wp5.5
+npm notice run node --env-file-if-exists=.env.local --env-file-if-exists=.env tools/run_wp5_5_live_bdd.mjs
+
+  VITE v5.4.21  ready in 2074 ms
+
+  ➜  Local:   http://127.0.0.1:43183/
+...............
+
+1 scenario (1 passed)
+15 steps (15 passed)
+0m 2.783s (0m 2.746s executing your code)
+PASS: BDD-ENR-004 executed through workspace, API and PostgreSQL.

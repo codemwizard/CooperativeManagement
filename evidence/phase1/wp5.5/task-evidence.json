@@ -1,6 +1,7 @@
 {
   "schema_version": 1,
   "task_id": "REM-WP5.5",
+  "commit": "76bec16d50e34a9b3ade73a82b640b8a8cb7d07d",
   "status": {
     "implementation": "complete",
     "unit_test": "passed",
@@ -9,58 +10,58 @@
     "gate_verified": "pending"
   },
   "candidate": {
-    "status": "Historical focused run used an uncommitted working tree; no immutable implementation candidate is bound to this record.",
+    "status": "immutable implementation candidate",
     "head_commit_before_implementation": "d70d7ee35b1aaaa0a1350feb01394ac25ba96896",
-    "implementation_commit": null
+    "implementation_commit": "76bec16d50e34a9b3ade73a82b640b8a8cb7d07d"
   },
   "environment": {
     "node": "v26.7.0",
-    "npm": "v11.19.0 (current shell; package declares npm 12.2.0)",
-    "postgres": "local isolated database with _test suffix; server version not captured in this run",
+    "npm": "v12.2.0",
+    "postgres": "PostgreSQL 18.0",
     "database_role": "restricted app role for application path; test-admin role for synthetic fixture setup and cleanup",
     "data_mode": "test",
     "key_provider": "local-test"
   },
   "commands": [
     {
-      "command": "npm run test:wp5.5 (WP5_5_WORKSPACE_PORT=53180, WP5_5_API_PORT=53006)",
-      "result": "passed; mapped BDD-ENR-004 scenario, 15/15 steps, actual workspace/API/PostgreSQL path",
-      "artifact": "evidence/phase1/wp5.5-verified/live-bdd-command.log"
+      "command": "npm run test:wp5.5 (isolated ports 43183/43184; mapped BDD-ENR-004, 15 steps)",
+      "result": "passed",
+      "artifact": "evidence/phase1/wp5.5/local/2026-11-22/live-bdd-command.log"
     },
     {
       "command": "Cucumber JSON report validated against frozen Phase 1 BDD manifest and owner mapping",
-      "result": "passed; exactly the selected BDD-ENR-004 scenario was executed and passed",
-      "artifact": "evidence/phase1/wp5.5-verified/bdd-enr-004.json"
+      "result": "passed",
+      "artifact": "evidence/phase1/wp5.5/local/2026-11-22/bdd-enr-004.json"
     },
     {
       "command": "Live authentication event and API-log canary assertions",
-      "result": "passed; persisted event rows and nonempty auth-route request logs contain no generated password canaries",
-      "artifact": "evidence/phase1/wp5.5-verified/api-redacted.raw.log"
+      "result": "passed",
+      "artifact": "evidence/phase1/wp5.5/local/2026-11-22/api-redacted.raw.log"
     },
     {
       "command": "npm run test:phase1:contracts",
-      "result": "passed; 112 tests",
-      "artifact": null
+      "result": "passed",
+      "artifact": "evidence/phase1/wp5.4/local/2026-11-22/phase1-contracts.log"
     },
     {
       "command": "node tools/phase1-contracts.js",
-      "result": "passed; structural manifest and task-graph checks only",
-      "artifact": null
+      "result": "passed",
+      "artifact": "evidence/phase1/wp5.4/local/2026-11-22/phase1-contracts.log"
     }
   ],
   "claims": {
     "behavior_proved": "The frozen BDD-ENR-004 temporary-credential journey exercises actual persisted credentials, expiry and forced-change behavior, browser navigation, password establishment, revoked temporary login, fresh permanent-password login, session cookie and refresh; no API route interception or in-memory repository is used. Authentication events and captured API logs are checked for unique password canaries.",
-    "path_proved": "One exact owner-mapped scenario ran against local Vite workspace, Fastify API and isolated PostgreSQL services. The runner checks service readiness, validates its Cucumber JSON against the frozen manifest, captures a nonempty redacted API log and tears down its child services.",
+    "path_proved": "One exact owner-mapped scenario ran from the clean detached candidate worktree at 76bec16d50e34a9b3ade73a82b640b8a8cb7d07d against local Vite workspace, Fastify API and isolated PostgreSQL services. The runner checks service readiness, validates its Cucumber JSON against the frozen manifest, captures a nonempty redacted API log and tears down its child services.",
     "scope_limit": "Focused WP5.5 BDD evidence only; not all 41 Phase 1 scenarios, not the aggregate REM-WP7.2 gate, and not a full integrated regression suite.",
     "predecessors": {
       "REM-WP5.2": "Closed evidence is recorded in evidence/phase1/wp5.2/task-evidence.json.",
       "REM-WP5.3": "Gate passed for implementation candidate 6ba1885035b330122570bf4602d88bcd19f73fc1; see evidence/phase1/wp5.3/task-evidence.json.",
-      "REM-WP5.4": "Implementation and focused browser acceptance evidence is recorded in evidence/phase1/wp5.4/task-evidence.json; its gate remains pending immutable candidate binding and exact-candidate closure."
+      "REM-WP5.4": "Gate passed on immutable implementation candidate 76bec16d50e34a9b3ade73a82b640b8a8cb7d07d; see evidence/phase1/wp5.4/task-evidence.json and its final verifier output."
     }
   },
   "limitations": [
-    "This record does not bind the tested implementation to an immutable commit SHA; gate verification remains pending and this record is not a gate PASS.",
-    "REM-WP5.3 is gate-passed. REM-WP5.5 remains pending because its own implementation candidate is not bound to an immutable SHA and REM-WP5.4 gate verification is pending.",
+    "Exact-candidate gate verification remains pending until the committed evidence-only record passes the final verifier.",
+    "REM-WP5.2, REM-WP5.3 and REM-WP5.4 predecessor gates are passed; REM-WP5.5 remains pending its own final exact-candidate verification.",
     "Only BDD-ENR-004 is owned by this focused WP5.5 run. The full 41-scenario integrated Phase 1 and REM-WP7.2 gate remains outstanding.",
     "Local test profile only; production deployment, TLS, production database and expected-load qualification are not claimed."
   ],
