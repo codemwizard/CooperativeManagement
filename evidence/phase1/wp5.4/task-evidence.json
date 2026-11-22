@@ -69,12 +69,12 @@
       "artifact": "evidence/phase1/wp5.4/local/2026-11-22/candidate-fe6db72/runtime-environment.json"
     },
     {
-      "command": "Temporary test-only migration role membership cleanup",
+      "command": "Temporary test-only role-membership-remediation cleanup",
       "result": "passed",
       "artifact": "evidence/phase1/wp5.4/local/2026-11-22/candidate-fe6db72/role-membership-remediation.log"
     },
     {
-      "command": "WP1.5 role finalization",
+      "command": "WP1.5 role-finalization verification",
       "result": "passed",
       "artifact": "evidence/phase1/wp5.4/local/2026-11-22/candidate-fe6db72/role-finalization.log"
     }
