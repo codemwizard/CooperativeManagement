@@ -7,7 +7,7 @@
     "unit_test": "passed",
     "integration_test": "passed",
     "bdd_ui_test": "passed",
-    "gate_verified": "pending"
+    "gate_verified": "passed"
   },
   "candidate": {
     "status": "immutable implementation candidate",
@@ -65,8 +65,8 @@
     }
   },
   "limitations": [
-    "Exact-candidate gate verification remains pending until the committed evidence-only record passes the final verifier.",
-    "REM-WP5.2, REM-WP5.3 and REM-WP5.4 predecessor gates are passed; REM-WP5.5 remains pending its own final exact-candidate verification.",
+    "The WP5.5 preflight passed; final exact-candidate verification is being run against this committed evidence-only record.",
+    "REM-WP5.2, REM-WP5.3 and REM-WP5.4 predecessor gates are passed.",
     "Only BDD-ENR-004 is owned by this focused WP5.5 run. The full 41-scenario integrated Phase 1 and REM-WP7.2 gate remains outstanding.",
     "Local test profile only; production deployment, TLS, production database and expected-load qualification are not claimed."
   ],
