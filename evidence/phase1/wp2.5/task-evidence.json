@@ -6,7 +6,7 @@
     "unit_test": "not_applicable",
     "integration_test": "passed",
     "bdd_ui_test": "passed",
-    "gate_verified": "pending"
+    "gate_verified": "passed"
   },
   "commit": "76bec16d50e34a9b3ade73a82b640b8a8cb7d07d",
   "candidate": {
@@ -52,6 +52,11 @@
       "command": "REM-WP2.4 PostgreSQL TA grant/revoke serialization tests (13 passed, including protected-read-first and mutation-first orders)",
       "result": "passed",
       "artifact": "evidence/phase1/wp2.4/local/2026-11-21/postgres-capacity-ta-serialization.log"
+    },
+    {
+      "command": "node evidence/phase1/wp2.5/verify-exact-candidate.mjs 76bec16d50e34a9b3ade73a82b640b8a8cb7d07d (final exact-candidate verifier)",
+      "result": "passed",
+      "artifact": "evidence/phase1/wp2.5/local/2026-11-22/wp25-final-verification.log"
     }
   ],
   "claims": {
@@ -66,9 +71,8 @@
     ]
   },
   "limitations": [
-    "Final exact-candidate verification is pending; the candidate-bound clean worktree run and mapped audit are recorded, with final status contingent on the committed evidence-only closure check.",
     "WP1.6 mapped HTTP evidence is retained from candidate 86feb09f334f8c6374ea364850631b8eccbafc5a; WP2.4 serial-order evidence is retained from its passing PostgreSQL run."
   ],
   "unresolved_decisions": [],
-  "reviewer": "WP2.5 implementation audit; exact-candidate verification pending"
+  "reviewer": "WP2.5 exact-candidate verifier passed on a clean evidence worktree; candidate 76bec16d50e34a9b3ade73a82b640b8a8cb7d07d"
 }
