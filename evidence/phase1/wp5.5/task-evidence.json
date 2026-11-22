@@ -62,6 +62,11 @@
       "command": "node evidence/phase1/wp5.5/verify-exact-candidate.mjs fe6db7259d7292dd65792d8c3983d914be5bda0f --preflight",
       "result": "passed",
       "artifact": "evidence/phase1/wp5.5/local/2026-11-22/candidate-fe6db72/wp55-preflight-verification.log"
+    },
+    {
+      "command": "node evidence/phase1/wp5.5/verify-exact-candidate.mjs fe6db7259d7292dd65792d8c3983d914be5bda0f (final exact-candidate verifier)",
+      "result": "passed",
+      "artifact": "evidence/phase1/wp5.5/local/2026-11-22/candidate-fe6db72/wp55-final-verification.log"
     }
   ],
   "claims": {
@@ -75,7 +80,6 @@
     }
   },
   "limitations": [
-    "Final exact-candidate verifier output is recorded after its clean run.",
     "Only focused BDD-ENR-004 and the three required login checks are claimed. The integrated 41-scenario Phase 1 and REM-WP7.2 gates remain outstanding.",
     "Local test profile only; production deployment, TLS, database and expected-load qualification are not claimed."
   ],
