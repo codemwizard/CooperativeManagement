@@ -72,6 +72,11 @@
       "command": "node evidence/phase1/wp5.4/verify-exact-candidate.mjs 76bec16d50e34a9b3ade73a82b640b8a8cb7d07d --preflight",
       "result": "passed",
       "artifact": "evidence/phase1/wp5.4/local/2026-11-22/wp54-preflight-verification.log"
+    },
+    {
+      "command": "node evidence/phase1/wp5.4/verify-exact-candidate.mjs 76bec16d50e34a9b3ade73a82b640b8a8cb7d07d",
+      "result": "passed",
+      "artifact": "evidence/phase1/wp5.4/local/2026-11-22/wp54-final-verification.log"
     }
   ],
   "claims": {
@@ -84,7 +89,7 @@
     }
   },
   "limitations": [
-    "The exact-candidate verifier preflight passed; final verification is now being run against the committed evidence-only candidate. The implementation remains bounded to the local test profile.",
+    "The exact-candidate verifier passed on the committed evidence-only candidate. The implementation remains bounded to the local test profile.",
     "The test profile does not establish production Secure-cookie, TLS, deployment origin, production database or production concurrency behavior.",
     "An earlier local DB invocation without CI migration-role bootstrap failed two WP1.5 migration-runner tests. The rerun with temporary role membership passed all 86 DB tests; cleanup revoked the membership. The older failure remains historical and is superseded by the cited passing run.",
     "The run is focused WP5.4 evidence and is not the integrated Phase 1 or REM-WP7.2 gate."
