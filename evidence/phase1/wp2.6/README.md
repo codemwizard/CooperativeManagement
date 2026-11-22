@@ -15,7 +15,7 @@ Implement the D-16 infrastructure required before REM-WP2.3 mutations:
 - startup/registration validation that rejects missing scope rows and writers for frozen authority sources;
 - atomic scope-version increments and rollback behavior at the transaction boundary.
 
-Do not start REM-WP2.3 command implementation until the WP2.6 candidate SHA and task evidence are established. The repository currently has no centralized authority command registry; WP2.3 must create and validate the exact supported writer registrations before enabling capacity/delegation source DML. Until then, migrations deny app-role DML on all authority source tables, including the future supported writer tables.
+At the time WP2.6 was implemented, WP2.3 command work was gated on the immutable WP2.6 candidate and task evidence. That prerequisite is now satisfied, and REM-WP2.3 has registered and verified the supported capacity/delegation writers. Current WP2.3 status and candidate-bound evidence are in `../wp2.3/task-evidence.json`; do not use the historical entry conditions below as the current execution status.
 
 ## Local verification references
 
@@ -34,4 +34,4 @@ No capacity/delegation command implementation or mutation behavior belongs here.
 
 ## Remaining boundary
 
-WP2.6 closes D-16 infrastructure and frozen-source enforcement. Capacity and delegation DML remains denied until REM-WP2.3 registers supported writers and consumes this lock service. REM-WP2.4 owns race-order and immutable-history proof after WP2.3. These downstream tasks do not block the WP2.6 gate.
+WP2.6 closes D-16 infrastructure and frozen-source enforcement. REM-WP2.3 now registers the supported capacity/delegation writers and consumes this lock service. REM-WP2.4 owns the race-order and immutable-history proof; its evidence and current gate state are recorded in `../wp2.4/task-evidence.json`.

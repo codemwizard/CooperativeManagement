@@ -1,0 +1,4 @@
+npm notice run symphony-prototype@1.0.0 verify:wp1.6:dependencies
+npm notice run node tools/verify_wp1_6_dependencies.mjs
+PASS REM-WP1.6 predecessor gate at fe6db7259d7292dd65792d8c3983d914be5bda0f.
+PASS 26 direct/transitive task records, schema, artifacts and candidate ancestry.

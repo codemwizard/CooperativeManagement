@@ -1,0 +1,21 @@
+{
+  "candidate": "76bec16d50e34a9b3ade73a82b640b8a8cb7d07d",
+  "work_package": "REM-WP2.5",
+  "selected_scenario_ids": [
+    "BDD-UNI-001",
+    "BDD-UNI-002"
+  ],
+  "branch": "",
+  "worktree_clean": true,
+  "started_at": "2026-11-22T04:21:33.667Z",
+  "profile_exit_codes": {
+    "default": 0,
+    "live_auth": 0,
+    "live_workspace": 0,
+    "live_telemetry": 0
+  },
+  "validation_errors": [],
+  "passed": true,
+  "finished_at": "2026-11-22T04:21:53.987Z",
+  "exit_code": 0
+}

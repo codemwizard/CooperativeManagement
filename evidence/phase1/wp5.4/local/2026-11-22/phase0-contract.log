@@ -1,0 +1,15 @@
+npm notice run symphony-prototype@1.0.0 test:phase0-contract
+npm notice run npx vitest run tests/tooling/phase0_scripts.test.ts
+npm notice run symphony-prototype@1.0.0 npx
+npm notice run vitest run tests/tooling/phase0_scripts.test.ts
+
+ RUN  v2.1.9 C:/Workspace/GitHub/Prototype/artifacts/exact-candidates/wp-phase1-closeout
+
+ ✓ tests/tooling/phase0_scripts.test.ts (12 tests | 1 skipped) 3126ms
+   ✓ Phase 0 script contracts > proves failure in a mandatory command stops later commands 3109ms
+
+ Test Files  1 passed (1)
+      Tests  11 passed | 1 skipped (12)
+   Start at  06:13:20
+   Duration  3.89s (transform 82ms, setup 0ms, collect 108ms, tests 3.13s, environment 0ms, prepare 177ms)
+

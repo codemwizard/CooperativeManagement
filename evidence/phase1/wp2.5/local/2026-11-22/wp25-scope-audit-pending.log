@@ -1,0 +1,5 @@
+FAIL REM-WP2.5 scope audit at bf8650183188c92af22ad058db3590752fb5eb0f
+- REM-WP1.6: a passing standalone task-evidence record is required; mapped BDD output alone is not gate closure
+- REM-WP1.6: gate_verified is pending
+No frozen scenario was removed, retagged, or silently re-scoped.
+

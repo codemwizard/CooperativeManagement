@@ -8,7 +8,12 @@
     "bdd_ui_test": "passed",
     "gate_verified": "pending"
   },
-  "commit": "working-tree",
+  "commit": "fe6db7259d7292dd65792d8c3983d914be5bda0f",
+  "candidate": {
+    "status": "immutable implementation candidate",
+    "head_commit_before_implementation": "4c60304c608052e67f978224a430286e33511ccc",
+    "implementation_commit": "fe6db7259d7292dd65792d8c3983d914be5bda0f"
+  },
   "environment": {
     "node": "v26.7.0",
     "npm": "v12.2.0",
@@ -26,7 +31,7 @@
     {
       "command": "npm run test:bdd:phase1 -- --work-package REM-WP2.5 (2 mapped direct-cooperative scenarios; 2 scenarios and 22 steps passed)",
       "result": "passed",
-      "artifact": "evidence/phase1/wp2.5/local/2026-11-21/wp25-cucumber-stdout.log"
+      "artifact": "evidence/phase1/wp2.5/local/2026-11-22/candidate-fe6db72/cucumber-wp25.stdout.log"
     },
     {
       "command": "WP2.5 live BDD report and runner validation summary",
@@ -34,19 +39,24 @@
       "artifact": "evidence/phase1/wp2.5/local/2026-11-21/wp25-validator-summary.json"
     },
     {
-      "command": "node tools/verify_wp2_5_scope.mjs",
-      "result": "passed",
-      "artifact": "evidence/phase1/wp2.5-scope-audit.log"
-    },
-    {
       "command": "npm run test:bdd:phase1 -- --work-package REM-WP1.6 (consumed retained mapped run; 6 IDs, 8 scenarios, 69 steps)",
       "result": "passed",
-      "artifact": "evidence/phase1/wp1.6/local/2026-11-21/wp2.3-candidate-86feb09.mapped-runner.log"
+      "artifact": "evidence/phase1/wp1.6/local/2026-11-22/candidate-fe6db72/cucumber-default.stdout.log"
     },
     {
       "command": "REM-WP2.4 PostgreSQL TA grant/revoke serialization tests (13 passed, including protected-read-first and mutation-first orders)",
       "result": "passed",
       "artifact": "evidence/phase1/wp2.4/local/2026-11-21/postgres-capacity-ta-serialization.log"
+    },
+    {
+      "command": "node tools/verify_wp2_5_scope.mjs fe6db7259d7292dd65792d8c3983d914be5bda0f (blocked only by REM-WP1.6 gate status)",
+      "result": "blocked",
+      "artifact": "evidence/phase1/wp2.5/local/2026-11-22/wp25-scope-audit-pending.log"
+    },
+    {
+      "command": "node evidence/phase1/wp2.5/verify-exact-candidate.mjs fe6db7259d7292dd65792d8c3983d914be5bda0f --preflight (blocked by REM-WP1.6 gate status)",
+      "result": "blocked",
+      "artifact": "evidence/phase1/wp2.5/local/2026-11-22/wp25-preflight-verification.log"
     }
   ],
   "claims": {
@@ -57,13 +67,13 @@
       "The workspace capability-gap navigation surface is exercised for correct scope; no claim is made that a separate capability-gap domain dataset was introduced by WP2.5.",
       "Agreement references are persisted provenance only; the application does not establish legal validity of an external agreement.",
       "No Phase 2 Feature 05 verification scenario is claimed as Phase 1 acceptance.",
-      "The BDD evidence was generated against working-tree implementation based on HEAD 4c60304c608052e67f978224a430286e33511ccc; exact-candidate verification requires a clean committed evidence candidate."
+      "The first candidate worktree run reported worktree_clean=false and is superseded by the fresh candidate-bound run in candidate-76bec16-clean, whose run metadata records worktree_clean=true."
     ]
   },
   "limitations": [
-    "WP2.5 exact-candidate gate verification remains pending until these implementation and evidence changes are committed and the verifier is run against that exact candidate on a clean worktree.",
-    "WP1.6 mapped HTTP evidence is retained from candidate 86feb09f334f8c6374ea364850631b8eccbafc5a; WP2.4 serial-order evidence is retained from its passing PostgreSQL run."
+    "WP2.5 closure remains pending because graph-defined REM-WP1.6 has a candidate-bound standalone mapped BDD pass but gate_verified is pending: cumulative REM-WP1 acceptance fails while mandatory BDD-AUD-004 remains @wip. Both current WP2.5 scope audit and exact-candidate preflight explicitly stop on that predecessor gate.",
+    "The standalone WP1.6 mapped HTTP run passes on candidate fe6db7259d7292dd65792d8c3983d914be5bda0f, but it cannot substitute for the failed cumulative predecessor acceptance. WP2.4 serial-order evidence remains retained from its passing PostgreSQL run."
   ],
   "unresolved_decisions": [],
-  "reviewer": "WP2.5 implementation audit; final exact-candidate verification remains pending"
+  "reviewer": "WP2.5 mapped BDD passes; dependency audit and exact-candidate preflight correctly report REM-WP1.6 gate pending."
 }

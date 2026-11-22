@@ -24,6 +24,12 @@ if (DATABASE_URL === undefined || DATABASE_URL === '') {
 
 const pool = new pg.Pool({ connectionString: DATABASE_URL });
 const LOCK_NAMESPACE = 'symphony.forward_sql_migrations';
+const SUPERSEDED_MIGRATIONS = new Map([
+  [
+    '0022_wp2_3_ta_semantic_identity.sql',
+    '0034_preserve_legacy_ta_semantic_identity.sql',
+  ],
+]);
 
 async function ensureMigrationsTable(client: pg.PoolClient): Promise<void> {
   await client.query(`CREATE SCHEMA IF NOT EXISTS ${QUOTED_SCHEMA}`);
@@ -81,6 +87,22 @@ async function runMigrations(): Promise<void> {
     for (const file of sqlFiles) {
       if (applied.has(file)) {
         console.log(`  ⏭  ${file} — already applied`);
+        continue;
+      }
+
+      const supersededBy = SUPERSEDED_MIGRATIONS.get(file);
+      if (supersededBy !== undefined) {
+        // Migration 0021 already installs the corrected legacy-aware index.
+        // Keep the applied SQL file immutable, but do not replay its obsolete
+        // index definition on fresh installs. Migration 0034 repairs databases
+        // where the historical 0022 body was already applied.
+        await executeSqlMigration(
+          client,
+          file,
+          `-- ${file} is superseded by ${supersededBy}; preserve the ledger without replaying obsolete SQL.\nSELECT 1;`,
+        );
+        console.log(`  ✅ ${file} — recorded as superseded by ${supersededBy}; immutable SQL not replayed`);
+        count++;
         continue;
       }
 

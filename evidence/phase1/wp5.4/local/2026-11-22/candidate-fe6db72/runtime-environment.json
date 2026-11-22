@@ -1,0 +1,11 @@
+{
+  "node": "v26.7.0",
+  "npm": "12.2.0",
+  "postgres": "18.0",
+  "database": "symphony_phase1_test",
+  "admin_role": "postgres",
+  "application_role": "symphony_app",
+  "data_mode": "test",
+  "key_provider": "local-test",
+  "temporary_migration_role_membership": "granted only for isolated test migrations and acceptance runs; revoked and verified absent after tests"
+}

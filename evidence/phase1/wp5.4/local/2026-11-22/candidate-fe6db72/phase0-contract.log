@@ -1,0 +1,15 @@
+npm notice run symphony-prototype@1.0.0 test:phase0-contract
+npm notice run npx vitest run tests/tooling/phase0_scripts.test.ts
+npm notice run symphony-prototype@1.0.0 npx
+npm notice run vitest run tests/tooling/phase0_scripts.test.ts
+
+ RUN  v2.1.9 C:/Workspace/GitHub/Prototype/artifacts/exact-candidates/phase1-flags-fe6db72
+
+ ✓ tests/tooling/phase0_scripts.test.ts (12 tests | 1 skipped) 3382ms
+   ✓ Phase 0 script contracts > proves failure in a mandatory command stops later commands 3359ms
+
+ Test Files  1 passed (1)
+      Tests  11 passed | 1 skipped (12)
+   Start at  09:01:00
+   Duration  4.22s (transform 101ms, setup 0ms, collect 134ms, tests 3.38s, environment 0ms, prepare 238ms)
+

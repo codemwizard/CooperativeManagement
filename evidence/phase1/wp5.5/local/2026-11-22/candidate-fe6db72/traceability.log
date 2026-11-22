@@ -1,0 +1,12 @@
+npm notice run symphony-prototype@1.0.0 verify:trace
+npm notice run tsx tools/verify-trace.ts
+Running traceability gate...
+
+  Found 205 scenarios in features/.
+  169 are @wip (pending step definitions).
+  31 are @hard non-@wip (must have step definitions).
+  ✅ All @REQ-xxx tags match known codes.
+  ✅ 31 @hard non-@wip scenario(s) covered by 11 step-definition file(s): auth-steps.ts, authz-steps.ts, data-mode-steps.ts, kernel-steps.ts, legacy-policy-compat.ts, live-auth-harness.ts, privacy-steps.ts, workspace-live-steps.ts, workspace-path.ts, workspace-steps.ts, wp6.1-fixture.ts.
+     (Authoritative coverage check: npm run test:bdd)
+
+✅ Traceability gate passed.

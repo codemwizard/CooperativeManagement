@@ -1,0 +1,2 @@
+PASS REM-WP2.5 exact implementation candidate 76bec16d50e34a9b3ade73a82b640b8a8cb7d07d; evidence HEAD a1a953f8a371ba8d1d807367057f1e6db2d51991.
+PASS clean-candidate direct-cooperative BDD (2 scenarios, 22 steps), scope/traceability audit, WP1.6 mapped HTTP evidence, and WP2.4 serialization evidence.

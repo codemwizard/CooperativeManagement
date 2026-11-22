@@ -1,0 +1,346 @@
+[
+  {
+    "description": "  Personal data is encrypted, masked by role and tied to consent. Union/TA and institutions\n  see capability gaps and aggregates, never member PII. The platform runs on test data only\n  but behaves as if the Data Protection Act and residency rules were enforced.",
+    "elements": [
+      {
+        "description": "",
+        "id": "identity,-privacy-and-access;union-ta-sees-assigned-cooperative-capability-gaps-without-member-pii",
+        "keyword": "Scenario",
+        "line": 126,
+        "name": "Union TA sees assigned cooperative capability gaps without member PII",
+        "steps": [
+          {
+            "result": {
+              "status": "passed",
+              "duration": 4103050600
+            },
+            "keyword": "Before",
+            "hidden": true
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 171899900
+            },
+            "keyword": "Before",
+            "hidden": true
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 336999
+            },
+            "arguments": [],
+            "keyword": "Given ",
+            "line": 8,
+            "name": "an active cooperative \"Nsenga Honey Growers\" with synthetic members",
+            "match": {
+              "location": "packages\\testkit\\src\\step-definitions\\auth-steps.ts:396"
+            }
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 456020499
+            },
+            "arguments": [],
+            "keyword": "Given ",
+            "line": 127,
+            "name": "the Programme Manager delegates TA scope for cooperative \"Org A\" through the union to the assigned Union TA",
+            "match": {
+              "location": "tools\\wp16-command-live-steps.ts:154"
+            }
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 167598500
+            },
+            "arguments": [],
+            "keyword": "When ",
+            "line": 128,
+            "name": "the assigned Union TA opens the capability-gap workflow for cooperative \"Org A\"",
+            "match": {
+              "location": "tools\\wp16-command-live-steps.ts:167"
+            }
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 516800
+            },
+            "arguments": [],
+            "keyword": "Then ",
+            "line": 129,
+            "name": "the trusted context includes \"Org A\" in the assigned cooperative scope",
+            "match": {
+              "location": "tools\\wp16-command-live-steps.ts:179"
+            }
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 144099
+            },
+            "arguments": [],
+            "keyword": "And ",
+            "line": 130,
+            "name": "the complete workspace response excludes the member PII canaries",
+            "match": {
+              "location": "tools\\wp16-command-live-steps.ts:191"
+            }
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 109399300
+            },
+            "arguments": [],
+            "keyword": "When ",
+            "line": 131,
+            "name": "the assigned Union TA checks capability-gap scope for unassigned cooperative \"Org C\"",
+            "match": {
+              "location": "tools\\wp16-command-live-steps.ts:198"
+            }
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 275100
+            },
+            "arguments": [],
+            "keyword": "Then ",
+            "line": 132,
+            "name": "\"Org C\" is absent from the assigned cooperative scope",
+            "match": {
+              "location": "tools\\wp16-command-live-steps.ts:204"
+            }
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 4321174200
+            },
+            "keyword": "After",
+            "hidden": true
+          }
+        ],
+        "tags": [
+          {
+            "name": "@phase1",
+            "line": 1
+          },
+          {
+            "name": "@area-PRV",
+            "line": 1
+          },
+          {
+            "name": "@REQ-UNI-001",
+            "line": 125
+          },
+          {
+            "name": "@REQ-UNI-002",
+            "line": 125
+          },
+          {
+            "name": "@BDD-UNI-001",
+            "line": 125
+          },
+          {
+            "name": "@hard",
+            "line": 125
+          }
+        ],
+        "type": "scenario"
+      },
+      {
+        "description": "",
+        "id": "identity,-privacy-and-access;cooperative-ta-delegation-can-be-revoked-without-erasing-audit-history",
+        "keyword": "Scenario",
+        "line": 135,
+        "name": "Cooperative TA delegation can be revoked without erasing audit history",
+        "steps": [
+          {
+            "result": {
+              "status": "passed",
+              "duration": 2783037099
+            },
+            "keyword": "Before",
+            "hidden": true
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 186116600
+            },
+            "keyword": "Before",
+            "hidden": true
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 243899
+            },
+            "arguments": [],
+            "keyword": "Given ",
+            "line": 8,
+            "name": "an active cooperative \"Nsenga Honey Growers\" with synthetic members",
+            "match": {
+              "location": "packages\\testkit\\src\\step-definitions\\auth-steps.ts:396"
+            }
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 274719100
+            },
+            "arguments": [],
+            "keyword": "Given ",
+            "line": 136,
+            "name": "the Programme Manager delegates TA scope for cooperative \"Org A\" through the union to the assigned Union TA",
+            "match": {
+              "location": "tools\\wp16-command-live-steps.ts:154"
+            }
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 152364699
+            },
+            "arguments": [],
+            "keyword": "When ",
+            "line": 137,
+            "name": "the Union TA opens the capability-gap workflow before revocation",
+            "match": {
+              "location": "tools\\wp16-command-live-steps.ts:173"
+            }
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 134999
+            },
+            "arguments": [],
+            "keyword": "Then ",
+            "line": 138,
+            "name": "the trusted context includes \"Org A\" in the assigned cooperative scope",
+            "match": {
+              "location": "tools\\wp16-command-live-steps.ts:179"
+            }
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 140745599
+            },
+            "arguments": [],
+            "keyword": "When ",
+            "line": 139,
+            "name": "the Programme Manager revokes the delegation for cooperative \"Org A\"",
+            "match": {
+              "location": "tools\\wp16-command-live-steps.ts:212"
+            }
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 101372999
+            },
+            "arguments": [],
+            "keyword": "Then ",
+            "line": 140,
+            "name": "the Union TA loses access to cooperative \"Org A\"",
+            "match": {
+              "location": "tools\\wp16-command-live-steps.ts:222"
+            }
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 17200300
+            },
+            "arguments": [],
+            "keyword": "And ",
+            "line": 141,
+            "name": "the delegation grant and revoke audit actions remain immutable",
+            "match": {
+              "location": "tools\\wp16-command-live-steps.ts:226"
+            }
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 188401900
+            },
+            "arguments": [],
+            "keyword": "When ",
+            "line": 142,
+            "name": "the Programme Manager grants and revokes a new delegation before the Union TA opens its context",
+            "match": {
+              "location": "tools\\wp16-command-live-steps.ts:244"
+            }
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 103705800
+            },
+            "arguments": [],
+            "keyword": "Then ",
+            "line": 143,
+            "name": "the Union TA still has no access to cooperative \"Org A\"",
+            "match": {
+              "location": "tools\\wp16-command-live-steps.ts:274"
+            }
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 372889800
+            },
+            "keyword": "After",
+            "hidden": true
+          }
+        ],
+        "tags": [
+          {
+            "name": "@phase1",
+            "line": 1
+          },
+          {
+            "name": "@area-PRV",
+            "line": 1
+          },
+          {
+            "name": "@REQ-UNI-001",
+            "line": 134
+          },
+          {
+            "name": "@BDD-UNI-002",
+            "line": 134
+          },
+          {
+            "name": "@hard",
+            "line": 134
+          }
+        ],
+        "type": "scenario"
+      }
+    ],
+    "id": "identity,-privacy-and-access",
+    "line": 2,
+    "keyword": "Feature",
+    "name": "Identity, privacy and access",
+    "tags": [
+      {
+        "name": "@phase1",
+        "line": 1
+      },
+      {
+        "name": "@area-PRV",
+        "line": 1
+      }
+    ],
+    "uri": "features\\02_identity_privacy_and_access.feature"
+  }
+]

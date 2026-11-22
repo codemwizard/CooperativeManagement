@@ -89,7 +89,7 @@
       "explicit_tenant_predicate": true,
       "tenant_context": "Authenticated tenant is set locally for user-session writes; pre-auth rows are opaque token-hash keyed and have no user identity.",
       "access_policy": "The session store contains only random token and CSRF digests plus opaque identity/lifecycle metadata. Application access is limited to the session repository and bounded by explicit tenant predicates for authenticated sessions.",
-      "status": "REM-WP5.3 migration 0015; candidate-specific restricted-role verification pending."
+      "status": "REM-WP5.3 migration 0015; restricted-role and session-path verification passed on candidate 6ba1885035b330122570bf4602d88bcd19f73fc1; see evidence/phase1/wp5.3/task-evidence.json."
     },
     {
       "table": "auth_user_tenant_index",
@@ -104,7 +104,7 @@
       "explicit_tenant_predicate": false,
       "tenant_context": "Only the user-row trigger and SECURITY DEFINER lookup access this private index.",
       "access_policy": "No ordinary runtime table grants; direct cross-tenant identity routing remains inaccessible to symphony_app.",
-      "status": "REM-WP5.3 migration 0015; candidate-specific security-definer and restricted-role verification pending."
+      "status": "REM-WP5.3 migration 0015; security-definer and restricted-role verification passed on candidate 6ba1885035b330122570bf4602d88bcd19f73fc1; see evidence/phase1/wp5.3/task-evidence.json."
     },
     {
       "table": "auth_attempt_events",
@@ -124,7 +124,7 @@
       "explicit_tenant_predicate": false,
       "tenant_context": "Cross-tenant global login protection; access is through the repository's advisory-locked, bounded transaction operations.",
       "access_policy": "Contains only HMAC account/source keys and bounded state/timestamps. It enables atomic shared limits across API instances and is not a general audit log.",
-      "status": "REM-WP5.3 migration 0015; candidate-specific restricted-role verification pending."
+      "status": "REM-WP5.3 migration 0015; restricted-role verification passed on candidate 6ba1885035b330122570bf4602d88bcd19f73fc1; see evidence/phase1/wp5.3/task-evidence.json."
     },
     {
       "table": "authority_scope_versions",

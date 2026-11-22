@@ -1,0 +1,29 @@
+{
+  "candidate": "fe6db7259d7292dd65792d8c3983d914be5bda0f",
+  "work_package": "REM-WP1",
+  "selected_scenario_ids": [
+    "BDD-AUD-001",
+    "BDD-AUD-002",
+    "BDD-AUD-003",
+    "BDD-AUD-004",
+    "BDD-AUD-005",
+    "BDD-AUD-006",
+    "BDD-AUD-010",
+    "BDD-AUD-015"
+  ],
+  "branch": "",
+  "worktree_clean": true,
+  "started_at": "2026-11-22T07:17:39.225Z",
+  "profile_exit_codes": {
+    "default": 0,
+    "live_auth": 0,
+    "live_workspace": 0,
+    "live_telemetry": 0
+  },
+  "validation_errors": [
+    "BDD-AUD-004 was not executed (missing, filtered, or still @wip)"
+  ],
+  "passed": false,
+  "finished_at": "2026-11-22T07:18:07.658Z",
+  "exit_code": 1
+}
