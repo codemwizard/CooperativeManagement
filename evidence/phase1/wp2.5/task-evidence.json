@@ -8,7 +8,12 @@
     "bdd_ui_test": "passed",
     "gate_verified": "pending"
   },
-  "commit": "working-tree",
+  "commit": "76bec16d50e34a9b3ade73a82b640b8a8cb7d07d",
+  "candidate": {
+    "status": "immutable implementation candidate",
+    "head_commit_before_implementation": "4c60304c608052e67f978224a430286e33511ccc",
+    "implementation_commit": "76bec16d50e34a9b3ade73a82b640b8a8cb7d07d"
+  },
   "environment": {
     "node": "v26.7.0",
     "npm": "v12.2.0",
@@ -26,7 +31,7 @@
     {
       "command": "npm run test:bdd:phase1 -- --work-package REM-WP2.5 (2 mapped direct-cooperative scenarios; 2 scenarios and 22 steps passed)",
       "result": "passed",
-      "artifact": "evidence/phase1/wp2.5/local/2026-11-21/wp25-cucumber-stdout.log"
+      "artifact": "evidence/phase1/wp2.5/local/2026-11-22/wp25-clean-candidate-command.log"
     },
     {
       "command": "WP2.5 live BDD report and runner validation summary",
@@ -36,7 +41,7 @@
     {
       "command": "node tools/verify_wp2_5_scope.mjs",
       "result": "passed",
-      "artifact": "evidence/phase1/wp2.5-scope-audit.log"
+      "artifact": "evidence/phase1/wp2.5/local/2026-11-22/wp25-scope-audit.log"
     },
     {
       "command": "npm run test:bdd:phase1 -- --work-package REM-WP1.6 (consumed retained mapped run; 6 IDs, 8 scenarios, 69 steps)",
@@ -57,13 +62,13 @@
       "The workspace capability-gap navigation surface is exercised for correct scope; no claim is made that a separate capability-gap domain dataset was introduced by WP2.5.",
       "Agreement references are persisted provenance only; the application does not establish legal validity of an external agreement.",
       "No Phase 2 Feature 05 verification scenario is claimed as Phase 1 acceptance.",
-      "The BDD evidence was generated against working-tree implementation based on HEAD 4c60304c608052e67f978224a430286e33511ccc; exact-candidate verification requires a clean committed evidence candidate."
+      "The first candidate worktree run reported worktree_clean=false and is superseded by the fresh candidate-bound run in candidate-76bec16-clean, whose run metadata records worktree_clean=true."
     ]
   },
   "limitations": [
-    "WP2.5 exact-candidate gate verification remains pending until these implementation and evidence changes are committed and the verifier is run against that exact candidate on a clean worktree.",
+    "Final exact-candidate verification is pending; the candidate-bound clean worktree run and mapped audit are recorded, with final status contingent on the committed evidence-only closure check.",
     "WP1.6 mapped HTTP evidence is retained from candidate 86feb09f334f8c6374ea364850631b8eccbafc5a; WP2.4 serial-order evidence is retained from its passing PostgreSQL run."
   ],
   "unresolved_decisions": [],
-  "reviewer": "WP2.5 implementation audit; final exact-candidate verification remains pending"
+  "reviewer": "WP2.5 implementation audit; exact-candidate verification pending"
 }
