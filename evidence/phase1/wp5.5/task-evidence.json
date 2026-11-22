@@ -47,6 +47,11 @@
       "command": "node tools/phase1-contracts.js",
       "result": "passed",
       "artifact": "evidence/phase1/wp5.4/local/2026-11-22/phase1-contracts.log"
+    },
+    {
+      "command": "node evidence/phase1/wp5.5/verify-exact-candidate.mjs 76bec16d50e34a9b3ade73a82b640b8a8cb7d07d --preflight",
+      "result": "passed",
+      "artifact": "evidence/phase1/wp5.5/local/2026-11-22/wp55-preflight-verification.log"
     }
   ],
   "claims": {
