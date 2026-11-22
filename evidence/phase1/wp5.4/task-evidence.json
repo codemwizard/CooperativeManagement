@@ -7,7 +7,7 @@
     "unit_test": "not_applicable",
     "integration_test": "passed",
     "bdd_ui_test": "passed",
-    "gate_verified": "passed"
+    "gate_verified": "pending"
   },
   "candidate": {
     "status": "immutable implementation candidate",
@@ -68,11 +68,6 @@
       "result": "passed",
       "artifact": "evidence/phase1/wp5.4/local/2026-11-22/phase0-contract.log"
     },
-    {
-      "command": "node evidence/phase1/wp5.4/verify-exact-candidate.mjs 76bec16d50e34a9b3ade73a82b640b8a8cb7d07d (final exact-candidate verifier)",
-      "result": "passed",
-      "artifact": "evidence/phase1/wp5.4/local/2026-11-22/wp54-final-verification.log"
-    }
   ],
   "claims": {
     "behavior_proved": "Accessible workspace login and forced password-change screens call the real shared API through the same-origin proxy. Real persisted temporary credentials exercise forced-change-only route enforcement, password establishment, session revocation, fresh permanent-password login, refresh persistence, non-enumerating unknown-account errors, HttpOnly session-cookie attributes, response-body token absence, keyboard form submission, visible mismatch feedback, API log redaction and authentication-event canary absence.",
@@ -84,7 +79,7 @@
     }
   },
   "limitations": [
-    "Final exact-candidate verifier passed on the committed WP5.4 evidence state; the implementation remains bounded to the local test profile.",
+    "Gate remains pending until the exact-candidate verifier passes against a clean evidence commit; the implementation remains bounded to the local test profile.",
     "The test profile does not establish production Secure-cookie, TLS, deployment origin, production database or production concurrency behavior.",
     "An earlier local DB invocation without CI migration-role bootstrap failed two WP1.5 migration-runner tests. The rerun with temporary role membership passed all 86 DB tests; cleanup revoked the membership. The older failure remains historical and is superseded by the cited passing run.",
     "The run is focused WP5.4 evidence and is not the integrated Phase 1 or REM-WP7.2 gate."
