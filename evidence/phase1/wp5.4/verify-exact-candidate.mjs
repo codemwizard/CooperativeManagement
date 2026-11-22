@@ -49,7 +49,7 @@ const typecheck = await readFile(`${root}/typecheck-v4.log`, 'utf8');
 assert.match(typecheck, /typecheck:v4/);
 assert.match(await readFile(`${root}/architecture.log`, 'utf8'), /no dependency violations found/i);
 assert.match(await readFile(`${root}/phase1-contracts.log`, 'utf8'), /112 tests/);
-assert.match(await readFile(`${root}/phase0-contract.log`, 'utf8'), /11 passed, 1 skipped/);
+assert.match(await readFile(`${root}/phase0-contract.log`, 'utf8'), /Tests\s+11 passed \| 1 skipped/);
 const environment = JSON.parse(await readFile(`${root}/runtime-environment.json`, 'utf8'));
 assert.equal(environment.database, 'symphony_phase1_test');
 assert.equal(environment.application_role, 'symphony_app');
