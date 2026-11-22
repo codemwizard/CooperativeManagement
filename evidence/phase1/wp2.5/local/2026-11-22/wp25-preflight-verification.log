@@ -1,0 +1,21 @@
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+AssertionError [ERR_ASSERTION]: REM-WP1.6 gate must be passed
++ actual - expected
+
++ 'pending'
+- 'passed'
+
+    at file:///C:/Workspace/GitHub/Prototype/artifacts/exact-candidates/phase1-flags-evidence-3341f8b/evidence/phase1/wp2.5/verify-exact-candidate.mjs:23:10 {
+  generatedMessage: false,
+  code: 'ERR_ASSERTION',
+  actual: 'pending',
+  expected: 'passed',
+  operator: 'strictEqual',
+  diff: 'simple'
+}
+
+Node.js v26.7.0
+

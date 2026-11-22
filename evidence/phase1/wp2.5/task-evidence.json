@@ -39,11 +39,6 @@
       "artifact": "evidence/phase1/wp2.5/local/2026-11-21/wp25-validator-summary.json"
     },
     {
-      "command": "node tools/verify_wp2_5_scope.mjs",
-      "result": "passed",
-      "artifact": "evidence/phase1/wp2.5/local/2026-11-22/wp25-scope-audit.log"
-    },
-    {
       "command": "npm run test:bdd:phase1 -- --work-package REM-WP1.6 (consumed retained mapped run; 6 IDs, 8 scenarios, 69 steps)",
       "result": "passed",
       "artifact": "evidence/phase1/wp1.6/local/2026-11-22/candidate-fe6db72/cucumber-default.stdout.log"
@@ -54,8 +49,13 @@
       "artifact": "evidence/phase1/wp2.4/local/2026-11-21/postgres-capacity-ta-serialization.log"
     },
     {
-      "command": "node evidence/phase1/wp2.5/verify-exact-candidate.mjs fe6db7259d7292dd65792d8c3983d914be5bda0f --preflight (expected pending result: REM-WP1.6 gate)",
-      "result": "pending",
+      "command": "node tools/verify_wp2_5_scope.mjs fe6db7259d7292dd65792d8c3983d914be5bda0f (blocked only by REM-WP1.6 gate status)",
+      "result": "blocked",
+      "artifact": "evidence/phase1/wp2.5/local/2026-11-22/wp25-scope-audit-pending.log"
+    },
+    {
+      "command": "node evidence/phase1/wp2.5/verify-exact-candidate.mjs fe6db7259d7292dd65792d8c3983d914be5bda0f --preflight (blocked by REM-WP1.6 gate status)",
+      "result": "blocked",
       "artifact": "evidence/phase1/wp2.5/local/2026-11-22/wp25-preflight-verification.log"
     }
   ],
@@ -71,9 +71,9 @@
     ]
   },
   "limitations": [
-    "WP2.5 closure remains pending because the graph-defined REM-WP1.6 predecessor has a candidate-bound standalone task record but gate_verified remains pending: the cumulative REM-WP1 acceptance fails because mandatory BDD-AUD-004 remains @wip.",
+    "WP2.5 closure remains pending because graph-defined REM-WP1.6 has a candidate-bound standalone mapped BDD pass but gate_verified is pending: cumulative REM-WP1 acceptance fails while mandatory BDD-AUD-004 remains @wip. Both current WP2.5 scope audit and exact-candidate preflight explicitly stop on that predecessor gate.",
     "The standalone WP1.6 mapped HTTP run passes on candidate fe6db7259d7292dd65792d8c3983d914be5bda0f, but it cannot substitute for the failed cumulative predecessor acceptance. WP2.4 serial-order evidence remains retained from its passing PostgreSQL run."
   ],
   "unresolved_decisions": [],
-  "reviewer": "WP2.5 BDD and scope evidence reviewed; gate pending because REM-WP1.6 cumulative mandatory acceptance is incomplete"
+  "reviewer": "WP2.5 mapped BDD passes; dependency audit and exact-candidate preflight correctly report REM-WP1.6 gate pending."
 }
