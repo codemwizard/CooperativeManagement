@@ -1,6 +1,6 @@
 # Prototype-14 Remediation and Re-synchronization
 
-**Status:** In progress on `codex/prototype14-remediation-resync`.
+**Status:** Historical implementation plan. Execution has advanced beyond this snapshot; consult [`WP2-WP5-IMPLEMENTATION-READINESS-PLAN.md`](./WP2-WP5-IMPLEMENTATION-READINESS-PLAN.md), `evidence/phase1/task-dependencies.yml`, and the per-task evidence before relying on any “current,” “pending,” or “not present” statement below. As of 2026-11-22, WP2.3 is gate-passed at `86feb09f334f8c6374ea364850631b8eccbafc5a`, and WP2.4 is gate-passed at `e9b9cf9249a5d533ce8e3a665762d3d1adcfcf1c`; WP2.5 remains gate-pending exact-candidate verification.
 **Baseline:** `main` at `5c6eb42912405c60198a461b999bba64363dc0be`.
 **Purpose:** Reconcile implementation sequencing, task ownership, BDD acceptance and evidence tooling before additional WP1.6 command implementation.
 

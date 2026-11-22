@@ -9,7 +9,7 @@
     "gate_verified": "pending"
   },
   "candidate": {
-    "status": "uncommitted working tree",
+    "status": "Historical focused run used an uncommitted working tree; no immutable implementation candidate is bound to this record.",
     "head_commit_before_implementation": "d70d7ee35b1aaaa0a1350feb01394ac25ba96896",
     "implementation_commit": null
   },
@@ -54,13 +54,13 @@
     "scope_limit": "Focused WP5.5 BDD evidence only; not all 41 Phase 1 scenarios, not the aggregate REM-WP7.2 gate, and not a full integrated regression suite.",
     "predecessors": {
       "REM-WP5.2": "Closed evidence is recorded in evidence/phase1/wp5.2/task-evidence.json.",
-      "REM-WP5.3": "Implementation and focused evidence exist in evidence/phase1/wp5.3/task-evidence.json; gate_verified remains pending exact-candidate closure.",
-      "REM-WP5.4": "Focused implementation and browser acceptance evidence is recorded in evidence/phase1/wp5.4/task-evidence.json; gate_verified remains pending predecessor reconciliation."
+      "REM-WP5.3": "Gate passed for implementation candidate 6ba1885035b330122570bf4602d88bcd19f73fc1; see evidence/phase1/wp5.3/task-evidence.json.",
+      "REM-WP5.4": "Implementation and focused browser acceptance evidence is recorded in evidence/phase1/wp5.4/task-evidence.json; its gate remains pending immutable candidate binding and exact-candidate closure."
     }
   },
   "limitations": [
-    "No implementation commit SHA exists; gate verification remains pending and this record is not a gate PASS.",
-    "The REM-WP5.3 predecessor remains pending exact-candidate closure; WP5.5 cannot be marked gate-passed until the full dependency chain is satisfied.",
+    "This record does not bind the tested implementation to an immutable commit SHA; gate verification remains pending and this record is not a gate PASS.",
+    "REM-WP5.3 is gate-passed. REM-WP5.5 remains pending because its own implementation candidate is not bound to an immutable SHA and REM-WP5.4 gate verification is pending.",
     "Only BDD-ENR-004 is owned by this focused WP5.5 run. The full 41-scenario integrated Phase 1 and REM-WP7.2 gate remains outstanding.",
     "Local test profile only; production deployment, TLS, production database and expected-load qualification are not claimed."
   ],

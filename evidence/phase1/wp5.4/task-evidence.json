@@ -9,7 +9,7 @@
     "gate_verified": "pending"
   },
   "candidate": {
-    "status": "uncommitted working tree",
+    "status": "Historical focused run used an uncommitted working tree; no immutable implementation candidate is bound to this record.",
     "head_commit_before_implementation": "d70d7ee35b1aaaa0a1350feb01394ac25ba96896",
     "implementation_commit": null
   },
@@ -78,13 +78,13 @@
     "path_proved": "Two focused Playwright scenarios ran with a real Vite workspace, Fastify API and isolated PostgreSQL database. No auth-route interception is used. Axe scans passed on login and forced-change screens.",
     "configuration_proved": "Local test profile only. The test session cookie is intentionally not Secure on HTTP loopback; production Secure-cookie behavior was not exercised.",
     "predecessors": {
-      "REM-WP5.3": "Implementation and focused evidence exist in evidence/phase1/wp5.3/task-evidence.json; gate_verified remains pending exact-candidate closure.",
-      "REM-WP6.1": "Implementation and focused route evidence are recorded in evidence/phase1/wp6.1/task-evidence.json; WP6.1 remains partial with gate_verified pending because BDD-UXW-001 and BDD-UXW-004 remain unmet."
+      "REM-WP5.3": "Gate passed for implementation candidate 6ba1885035b330122570bf4602d88bcd19f73fc1; see evidence/phase1/wp5.3/task-evidence.json and its retained final verifier output.",
+      "REM-WP6.1": "Gate passed for implementation candidate 0f6bb5cbe91eb7b7f7795b3be3ceb1f9357c799a; BDD-UXW-001 through BDD-UXW-004 passed; see evidence/phase1/wp6.1/task-evidence.json."
     }
   },
   "limitations": [
-    "No implementation commit SHA exists; gate verification remains pending and this record is not a gate PASS.",
-    "REM-WP5.3 exact-candidate closure remains pending and REM-WP6.1 has not passed its gate; the dependency graph does not permit WP5.4 gate closure yet.",
+    "This record does not bind the tested implementation to an immutable implementation commit SHA; gate verification remains pending and this record is not a gate PASS.",
+    "REM-WP5.3 and REM-WP6.1 predecessor gates are passed. REM-WP5.4 remains pending its own immutable candidate binding and exact-candidate closure.",
     "The test profile does not establish production Secure-cookie, TLS, deployment origin, production database or production concurrency behavior.",
     "The broad DB workspace suite is not fully green locally: two WP1.5 migration-runner tests fail on missing CI role-bootstrap state (expected migrator membership and CREATE SCHEMA permission); its focused temporary-credential PostgreSQL tests passed. CI provisions these roles through tools/bootstrap_wp1_5_database.mjs.",
     "The run is focused WP5.4 evidence and is not the integrated Phase 1 or REM-WP7.2 gate."

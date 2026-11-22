@@ -1,5 +1,7 @@
 # REM-WP1.5 CI Remediation and Closeout Plan
 
+> Historical closeout plan. Its WP1.6 “must remain not started” section records the state when this plan was prepared. The six WP1.6-owned mapped scenarios have since passed through the real command path, with evidence retained in `evidence/phase1/wp2.3/task-evidence.json`; this is mapped acceptance evidence, not a standalone WP1.6 gate record. Current status is determined by the dependency graph and current task evidence, not the earlier readiness snapshot below.
+
 **Status:** Historical candidate d7fbf5851b11b07b65bde36f062db7b21f487947 passed run 43683206104, attempt 1; those artifacts remain immutable. Current REM-WP1.5 gate verification passed for candidate 6f145875761a2c356bab790324c8a5615ec03652 in run 44575936287, attempt 1. The Phase 0 and restricted-role DB/WP1.5 jobs passed, with retained artifacts/checksums under evidence/phase1/wp1.5/ci/6f145875761a2c356bab790324c8a5615ec03652/. The overall workflow failed only in the separate legacy-e2e job on two login UI tests; per section 6 this does not negate REM-WP1.5 database acceptance. Full repository CI is not green. The canonical status remains evidence/phase1/wp1.5/task-evidence.json and the Phase 1 closure register.
 **Plan owner:** Phase 1 implementation owner.
 **Authority:** `PHASE-1-REMEDIATION-PLAN-v2.md` REM-WP1.5 and REM-WP1.6; `evidence/phase1/task-dependencies.yml`; `docs/phase1/TENANT_ISOLATION_CONTRACT.md`; `evidence/phase1/tenant-table-policy-matrix.json`; `evidence/phase1/wp1.5/task-evidence.json`.

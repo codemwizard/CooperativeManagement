@@ -1,6 +1,6 @@
 # REM-WP6.1 predecessor and closure implementation plan
 
-**Status:** Implementation and focused acceptance complete; WP5.3 is exact-candidate gate-closed. WP6.1 exact-candidate preflight/final verification and origin CI remain.
+**Status:** Historical closure plan; its planned actions are complete. REM-WP5.3 passed at `6ba1885035b330122570bf4602d88bcd19f73fc1`; REM-WP6.1 passed at `0f6bb5cbe91eb7b7f7795b3be3ceb1f9357c799a`, including mapped BDD-UXW-001–004. See `evidence/phase1/wp6.1/task-evidence.json` for the final verifier evidence. Do not use the remaining-step language below as current work.
 
 **Candidate base:** `d9a8f47ed278918b507b1776b0bb9d426da37c1a` (`main` / `origin/main` at the time this plan was prepared).
 

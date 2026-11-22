@@ -1,6 +1,6 @@
 # Phase 1 Remediation Roadmap from REM-WP1.6
 
-**Status:** Corrected execution sequence and ownership boundary  
+**Status:** Historical sequencing snapshot; the corrected dependency graph remains normative, but the “next,” “schedulable,” and “not started” statements below describe the earlier planning point. As of 2026-11-22, WP2.1–WP2.4 and WP2.6 are gate-passed; WP2.5 is implemented with its gate pending exact-candidate verification. See current per-task evidence and the readiness-plan status index.
 **Authority:** This document resolves the sequencing conflicts between `06-phased-plan.md`, `remediation/Prototype_V4_Phase0_Phase1_Review_and_Remediation_Plan.md`, `PHASE-1-REMEDIATION-PLAN-v2.md`, the task dependency graph, and the REM-WP1.6 implementation plan. It does not change the product requirements or claim any task complete.
 
 ## 1. Roadmap interpretation
